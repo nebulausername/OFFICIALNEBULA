@@ -2,6 +2,8 @@ import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
+import Requests from './pages/Requests';
+import Admin from './pages/Admin';
 import __Layout from './Layout.jsx';
 
 
@@ -10,6 +12,8 @@ export const PAGES = {
     "Products": Products,
     "ProductDetail": ProductDetail,
     "Cart": Cart,
+    "Requests": Requests,
+    "Admin": Admin,
 }
 
 export const pagesConfig = {
