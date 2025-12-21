@@ -36,10 +36,17 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* Animated Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-2000" />
+      </div>
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10" />
+      <section className="relative overflow-hidden z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10 animate-gradient" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -47,13 +54,18 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="text-center space-y-6"
           >
-            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-purple-500/10 border border-purple-500/20 rounded-full mb-4">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span className="text-sm text-purple-400 font-medium">Dein Premium Lifestyle Shop</span>
-            </div>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center space-x-2 px-4 py-2 glass border border-purple-500/30 rounded-full mb-4 glow-effect"
+            >
+              <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+              <span className="text-sm text-purple-400 font-semibold">Dein Premium Lifestyle Shop</span>
+            </motion.div>
             
-            <h1 className="text-5xl md:text-7xl font-bold">
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-7xl font-black mb-6">
+              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
                 Nebula Supply
               </span>
             </h1>
@@ -63,12 +75,15 @@ export default function Home() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-              <Link
-                to={createPageUrl('Products')}
-                className="group px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-semibold flex items-center space-x-2 hover:scale-105 transition-transform"
-              >
-                <span>Jetzt entdecken</span>
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Link to={createPageUrl('Products')}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="neon-button group px-10 py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-2xl font-bold text-lg flex items-center space-x-2 shadow-2xl shadow-purple-500/50 glow-effect animate-gradient"
+                >
+                  <span>Jetzt entdecken</span>
+                  <ChevronRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </motion.button>
               </Link>
             </div>
           </motion.div>
@@ -83,14 +98,20 @@ export default function Home() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div
+                <motion.div
                   key={index}
-                  className="p-6 bg-zinc-900/50 backdrop-blur border border-zinc-800 rounded-2xl hover:border-purple-500/50 transition-all"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1 }}
+                  whileHover={{ y: -5 }}
+                  className="p-8 glass border border-zinc-800 rounded-2xl hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10 transition-all group"
                 >
-                  <Icon className="w-10 h-10 text-purple-400 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                  <div className="w-14 h-14 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Icon className="w-8 h-8 text-purple-400" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
                   <p className="text-zinc-400">{feature.description}</p>
-                </div>
+                </motion.div>
               );
             })}
           </motion.div>
@@ -112,19 +133,25 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {departments.map((dept) => (
-              <Link
+            {departments.map((dept, index) => (
+              <motion.div
                 key={dept.id}
-                to={createPageUrl('Products') + `?department=${dept.id}`}
-                className="group relative overflow-hidden bg-zinc-900/50 backdrop-blur border border-zinc-800 rounded-2xl p-8 hover:border-purple-500/50 transition-all hover:scale-105"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
               >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/20 to-transparent rounded-full transform translate-x-16 -translate-y-16" />
-                <h3 className="text-2xl font-bold mb-2 relative z-10">{dept.name}</h3>
-                <div className="flex items-center text-purple-400 text-sm font-medium relative z-10">
-                  <span>Entdecken</span>
-                  <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
+                <Link
+                  to={createPageUrl('Products') + `?department=${dept.id}`}
+                  className="group relative overflow-hidden glass border border-zinc-800 rounded-2xl p-10 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all hover:scale-105 block h-full"
+                >
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-500/30 to-pink-500/20 rounded-full transform translate-x-20 -translate-y-20 group-hover:scale-150 transition-transform duration-500 blur-2xl" />
+                  <h3 className="text-3xl font-black mb-3 relative z-10 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text transition-all">{dept.name}</h3>
+                  <div className="flex items-center text-purple-400 text-sm font-bold relative z-10 group-hover:text-pink-400 transition-colors">
+                    <span>Entdecken</span>
+                    <ChevronRight className="w-5 h-5 ml-1 group-hover:translate-x-2 transition-transform" />
+                  </div>
+                </Link>
+              </motion.div>
             ))}
           </div>
         )}
