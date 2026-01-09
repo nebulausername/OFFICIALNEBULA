@@ -58,24 +58,7 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Floating Cart Button */}
-      {cartCount > 0 && (
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="floating-cart"
-        >
-          <Link
-            to={createPageUrl('Cart')}
-            className="relative w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl glow-effect hover:scale-110 transition-transform group"
-          >
-            <ShoppingBag className="w-7 h-7 text-white group-hover:scale-110 transition-transform" />
-            <span className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
-              {cartCount}
-            </span>
-          </Link>
-        </motion.div>
-      )}
+
 
       {/* Header */}
       <header className="sticky top-0 z-50 glass-strong border-b border-zinc-700/50 shadow-2xl">
@@ -104,11 +87,11 @@ export default function Layout({ children, currentPageName }) {
                     className="relative group"
                   >
                     <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`relative flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-base transition-all overflow-hidden ${
+                      whileHover={{ scale: 1.08 }}
+                      whileTap={{ scale: 0.92 }}
+                      className={`relative flex items-center gap-2.5 px-5 py-2.5 rounded-xl font-bold text-sm transition-all overflow-hidden ${
                         isActive
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-xl shadow-purple-500/60'
                           : 'glass backdrop-blur-xl border-2 border-zinc-700 text-zinc-300 hover:border-purple-400 hover:text-white hover:shadow-lg hover:shadow-purple-500/30'
                       }`}
                     >
@@ -119,8 +102,8 @@ export default function Layout({ children, currentPageName }) {
                           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                         />
                       )}
-                      <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'}`} />
-                      <span className="relative z-10 uppercase tracking-wide">{item.name}</span>
+                      <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'drop-shadow-lg' : 'group-hover:scale-110 transition-transform'}`} />
+                      <span className="relative z-10 uppercase tracking-wider text-sm">{item.name}</span>
                       {!isActive && (
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       )}
@@ -138,16 +121,16 @@ export default function Layout({ children, currentPageName }) {
                 className="relative group"
               >
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative p-3 glass backdrop-blur-xl border-2 border-zinc-700 rounded-xl hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                  className="relative p-2.5 glass backdrop-blur-xl border-2 border-zinc-700 rounded-xl hover:border-purple-400 hover:shadow-xl hover:shadow-purple-500/40 transition-all"
                 >
-                  <ShoppingBag className="w-6 h-6 text-zinc-300 group-hover:text-white transition-colors" />
+                  <ShoppingBag className="w-5 h-5 text-zinc-300 group-hover:text-white transition-colors" />
                   {cartCount > 0 && (
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute -top-2 -right-2 min-w-6 h-6 px-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-black shadow-lg shadow-purple-500/50"
+                      className="absolute -top-2 -right-2 min-w-6 h-6 px-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-black shadow-xl shadow-purple-500/60 border-2 border-zinc-900"
                     >
                       {cartCount}
                     </motion.span>
