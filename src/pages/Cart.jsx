@@ -105,6 +105,10 @@ export default function Cart() {
     }, 0);
   };
 
+  const isFromTelegram = () => {
+    return window.Telegram?.WebApp?.initData || false;
+  };
+
   const handleSubmitRequest = async () => {
     if (cartItems.length === 0) {
       toast({
@@ -115,10 +119,20 @@ export default function Cart() {
       return;
     }
 
-    if (!contactInfo.name || !contactInfo.phone) {
+    if (!contactInfo.name || !contactInfo.telegram) {
       toast({
         title: '⚠️ Fehlende Informationen',
-        description: 'Bitte fülle alle Pflichtfelder aus',
+        description: 'Name und Telegram Username sind erforderlich',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Telefon ist nur Pflicht wenn nicht von Telegram
+    if (!isFromTelegram() && !contactInfo.phone) {
+      toast({
+        title: '⚠️ Telefonnummer erforderlich',
+        description: 'Bitte gib deine Telefonnummer ein',
         variant: 'destructive'
       });
       return;
@@ -280,11 +294,11 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
         </motion.div>
 
         <h1 className="text-6xl md:text-7xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
-          StarCart
+          Warenkorb
         </h1>
         <p className="text-zinc-300 text-xl flex items-center justify-center gap-2">
           <Sparkles className="w-5 h-5 text-purple-400" />
-          {cartItems.length > 0 ? `${cartItems.length} ${cartItems.length === 1 ? 'Artikel' : 'Artikel'} in deinem Warenkorb` : 'Dein Premium-Warenkorb wartet auf dich'}
+          {cartItems.length > 0 ? `${cartItems.length} ${cartItems.length === 1 ? 'Produkt' : 'Produkte'} in deinem Warenkorb` : 'Dein Premium-Warenkorb wartet auf dich'}
         </p>
       </motion.div>
 
@@ -474,18 +488,8 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
 
                 <div>
                   <Label className="text-sm font-bold text-zinc-300 mb-2 flex items-center gap-2">
-                    Telefon <span className="text-red-400">*</span>
+                    Telegram Username <span className="text-red-400">*</span>
                   </Label>
-                  <Input
-                    value={contactInfo.phone}
-                    onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
-                    placeholder="+49 123 456789"
-                    className="h-12 bg-zinc-900/50 border-2 border-zinc-700 focus:border-purple-500 transition-all rounded-xl text-lg"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm font-bold text-zinc-300 mb-2">Telegram Username (empfohlen)</Label>
                   <Input
                     value={contactInfo.telegram}
                     onChange={(e) => setContactInfo({ ...contactInfo, telegram: e.target.value })}
@@ -494,9 +498,23 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                   />
                   <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
-                    Für schnellere Kommunikation
+                    Hauptkontaktweg für deine Bestellung
                   </p>
                 </div>
+
+                {!isFromTelegram() && (
+                  <div>
+                    <Label className="text-sm font-bold text-zinc-300 mb-2 flex items-center gap-2">
+                      Telefon <span className="text-red-400">*</span>
+                    </Label>
+                    <Input
+                      value={contactInfo.phone}
+                      onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                      placeholder="+49 123 456789"
+                      className="h-12 bg-zinc-900/50 border-2 border-zinc-700 focus:border-purple-500 transition-all rounded-xl text-lg"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <Label className="text-sm font-bold text-zinc-300 mb-2">Notiz (optional)</Label>
