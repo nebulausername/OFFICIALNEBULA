@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Plus, Minus, ShoppingBag, Send, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Trash2, Plus, Minus, ShoppingBag, Send, Sparkles, Star, Package, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { useToast } from '@/components/ui/use-toast';
@@ -65,6 +65,11 @@ export default function Cart() {
       setCartItems(cartItems.map(item => 
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       ));
+      
+      toast({
+        title: '✓ Aktualisiert',
+        description: 'Menge wurde geändert'
+      });
     } catch (error) {
       console.error('Error updating quantity:', error);
       toast({
@@ -80,7 +85,7 @@ export default function Cart() {
       await base44.entities.StarCartItem.delete(itemId);
       setCartItems(cartItems.filter(item => item.id !== itemId));
       toast({
-        title: 'Entfernt',
+        title: '🗑️ Entfernt',
         description: 'Produkt wurde aus dem Warenkorb entfernt'
       });
     } catch (error) {
@@ -152,7 +157,7 @@ export default function Cart() {
         }
       }
 
-      // Send Telegram notification (Open Beta)
+      // Send notifications
       try {
         const telegramMessage = `
 🌟 *NEUE BESTELLUNG - NEBULA SUPPLY* 🌟
@@ -182,16 +187,13 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
           body: `Hallo ${contactInfo.name},\n\nDeine Bestellung wurde erfolgreich aufgegeben!\n\nWir melden uns schnellstmöglich bei dir.\n\nGesamtsumme: ${total.toFixed(2)}€\n\nViele Grüße,\nDein Nebula Supply Team`
         });
 
-        // Note: For actual Telegram integration, you would need to set up a Telegram bot
-        // This sends an email notification instead for now
         await base44.integrations.Core.SendEmail({
-          to: 'admin@nebulasupply.com', // Replace with actual admin email
+          to: 'admin@nebulasupply.com',
           subject: `🌟 Neue Bestellung #${request.id}`,
           body: telegramMessage
         });
       } catch (notificationError) {
         console.error('Notification error:', notificationError);
-        // Continue even if notification fails
       }
 
       // Clear cart
@@ -221,11 +223,22 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-zinc-800 rounded w-48" />
-          <div className="h-32 bg-zinc-800 rounded" />
-          <div className="h-32 bg-zinc-800 rounded" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.1 }}
+                className="h-48 skeleton rounded-2xl"
+              />
+            ))}
+          </div>
+          <div className="lg:col-span-1">
+            <div className="h-96 skeleton rounded-2xl" />
+          </div>
         </div>
       </div>
     );
@@ -237,13 +250,41 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-12 text-center relative"
       >
-        <h1 className="text-5xl font-black mb-2 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
-          Warenkorb
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 180],
+            }}
+            transition={{ duration: 20, repeat: Infinity }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl"
+          />
+        </div>
+
+        <motion.div
+          whileHover={{ scale: 1.05, rotate: 5 }}
+          className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 glow-effect shadow-2xl shadow-purple-500/50 relative"
+        >
+          <ShoppingBag className="w-10 h-10 text-white" />
+          {cartItems.length > 0 && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center text-sm font-bold shadow-lg"
+            >
+              {cartItems.length}
+            </motion.div>
+          )}
+        </motion.div>
+
+        <h1 className="text-6xl md:text-7xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+          StarCart
         </h1>
-        <p className="text-zinc-400 text-lg">
-          {cartItems.length > 0 ? `${cartItems.length} ${cartItems.length === 1 ? 'Artikel' : 'Artikel'}` : 'Bereit zum Einkaufen'}
+        <p className="text-zinc-300 text-xl flex items-center justify-center gap-2">
+          <Sparkles className="w-5 h-5 text-purple-400" />
+          {cartItems.length > 0 ? `${cartItems.length} ${cartItems.length === 1 ? 'Artikel' : 'Artikel'} in deinem Warenkorb` : 'Dein Premium-Warenkorb wartet auf dich'}
         </p>
       </motion.div>
 
@@ -251,113 +292,155 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center py-32 glass backdrop-blur-xl border border-zinc-800 rounded-3xl"
+          className="text-center py-32 glass backdrop-blur-xl border-2 border-zinc-800 rounded-3xl relative overflow-hidden"
         >
-          <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 glow-effect">
-            <ShoppingBag className="w-12 h-12 text-white" />
-          </div>
-          <h2 className="text-3xl font-black mb-3">Warenkorb ist leer</h2>
-          <p className="text-zinc-400 text-lg mb-8">Entdecke unsere Premium-Produkte</p>
-          <Link to={createPageUrl('Products')}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="neon-button px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-lg shadow-xl shadow-purple-500/50"
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5" />
+          
+          <div className="relative z-10">
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="w-32 h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-8 glow-effect shadow-2xl shadow-purple-500/50"
             >
-              Jetzt einkaufen
-            </motion.button>
-          </Link>
+              <ShoppingBag className="w-16 h-16 text-white" />
+            </motion.div>
+            
+            <h2 className="text-4xl font-black mb-4">Warenkorb ist leer</h2>
+            <p className="text-zinc-400 text-xl mb-10 max-w-md mx-auto">
+              Entdecke unsere exklusive Auswahl an Premium-Produkten
+            </p>
+            
+            <Link to={createPageUrl('Products')}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="neon-button px-10 py-5 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-2xl font-black text-xl shadow-2xl shadow-purple-500/50 inline-flex items-center gap-3 animate-gradient"
+              >
+                <Package className="w-6 h-6" />
+                Jetzt einkaufen
+                <ArrowRight className="w-6 h-6" />
+              </motion.button>
+            </Link>
+          </div>
         </motion.div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((item, index) => {
-              const product = products[item.product_id];
-              if (!product) return null;
+            <AnimatePresence>
+              {cartItems.map((item, index) => {
+                const product = products[item.product_id];
+                if (!product) return null;
 
-              return (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="group glass backdrop-blur-xl border border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10 transition-all"
-                >
-                  <div className="flex gap-6 p-6">
-                    {/* Image */}
-                    <div className="relative w-32 h-32 bg-zinc-900 rounded-xl overflow-hidden flex-shrink-0">
-                      {product.cover_image ? (
-                        <img
-                          src={product.cover_image}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ShoppingBag className="w-12 h-12 text-zinc-700" />
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ x: 5 }}
+                    className="group glass backdrop-blur-xl border-2 border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all relative"
+                  >
+                    {/* Shimmer Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                    
+                    <div className="flex gap-6 p-6 relative z-10">
+                      {/* Image */}
+                      <motion.div 
+                        whileHover={{ scale: 1.05 }}
+                        className="relative w-32 h-32 bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl overflow-hidden flex-shrink-0 shadow-lg"
+                      >
+                        {product.cover_image ? (
+                          <img
+                            src={product.cover_image}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ShoppingBag className="w-12 h-12 text-zinc-700" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-black/80 backdrop-blur rounded-lg text-xs font-mono text-purple-300 font-bold">
+                          {product.sku}
                         </div>
-                      )}
-                      <div className="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded-lg text-xs font-mono text-purple-300">
-                        {product.sku}
-                      </div>
-                    </div>
+                      </motion.div>
 
-                    {/* Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="flex-1 min-w-0 pr-4">
-                          <h3 className="font-bold text-xl mb-1 truncate">{product.name}</h3>
-                          <p className="text-sm text-zinc-500">Einzelpreis: {product.price.toFixed(2)}€</p>
-                        </div>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="flex-shrink-0 p-2 rounded-lg hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-
-                      {/* Options */}
-                      {item.selected_options && Object.keys(item.selected_options).length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {Object.entries(item.selected_options).map(([key, value]) => (
-                            <div key={key} className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded-lg text-xs text-purple-300">
-                              {key}: <span className="font-semibold">{value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Quantity & Price */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 glass border border-zinc-800 rounded-xl p-1">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-zinc-800 transition-colors"
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex-1 min-w-0 pr-4">
+                            <h3 className="font-black text-xl mb-2 truncate group-hover:text-purple-400 transition-colors">{product.name}</h3>
+                            <p className="text-sm text-zinc-500 flex items-center gap-2">
+                              <Star className="w-3 h-3 text-purple-400" />
+                              Einzelpreis: <span className="font-bold text-purple-400">{product.price.toFixed(2)}€</span>
+                            </p>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => removeItem(item.id)}
+                            className="flex-shrink-0 p-3 rounded-xl hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all border-2 border-transparent hover:border-red-500/30"
                           >
-                            <Minus className="w-4 h-4" />
-                          </button>
-                          <span className="w-12 text-center font-bold text-lg">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-zinc-800 transition-colors"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
+                            <Trash2 className="w-5 h-5" />
+                          </motion.button>
                         </div>
-                        <div className="text-right">
-                          <div className="text-xs text-zinc-500 mb-1">Summe</div>
-                          <div className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            {(product.price * item.quantity).toFixed(2)}€
+
+                        {/* Options */}
+                        {item.selected_options && Object.keys(item.selected_options).length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {Object.entries(item.selected_options).map(([key, value]) => (
+                              <motion.div 
+                                key={key}
+                                whileHover={{ scale: 1.05 }}
+                                className="px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-xs text-purple-300 font-semibold"
+                              >
+                                {key}: <span className="text-purple-400">{value}</span>
+                              </motion.div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Quantity & Price */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 glass border-2 border-zinc-800 rounded-xl p-1.5">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-purple-500/20 transition-all"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </motion.button>
+                            <span className="w-14 text-center font-black text-xl">{item.quantity}</span>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-purple-500/20 transition-all"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </motion.button>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-zinc-500 mb-1 font-semibold">Summe</div>
+                            <motion.div 
+                              key={item.quantity}
+                              initial={{ scale: 1.2 }}
+                              animate={{ scale: 1 }}
+                              className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient"
+                            >
+                              {(product.price * item.quantity).toFixed(2)}€
+                            </motion.div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
 
           {/* Checkout */}
@@ -365,69 +448,79 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="sticky top-24 glass backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 space-y-6"
+              className="sticky top-24 glass backdrop-blur-xl border-2 border-zinc-800 rounded-2xl p-8 space-y-6 shadow-2xl"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <Send className="w-5 h-5" />
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-zinc-800">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <Send className="w-6 h-6" />
                 </div>
-                <h2 className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Anfrage senden
+                <h2 className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Checkout
                 </h2>
               </div>
 
-
-
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label className="text-sm font-semibold text-zinc-400">Name *</Label>
+                  <Label className="text-sm font-bold text-zinc-300 mb-2 flex items-center gap-2">
+                    Name <span className="text-red-400">*</span>
+                  </Label>
                   <Input
                     value={contactInfo.name}
                     onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
                     placeholder="Dein vollständiger Name"
-                    className="mt-2 h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
+                    className="h-12 bg-zinc-900/50 border-2 border-zinc-700 focus:border-purple-500 transition-all rounded-xl text-lg"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-sm font-semibold text-zinc-400">Telefon *</Label>
+                  <Label className="text-sm font-bold text-zinc-300 mb-2 flex items-center gap-2">
+                    Telefon <span className="text-red-400">*</span>
+                  </Label>
                   <Input
                     value={contactInfo.phone}
                     onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
                     placeholder="+49 123 456789"
-                    className="mt-2 h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
+                    className="h-12 bg-zinc-900/50 border-2 border-zinc-700 focus:border-purple-500 transition-all rounded-xl text-lg"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-sm font-semibold text-zinc-400">Telegram Username (empfohlen)</Label>
+                  <Label className="text-sm font-bold text-zinc-300 mb-2">Telegram Username (empfohlen)</Label>
                   <Input
                     value={contactInfo.telegram}
                     onChange={(e) => setContactInfo({ ...contactInfo, telegram: e.target.value })}
                     placeholder="@deinusername"
-                    className="mt-2 h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
+                    className="h-12 bg-zinc-900/50 border-2 border-zinc-700 focus:border-purple-500 transition-all rounded-xl text-lg"
                   />
-                  <p className="text-xs text-zinc-500 mt-1">Für schnellere Kommunikation</p>
+                  <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" />
+                    Für schnellere Kommunikation
+                  </p>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-semibold text-zinc-400">Notiz (optional)</Label>
+                  <Label className="text-sm font-bold text-zinc-300 mb-2">Notiz (optional)</Label>
                   <Textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Besondere Wünsche, Fragen oder Anmerkungen..."
-                    className="mt-2 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
+                    className="bg-zinc-900/50 border-2 border-zinc-700 focus:border-purple-500 transition-all rounded-xl"
                     rows={3}
                   />
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-zinc-800">
-                <div className="flex justify-between items-center mb-6">
-                  <span className="text-lg font-semibold">Gesamt:</span>
-                  <span className="text-3xl font-bold text-purple-400">
+              <div className="pt-6 border-t-2 border-zinc-800 space-y-6">
+                <div className="flex justify-between items-center p-5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/30">
+                  <span className="text-lg font-bold text-zinc-300">Gesamt:</span>
+                  <motion.span 
+                    key={calculateTotal()}
+                    initial={{ scale: 1.2 }}
+                    animate={{ scale: 1 }}
+                    className="text-4xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+                  >
                     {calculateTotal().toFixed(2)}€
-                  </span>
+                  </motion.span>
                 </div>
 
                 <motion.button
@@ -435,26 +528,34 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                   disabled={submitting}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="neon-button w-full h-16 text-lg font-bold bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-xl shadow-2xl shadow-purple-500/50 glow-effect disabled:opacity-50 disabled:cursor-not-allowed transition-all animate-gradient"
+                  className="neon-button w-full h-16 text-lg font-black bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-xl shadow-2xl shadow-purple-500/50 glow-effect disabled:opacity-50 disabled:cursor-not-allowed transition-all animate-gradient relative overflow-hidden group"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  
                   {submitting ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="flex items-center justify-center gap-3 relative z-10">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
+                      />
                       Wird verarbeitet...
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center gap-2">
-                      <Send className="w-5 h-5" />
+                    <div className="flex items-center justify-center gap-3 relative z-10">
+                      <CheckCircle2 className="w-6 h-6" />
                       Jetzt bestellen
+                      <ArrowRight className="w-6 h-6" />
                     </div>
                   )}
                 </motion.button>
 
-                <p className="text-xs text-center text-zinc-500 mt-2">
+                <p className="text-xs text-center text-zinc-500 flex items-center justify-center gap-2">
+                  <Sparkles className="w-3 h-3 text-purple-400" />
                   Bestellbestätigung per Email
                 </p>
-                </div>
-                </motion.div>
+              </div>
+            </motion.div>
           </div>
         </div>
       )}
