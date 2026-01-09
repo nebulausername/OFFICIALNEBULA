@@ -645,35 +645,39 @@ export default function ProductDetail() {
               >
                 <Link
                   to={createPageUrl('ProductDetail') + `?id=${relatedProduct.id}`}
-                  className="group block glass backdrop-blur border border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all hover:scale-105"
+                  className="group block glass backdrop-blur border border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/40 transition-all hover:scale-105"
                 >
                   {relatedProduct.cover_image && (
-                    <div className="aspect-square overflow-hidden bg-zinc-900">
+                    <div className="aspect-square overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-800 relative">
                       <img
                         src={relatedProduct.cover_image}
                         alt={relatedProduct.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
+                      {relatedProduct.in_stock ? (
+                        <div className="absolute top-3 right-3 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full text-white text-xs font-black shadow-lg shadow-green-500/50">
+                          ✓ Verfügbar
+                        </div>
+                      ) : (
+                        <div className="absolute top-3 right-3 px-3 py-1.5 bg-gradient-to-r from-red-500 to-rose-600 rounded-full text-white text-xs font-black shadow-lg shadow-red-500/50">
+                          Ausverkauft
+                        </div>
+                      )}
                     </div>
                   )}
-                  <div className="p-5">
-                    <div className="text-xs text-purple-400 font-medium mb-2">{relatedProduct.sku}</div>
-                    <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-purple-400 transition-colors">
-                      {relatedProduct.name}
-                    </h3>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-xs text-purple-400 font-black uppercase tracking-wider mb-1">{relatedProduct.sku}</div>
+                        <h3 className="font-black text-base mb-2 line-clamp-2 text-white group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
+                          {relatedProduct.name}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="pt-4 border-t border-zinc-700 group-hover:border-purple-500/40 transition-colors">
+                      <span className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
                         {relatedProduct.price}€
                       </span>
-                      {relatedProduct.in_stock ? (
-                        <Badge className="text-xs text-green-400 bg-green-400/10 border-green-500/30">
-                          Verfügbar
-                        </Badge>
-                      ) : (
-                        <Badge className="text-xs text-red-400 bg-red-400/10 border-red-500/30">
-                          Ausverkauft
-                        </Badge>
-                      )}
                     </div>
                   </div>
                 </Link>
