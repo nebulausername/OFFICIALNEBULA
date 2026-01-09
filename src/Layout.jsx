@@ -93,7 +93,7 @@ export default function Layout({ children, currentPageName }) {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-1">
+            <nav className="hidden md:flex items-center gap-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPageName === item.page;
@@ -101,14 +101,30 @@ export default function Layout({ children, currentPageName }) {
                   <Link
                     key={item.page}
                     to={createPageUrl(item.page)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
-                      isActive
-                        ? 'bg-purple-500/20 text-purple-300 font-semibold'
-                        : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80 font-medium'
-                    }`}
+                    className="relative group"
                   >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.name}</span>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`relative flex items-center gap-3 px-6 py-3 rounded-xl font-bold text-base transition-all overflow-hidden ${
+                        isActive
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
+                          : 'glass backdrop-blur-xl border-2 border-zinc-700 text-zinc-300 hover:border-purple-400 hover:text-white hover:shadow-lg hover:shadow-purple-500/30'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeTab"
+                          className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                      <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'}`} />
+                      <span className="relative z-10 uppercase tracking-wide">{item.name}</span>
+                      {!isActive && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      )}
+                    </motion.div>
                   </Link>
                 );
               })}
@@ -119,14 +135,24 @@ export default function Layout({ children, currentPageName }) {
               {/* Cart */}
               <Link
                 to={createPageUrl('Cart')}
-                className="relative p-2 rounded-lg hover:bg-zinc-800 transition-colors"
+                className="relative group"
               >
-                <ShoppingBag className="w-6 h-6" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-bold">
-                    {cartCount}
-                  </span>
-                )}
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative p-3 glass backdrop-blur-xl border-2 border-zinc-700 rounded-xl hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+                >
+                  <ShoppingBag className="w-6 h-6 text-zinc-300 group-hover:text-white transition-colors" />
+                  {cartCount > 0 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute -top-2 -right-2 min-w-6 h-6 px-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-black shadow-lg shadow-purple-500/50"
+                    >
+                      {cartCount}
+                    </motion.span>
+                  )}
+                </motion.div>
               </Link>
 
               {/* User Menu */}
@@ -146,8 +172,8 @@ export default function Layout({ children, currentPageName }) {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-zinc-700/50 shadow-2xl pb-safe">
-        <div className="grid grid-cols-3 gap-1 px-2 py-3">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong backdrop-blur-2xl border-t-2 border-zinc-700/50 shadow-2xl pb-safe">
+        <div className="grid grid-cols-3 gap-2 px-3 py-4">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = currentPageName === item.page;
@@ -155,16 +181,35 @@ export default function Layout({ children, currentPageName }) {
               <Link
                 key={item.page}
                 to={createPageUrl(item.page)}
-                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
-                  isActive
-                    ? 'bg-purple-500/20 text-purple-300'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                }`}
+                className="relative"
               >
-                <Icon className={`w-6 h-6 ${isActive ? 'scale-110' : ''} transition-transform`} />
-                <span className={`text-xs font-bold ${isActive ? 'text-purple-300' : 'text-zinc-400'}`}>
-                  {item.name}
-                </span>
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className={`relative flex flex-col items-center gap-2 px-4 py-3 rounded-2xl transition-all overflow-hidden ${
+                    isActive
+                      ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-xl shadow-purple-500/50'
+                      : 'glass border-2 border-zinc-700 hover:border-purple-400'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="mobileActiveTab"
+                      className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <Icon className={`w-7 h-7 relative z-10 ${isActive ? 'text-white scale-110 drop-shadow-lg' : 'text-zinc-400'} transition-all`} />
+                  <span className={`text-xs font-black uppercase tracking-wider relative z-10 ${isActive ? 'text-white' : 'text-zinc-400'}`}>
+                    {item.name}
+                  </span>
+                  {isActive && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-400 opacity-50"
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.3, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  )}
+                </motion.div>
               </Link>
             );
           })}
