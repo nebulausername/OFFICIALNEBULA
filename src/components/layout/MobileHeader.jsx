@@ -13,7 +13,6 @@ export default function MobileHeader({ theme, toggleTheme }) {
 
   useEffect(() => {
     loadCartCount();
-    setCurrentTheme(theme);
   }, [theme]);
 
   const loadCartCount = async () => {
@@ -31,18 +30,18 @@ export default function MobileHeader({ theme, toggleTheme }) {
   return (
     <>
       <header className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
-        currentTheme === 'light'
+        theme === 'light'
           ? 'bg-white border-zinc-200'
           : 'bg-zinc-900 border-zinc-700'
       }`}>
         {/* USP Bar */}
         <div className={`bg-gradient-to-r transition-colors duration-300 ${
-          currentTheme === 'light'
+          theme === 'light'
             ? 'from-zinc-100 via-zinc-50 to-zinc-100'
             : 'from-zinc-900 via-zinc-800 to-zinc-900'
         }`}>
           <div className={`flex items-center justify-center gap-6 px-4 py-2 text-xs font-medium overflow-x-auto ${
-            currentTheme === 'light' ? 'text-zinc-700' : 'text-white'
+            theme === 'light' ? 'text-zinc-700' : 'text-white'
           }`}>
             <span className="flex items-center gap-1.5 whitespace-nowrap">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
@@ -64,7 +63,7 @@ export default function MobileHeader({ theme, toggleTheme }) {
           <button
             onClick={() => setDrawerOpen(true)}
             className={`p-2 -ml-2 touch-manipulation rounded-lg transition-colors ${
-              currentTheme === 'light'
+              theme === 'light'
                 ? 'hover:bg-zinc-100 text-zinc-900'
                 : 'hover:bg-zinc-800 text-white'
             }`}
@@ -81,7 +80,7 @@ export default function MobileHeader({ theme, toggleTheme }) {
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                 <Star className="w-4 h-4 text-white" fill="white" />
               </div>
-              <span className="text-lg font-black tracking-tight text-zinc-900">
+              <span className={`text-lg font-black tracking-tight ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
                 NEBULA
               </span>
             </motion.div>
@@ -94,12 +93,12 @@ export default function MobileHeader({ theme, toggleTheme }) {
               whileTap={{ scale: 0.9 }}
               onClick={toggleTheme}
               className={`p-2 rounded-lg transition-colors ${
-                currentTheme === 'light'
+                theme === 'light'
                   ? 'hover:bg-zinc-100 text-zinc-900'
                   : 'hover:bg-zinc-800 text-yellow-400'
               }`}
             >
-              {currentTheme === 'light' ? (
+              {theme === 'light' ? (
                 <Moon className="w-5 h-5" />
               ) : (
                 <Sun className="w-5 h-5" />
@@ -111,12 +110,12 @@ export default function MobileHeader({ theme, toggleTheme }) {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 className={`p-2 rounded-lg transition-colors touch-manipulation ${
-                  currentTheme === 'light'
+                  theme === 'light'
                     ? 'hover:bg-zinc-100'
                     : 'hover:bg-zinc-800'
                 }`}
               >
-                <ShoppingBag className={`w-6 h-6 ${currentTheme === 'light' ? 'text-zinc-900' : 'text-white'}`} />
+                <ShoppingBag className={`w-6 h-6 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`} />
                 {cartCount > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
