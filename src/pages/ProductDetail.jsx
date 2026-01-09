@@ -649,8 +649,8 @@ export default function ProductDetail() {
           {/* Quantity & Add to Cart */}
           <div className="space-y-4 pt-6">
             <div>
-              <label className="text-sm font-bold text-white mb-3 block">Anzahl</label>
-              <div className="flex items-center gap-4">
+              <label className="text-sm sm:text-base font-bold text-white mb-3 block">Anzahl</label>
+              <div className="flex flex-col sm:flex-row items-center gap-4">
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
