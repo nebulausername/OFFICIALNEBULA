@@ -70,7 +70,7 @@ export default function Help() {
         </h1>
         <p className="text-zinc-400 text-lg flex items-center justify-center gap-2">
           <Sparkles className="w-4 h-4 text-purple-400" />
-          Wir sind für dich da - Open Beta Support
+          Wir sind für dich da - 24/7 Support
         </p>
       </motion.div>
 
@@ -167,7 +167,7 @@ export default function Help() {
           <li>• <strong>Bestellstatus:</strong> Schau in deinen Anfragen nach</li>
           <li>• <strong>Zahlungsprobleme:</strong> Kontaktiere uns per Telegram</li>
           <li>• <strong>Produktfragen:</strong> Nutze die FAQ oder schreib uns</li>
-          <li>• <strong>Open Beta:</strong> Wir bearbeiten alle Anfragen manuell</li>
+          <li>• <strong>Support:</strong> Wir antworten innerhalb von 24h</li>
         </ul>
       </motion.div>
     </div>

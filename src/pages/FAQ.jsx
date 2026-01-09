@@ -13,7 +13,7 @@ export default function FAQ() {
       questions: [
         {
           q: 'Wie funktioniert die Bestellung?',
-          a: 'Wir befinden uns in der Open Beta. Lege Produkte in den Warenkorb, fülle das Kontaktformular aus und wir melden uns persönlich bei dir zur Bestellbestätigung.'
+          a: 'Lege Produkte in den Warenkorb, fülle das Kontaktformular aus und sende deine Bestellung ab. Du erhältst umgehend eine Bestellbestätigung per Email und wir melden uns bei dir.'
         },
         {
           q: 'Wie lange dauert die Bearbeitung?',

@@ -173,7 +173,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
 📧 *User-Email:* ${user.email}
 
 ━━━━━━━━━━━━━━━━━━━━
-⚡ Open Beta - Nebula Supply
+⚡ Nebula Supply
         `.trim();
 
         await base44.integrations.Core.SendEmail({
@@ -200,8 +200,8 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
       }
 
       toast({
-        title: '🎉 Anfrage erfolgreich gesendet!',
-        description: 'Wir melden uns schnellstmöglich bei dir'
+        title: '🎉 Bestellung erfolgreich aufgegeben!',
+        description: 'Du erhältst eine Bestätigung per Email'
       });
 
       setTimeout(() => {
@@ -232,72 +232,98 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-4xl font-bold mb-8">Warenkorb</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <h1 className="text-5xl font-black mb-2 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+          Warenkorb
+        </h1>
+        <p className="text-zinc-400 text-lg">
+          {cartItems.length > 0 ? `${cartItems.length} ${cartItems.length === 1 ? 'Artikel' : 'Artikel'}` : 'Bereit zum Einkaufen'}
+        </p>
+      </motion.div>
 
       {cartItems.length === 0 ? (
-        <div className="text-center py-20 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
-          <ShoppingBag className="w-20 h-20 text-zinc-700 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Dein Warenkorb ist leer</h2>
-          <p className="text-zinc-400 mb-6">Füge Produkte hinzu, um eine Anfrage zu stellen</p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center py-32 glass backdrop-blur-xl border border-zinc-800 rounded-3xl"
+        >
+          <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 glow-effect">
+            <ShoppingBag className="w-12 h-12 text-white" />
+          </div>
+          <h2 className="text-3xl font-black mb-3">Warenkorb ist leer</h2>
+          <p className="text-zinc-400 text-lg mb-8">Entdecke unsere Premium-Produkte</p>
           <Link to={createPageUrl('Products')}>
-            <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
-              Produkte entdecken
-            </Button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="neon-button px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-lg shadow-xl shadow-purple-500/50"
+            >
+              Jetzt einkaufen
+            </motion.button>
           </Link>
-        </div>
+        </motion.div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((item) => {
+            {cartItems.map((item, index) => {
               const product = products[item.product_id];
               if (!product) return null;
 
               return (
-                <div
+                <motion.div
                   key={item.id}
-                  className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 hover:border-purple-500/50 transition-colors"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group glass backdrop-blur-xl border border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10 transition-all"
                 >
-                  <div className="flex gap-6">
+                  <div className="flex gap-6 p-6">
                     {/* Image */}
-                    <div className="w-24 h-24 bg-zinc-800 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="relative w-32 h-32 bg-zinc-900 rounded-xl overflow-hidden flex-shrink-0">
                       {product.cover_image ? (
                         <img
                           src={product.cover_image}
                           alt={product.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <ShoppingBag className="w-8 h-8 text-zinc-600" />
+                          <ShoppingBag className="w-12 h-12 text-zinc-700" />
                         </div>
                       )}
+                      <div className="absolute top-2 right-2 px-2 py-1 bg-black/60 backdrop-blur rounded-lg text-xs font-mono text-purple-300">
+                        {product.sku}
+                      </div>
                     </div>
 
                     {/* Details */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="font-semibold text-lg">{product.name}</h3>
-                          <p className="text-sm text-zinc-400">{product.sku}</p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1 min-w-0 pr-4">
+                          <h3 className="font-bold text-xl mb-1 truncate">{product.name}</h3>
+                          <p className="text-sm text-zinc-500">Einzelpreis: {product.price.toFixed(2)}€</p>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                        <button
                           onClick={() => removeItem(item.id)}
-                          className="text-red-400 hover:text-red-300"
+                          className="flex-shrink-0 p-2 rounded-lg hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
                         >
                           <Trash2 className="w-5 h-5" />
-                        </Button>
+                        </button>
                       </div>
 
                       {/* Options */}
                       {item.selected_options && Object.keys(item.selected_options).length > 0 && (
-                        <div className="text-sm text-zinc-400 mb-3">
+                        <div className="flex flex-wrap gap-2 mb-4">
                           {Object.entries(item.selected_options).map(([key, value]) => (
-                            <div key={key}>
-                              {key}: {value}
+                            <div key={key} className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded-lg text-xs text-purple-300">
+                              {key}: <span className="font-semibold">{value}</span>
                             </div>
                           ))}
                         </div>
@@ -305,32 +331,31 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
 
                       {/* Quantity & Price */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
+                        <div className="flex items-center gap-3 glass border border-zinc-800 rounded-xl p-1">
+                          <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-zinc-800 transition-colors"
                           >
                             <Minus className="w-4 h-4" />
-                          </Button>
-                          <span className="w-12 text-center font-semibold">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-8 w-8"
+                          </button>
+                          <span className="w-12 text-center font-bold text-lg">{item.quantity}</span>
+                          <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-zinc-800 transition-colors"
                           >
                             <Plus className="w-4 h-4" />
-                          </Button>
+                          </button>
                         </div>
-                        <span className="text-xl font-bold text-purple-400">
-                          {(product.price * item.quantity).toFixed(2)}€
-                        </span>
+                        <div className="text-right">
+                          <div className="text-xs text-zinc-500 mb-1">Summe</div>
+                          <div className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            {(product.price * item.quantity).toFixed(2)}€
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -351,14 +376,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                 </h2>
               </div>
 
-              <div className="px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-blue-300">
-                    <strong>Open Beta:</strong> Wir bearbeiten deine Anfrage manuell und melden uns schnellstmöglich!
-                  </p>
-                </div>
-              </div>
+
 
               <div className="space-y-4">
                 <div>
@@ -427,14 +445,13 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                   ) : (
                     <div className="flex items-center justify-center gap-2">
                       <Send className="w-5 h-5" />
-                      Verbindlich anfragen
-                      <Sparkles className="w-4 h-4" />
+                      Jetzt bestellen
                     </div>
                   )}
                 </motion.button>
 
-                <p className="text-xs text-center text-zinc-500">
-                  Deine Anfrage wird per Email bestätigt
+                <p className="text-xs text-center text-zinc-500 mt-2">
+                  Bestellbestätigung per Email
                 </p>
                 </div>
                 </motion.div>
