@@ -460,6 +460,9 @@ export default function ProductDetail() {
                         <span className="font-bold text-sm text-green-200">DE</span>
                       </div>
                     </div>
+                    <div className="mt-2 text-xs font-bold text-green-100 bg-green-500/20 px-2.5 py-1 rounded-lg w-fit">
+                      Normaler Preis
+                    </div>
                   </div>
                 </div>
                 <motion.div
@@ -500,6 +503,9 @@ export default function ProductDetail() {
                         <MapPin className="w-4 h-4 text-amber-400" />
                         <span className="font-bold text-sm text-orange-200">CN</span>
                       </div>
+                    </div>
+                    <div className="mt-2 text-xs font-bold text-orange-100 bg-gradient-to-r from-orange-500/30 to-red-500/30 px-2.5 py-1 rounded-lg w-fit">
+                      💰 10-20% günstiger
                     </div>
                   </div>
                 </div>
@@ -590,25 +596,36 @@ export default function ProductDetail() {
             <div>
               <label className="text-sm font-bold text-white mb-3 block">Anzahl</label>
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3 glass backdrop-blur border border-zinc-800 rounded-xl p-2">
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3 glass backdrop-blur border border-purple-500/40 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-2 hover:border-purple-500/60 transition-all"
+                >
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.85 }}
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/20 rounded-lg transition-colors"
+                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/30 rounded-lg transition-colors text-purple-300 hover:text-purple-100"
                   >
                     <Minus className="w-5 h-5" />
                   </motion.button>
-                  <span className="w-12 text-center font-bold text-xl">{quantity}</span>
+                  <motion.div
+                    key={quantity}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-14 text-center font-black text-xl bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent"
+                  >
+                    {quantity}
+                  </motion.div>
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.85 }}
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/20 rounded-lg transition-colors"
+                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/30 rounded-lg transition-colors text-purple-300 hover:text-purple-100"
                   >
                     <Plus className="w-5 h-5" />
                   </motion.button>
-                </div>
+                </motion.div>
                 
                 <motion.div
                   whileHover={{ scale: 1.02 }}
