@@ -25,14 +25,41 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
   const [showZoom, setShowZoom] = useState(false);
   const { toast } = useToast();
 
-  // Color variants with their images
+  // Color variants intelligently mapped to available images
   const colorVariants = [
-    { name: 'Schwarz', hex: '#000000', image: product?.cover_image || images[0]?.url },
-    { name: 'Weiß', hex: '#FFFFFF', image: images[1]?.url || product?.cover_image },
-    { name: 'Rot', hex: '#DC2626', image: images[2]?.url || product?.cover_image },
-    { name: 'Blau', hex: '#2563EB', image: images[3]?.url || product?.cover_image },
-    { name: 'Grün', hex: '#16A34A', image: images[4]?.url || product?.cover_image }
-  ].filter(v => v.image);
+    { 
+      name: 'Schwarz', 
+      hex: '#000000', 
+      imageIndex: 0,
+      keywords: ['schwarz', 'black', 'dark']
+    },
+    { 
+      name: 'Weiß', 
+      hex: '#FFFFFF', 
+      imageIndex: 1,
+      keywords: ['weiß', 'white', 'light']
+    },
+    { 
+      name: 'Rot', 
+      hex: '#DC2626', 
+      imageIndex: 2,
+      keywords: ['rot', 'red']
+    },
+    { 
+      name: 'Blau', 
+      hex: '#2563EB', 
+      imageIndex: 3,
+      keywords: ['blau', 'blue']
+    },
+    { 
+      name: 'Grün', 
+      hex: '#16A34A', 
+      imageIndex: 4,
+      keywords: ['grün', 'green']
+    }
+  ].filter(variant => allImages[variant.imageIndex]);
+
+  const getColorImage = (imageIndex) => allImages[imageIndex] || selectedImage;
 
   useEffect(() => {
     if (product && isOpen) {
