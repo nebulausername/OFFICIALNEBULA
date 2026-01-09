@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Plus, Minus, ShoppingBag, Send } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, Send, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { useToast } from '@/components/ui/use-toast';
@@ -102,7 +103,7 @@ export default function Cart() {
   const handleSubmitRequest = async () => {
     if (cartItems.length === 0) {
       toast({
-        title: 'Warenkorb leer',
+        title: '🛒 Warenkorb leer',
         description: 'Füge zuerst Produkte hinzu',
         variant: 'destructive'
       });
@@ -111,7 +112,7 @@ export default function Cart() {
 
     if (!contactInfo.name || !contactInfo.phone) {
       toast({
-        title: 'Fehlende Informationen',
+        title: '⚠️ Fehlende Informationen',
         description: 'Bitte fülle alle Pflichtfelder aus',
         variant: 'destructive'
       });
@@ -134,6 +135,7 @@ export default function Cart() {
       });
 
       // Create request items
+      const itemsList = [];
       for (const item of cartItems) {
         const product = products[item.product_id];
         if (product) {
@@ -146,7 +148,50 @@ export default function Cart() {
             quantity_snapshot: item.quantity,
             selected_options_snapshot: item.selected_options || {}
           });
+          itemsList.push(`${item.quantity}x ${product.name} (${product.price}€)`);
         }
+      }
+
+      // Send Telegram notification (Open Beta)
+      try {
+        const telegramMessage = `
+🌟 *NEUE BESTELLUNG - NEBULA SUPPLY* 🌟
+━━━━━━━━━━━━━━━━━━━━
+
+👤 *Kunde:* ${contactInfo.name}
+📞 *Telefon:* ${contactInfo.phone}
+${contactInfo.telegram ? `💬 *Telegram:* ${contactInfo.telegram}` : ''}
+
+🛍️ *Bestellung:*
+${itemsList.map(item => `  • ${item}`).join('\n')}
+
+💰 *Gesamtsumme:* ${total.toFixed(2)}€
+
+${note ? `📝 *Notiz:* ${note}` : ''}
+
+🆔 *Anfrage-ID:* ${request.id}
+📧 *User-Email:* ${user.email}
+
+━━━━━━━━━━━━━━━━━━━━
+⚡ Open Beta - Nebula Supply
+        `.trim();
+
+        await base44.integrations.Core.SendEmail({
+          to: user.email,
+          subject: '✨ Bestellung eingegangen - Nebula Supply',
+          body: `Hallo ${contactInfo.name},\n\nDeine Bestellung wurde erfolgreich aufgegeben!\n\nWir melden uns schnellstmöglich bei dir.\n\nGesamtsumme: ${total.toFixed(2)}€\n\nViele Grüße,\nDein Nebula Supply Team`
+        });
+
+        // Note: For actual Telegram integration, you would need to set up a Telegram bot
+        // This sends an email notification instead for now
+        await base44.integrations.Core.SendEmail({
+          to: 'admin@nebulasupply.com', // Replace with actual admin email
+          subject: `🌟 Neue Bestellung #${request.id}`,
+          body: telegramMessage
+        });
+      } catch (notificationError) {
+        console.error('Notification error:', notificationError);
+        // Continue even if notification fails
       }
 
       // Clear cart
@@ -155,17 +200,17 @@ export default function Cart() {
       }
 
       toast({
-        title: 'Anfrage gesendet!',
-        description: 'Wir melden uns bald bei dir'
+        title: '🎉 Anfrage erfolgreich gesendet!',
+        description: 'Wir melden uns schnellstmöglich bei dir'
       });
 
       setTimeout(() => {
         window.location.href = createPageUrl('Requests');
-      }, 1500);
+      }, 2000);
     } catch (error) {
       console.error('Error submitting request:', error);
       toast({
-        title: 'Fehler',
+        title: '❌ Fehler',
         description: 'Anfrage konnte nicht gesendet werden',
         variant: 'destructive'
       });
@@ -292,47 +337,68 @@ export default function Cart() {
 
           {/* Checkout */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 space-y-6">
-              <h2 className="text-2xl font-bold">Kontaktinformationen</h2>
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="sticky top-24 glass backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 space-y-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                  <Send className="w-5 h-5" />
+                </div>
+                <h2 className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Anfrage senden
+                </h2>
+              </div>
+
+              <div className="px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-blue-300">
+                    <strong>Open Beta:</strong> Wir bearbeiten deine Anfrage manuell und melden uns schnellstmöglich!
+                  </p>
+                </div>
+              </div>
 
               <div className="space-y-4">
                 <div>
-                  <Label>Name *</Label>
+                  <Label className="text-sm font-semibold text-zinc-400">Name *</Label>
                   <Input
                     value={contactInfo.name}
                     onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
-                    placeholder="Dein Name"
-                    className="mt-2"
+                    placeholder="Dein vollständiger Name"
+                    className="mt-2 h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <Label>Telefon *</Label>
+                  <Label className="text-sm font-semibold text-zinc-400">Telefon *</Label>
                   <Input
                     value={contactInfo.phone}
                     onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
-                    placeholder="+49..."
-                    className="mt-2"
+                    placeholder="+49 123 456789"
+                    className="mt-2 h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <Label>Telegram Username</Label>
+                  <Label className="text-sm font-semibold text-zinc-400">Telegram Username (empfohlen)</Label>
                   <Input
                     value={contactInfo.telegram}
                     onChange={(e) => setContactInfo({ ...contactInfo, telegram: e.target.value })}
-                    placeholder="@username"
-                    className="mt-2"
+                    placeholder="@deinusername"
+                    className="mt-2 h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
                   />
+                  <p className="text-xs text-zinc-500 mt-1">Für schnellere Kommunikation</p>
                 </div>
 
                 <div>
-                  <Label>Notiz</Label>
+                  <Label className="text-sm font-semibold text-zinc-400">Notiz (optional)</Label>
                   <Textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    placeholder="Zusätzliche Informationen..."
-                    className="mt-2"
+                    placeholder="Besondere Wünsche, Fragen oder Anmerkungen..."
+                    className="mt-2 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
                     rows={3}
                   />
                 </div>
@@ -346,22 +412,32 @@ export default function Cart() {
                   </span>
                 </div>
 
-                <Button
+                <motion.button
                   onClick={handleSubmitRequest}
                   disabled={submitting}
-                  className="w-full h-14 text-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition-transform"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="neon-button w-full h-16 text-lg font-bold bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-xl shadow-2xl shadow-purple-500/50 glow-effect disabled:opacity-50 disabled:cursor-not-allowed transition-all animate-gradient"
                 >
                   {submitting ? (
-                    'Wird gesendet...'
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Wird verarbeitet...
+                    </div>
                   ) : (
-                    <>
-                      <Send className="w-5 h-5 mr-2" />
-                      Anfrage senden
-                    </>
+                    <div className="flex items-center justify-center gap-2">
+                      <Send className="w-5 h-5" />
+                      Verbindlich anfragen
+                      <Sparkles className="w-4 h-4" />
+                    </div>
                   )}
-                </Button>
-              </div>
-            </div>
+                </motion.button>
+
+                <p className="text-xs text-center text-zinc-500">
+                  Deine Anfrage wird per Email bestätigt
+                </p>
+                </div>
+                </motion.div>
           </div>
         </div>
       )}

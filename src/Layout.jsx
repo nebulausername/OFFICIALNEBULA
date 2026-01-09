@@ -2,8 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
-import { ShoppingBag, Home, Package, User, Menu, X, Star, Sparkles } from 'lucide-react';
+import { ShoppingBag, Home, Package, User, Menu, X, Star, Sparkles, ChevronDown, HelpCircle, MessageCircle, Settings, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
@@ -123,10 +131,58 @@ export default function Layout({ children, currentPageName }) {
 
               {/* User Menu */}
               {user && (
-                <div className="hidden md:flex items-center space-x-3 px-3 py-2 bg-zinc-800 rounded-lg">
-                  <User className="w-5 h-5 text-purple-400" />
-                  <span className="text-sm font-medium">{user.full_name || user.email}</span>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="hidden md:flex items-center space-x-3 px-4 py-2 glass border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all hover:shadow-lg hover:shadow-purple-500/20 group">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-sm font-semibold">{user.full_name || user.email}</span>
+                      <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-purple-400 transition-colors" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 glass border-zinc-800 bg-zinc-900/95 backdrop-blur-xl">
+                    <DropdownMenuLabel className="text-purple-400">Mein Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-zinc-800" />
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('Profile')} className="flex items-center gap-2 cursor-pointer">
+                        <User className="w-4 h-4" />
+                        Profil
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('Help')} className="flex items-center gap-2 cursor-pointer">
+                        <HelpCircle className="w-4 h-4" />
+                        Hilfe & Support
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to={createPageUrl('FAQ')} className="flex items-center gap-2 cursor-pointer">
+                        <MessageCircle className="w-4 h-4" />
+                        FAQ
+                      </Link>
+                    </DropdownMenuItem>
+                    {user.role === 'admin' && (
+                      <>
+                        <DropdownMenuSeparator className="bg-zinc-800" />
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl('Admin')} className="flex items-center gap-2 cursor-pointer text-purple-400">
+                            <Settings className="w-4 h-4" />
+                            Admin Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator className="bg-zinc-800" />
+                    <DropdownMenuItem 
+                      onClick={() => base44.auth.logout()}
+                      className="flex items-center gap-2 cursor-pointer text-red-400"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Abmelden
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
 
               {/* Mobile Menu Button */}

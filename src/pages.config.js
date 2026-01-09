@@ -8,6 +8,9 @@ import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
 import Products from './pages/Products';
 import Requests from './pages/Requests';
+import Profile from './pages/Profile';
+import Help from './pages/Help';
+import FAQ from './pages/FAQ';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +25,9 @@ export const PAGES = {
     "ProductDetail": ProductDetail,
     "Products": Products,
     "Requests": Requests,
+    "Profile": Profile,
+    "Help": Help,
+    "FAQ": FAQ,
 }
 
 export const pagesConfig = {
