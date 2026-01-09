@@ -252,7 +252,7 @@ export default function ProductDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
         {/* Product Gallery */}
-        <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
           {/* Main Image with Navigation */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
