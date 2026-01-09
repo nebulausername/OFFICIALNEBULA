@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { X, Plus, Minus, ShoppingBag, ZoomIn, ChevronLeft, ChevronRight, Star, Package } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, ZoomIn, ChevronLeft, ChevronRight, Star, Package, Truck, MapPin, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -276,6 +276,41 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                 )}
               </div>
             )}
+
+            {/* Shipping Info Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-6 p-5 bg-gradient-to-br from-green-500/10 to-blue-500/10 border-2 border-green-500/30 rounded-2xl space-y-4"
+            >
+              <div className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-green-400" />
+                <h3 className="font-black text-sm text-white uppercase tracking-wide">Versandinformationen</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-black/30 rounded-lg p-4 backdrop-blur-sm border border-green-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-green-400" />
+                    <p className="text-xs font-bold text-zinc-400 uppercase">Lieferfrist</p>
+                  </div>
+                  <p className="text-lg font-black text-green-300">
+                    {product.delivery_time || '2-5 Tage'}
+                  </p>
+                </div>
+                
+                <div className="bg-black/30 rounded-lg p-4 backdrop-blur-sm border border-blue-500/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="w-4 h-4 text-blue-400" />
+                    <p className="text-xs font-bold text-zinc-400 uppercase">Lieferort</p>
+                  </div>
+                  <p className="text-lg font-black text-blue-300">
+                    {product.delivery_location || 'Deutschland'}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
 
             {/* Tags */}
             {product.tags && product.tags.length > 0 && (
