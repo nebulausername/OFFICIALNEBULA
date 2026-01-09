@@ -154,49 +154,44 @@ export default function Layout({ children, currentPageName }) {
         {children}
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong backdrop-blur-2xl border-t-2 border-zinc-700/50 shadow-2xl pb-safe">
-        <div className="grid grid-cols-3 gap-2 px-3 py-4">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPageName === item.page;
-            return (
-              <Link
-                key={item.page}
-                to={createPageUrl(item.page)}
-                className="relative"
+      {/* Mobile Navigation */}
+      <div className="md:hidden flex items-center gap-2">
+        {navigation.map((item) => {
+          const Icon = item.icon;
+          const isActive = currentPageName === item.page;
+          return (
+            <Link
+              key={item.page}
+              to={createPageUrl(item.page)}
+              className="relative"
+            >
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className={`relative flex items-center justify-center p-2.5 rounded-xl transition-all overflow-hidden ${
+                  isActive
+                    ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg shadow-purple-500/50'
+                    : 'glass border-2 border-zinc-700'
+                }`}
               >
-                <motion.div
-                  whileTap={{ scale: 0.9 }}
-                  className={`relative flex flex-col items-center gap-2 px-4 py-3 rounded-2xl transition-all overflow-hidden ${
-                    isActive
-                      ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-xl shadow-purple-500/50'
-                      : 'glass border-2 border-zinc-700 hover:border-purple-400'
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="mobileActiveTab"
-                      className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                  <Icon className={`w-7 h-7 relative z-10 ${isActive ? 'text-white scale-110 drop-shadow-lg' : 'text-zinc-400'} transition-all`} />
-                  <span className={`text-xs font-black uppercase tracking-wider relative z-10 ${isActive ? 'text-white' : 'text-zinc-400'}`}>
-                    {item.name}
-                  </span>
-                  {isActive && (
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-400 opacity-50"
-                      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.3, 0.5] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                  )}
-                </motion.div>
-              </Link>
-            );
-          })}
-        </div>
+                {isActive && (
+                  <motion.div
+                    layoutId="mobileActiveTab"
+                    className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <Icon className={`w-6 h-6 relative z-10 ${isActive ? 'text-white drop-shadow-lg' : 'text-zinc-400'} transition-all`} />
+                {isActive && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-400 opacity-50"
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.3, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                )}
+              </motion.div>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Footer */}
