@@ -244,13 +244,13 @@ export default function ProductDetail() {
       {/* Back Button */}
       <Link
         to={createPageUrl('Products')}
-        className="inline-flex items-center space-x-2 text-zinc-400 hover:text-white mb-8 transition-colors group"
+        className="inline-flex items-center space-x-2 text-zinc-400 hover:text-white mb-6 sm:mb-8 transition-colors group"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-        <span>Zurück zu Produkten</span>
+        <span className="text-sm sm:text-base">Zurück zu Produkten</span>
       </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
         {/* Product Gallery */}
         <div className="space-y-4">
           {/* Main Image with Navigation */}
