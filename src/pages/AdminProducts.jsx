@@ -194,7 +194,7 @@ export default function AdminProducts() {
         <Table>
           <TableHeader>
             <TableRow className="border-zinc-800 hover:bg-transparent bg-zinc-900/50">
-              <TableHead className="font-bold">SKU</TableHead>
+              <TableHead className="font-bold">ProduktID</TableHead>
               <TableHead className="font-bold">Name</TableHead>
               <TableHead className="font-bold">Preis</TableHead>
               <TableHead className="font-bold">Kategorie</TableHead>
@@ -286,7 +286,7 @@ export default function AdminProducts() {
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <Label className="text-lg font-black text-white mb-2 flex items-center gap-2">
-                  <span className="text-purple-400">●</span> SKU *
+                  <span className="text-purple-400">●</span> ProduktID *
                 </Label>
                 <Input
                   value={formData.sku}

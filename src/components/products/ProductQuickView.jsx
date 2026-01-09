@@ -18,17 +18,28 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
   const [images, setImages] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState({});
+  const [selectedColor, setSelectedColor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState(null);
   const [brand, setBrand] = useState(null);
   const [showZoom, setShowZoom] = useState(false);
   const { toast } = useToast();
 
+  // Color variants with their images
+  const colorVariants = [
+    { name: 'Schwarz', hex: '#000000', image: product?.cover_image || images[0]?.url },
+    { name: 'Weiß', hex: '#FFFFFF', image: images[1]?.url || product?.cover_image },
+    { name: 'Rot', hex: '#DC2626', image: images[2]?.url || product?.cover_image },
+    { name: 'Blau', hex: '#2563EB', image: images[3]?.url || product?.cover_image },
+    { name: 'Grün', hex: '#16A34A', image: images[4]?.url || product?.cover_image }
+  ].filter(v => v.image);
+
   useEffect(() => {
     if (product && isOpen) {
       loadProductDetails();
       setQuantity(1);
       setSelectedOptions({});
+      setSelectedColor(null);
     }
   }, [product, isOpen]);
 
@@ -170,8 +181,8 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
             {/* Header */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Badge variant="outline" className="text-purple-400 border-purple-500/50 font-mono">
-                  {product.sku}
+                <Badge variant="outline" className="text-purple-400 border-purple-500/50 font-mono font-black">
+                  ID: {product.sku}
                 </Badge>
                 {brand && (
                   <Badge variant="outline" className="text-zinc-400">
@@ -211,11 +222,66 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
               )}
             </div>
 
+            {/* Color Variants */}
+            {colorVariants.length > 1 && (
+              <div className="mb-6 p-5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30 rounded-2xl">
+                <h3 className="font-black text-base text-white uppercase tracking-wide mb-4 flex items-center gap-2">
+                  <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+                  Farbe wählen
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  {colorVariants.map((color, index) => (
+                    <motion.button
+                      key={index}
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => {
+                        setSelectedColor(color.name);
+                        setSelectedImage(color.image);
+                      }}
+                      className={`group relative w-16 h-16 rounded-2xl border-3 transition-all overflow-hidden ${
+                        selectedColor === color.name
+                          ? 'border-purple-400 shadow-2xl shadow-purple-500/60 scale-110'
+                          : 'border-zinc-700 hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/30'
+                      }`}
+                    >
+                      <div 
+                        className="absolute inset-0 transition-transform group-hover:scale-110"
+                        style={{ backgroundColor: color.hex }}
+                      />
+                      {selectedColor === color.name && (
+                        <motion.div
+                          layoutId="selectedColor"
+                          className="absolute inset-0 border-4 border-purple-400 rounded-2xl"
+                          transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
+                        />
+                      )}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className={`text-xs font-black ${color.hex === '#000000' ? 'text-white' : 'text-zinc-900'} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                          {color.name[0]}
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+                {selectedColor && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 text-sm font-bold text-purple-300 flex items-center gap-2"
+                  >
+                    <Star className="w-4 h-4 fill-purple-400 text-purple-400" />
+                    Gewählt: {selectedColor}
+                  </motion.p>
+                )}
+              </div>
+            )}
+
             {/* Tags */}
             {product.tags && product.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
                 {product.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="bg-zinc-800">
+                  <Badge key={index} variant="secondary" className="bg-zinc-800 hover:bg-purple-500/20 transition-colors">
                     {tag}
                   </Badge>
                 ))}

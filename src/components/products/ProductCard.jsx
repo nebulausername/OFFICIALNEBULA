@@ -108,9 +108,9 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
             )}
           </div>
 
-          {/* SKU Badge Bottom Left */}
+          {/* ProduktID Badge Bottom Left */}
           <div className="absolute bottom-3 left-3">
-            <span className="px-3 py-1 bg-black/60 backdrop-blur border border-purple-500/30 text-purple-300 text-xs font-mono font-semibold rounded-full">
+            <span className="px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl border-2 border-purple-400/40 text-purple-200 text-xs font-black rounded-xl shadow-lg shadow-purple-500/30 tracking-wider">
               {product.sku}
             </span>
           </div>

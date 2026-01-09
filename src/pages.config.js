@@ -10,9 +10,9 @@ import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
 import Products from './pages/Products';
 import Profile from './pages/Profile';
+import ProfileSettings from './pages/ProfileSettings';
 import Requests from './pages/Requests';
 import VIP from './pages/VIP';
-import ProfileSettings from './pages/ProfileSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -29,9 +29,9 @@ export const PAGES = {
     "ProductDetail": ProductDetail,
     "Products": Products,
     "Profile": Profile,
+    "ProfileSettings": ProfileSettings,
     "Requests": Requests,
     "VIP": VIP,
-    "ProfileSettings": ProfileSettings,
 }
 
 export const pagesConfig = {
