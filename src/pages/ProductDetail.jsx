@@ -378,50 +378,94 @@ export default function ProductDetail() {
 
           {/* Description */}
           {product.description && (
-            <div className="glass backdrop-blur-xl border border-zinc-800 rounded-2xl p-6">
-              <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                <Package className="w-5 h-5 text-purple-400" />
-                Produktbeschreibung
-              </h3>
-              <p className="text-zinc-400 leading-relaxed">{product.description}</p>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="relative group"
+            >
+              <div className="absolute -inset-px bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-purple-600/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative glass backdrop-blur-xl border border-purple-500/30 group-hover:border-purple-400/60 rounded-2xl p-6 transition-all">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/50">
+                    <Package className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                    Produktbeschreibung
+                  </h3>
+                </div>
+                <p className="text-zinc-300 leading-relaxed text-base font-medium">{product.description}</p>
+
+                {/* Additional Info Bar */}
+                <div className="mt-4 pt-4 border-t border-zinc-700 flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-purple-300">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full" />
+                    <span>Premium Material</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-purple-300">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full" />
+                    <span>Qualitätsgeprüft</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           )}
 
-          {/* Shipping Info Card */}
+          {/* Shipping Info Card - Enhanced */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="space-y-3"
+            className="space-y-4"
           >
+            <div className="flex items-center gap-3 mb-4">
+              <motion.div 
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50"
+              >
+                <Truck className="w-5 h-5 text-white" />
+              </motion.div>
+              <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+                Versandoptionen
+              </h3>
+            </div>
+
             {/* Germany Shipping */}
             <motion.div
-              whileHover={{ x: 4 }}
-              className="group relative p-4 bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-2 border-green-500/40 rounded-2xl overflow-hidden hover:border-green-400/60 transition-all cursor-pointer"
+              whileHover={{ x: 4, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative p-5 bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-2 border-green-500/40 rounded-2xl overflow-hidden hover:border-green-400/60 hover:shadow-lg hover:shadow-green-500/30 transition-all cursor-pointer"
             >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Truck className="w-6 h-6 text-white" />
-                  </div>
+              <div className="absolute -right-20 -top-20 w-40 h-40 bg-green-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
+
+              <div className="relative flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4 flex-1">
+                  <motion.div 
+                    whileHover={{ scale: 1.1, rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                    className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/50 flex-shrink-0"
+                  >
+                    <Truck className="w-7 h-7 text-white" />
+                  </motion.div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-green-300 uppercase tracking-wider mb-1">Versand aus Deutschland</p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-1">
+                    <p className="text-xs font-black text-green-300 uppercase tracking-widest mb-2">🚚 Express aus Deutschland</p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-green-500/20 px-2.5 py-1 rounded-lg">
                         <Clock className="w-4 h-4 text-green-400" />
                         <span className="font-black text-sm text-green-200">1-5 Werktage</span>
-                      </div>
-                      <span className="text-green-500/60">•</span>
-                      <div className="flex items-center gap-1">
+                      </motion.div>
+                      <div className="flex items-center gap-1.5 bg-green-500/20 px-2.5 py-1 rounded-lg">
                         <MapPin className="w-4 h-4 text-emerald-400" />
-                        <span className="font-bold text-sm text-green-200">🇩🇪 DE</span>
+                        <span className="font-bold text-sm text-green-200">DE</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <motion.div
-                  whileHover={{ scale: 1.2, rotate: 10 }}
-                  className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-lg font-black flex-shrink-0"
+                  whileHover={{ scale: 1.2, rotate: 360 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-lg font-black flex-shrink-0 shadow-lg"
                 >
                   ✓
                 </motion.div>
@@ -430,36 +474,55 @@ export default function ProductDetail() {
 
             {/* China Shipping */}
             <motion.div
-              whileHover={{ x: 4 }}
-              className="group relative p-4 bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-2 border-orange-500/30 rounded-2xl overflow-hidden hover:border-orange-400/60 transition-all cursor-pointer"
+              whileHover={{ x: 4, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative p-5 bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-2 border-orange-500/30 rounded-2xl overflow-hidden hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/30 transition-all cursor-pointer"
             >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Truck className="w-6 h-6 text-white" />
-                  </div>
+              <div className="absolute -right-20 -top-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
+
+              <div className="relative flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4 flex-1">
+                  <motion.div 
+                    whileHover={{ scale: 1.1, rotate: -360 }}
+                    transition={{ duration: 0.6 }}
+                    className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/50 flex-shrink-0"
+                  >
+                    <Truck className="w-7 h-7 text-white" />
+                  </motion.div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-orange-300 uppercase tracking-wider mb-1">Versand aus China</p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-1">
+                    <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-2">🌍 Budget aus China</p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-orange-500/20 px-2.5 py-1 rounded-lg">
                         <Clock className="w-4 h-4 text-orange-400" />
                         <span className="font-black text-sm text-orange-200">8-15 Werktage</span>
-                      </div>
-                      <span className="text-orange-500/60">•</span>
-                      <div className="flex items-center gap-1">
+                      </motion.div>
+                      <div className="flex items-center gap-1.5 bg-orange-500/20 px-2.5 py-1 rounded-lg">
                         <MapPin className="w-4 h-4 text-amber-400" />
-                        <span className="font-bold text-sm text-orange-200">🇨🇳 CN</span>
+                        <span className="font-bold text-sm text-orange-200">CN</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="px-2 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs font-black flex-shrink-0"
+                  whileHover={{ scale: 1.05 }}
+                  className="px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-black flex-shrink-0 shadow-lg shadow-orange-500/50"
                 >
                   BUDGET
                 </motion.div>
               </div>
+            </motion.div>
+
+            {/* Info Banner */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3"
+            >
+              <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+              <p className="text-xs font-medium text-blue-200">
+                Versand wird bei Bestellung automatisch ausgewählt. Standard ist der schnelle Versand aus Deutschland mit DHL/DPD.
+              </p>
             </motion.div>
           </motion.div>
 
