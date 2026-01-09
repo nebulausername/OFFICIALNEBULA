@@ -387,6 +387,82 @@ export default function ProductDetail() {
             </div>
           )}
 
+          {/* Shipping Info Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-3"
+          >
+            {/* Germany Shipping */}
+            <motion.div
+              whileHover={{ x: 4 }}
+              className="group relative p-4 bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-2 border-green-500/40 rounded-2xl overflow-hidden hover:border-green-400/60 transition-all cursor-pointer"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Truck className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-green-300 uppercase tracking-wider mb-1">Versand aus Deutschland</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 text-green-400" />
+                        <span className="font-black text-sm text-green-200">1-5 Werktage</span>
+                      </div>
+                      <span className="text-green-500/60">•</span>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4 text-emerald-400" />
+                        <span className="font-bold text-sm text-green-200">🇩🇪 DE</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <motion.div
+                  whileHover={{ scale: 1.2, rotate: 10 }}
+                  className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-lg font-black flex-shrink-0"
+                >
+                  ✓
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* China Shipping */}
+            <motion.div
+              whileHover={{ x: 4 }}
+              className="group relative p-4 bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-2 border-orange-500/30 rounded-2xl overflow-hidden hover:border-orange-400/60 transition-all cursor-pointer"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Truck className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-orange-300 uppercase tracking-wider mb-1">Versand aus China</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4 text-orange-400" />
+                        <span className="font-black text-sm text-orange-200">8-15 Werktage</span>
+                      </div>
+                      <span className="text-orange-500/60">•</span>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4 text-amber-400" />
+                        <span className="font-bold text-sm text-orange-200">🇨🇳 CN</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="px-2 py-1 rounded-full bg-orange-500/20 text-orange-400 text-xs font-black flex-shrink-0"
+                >
+                  BUDGET
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+
           {/* Tags */}
           {product.tags && product.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
