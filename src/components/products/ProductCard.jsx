@@ -23,10 +23,10 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8 }}
+      whileHover={{ y: -12, scale: 1.02 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
-      className="product-card group glass backdrop-blur border border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all"
+      className="product-card group glass backdrop-blur-xl border border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/30 transition-all"
     >
       <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`}>
         {/* Image */}
@@ -117,10 +117,10 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
         </div>
 
         {/* Content */}
-        <div className="p-5 relative">
+        <div className="p-6 relative">
           <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          
-          <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text group-hover:text-transparent transition-all">
+
+          <h3 className="font-black text-lg mb-3 line-clamp-2 group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:via-pink-400 group-hover:to-purple-400 group-hover:bg-clip-text group-hover:text-transparent transition-all leading-tight">
             {product.name}
           </h3>
           
@@ -143,32 +143,33 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
           )}
 
           {/* Price and Action */}
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800/50 group-hover:border-purple-500/30 transition-colors">
+          <div className="flex items-center justify-between mt-5 pt-5 border-t border-zinc-800/50 group-hover:border-purple-500/30 transition-colors">
             <div>
-              <div className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <div className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
                 {product.price}€
               </div>
               {product.currency && product.currency !== 'EUR' && (
-                <div className="text-xs text-zinc-500">{product.currency}</div>
+                <div className="text-xs text-zinc-500 mt-1">{product.currency}</div>
               )}
             </div>
-            
+
             {product.in_stock && onAddToCart && (
               <motion.button
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.15, rotate: 10 }}
+                whileTap={{ scale: 0.85 }}
                 onClick={(e) => {
                   e.preventDefault();
                   onAddToCart(product);
                 }}
-                className="neon-button relative p-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg shadow-purple-500/50 hover:shadow-xl hover:shadow-purple-500/60 transition-all"
+                className="neon-button relative p-4 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-xl shadow-xl shadow-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/70 transition-all animate-gradient group/btn"
               >
-                <ShoppingBag className="w-5 h-5 relative z-10" />
+                <ShoppingBag className="w-6 h-6 relative z-10 group-hover/btn:scale-110 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-pink-500/20 rounded-xl opacity-0 group-hover/btn:opacity-100 transition-opacity blur-xl" />
               </motion.button>
             )}
           </div>
-        </div>
-      </Link>
-    </motion.div>
-  );
-}
+          </div>
+          </Link>
+          </motion.div>
+          );
+          }
