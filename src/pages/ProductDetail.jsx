@@ -660,31 +660,32 @@ export default function ProductDetail() {
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-3 glass backdrop-blur border border-purple-500/40 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-2 hover:border-purple-500/60 transition-all"
+                  className="flex items-center gap-2 glass-strong backdrop-blur-xl border-2 border-purple-400/60 bg-gradient-to-r from-purple-600/20 via-pink-500/15 to-purple-600/20 rounded-2xl p-3 hover:border-purple-300/80 shadow-xl shadow-purple-500/25 transition-all"
                 >
                   <motion.button
-                    whileHover={{ scale: 1.15 }}
-                    whileTap={{ scale: 0.85 }}
+                    whileHover={{ scale: 1.2, rotate: -5 }}
+                    whileTap={{ scale: 0.9, rotate: -5 }}
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/30 rounded-lg transition-colors text-purple-300 hover:text-purple-100"
+                    className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 rounded-xl transition-all text-white font-bold shadow-lg shadow-purple-600/50 hover:shadow-purple-500/70"
                   >
-                    <Minus className="w-5 h-5" />
+                    <Minus className="w-6 h-6" />
                   </motion.button>
                   <motion.div
                     key={quantity}
-                    initial={{ scale: 1.2, opacity: 0 }}
+                    initial={{ scale: 1.3, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-12 sm:w-14 text-center font-black text-lg sm:text-xl text-white"
+                    transition={{ type: 'spring', bounce: 0.6 }}
+                    className="w-16 text-center font-black text-2xl bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent"
                   >
                     {quantity}
                   </motion.div>
                   <motion.button
-                    whileHover={{ scale: 1.15 }}
-                    whileTap={{ scale: 0.85 }}
+                    whileHover={{ scale: 1.2, rotate: 5 }}
+                    whileTap={{ scale: 0.9, rotate: 5 }}
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/30 rounded-lg transition-colors text-purple-300 hover:text-purple-100"
+                    className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl transition-all text-white font-bold shadow-lg shadow-pink-600/50 hover:shadow-pink-500/70"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-6 h-6" />
                   </motion.button>
                 </motion.div>
                 
