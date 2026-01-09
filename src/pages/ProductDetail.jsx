@@ -721,9 +721,14 @@ export default function ProductDetail() {
                     whileHover={{ y: -2 }}
                     className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
                   >
-                    <p className="text-xs font-black text-green-300 mb-1">🇩🇪 AUS DEUTSCHLAND</p>
+                    <p className="text-xs font-black text-green-300 mb-1">🇩🇪 DEUTSCHLAND</p>
                     <p className="text-xs text-green-200 font-bold">
-                      {calculateDeliveryDate(1, 5).startShort} - {new Date(new Date().setDate(new Date().getDate() + 7)).getDate()}.{new Date(new Date().setDate(new Date().getDate() + 7)).getMonth() + 1}.
+                      {(() => {
+                        const start = calculateDeliveryDate(1, 5);
+                        const end = new Date();
+                        end.setDate(end.getDate() + 5);
+                        return `${start.startShort} - ${end.getDate()}.${end.getMonth() + 1}.`;
+                      })()}
                     </p>
                   </motion.div>
 
@@ -732,9 +737,14 @@ export default function ProductDetail() {
                     whileHover={{ y: -2 }}
                     className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg"
                   >
-                    <p className="text-xs font-black text-orange-300 mb-1">🇨🇳 AUS CHINA</p>
+                    <p className="text-xs font-black text-orange-300 mb-1">🇨🇳 CHINA</p>
                     <p className="text-xs text-orange-200 font-bold">
-                      {calculateDeliveryDate(8, 15).startShort} - {new Date(new Date().setDate(new Date().getDate() + 22)).getDate()}.{new Date(new Date().setDate(new Date().getDate() + 22)).getMonth() + 1}.
+                      {(() => {
+                        const start = calculateDeliveryDate(8, 15);
+                        const end = new Date();
+                        end.setDate(end.getDate() + 15);
+                        return `${start.startShort} - ${end.getDate()}.${end.getMonth() + 1}.`;
+                      })()}
                     </p>
                   </motion.div>
                 </div>
