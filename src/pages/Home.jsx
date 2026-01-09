@@ -246,10 +246,31 @@ export default function Home() {
                       </div>
                     </div>
                   </Link>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setQuickViewProduct(product);
+                      setIsQuickViewOpen(true);
+                    }}
+                    className="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl"
+                  >
+                    <Button className="bg-white text-zinc-900 hover:bg-purple-500 hover:text-white font-black px-6 py-2">
+                      Quick View
+                    </Button>
+                  </motion.button>
                 </motion.div>
               ))
             )}
           </div>
+
+          <ProductQuickView
+            product={quickViewProduct}
+            isOpen={isQuickViewOpen}
+            onClose={() => setIsQuickViewOpen(false)}
+            onAddToCart={handleAddToCart}
+          />
 
           <div className="text-center">
             <Link to={createPageUrl('Products')}>
