@@ -401,31 +401,31 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
               </motion.div>
 
               {/* Zoom Modal */}
-        <AnimatePresence>
-          {showZoom && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
-              onClick={() => setShowZoom(false)}
-            >
-              <button
-                className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur rounded-full hover:bg-white/20 transition-colors"
+              <AnimatePresence>
+              {showZoom && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
                 onClick={() => setShowZoom(false)}
               >
-                <X className="w-6 h-6 text-white" />
-              </button>
-              <img
-                src={selectedImage}
-                alt={product.name}
-                className="max-w-full max-h-full object-contain"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-        </motion.div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+                <button
+                  className="absolute top-4 right-4 p-2 bg-white/10 backdrop-blur rounded-full hover:bg-white/20 transition-colors"
+                  onClick={() => setShowZoom(false)}
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+                <img
+                  src={selectedImage}
+                  alt={product.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </motion.div>
+              )}
+              </AnimatePresence>
+              </motion.div>
+              </DialogContent>
+              </Dialog>
+              );
+              }
