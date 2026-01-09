@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { HelpCircle, Mail, MessageCircle, Phone, Send, Sparkles } from 'lucide-react';
+import { HelpCircle, Mail, MessageCircle, Phone, Send, Sparkles, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '../utils';
 
 export default function Help() {
   const [message, setMessage] = React.useState('');
@@ -50,7 +52,8 @@ export default function Help() {
       title: 'WhatsApp',
       value: '+49 123 456789',
       description: 'Täglich 10-20 Uhr',
-      color: 'from-green-500 to-emerald-500'
+      color: 'from-green-500 to-emerald-500',
+      badge: 'VIP'
     }
   ];
 
@@ -84,12 +87,24 @@ export default function Help() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="glass backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10 transition-all"
+              className="relative glass backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/10 transition-all"
             >
               <div className={`w-12 h-12 bg-gradient-to-br ${method.color} rounded-xl flex items-center justify-center mb-4`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-lg mb-2">{method.title}</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-lg">{method.title}</h3>
+                {method.badge && (
+                  <Link to={createPageUrl('VIP')} className="group flex items-center gap-1.5">
+                    <span className="text-xs font-black bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent animate-gradient">
+                      VIP
+                    </span>
+                    <span className="text-xs font-bold text-pink-500 group-hover:text-pink-400 transition-colors animate-pulse">
+                      VIP?
+                    </span>
+                  </Link>
+                )}
+              </div>
               <p className="text-purple-400 font-mono text-sm mb-2">{method.value}</p>
               <p className="text-zinc-500 text-sm">{method.description}</p>
             </motion.div>

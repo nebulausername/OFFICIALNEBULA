@@ -11,6 +11,7 @@ import Requests from './pages/Requests';
 import Profile from './pages/Profile';
 import Help from './pages/Help';
 import FAQ from './pages/FAQ';
+import VIP from './pages/VIP';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +29,7 @@ export const PAGES = {
     "Profile": Profile,
     "Help": Help,
     "FAQ": FAQ,
+    "VIP": VIP,
 }
 
 export const pagesConfig = {
