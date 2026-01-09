@@ -336,7 +336,7 @@ export default function ProductDetail() {
 
           {/* Title & Status */}
           <div>
-            <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight">{product.name}</h1>
+            <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight bg-gradient-to-r from-white via-purple-100 to-white bg-clip-text text-transparent">{product.name}</h1>
             <div className="flex items-center gap-4 flex-wrap">
               <Badge variant="outline" className="px-3 py-1 bg-zinc-800 text-zinc-400 font-mono font-semibold border-zinc-700">
                 {product.sku}
@@ -477,7 +477,7 @@ export default function ProductDetail() {
           {/* Options with Price Impact */}
           {product.option_schema?.options && product.option_schema.options.length > 0 && (
             <div className="space-y-5">
-              <h3 className="text-xl font-bold">Optionen wählen</h3>
+              <h3 className="text-xl font-bold text-white">Optionen wählen</h3>
               {product.option_schema.options.map((option, index) => (
                 <div key={index} className="space-y-3">
                   <label className="text-sm font-bold text-zinc-300 flex items-center gap-2">
@@ -525,7 +525,7 @@ export default function ProductDetail() {
           {/* Quantity & Add to Cart */}
           <div className="space-y-4 pt-6">
             <div>
-              <label className="text-sm font-bold text-zinc-300 mb-3 block">Anzahl</label>
+              <label className="text-sm font-bold text-white mb-3 block">Anzahl</label>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3 glass backdrop-blur border border-zinc-800 rounded-xl p-2">
                   <motion.button
