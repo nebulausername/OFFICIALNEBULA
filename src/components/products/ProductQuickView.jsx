@@ -99,8 +99,6 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
     }
   };
 
-  const allImages = [product?.cover_image, ...images.map(img => img.url)].filter(Boolean);
-
   const handlePrevImage = () => {
     const currentIndex = allImages.indexOf(selectedImage);
     const prevIndex = currentIndex === 0 ? allImages.length - 1 : currentIndex - 1;
