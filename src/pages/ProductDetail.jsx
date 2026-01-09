@@ -685,14 +685,14 @@ export default function ProductDetail() {
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1"
+                  className="flex-1 w-full"
                 >
                   <Button
                     onClick={handleAddToCart}
                     disabled={!product.in_stock}
-                    className="w-full h-14 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-purple-500/50 text-lg font-black shadow-xl shadow-purple-500/30 rounded-xl transition-all animate-gradient disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-12 sm:h-14 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-purple-500/50 text-sm sm:text-lg font-black shadow-xl shadow-purple-500/30 rounded-xl transition-all animate-gradient disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ShoppingBag className="w-6 h-6 mr-2" />
+                    <ShoppingBag className="w-5 sm:w-6 h-5 sm:h-6 mr-2" />
                     {product.in_stock ? 'In den Warenkorb' : 'Ausverkauft'}
                   </Button>
                 </motion.div>
