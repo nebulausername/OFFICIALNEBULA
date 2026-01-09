@@ -23,13 +23,13 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
   const [category, setCategory] = useState(null);
   const [brand, setBrand] = useState(null);
   const [showZoom, setShowZoom] = useState(false);
-    const { toast } = useToast();
+  const { toast } = useToast();
 
-    // Build allImages array first
-    const allImages = product ? [product.cover_image, ...images.map(img => img.url)].filter(Boolean) : [];
+  // Build allImages array first
+  const allImages = product ? [product.cover_image, ...images.map(img => img.url)].filter(Boolean) : [];
 
-    // Color variants intelligently mapped to available images
-    const colorVariants = [
+  // Color variants intelligently mapped to available images
+  const colorVariants = [
     { 
       name: 'Schwarz', 
       hex: '#000000', 
