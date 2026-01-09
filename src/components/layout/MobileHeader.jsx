@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Menu, ShoppingBag, Globe, Star } from 'lucide-react';
+import { Menu, ShoppingBag, Globe, Star, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import SideDrawer from './SideDrawer';
 
-export default function MobileHeader() {
+export default function MobileHeader({ theme, toggleTheme }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const [language, setLanguage] = useState('DE');
@@ -29,20 +29,30 @@ export default function MobileHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white border-b border-zinc-200">
+      <header className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
+        theme === 'light'
+          ? 'bg-white border-zinc-200'
+          : 'bg-zinc-900 border-zinc-700'
+      }`}>
         {/* USP Bar */}
-        <div className="bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-900 text-white">
-          <div className="flex items-center justify-center gap-6 px-4 py-2 text-xs font-medium overflow-x-auto">
+        <div className={`bg-gradient-to-r transition-colors duration-300 ${
+          theme === 'light'
+            ? 'from-zinc-100 via-zinc-50 to-zinc-100'
+            : 'from-zinc-900 via-zinc-800 to-zinc-900'
+        }`}>
+          <div className={`flex items-center justify-center gap-6 px-4 py-2 text-xs font-medium overflow-x-auto ${
+            theme === 'light' ? 'text-zinc-700' : 'text-white'
+          }`}>
             <span className="flex items-center gap-1.5 whitespace-nowrap">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
               Free Shipping
             </span>
-            <span className="text-zinc-500">•</span>
+            <span className={theme === 'light' ? 'text-zinc-400' : 'text-zinc-500'}>•</span>
             <span className="flex items-center gap-1.5 whitespace-nowrap">
               <Star className="w-3 h-3" fill="currentColor" />
               Premium Qualität
             </span>
-            <span className="text-zinc-500">•</span>
+            <span className={theme === 'light' ? 'text-zinc-400' : 'text-zinc-500'}>•</span>
             <span className="whitespace-nowrap">24/7 Support</span>
           </div>
         </div>
@@ -52,9 +62,13 @@ export default function MobileHeader() {
           {/* Hamburger */}
           <button
             onClick={() => setDrawerOpen(true)}
-            className="p-2 -ml-2 touch-manipulation hover:bg-zinc-100 rounded-lg transition-colors"
+            className={`p-2 -ml-2 touch-manipulation rounded-lg transition-colors ${
+              theme === 'light'
+                ? 'hover:bg-zinc-100 text-zinc-900'
+                : 'hover:bg-zinc-800 text-white'
+            }`}
           >
-            <Menu className="w-6 h-6 text-zinc-900" />
+            <Menu className="w-6 h-6" />
           </button>
 
           {/* Logo */}
@@ -72,23 +86,36 @@ export default function MobileHeader() {
             </motion.div>
           </Link>
 
-          {/* Language + Cart */}
-          <div className="flex items-center gap-3">
-            {/* Language Selector */}
-            <div className="relative">
-              <button className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors touch-manipulation">
-                <Globe className="w-4 h-4" />
-                {language}
-              </button>
-            </div>
+          {/* Theme + Language + Cart */}
+          <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg transition-colors ${
+                theme === 'light'
+                  ? 'hover:bg-zinc-100 text-zinc-900'
+                  : 'hover:bg-zinc-800 text-yellow-400'
+              }`}
+            >
+              {theme === 'light' ? (
+                <Moon className="w-5 h-5" />
+              ) : (
+                <Sun className="w-5 h-5" />
+              )}
+            </motion.button>
 
             {/* Cart */}
             <Link to={createPageUrl('Cart')} className="relative">
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="p-2 hover:bg-zinc-100 rounded-lg transition-colors touch-manipulation"
+                className={`p-2 rounded-lg transition-colors touch-manipulation ${
+                  theme === 'light'
+                    ? 'hover:bg-zinc-100'
+                    : 'hover:bg-zinc-800'
+                }`}
               >
-                <ShoppingBag className="w-6 h-6 text-zinc-900" />
+                <ShoppingBag className={`w-6 h-6 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`} />
                 {cartCount > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}

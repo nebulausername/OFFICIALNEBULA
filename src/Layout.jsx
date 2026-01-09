@@ -1,22 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import MobileHeader from './components/layout/MobileHeader';
 import { Star } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
+  const [theme, setTheme] = useState('light');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('nebula-theme') || 'light';
+    setTheme(saved);
+    document.documentElement.setAttribute('data-theme', saved);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('nebula-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      theme === 'light' 
+        ? 'bg-gradient-to-br from-zinc-50 via-white to-zinc-50' 
+        : 'bg-gradient-to-br from-zinc-950 via-zinc-900 to-black'
+    }`}>
       <style>{`
         :root {
           --nebula-primary: #8B5CF6;
           --nebula-secondary: #EC4899;
         }
-        body {
-          background: #fafafa;
+        [data-theme="dark"] {
+          color-scheme: dark;
+        }
+        [data-theme="light"] {
+          color-scheme: light;
         }
       `}</style>
 
       {/* Mobile Header */}
-      <MobileHeader />
+      <MobileHeader theme={theme} toggleTheme={toggleTheme} />
 
       {/* Main Content */}
       <main className="min-h-[calc(100vh-8rem)]">

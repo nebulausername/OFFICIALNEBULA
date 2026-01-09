@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Mail, Calendar, Shield, ArrowLeft, Save, Sparkles } from 'lucide-react';
+import { User, Mail, Calendar, Shield, ArrowLeft, Save, Sparkles, Moon, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { useToast } from '@/components/ui/use-toast';
@@ -11,10 +11,18 @@ import { motion } from 'framer-motion';
 
 export default function ProfileSettings() {
   const [user, setUser] = useState(null);
+  const [theme, setTheme] = useState('light');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({ full_name: '' });
   const { toast } = useToast();
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('nebula-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
 
   useEffect(() => {
     loadUser();
@@ -25,6 +33,8 @@ export default function ProfileSettings() {
       const userData = await base44.auth.me();
       setUser(userData);
       setFormData({ full_name: userData.full_name || '' });
+      const saved = localStorage.getItem('nebula-theme') || 'light';
+      setTheme(saved);
     } catch (error) {
       console.error('Error loading user:', error);
     } finally {
@@ -65,16 +75,42 @@ export default function ProfileSettings() {
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8">
+    <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 ${
+      theme === 'light'
+        ? 'bg-gradient-to-br from-zinc-50 to-white'
+        : 'bg-gradient-to-br from-zinc-950 to-zinc-900'
+    }`}>
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-        {/* Back Button */}
-        <Link
-          to={createPageUrl('Profile')}
-          className="inline-flex items-center gap-2 text-zinc-400 hover:text-white mb-8 transition-colors group"
-        >
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span>Zurück zum Profil</span>
-        </Link>
+        {/* Back Button + Theme */}
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            to={createPageUrl('Profile')}
+            className={`inline-flex items-center gap-2 mb-0 transition-colors group ${
+              theme === 'light'
+                ? 'text-zinc-600 hover:text-zinc-900'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span>Zurück</span>
+          </Link>
+          
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleTheme}
+            className={`p-3 rounded-lg transition-colors ${
+              theme === 'light'
+                ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900'
+                : 'bg-zinc-800 hover:bg-zinc-700 text-yellow-400'
+            }`}
+          >
+            {theme === 'light' ? (
+              <Moon className="w-5 h-5" />
+            ) : (
+              <Sun className="w-5 h-5" />
+            )}
+          </motion.button>
+        </div>
 
         {/* Header */}
         <motion.div

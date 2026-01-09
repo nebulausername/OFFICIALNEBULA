@@ -134,8 +134,14 @@ export default function Admin() {
     }
   ];
 
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-zinc-50 to-white">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      isDark
+        ? 'bg-gradient-to-b from-zinc-950 via-zinc-900 to-black'
+        : 'bg-gradient-to-b from-white via-zinc-50 to-white'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <motion.div
