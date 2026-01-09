@@ -4,7 +4,7 @@ import { createPageUrl } from '../../utils';
 import { ShoppingBag, Star, Heart, Eye, Zap, Flame } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function ProductCard({ product, onAddToCart }) {
+export default function ProductCard({ product, onAddToCart, onQuickView }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   
@@ -57,6 +57,10 @@ export default function ProductCard({ product, onAddToCart }) {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.1 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (onQuickView) onQuickView(product);
+                  }}
                   className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
                 >
                   <Eye className="w-5 h-5 text-white" />

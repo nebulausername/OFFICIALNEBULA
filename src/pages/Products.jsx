@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import FilterSidebar from '../components/products/FilterSidebar';
 import ProductCard from '../components/products/ProductCard';
+import ProductQuickView from '../components/products/ProductQuickView';
 import { useToast } from '@/components/ui/use-toast';
+import { motion } from 'framer-motion';
 import {
   Sheet,
   SheetContent,
@@ -28,6 +30,8 @@ export default function Products() {
     priceRange: [0, 1000],
     inStockOnly: false
   });
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -110,7 +114,12 @@ export default function Products() {
     }
   };
 
-  const handleAddToCart = async (product) => {
+  const handleQuickView = (product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+  };
+
+  const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
     try {
       const user = await base44.auth.me();
       
@@ -123,14 +132,16 @@ export default function Products() {
       if (existing.length > 0) {
         // Update quantity
         await base44.entities.StarCartItem.update(existing[0].id, {
-          quantity: existing[0].quantity + 1
+          quantity: existing[0].quantity + quantity,
+          selected_options: selectedOptions
         });
       } else {
         // Create new cart item
         await base44.entities.StarCartItem.create({
           user_id: user.id,
           product_id: product.id,
-          quantity: 1
+          quantity: quantity,
+          selected_options: selectedOptions
         });
       }
 
@@ -244,10 +255,18 @@ export default function Products() {
           </div>
 
           {/* Products Grid */}
+          {/* Quick View Modal */}
+          <ProductQuickView
+            product={quickViewProduct}
+            isOpen={isQuickViewOpen}
+            onClose={() => setIsQuickViewOpen(false)}
+            onAddToCart={handleAddToCart}
+          />
+
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-96 bg-zinc-900/50 rounded-2xl animate-pulse" />
+                <div key={i} className="h-96 skeleton rounded-2xl" />
               ))}
             </div>
           ) : products.length === 0 ? (
@@ -262,15 +281,26 @@ export default function Products() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard
+            <motion.div 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {products.map((product, index) => (
+                <motion.div
                   key={product.id}
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                />
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <ProductCard
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                    onQuickView={handleQuickView}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
