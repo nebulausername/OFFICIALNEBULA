@@ -142,6 +142,16 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
             </div>
           )}
 
+          {/* Shipping Info */}
+          <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-gradient-to-r from-green-500/10 to-green-600/10 border border-green-500/30 rounded-lg">
+            <Truck className="w-4 h-4 text-green-400 flex-shrink-0" />
+            <div className="flex items-center gap-1 text-xs font-bold">
+              <span className="text-green-300">🇩🇪 1-5 Tage</span>
+              <span className="text-zinc-600">•</span>
+              <span className="text-green-400">DE</span>
+            </div>
+          </div>
+
           {/* Price and Action */}
           <div className="flex items-center justify-between mt-5 pt-5 border-t border-zinc-800/50 group-hover:border-purple-500/30 transition-colors">
             <div>
