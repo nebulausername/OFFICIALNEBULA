@@ -398,7 +398,6 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
               </Button>
               </div>
               </motion.div>
-              </motion.div>
 
               {/* Zoom Modal */}
               <AnimatePresence>
