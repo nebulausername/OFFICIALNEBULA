@@ -375,9 +375,9 @@ export default function ProductDetail() {
 
           {/* Title & Status */}
           <div>
-            <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight bg-gradient-to-r from-white via-purple-100 to-white bg-clip-text text-transparent">{product.name}</h1>
-            <div className="flex items-center gap-4 flex-wrap">
-              <Badge variant="outline" className="px-3 py-1 bg-zinc-800 text-zinc-400 font-mono font-semibold border-zinc-700">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 leading-tight text-white drop-shadow-lg">{product.name}</h1>
+            <div className="flex items-center gap-3 flex-wrap mb-4">
+              <Badge variant="outline" className="px-3 py-1 bg-purple-500/20 text-purple-300 font-mono font-bold border-purple-500/50">
                 {product.sku}
               </Badge>
               {product.in_stock ? (
