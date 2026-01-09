@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { ShoppingBag, Star, Heart, Eye, Zap, Flame } from 'lucide-react';
+import { ShoppingBag, Star, Heart, Eye, Zap, Flame, Truck, Clock, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProductCard({ product, onAddToCart, onQuickView }) {
