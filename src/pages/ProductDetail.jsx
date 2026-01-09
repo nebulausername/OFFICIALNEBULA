@@ -162,6 +162,34 @@ export default function ProductDetail() {
     }
   };
 
+  const calculateDeliveryDate = (daysMin, daysMax) => {
+    const today = new Date();
+    const deliveryStartDate = new Date(today);
+    const deliveryEndDate = new Date(today);
+    
+    // Add business days (skip weekends)
+    let businessDaysAdded = 0;
+    while (businessDaysAdded < daysMin) {
+      deliveryStartDate.setDate(deliveryStartDate.getDate() + 1);
+      const dayOfWeek = deliveryStartDate.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) businessDaysAdded++;
+    }
+    
+    businessDaysAdded = 0;
+    while (businessDaysAdded < daysMax) {
+      deliveryEndDate.setDate(deliveryEndDate.getDate() + 1);
+      const dayOfWeek = deliveryEndDate.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) businessDaysAdded++;
+    }
+    
+    const dateFormatter = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    return {
+      start: dateFormatter.format(deliveryStartDate),
+      end: dateFormatter.format(deliveryEndDate),
+      startShort: `${deliveryStartDate.getDate()}.${deliveryStartDate.getMonth() + 1}.`
+    };
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
