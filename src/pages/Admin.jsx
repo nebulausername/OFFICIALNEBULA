@@ -135,110 +135,114 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+    <div className="min-h-screen bg-gradient-to-b from-white via-zinc-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12 md:mb-16 text-center relative"
+          transition={{ duration: 0.6 }}
+          className="relative mb-12 md:mb-16"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-pink-500/20 to-purple-500/20 blur-3xl -z-10" />
+          {/* Gradient Background */}
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-br from-purple-200/40 via-pink-200/40 to-red-200/40 rounded-full blur-3xl -z-10" />
           
-          <motion.div
-            whileHover={{ scale: 1.05, rotate: -5 }}
-            className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-6 glow-effect shadow-2xl shadow-red-500/50 relative overflow-hidden"
-          >
+          <div className="relative z-10">
+            {/* Icon & Title */}
             <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-            />
-            <Settings className="w-10 h-10 md:w-14 md:h-14 text-white relative z-10" />
-          </motion.div>
-          
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-4 px-4 tracking-tight">
-            <span className="bg-gradient-to-r from-red-300 via-pink-300 to-purple-300 bg-clip-text text-transparent animate-gradient drop-shadow-2xl">
-              Admin Dashboard
-            </span>
-          </h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-zinc-200 text-base sm:text-lg md:text-xl flex flex-wrap items-center justify-center gap-2 px-4 font-semibold"
-          >
-            <Sparkles className="w-5 h-5 text-red-400 flex-shrink-0 animate-pulse" />
-            <span>Willkommen zurück, <span className="font-black text-xl md:text-2xl bg-gradient-to-r from-red-400 via-pink-400 to-red-400 bg-clip-text text-transparent animate-gradient">{user.full_name}</span></span>
-          </motion.p>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-6 flex items-center justify-center gap-3 text-sm text-zinc-400"
-          >
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="font-medium">System aktiv</span>
-            </div>
-            <span className="text-zinc-600">•</span>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              <span className="font-medium">{new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-            </div>
-          </motion.div>
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-8"
+            >
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center justify-center"
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-pink-400 rounded-2xl blur-xl opacity-60" />
+                  <div className="relative w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/40">
+                    <Settings className="w-10 h-10 md:w-12 md:h-12 text-white" />
+                  </div>
+                </div>
+              </motion.div>
+
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mt-6 mb-3 text-zinc-900">
+                Admin Panel
+              </h1>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-lg md:text-xl text-zinc-600 font-bold flex items-center justify-center gap-2 flex-wrap"
+              >
+                <Sparkles className="w-5 h-5 text-purple-500 flex-shrink-0" />
+                <span>Hallo, <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent font-black">{user.full_name}</span></span>
+              </motion.p>
+            </motion.div>
+
+            {/* Status Bar */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center justify-center gap-6 px-6 py-4 bg-white border border-zinc-200 rounded-xl shadow-sm max-w-2xl mx-auto"
+            >
+              <div className="flex items-center gap-2">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-3 h-3 bg-green-500 rounded-full shadow-lg shadow-green-500/50"
+                />
+                <span className="font-semibold text-zinc-700 text-sm">System aktiv</span>
+              </div>
+              <div className="w-px h-5 bg-zinc-300" />
+              <div className="flex items-center gap-2 text-zinc-600 font-medium text-sm">
+                <Clock className="w-4 h-4" />
+                {new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-12 md:mb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 mb-12 md:mb-16">
           {adminSections.map((section, index) => {
             const Icon = section.icon;
             return (
               <Link key={section.title} to={createPageUrl(section.link)}>
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -10, scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative overflow-hidden glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl md:rounded-3xl p-5 md:p-8 cursor-pointer hover:border-red-500/60 hover:shadow-2xl hover:shadow-red-500/30 transition-all"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.08 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="group relative overflow-hidden bg-white border-2 border-zinc-200 rounded-2xl p-5 md:p-6 cursor-pointer hover:border-purple-400 hover:shadow-xl hover:shadow-purple-500/20 transition-all"
                 >
-                  <motion.div 
-                    className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-0 group-hover:opacity-20 transition-opacity`}
-                    animate={{ 
-                      backgroundPosition: ['0% 0%', '100% 100%', '0% 0%']
-                    }}
-                    transition={{ duration: 5, repeat: Infinity }}
-                  />
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity" />
                   
                   <div className="relative z-10">
-                    <div className="flex flex-col gap-4 mb-4">
+                    <div className="flex items-start justify-between mb-4">
                       <motion.div 
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                        className={`w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br ${section.color} rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all`}
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                        className={`w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br ${section.color} rounded-lg md:rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all`}
                       >
-                        <Icon className="w-7 h-7 md:w-8 md:h-8 text-white" />
+                        <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                       </motion.div>
                       <motion.span 
                         initial={{ scale: 1 }}
-                        whileHover={{ scale: 1.1 }}
-                        className="text-4xl md:text-5xl font-black bg-gradient-to-br from-red-300 via-pink-300 to-purple-300 bg-clip-text text-transparent"
+                        whileHover={{ scale: 1.15 }}
+                        className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
                       >
                         {section.count}
                       </motion.span>
                     </div>
-                    <h3 className="text-zinc-100 font-black mb-2 text-base md:text-xl tracking-tight group-hover:text-white transition-colors">{section.title}</h3>
-                    <p className="text-zinc-400 text-xs md:text-sm leading-relaxed font-medium">{section.description}</p>
+                    <h3 className="text-zinc-900 font-black text-sm md:text-base mb-1 group-hover:text-purple-700 transition-colors">{section.title}</h3>
+                    <p className="text-zinc-500 text-xs font-medium">{section.description}</p>
                   </div>
-
-                  <motion.div
-                    className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full opacity-0 group-hover:opacity-30 transition-opacity blur-2xl"
-                    style={{
-                      background: `linear-gradient(135deg, ${section.color.includes('purple') ? '#a855f7' : section.color.includes('blue') ? '#3b82f6' : section.color.includes('green') ? '#10b981' : '#f97316'}, transparent)`
-                    }}
-                  />
                 </motion.div>
               </Link>
             );
@@ -247,70 +251,59 @@ export default function Admin() {
 
         {/* Quick Actions */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-3xl p-6 md:p-10 relative overflow-hidden mb-12 md:mb-16"
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-br from-white to-zinc-50 border-2 border-zinc-200 rounded-2xl p-6 md:p-8 relative overflow-hidden mb-12 md:mb-16"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-pink-500/5 to-purple-500/5" />
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-100 via-pink-100 to-transparent rounded-full -mr-16 -mt-16 opacity-60" />
           
           <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-8">
+            <div className="flex items-center gap-3 mb-6 md:mb-8">
               <motion.div 
                 whileHover={{ rotate: 180 }}
-                transition={{ duration: 0.5 }}
-                className="w-14 h-14 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-xl"
+                transition={{ duration: 0.4 }}
+                className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg"
               >
-                <Sparkles className="w-7 h-7 text-white" />
+                <Plus className="w-6 h-6 md:w-7 md:h-7 text-white" />
               </motion.div>
-              <h2 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-red-300 to-pink-300 bg-clip-text text-transparent tracking-tight">
+              <h2 className="text-2xl md:text-3xl font-black text-zinc-900">
                 Schnellzugriff
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
               <Link to={createPageUrl('AdminProducts') + '?action=new'}>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative overflow-hidden"
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full h-14 md:h-16 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/40 text-white font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base"
                 >
-                  <Button className="w-full h-16 md:h-24 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-purple-500/50 text-base md:text-xl font-black rounded-2xl transition-all relative overflow-hidden animate-gradient">
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                      animate={{ x: ['-200%', '200%'] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    />
-                    <Plus className="w-7 h-7 mr-2 relative z-10" />
-                    <span className="relative z-10">Neues Produkt</span>
-                  </Button>
-                </motion.div>
+                  <Plus className="w-5 h-5 md:w-6 md:h-6" />
+                  Produkt
+                </motion.button>
               </Link>
               
               <Link to={createPageUrl('AdminCategories') + '?action=new'}>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group"
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full h-14 md:h-16 bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-lg hover:shadow-green-500/40 text-white font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base"
                 >
-                  <Button className="w-full h-16 md:h-24 bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 hover:shadow-2xl hover:shadow-green-500/50 text-base md:text-xl font-black rounded-2xl transition-all animate-gradient">
-                    <Plus className="w-7 h-7 mr-2" />
-                    Neue Kategorie
-                  </Button>
-                </motion.div>
+                  <Plus className="w-5 h-5 md:w-6 md:h-6" />
+                  Kategorie
+                </motion.button>
               </Link>
               
               <Link to={createPageUrl('AdminBrands') + '?action=new'}>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group"
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -3 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full h-14 md:h-16 bg-gradient-to-r from-orange-500 to-red-500 hover:shadow-lg hover:shadow-orange-500/40 text-white font-black rounded-xl transition-all flex items-center justify-center gap-2 text-sm md:text-base"
                 >
-                  <Button className="w-full h-16 md:h-24 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500 hover:shadow-2xl hover:shadow-red-500/50 text-base md:text-xl font-black rounded-2xl transition-all animate-gradient">
-                    <Plus className="w-7 h-7 mr-2" />
-                    Neue Marke
-                  </Button>
-                </motion.div>
+                  <Plus className="w-5 h-5 md:w-6 md:h-6" />
+                  Marke
+                </motion.button>
               </Link>
             </div>
           </div>
@@ -318,27 +311,27 @@ export default function Admin() {
 
         {/* Recent Activity */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-3xl p-6 md:p-10 relative overflow-hidden"
+          transition={{ delay: 0.5 }}
+          className="bg-white border-2 border-zinc-200 rounded-2xl p-6 md:p-8 relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-blue-500/5" />
+          <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-blue-100 via-cyan-100 to-transparent rounded-full -mr-20 -mt-20 opacity-50" />
           
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <div className="flex items-center gap-3">
                 <motion.div 
                   whileHover={{ scale: 1.1 }}
-                  className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-xl"
+                  className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg"
                 >
-                  <Activity className="w-7 h-7 text-white" />
+                  <Activity className="w-6 h-6 md:w-7 md:h-7 text-white" />
                 </motion.div>
                 <div>
-                  <h2 className="text-2xl md:text-4xl font-black bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent tracking-tight">
+                  <h2 className="text-xl md:text-2xl font-black text-zinc-900">
                     Letzte Aktivität
                   </h2>
-                  <p className="text-zinc-400 text-sm font-medium mt-1">Neueste Anfragen</p>
+                  <p className="text-zinc-500 text-xs md:text-sm font-medium mt-0.5">Neueste Anfragen</p>
                 </div>
               </div>
               <Link to={createPageUrl('AdminRequests')}>
@@ -361,46 +354,46 @@ export default function Admin() {
                 <p className="text-zinc-400 font-medium text-lg">Noch keine Anfragen vorhanden</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 <AnimatePresence>
                   {recentRequests.map((request, index) => (
                     <motion.div
                       key={request.id}
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -15 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.7 + index * 0.1 }}
-                      whileHover={{ x: 5 }}
-                      className="glass backdrop-blur border border-zinc-800 rounded-2xl p-5 md:p-6 hover:border-blue-500/30 transition-all cursor-pointer group"
+                      transition={{ delay: 0.5 + index * 0.08 }}
+                      whileHover={{ x: 3 }}
+                      className="bg-zinc-50 border border-zinc-200 rounded-lg md:rounded-xl p-4 md:p-5 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer group"
                       onClick={() => window.location.href = createPageUrl('AdminRequests')}
                     >
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                            <ShoppingBag className="w-6 h-6 text-blue-400" />
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500/30 to-cyan-500/30 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                            <ShoppingBag className="w-5 h-5 text-blue-600" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-3 mb-1">
-                              <h3 className="font-bold text-base md:text-lg text-zinc-100 truncate">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3 className="font-bold text-sm md:text-base text-zinc-900 truncate">
                                 Anfrage #{request.id.slice(0, 8)}
                               </h3>
-                              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${statusConfig[request.status]?.color || 'bg-zinc-800 text-zinc-400'}`}>
+                              <span className={`px-2 py-0.5 rounded-md text-xs font-bold border ${statusConfig[request.status]?.color || 'bg-zinc-200 text-zinc-600'}`}>
                                 {statusConfig[request.status]?.label || request.status}
                               </span>
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-zinc-400 font-medium">
+                            <div className="flex items-center gap-3 text-xs md:text-sm text-zinc-600 font-medium">
                               <span className="truncate">{request.contact_info?.name || 'Unbekannt'}</span>
-                              <span className="text-zinc-600">•</span>
+                              <span className="text-zinc-400">•</span>
                               <span>{new Date(request.created_date).toLocaleDateString('de-DE')}</span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4 flex-shrink-0">
+                        <div className="flex items-center gap-3 flex-shrink-0">
                           <div className="text-right">
-                            <div className="text-2xl md:text-3xl font-black bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">
+                            <div className="text-lg md:text-xl font-black text-zinc-900">
                               {request.total_sum?.toFixed(2)}€
                             </div>
                           </div>
-                          <ArrowUpRight className="w-5 h-5 text-zinc-600 group-hover:text-blue-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+                          <ArrowUpRight className="w-4 h-4 text-zinc-400 group-hover:text-blue-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                         </div>
                       </div>
                     </motion.div>
