@@ -465,7 +465,7 @@ export default function ProductDetail() {
               >
                 <Truck className="w-5 h-5 text-white" />
               </motion.div>
-              <h3 className="text-xl font-black bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+              <h3 className="text-lg sm:text-xl font-black text-white">
                 Versandoptionen
               </h3>
             </div>
