@@ -426,10 +426,10 @@ export default function AdminProducts() {
           </div>
 
           <div className="flex justify-end gap-4 pt-6 border-t-2 border-zinc-700">
-            <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-14 px-8 border-2 border-zinc-600 bg-zinc-800/90 hover:border-red-400 hover:bg-red-500/20 font-black text-base text-white rounded-xl">
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-14 px-8 border-2 border-zinc-600 bg-zinc-700 hover:border-red-400 hover:bg-red-500/20 font-bold text-base text-white rounded-xl uppercase tracking-wide">
               Abbrechen
             </Button>
-            <Button onClick={handleSave} className="h-14 px-10 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all font-black text-lg text-white rounded-xl">
+            <Button onClick={handleSave} className="h-14 px-10 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-purple-500/50 hover:scale-105 transition-all font-bold text-base text-white rounded-xl uppercase tracking-wide">
               <Save className="w-5 h-5 mr-2" />
               Speichern
             </Button>
