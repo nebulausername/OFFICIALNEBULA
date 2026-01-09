@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ShoppingBag, Plus, Minus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '../utils';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Heart, Star, Shield, Zap, Package } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProductDetail() {
   const [product, setProduct] = useState(null);
@@ -18,6 +17,8 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [loading, setLoading] = useState(true);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [isFavorite, setIsFavorite] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function ProductDetail() {
           description: 'Produkt nicht gefunden',
           variant: 'destructive'
         });
+        setLoading(false);
         return;
       }
 
@@ -49,6 +51,7 @@ export default function ProductDetail() {
           description: 'Produkt nicht gefunden',
           variant: 'destructive'
         });
+        setLoading(false);
         return;
       }
 
@@ -66,6 +69,13 @@ export default function ProductDetail() {
       if (prod.brand_id) {
         const brands = await base44.entities.Brand.filter({ id: prod.brand_id });
         if (brands.length > 0) setBrand(brands[0]);
+      }
+
+      // Load related products (same category)
+      if (prod.category_id) {
+        const related = await base44.entities.Product.filter({ category_id: prod.category_id });
+        const filteredRelated = related.filter(rp => rp.id !== prod.id).slice(0, 4);
+        setRelatedProducts(filteredRelated);
       }
     } catch (error) {
       console.error('Error loading product:', error);
@@ -121,18 +131,54 @@ export default function ProductDetail() {
     }
   };
 
+  const calculatePrice = () => {
+    let basePrice = product.price;
+    
+    if (product.option_schema?.options) {
+      product.option_schema.options.forEach(option => {
+        const selectedValue = selectedOptions[option.name];
+        if (selectedValue && option.values) {
+          const valueObj = option.values.find(v => v.value === selectedValue);
+          if (valueObj?.price_modifier) {
+            basePrice += valueObj.price_modifier;
+          }
+        }
+      });
+    }
+    
+    return basePrice;
+  };
+
+  const navigateImage = (direction) => {
+    const allImages = [product.cover_image, ...images.map(img => img.url)].filter(Boolean);
+    const currentIndex = allImages.indexOf(selectedImage);
+    
+    if (direction === 'next') {
+      const nextIndex = (currentIndex + 1) % allImages.length;
+      setSelectedImage(allImages[nextIndex]);
+    } else {
+      const prevIndex = currentIndex === 0 ? allImages.length - 1 : currentIndex - 1;
+      setSelectedImage(allImages[prevIndex]);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-zinc-800 rounded w-32 mb-8" />
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="aspect-square bg-zinc-800 rounded-2xl" />
-            <div className="space-y-4">
-              <div className="h-8 bg-zinc-800 rounded w-3/4" />
-              <div className="h-4 bg-zinc-800 rounded w-1/2" />
-              <div className="h-32 bg-zinc-800 rounded" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="space-y-4">
+            <div className="aspect-square skeleton rounded-2xl" />
+            <div className="grid grid-cols-5 gap-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="aspect-square skeleton rounded-lg" />
+              ))}
             </div>
+          </div>
+          <div className="space-y-6">
+            <div className="h-12 skeleton rounded-lg w-3/4" />
+            <div className="h-8 skeleton rounded-lg w-1/4" />
+            <div className="h-32 skeleton rounded-lg" />
+            <div className="h-16 skeleton rounded-lg" />
           </div>
         </div>
       </div>
@@ -142,6 +188,7 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+        <Package className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
         <h2 className="text-2xl font-bold mb-4">Produkt nicht gefunden</h2>
         <Link to={createPageUrl('Products')}>
           <Button>Zurück zu Produkten</Button>
@@ -150,93 +197,193 @@ export default function ProductDetail() {
     );
   }
 
+  const allImages = [product.cover_image, ...images.map(img => img.url)].filter(Boolean);
+  const currentPrice = calculatePrice();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
       <Link
         to={createPageUrl('Products')}
-        className="inline-flex items-center space-x-2 text-zinc-400 hover:text-white mb-8 transition-colors"
+        className="inline-flex items-center space-x-2 text-zinc-400 hover:text-white mb-8 transition-colors group"
       >
-        <ArrowLeft className="w-5 h-5" />
-        <span>Zurück</span>
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span>Zurück zu Produkten</span>
       </Link>
 
-      <div className="grid md:grid-cols-2 gap-12">
-        {/* Images */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Product Gallery */}
         <div className="space-y-4">
-          {/* Main Image */}
-          <div className="aspect-square bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-            {selectedImage ? (
-              <img
-                src={selectedImage}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ShoppingBag className="w-24 h-24 text-zinc-700" />
+          {/* Main Image with Navigation */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative aspect-square bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl overflow-hidden border border-zinc-800 group"
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedImage}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full h-full"
+              >
+                {selectedImage ? (
+                  <img
+                    src={selectedImage}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ShoppingBag className="w-24 h-24 text-zinc-700" />
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Arrows */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={() => navigateImage('prev')}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/60 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() => navigateImage('next')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/60 backdrop-blur rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            )}
+
+            {/* Favorite Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsFavorite(!isFavorite)}
+              className="absolute top-4 right-4 w-12 h-12 bg-black/60 backdrop-blur rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
+            >
+              <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`} />
+            </motion.button>
+
+            {/* Image Counter */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur rounded-full text-sm font-medium">
+                {allImages.indexOf(selectedImage) + 1} / {allImages.length}
               </div>
             )}
-          </div>
+          </motion.div>
 
-          {/* Thumbnail Grid */}
-          {images.length > 0 && (
-            <div className="grid grid-cols-4 gap-4">
-              {[product.cover_image, ...images.map(img => img.url)]
-                .filter(Boolean)
-                .map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(img)}
-                    className={`aspect-square bg-zinc-900 border rounded-lg overflow-hidden hover:border-purple-500 transition-colors ${
-                      selectedImage === img ? 'border-purple-500' : 'border-zinc-800'
-                    }`}
-                  >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
-                ))}
-            </div>
+          {/* Image Thumbnails Gallery */}
+          {allImages.length > 1 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="grid grid-cols-5 gap-2"
+            >
+              {allImages.map((imgUrl, index) => (
+                <motion.button
+                  key={index}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSelectedImage(imgUrl)}
+                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                    selectedImage === imgUrl
+                      ? 'border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/30'
+                      : 'border-zinc-800 hover:border-zinc-600'
+                  }`}
+                >
+                  <img
+                    src={imgUrl}
+                    alt={`View ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </motion.button>
+              ))}
+            </motion.div>
           )}
         </div>
 
         {/* Product Info */}
-        <div className="space-y-6">
-          {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="space-y-6"
+        >
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm">
+            <Link to={createPageUrl('Products')} className="text-zinc-400 hover:text-purple-400 transition-colors">
+              Produkte
+            </Link>
+            {category && (
+              <>
+                <span className="text-zinc-600">/</span>
+                <span className="text-zinc-400">{category.name}</span>
+              </>
+            )}
+            {brand && (
+              <>
+                <span className="text-zinc-600">/</span>
+                <span className="text-zinc-400">{brand.name}</span>
+              </>
+            )}
+          </div>
+
+          {/* Title & Status */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="outline" className="text-purple-400 border-purple-500/50">
+            <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight">{product.name}</h1>
+            <div className="flex items-center gap-4 flex-wrap">
+              <Badge variant="outline" className="px-3 py-1 bg-zinc-800 text-zinc-400 font-mono font-semibold border-zinc-700">
                 {product.sku}
               </Badge>
-              {brand && (
-                <Badge variant="outline" className="text-zinc-400">
-                  {brand.name}
-                </Badge>
-              )}
-              {category && (
-                <Badge variant="outline" className="text-zinc-400">
-                  {category.name}
-                </Badge>
-              )}
-            </div>
-            <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-4xl font-bold text-purple-400">{product.price}€</span>
               {product.in_stock ? (
-                <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">
-                  Verfügbar
+                <Badge className="px-4 py-1.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 text-green-400 font-bold">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-1.5" />
+                  Auf Lager
                 </Badge>
               ) : (
-                <Badge className="bg-red-500/20 text-red-400 border border-red-500/30">
+                <Badge className="px-4 py-1.5 bg-red-500/20 border border-red-500/30 text-red-400 font-bold">
                   Ausverkauft
+                </Badge>
+              )}
+              {brand && (
+                <Badge variant="outline" className="px-3 py-1 bg-purple-500/10 text-purple-400 border-purple-500/30">
+                  {brand.name}
                 </Badge>
               )}
             </div>
           </div>
 
+          {/* Price */}
+          <div className="py-6 border-y border-zinc-800">
+            <div className="flex items-baseline gap-3">
+              <div className="text-5xl md:text-6xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+                {currentPrice.toFixed(2)}€
+              </div>
+              {currentPrice !== product.price && (
+                <div className="text-2xl text-zinc-500 line-through">
+                  {product.price}€
+                </div>
+              )}
+            </div>
+            {product.currency && product.currency !== 'EUR' && (
+              <div className="text-sm text-zinc-500 mt-2">Preis in {product.currency}</div>
+            )}
+          </div>
+
           {/* Description */}
           {product.description && (
-            <div className="prose prose-invert">
-              <p className="text-zinc-400 text-lg leading-relaxed">{product.description}</p>
+            <div className="glass backdrop-blur-xl border border-zinc-800 rounded-2xl p-6">
+              <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <Package className="w-5 h-5 text-purple-400" />
+                Produktbeschreibung
+              </h3>
+              <p className="text-zinc-400 leading-relaxed">{product.description}</p>
             </div>
           )}
 
@@ -244,67 +391,207 @@ export default function ProductDetail() {
           {product.tags && product.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {product.tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="bg-zinc-800">
+                <Badge key={index} variant="secondary" className="bg-zinc-800 text-zinc-300">
                   {tag}
                 </Badge>
               ))}
             </div>
           )}
 
-          {/* Options */}
-          {product.option_schema && product.option_schema.options && (
-            <div className="space-y-4 p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-              <h3 className="font-semibold">Optionen</h3>
+          {/* Options with Price Impact */}
+          {product.option_schema?.options && product.option_schema.options.length > 0 && (
+            <div className="space-y-5">
+              <h3 className="text-xl font-bold">Optionen wählen</h3>
               {product.option_schema.options.map((option, index) => (
-                <div key={index} className="space-y-2">
-                  <Label>{option.label}</Label>
-                  <Input
-                    placeholder={option.placeholder || ''}
-                    value={selectedOptions[option.name] || ''}
-                    onChange={(e) =>
-                      setSelectedOptions({ ...selectedOptions, [option.name]: e.target.value })
-                    }
-                  />
+                <div key={index} className="space-y-3">
+                  <label className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+                    {option.name}
+                    {selectedOptions[option.name] && (
+                      <span className="text-xs text-purple-400">
+                        • {selectedOptions[option.name]}
+                      </span>
+                    )}
+                  </label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {option.values?.map((val, valIndex) => {
+                      const isSelected = selectedOptions[option.name] === val.value;
+                      const priceModifier = val.price_modifier || 0;
+                      
+                      return (
+                        <motion.button
+                          key={valIndex}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() =>
+                            setSelectedOptions({ ...selectedOptions, [option.name]: val.value })
+                          }
+                          className={`relative px-4 py-3 rounded-xl border-2 transition-all font-medium ${
+                            isSelected
+                              ? 'border-purple-500 bg-purple-500/20 text-purple-400 shadow-lg shadow-purple-500/30'
+                              : 'border-zinc-800 hover:border-zinc-600 text-zinc-300'
+                          }`}
+                        >
+                          <div className="text-sm">{val.label || val.value}</div>
+                          {priceModifier !== 0 && (
+                            <div className={`text-xs mt-1 ${isSelected ? 'text-purple-300' : 'text-zinc-500'}`}>
+                              {priceModifier > 0 ? '+' : ''}{priceModifier}€
+                            </div>
+                          )}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
           {/* Quantity & Add to Cart */}
-          {product.in_stock && (
-            <div className="space-y-4 pt-6 border-t border-zinc-800">
+          <div className="space-y-4 pt-6">
+            <div>
+              <label className="text-sm font-bold text-zinc-300 mb-3 block">Anzahl</label>
               <div className="flex items-center gap-4">
-                <Label>Anzahl:</Label>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
+                <div className="flex items-center gap-3 glass backdrop-blur border border-zinc-800 rounded-xl p-2">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/20 rounded-lg transition-colors"
                   >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="w-12 text-center font-semibold">{quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="icon"
+                    <Minus className="w-5 h-5" />
+                  </motion.button>
+                  <span className="w-12 text-center font-bold text-xl">{quantity}</span>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => setQuantity(quantity + 1)}
+                    className="w-10 h-10 flex items-center justify-center hover:bg-purple-500/20 rounded-lg transition-colors"
                   >
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                    <Plus className="w-5 h-5" />
+                  </motion.button>
                 </div>
+                
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1"
+                >
+                  <Button
+                    onClick={handleAddToCart}
+                    disabled={!product.in_stock}
+                    className="w-full h-14 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-purple-500/50 text-lg font-black shadow-xl shadow-purple-500/30 rounded-xl transition-all animate-gradient disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingBag className="w-6 h-6 mr-2" />
+                    {product.in_stock ? 'In den Warenkorb' : 'Ausverkauft'}
+                  </Button>
+                </motion.div>
               </div>
-
-              <Button
-                onClick={handleAddToCart}
-                className="w-full h-14 text-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition-transform"
-              >
-                <ShoppingBag className="w-5 h-5 mr-2" />
-                In den Warenkorb
-              </Button>
             </div>
-          )}
-        </div>
+
+            {/* Total Price Preview */}
+            <div className="glass backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
+              <div className="flex items-center justify-between">
+                <span className="text-zinc-400">Gesamtpreis:</span>
+                <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  {(currentPrice * quantity).toFixed(2)}€
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Features */}
+          <div className="grid grid-cols-3 gap-4 pt-4">
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="flex flex-col items-center text-center p-5 glass backdrop-blur border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mb-3">
+                <Zap className="w-6 h-6 text-purple-400" />
+              </div>
+              <span className="text-xs font-semibold text-zinc-300">Schneller Versand</span>
+            </motion.div>
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="flex flex-col items-center text-center p-5 glass backdrop-blur border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mb-3">
+                <Shield className="w-6 h-6 text-purple-400" />
+              </div>
+              <span className="text-xs font-semibold text-zinc-300">100% Authentisch</span>
+            </motion.div>
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="flex flex-col items-center text-center p-5 glass backdrop-blur border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all"
+            >
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center mb-3">
+                <Star className="w-6 h-6 text-purple-400" />
+              </div>
+              <span className="text-xs font-semibold text-zinc-300">Premium Qualität</span>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
+
+      {/* Related Products */}
+      {relatedProducts.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-20"
+        >
+          <div className="mb-8">
+            <h2 className="text-3xl font-black mb-2">Das könnte dir auch gefallen</h2>
+            <p className="text-zinc-400">Ähnliche Produkte aus der gleichen Kategorie</p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProducts.map((relatedProduct, index) => (
+              <motion.div
+                key={relatedProduct.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+              >
+                <Link
+                  to={createPageUrl('ProductDetail') + `?id=${relatedProduct.id}`}
+                  className="group block glass backdrop-blur border border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all hover:scale-105"
+                >
+                  {relatedProduct.cover_image && (
+                    <div className="aspect-square overflow-hidden bg-zinc-900">
+                      <img
+                        src={relatedProduct.cover_image}
+                        alt={relatedProduct.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <div className="text-xs text-purple-400 font-medium mb-2">{relatedProduct.sku}</div>
+                    <h3 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-purple-400 transition-colors">
+                      {relatedProduct.name}
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        {relatedProduct.price}€
+                      </span>
+                      {relatedProduct.in_stock ? (
+                        <Badge className="text-xs text-green-400 bg-green-400/10 border-green-500/30">
+                          Verfügbar
+                        </Badge>
+                      ) : (
+                        <Badge className="text-xs text-red-400 bg-red-400/10 border-red-500/30">
+                          Ausverkauft
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }
