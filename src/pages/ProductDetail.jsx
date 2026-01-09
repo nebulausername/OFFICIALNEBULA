@@ -19,6 +19,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [selectedShippingOption, setSelectedShippingOption] = useState('Germany');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -144,6 +145,16 @@ export default function ProductDetail() {
           }
         }
       });
+    }
+
+    // Apply shipping price modifier
+    if (product.shipping_options) {
+      const selectedShipping = product.shipping_options.find(
+        opt => opt.location === selectedShippingOption
+      );
+      if (selectedShipping && selectedShipping.price_modifier) {
+        basePrice = basePrice * (1 + selectedShipping.price_modifier);
+      }
     }
     
     return basePrice;
