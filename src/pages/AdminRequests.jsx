@@ -95,22 +95,22 @@ export default function AdminRequests() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Anfragen</h1>
-        <p className="text-zinc-400">{requests.length} Anfragen insgesamt</p>
+      <div className="mb-12">
+        <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-300 bg-clip-text text-transparent">Anfragen</h1>
+        <p className="text-zinc-300 text-lg font-semibold">{requests.length} Anfragen insgesamt</p>
       </div>
 
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+      <div className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-3xl overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Kunde</TableHead>
-              <TableHead>Datum</TableHead>
-              <TableHead>Artikel</TableHead>
-              <TableHead>Summe</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aktionen</TableHead>
+            <TableRow className="border-b-2 border-zinc-700 hover:bg-zinc-800/50">
+              <TableHead className="font-black text-zinc-200 text-base">ID</TableHead>
+              <TableHead className="font-black text-zinc-200 text-base">Kunde</TableHead>
+              <TableHead className="font-black text-zinc-200 text-base">Datum</TableHead>
+              <TableHead className="font-black text-zinc-200 text-base">Artikel</TableHead>
+              <TableHead className="font-black text-zinc-200 text-base">Summe</TableHead>
+              <TableHead className="font-black text-zinc-200 text-base">Status</TableHead>
+              <TableHead className="text-right font-black text-zinc-200 text-base">Aktionen</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -120,21 +120,21 @@ export default function AdminRequests() {
               const status = statusConfig[request.status] || statusConfig.pending;
 
               return (
-                <TableRow key={request.id}>
-                  <TableCell className="font-mono text-sm">
+                <TableRow key={request.id} className="border-b border-zinc-800 hover:bg-zinc-800/30">
+                  <TableCell className="font-mono text-sm font-bold text-purple-400">
                     #{request.id.slice(0, 8)}
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{user?.full_name || 'Unbekannt'}</div>
-                      <div className="text-sm text-zinc-400">{user?.email}</div>
+                      <div className="font-bold text-zinc-100">{user?.full_name || 'Unbekannt'}</div>
+                      <div className="text-sm font-medium text-zinc-300">{user?.email}</div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="text-sm font-medium text-zinc-200">
                     {format(new Date(request.created_date), 'dd.MM.yyyy HH:mm', { locale: de })}
                   </TableCell>
-                  <TableCell>{items.length} Artikel</TableCell>
-                  <TableCell className="font-semibold text-purple-400">
+                  <TableCell className="font-bold text-zinc-100">{items.length} Artikel</TableCell>
+                  <TableCell className="font-black text-lg bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
                     {request.total_sum.toFixed(2)}€
                   </TableCell>
                   <TableCell>
@@ -142,12 +142,12 @@ export default function AdminRequests() {
                       value={request.status}
                       onValueChange={(val) => handleStatusChange(request.id, val)}
                     >
-                      <SelectTrigger className="w-40">
+                      <SelectTrigger className="w-40 font-bold border-2 border-zinc-700 bg-zinc-800/50">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="glass backdrop-blur-xl border-2 border-zinc-700">
                         {Object.entries(statusConfig).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>
+                          <SelectItem key={key} value={key} className="font-bold">
                             {config.label}
                           </SelectItem>
                         ))}
@@ -159,8 +159,9 @@ export default function AdminRequests() {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleViewDetails(request)}
+                      className="hover:bg-purple-500/20 hover:text-purple-300"
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye className="w-5 h-5" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -172,46 +173,46 @@ export default function AdminRequests() {
 
       {/* Details Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-zinc-800">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto glass backdrop-blur-xl border-2 border-zinc-700">
           {selectedRequest && (
             <>
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="text-2xl md:text-3xl font-black bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
                   Anfrage #{selectedRequest.id.slice(0, 8)}
                 </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-6 py-4">
                 {/* Customer Info */}
-                <div className="grid grid-cols-2 gap-4 p-4 bg-zinc-800/50 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 p-5 glass backdrop-blur border-2 border-zinc-700 rounded-2xl">
                   <div>
-                    <div className="text-sm text-zinc-400 mb-1">Kunde</div>
-                    <div className="font-medium">{users[selectedRequest.user_id]?.full_name || 'Unbekannt'}</div>
-                    <div className="text-sm text-zinc-400">{users[selectedRequest.user_id]?.email}</div>
+                    <div className="text-sm font-bold text-zinc-300 mb-2">Kunde</div>
+                    <div className="font-bold text-lg text-zinc-100">{users[selectedRequest.user_id]?.full_name || 'Unbekannt'}</div>
+                    <div className="text-sm font-medium text-zinc-300 mt-1">{users[selectedRequest.user_id]?.email}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-zinc-400 mb-1">Datum</div>
-                    <div>{format(new Date(selectedRequest.created_date), 'dd. MMMM yyyy, HH:mm', { locale: de })} Uhr</div>
+                    <div className="text-sm font-bold text-zinc-300 mb-2">Datum</div>
+                    <div className="font-bold text-lg text-zinc-100">{format(new Date(selectedRequest.created_date), 'dd. MMMM yyyy, HH:mm', { locale: de })} Uhr</div>
                   </div>
                 </div>
 
                 {/* Contact Info */}
                 {selectedRequest.contact_info && (
-                  <div className="p-4 bg-zinc-800/50 rounded-lg">
-                    <div className="text-sm text-zinc-400 mb-3">Kontaktinformationen</div>
+                  <div className="p-5 glass backdrop-blur border-2 border-zinc-700 rounded-2xl">
+                    <div className="text-sm font-bold text-zinc-300 mb-4">Kontaktinformationen</div>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="text-zinc-400">Name: </span>
-                        <span className="font-medium">{selectedRequest.contact_info.name}</span>
+                        <span className="text-zinc-300 font-medium">Name: </span>
+                        <span className="font-bold text-zinc-100">{selectedRequest.contact_info.name || '--'}</span>
                       </div>
                       <div>
-                        <span className="text-zinc-400">Telefon: </span>
-                        <span className="font-medium">{selectedRequest.contact_info.phone}</span>
+                        <span className="text-zinc-300 font-medium">Telefon: </span>
+                        <span className="font-bold text-zinc-100">{selectedRequest.contact_info.phone || '--'}</span>
                       </div>
                       {selectedRequest.contact_info.telegram && (
                         <div>
-                          <span className="text-zinc-400">Telegram: </span>
-                          <span className="font-medium">{selectedRequest.contact_info.telegram}</span>
+                          <span className="text-zinc-300 font-medium">Telegram: </span>
+                          <span className="font-bold text-zinc-100">{selectedRequest.contact_info.telegram || '--'}</span>
                         </div>
                       )}
                     </div>
@@ -220,22 +221,22 @@ export default function AdminRequests() {
 
                 {/* Items */}
                 <div>
-                  <div className="text-sm text-zinc-400 mb-3">Artikel</div>
-                  <div className="space-y-2">
+                  <div className="text-sm font-bold text-zinc-300 mb-4">Artikel</div>
+                  <div className="space-y-3">
                     {(requestItems[selectedRequest.id] || []).map((item) => (
-                      <div key={item.id} className="p-4 bg-zinc-800/30 rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-medium">{item.name_snapshot}</div>
-                            <div className="text-sm text-zinc-400">
-                              SKU: {item.sku_snapshot} • Anzahl: {item.quantity_snapshot}
+                      <div key={item.id} className="p-5 glass backdrop-blur border-2 border-zinc-700 rounded-2xl hover:border-purple-500/50 transition-all">
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1">
+                            <div className="font-bold text-lg text-zinc-100 mb-2">{item.name_snapshot}</div>
+                            <div className="text-sm font-medium text-zinc-300">
+                              SKU: <span className="font-bold text-purple-400">{item.sku_snapshot}</span> • Anzahl: <span className="font-bold text-zinc-100">{item.quantity_snapshot}</span>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-purple-400">
+                          <div className="text-right flex-shrink-0">
+                            <div className="font-black text-2xl bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
                               {(item.price_snapshot * item.quantity_snapshot).toFixed(2)}€
                             </div>
-                            <div className="text-sm text-zinc-400">
+                            <div className="text-sm font-medium text-zinc-300 mt-1">
                               {item.price_snapshot}€ × {item.quantity_snapshot}
                             </div>
                           </div>
@@ -247,16 +248,16 @@ export default function AdminRequests() {
 
                 {/* Note */}
                 {selectedRequest.note && (
-                  <div className="p-4 bg-zinc-800/30 rounded-lg">
-                    <div className="text-sm text-zinc-400 mb-2">Notiz</div>
-                    <div className="text-sm">{selectedRequest.note}</div>
+                  <div className="p-5 glass backdrop-blur border-2 border-zinc-700 rounded-2xl">
+                    <div className="text-sm font-bold text-zinc-300 mb-3">Notiz</div>
+                    <div className="text-base font-medium text-zinc-100 leading-relaxed">{selectedRequest.note}</div>
                   </div>
                 )}
 
                 {/* Total */}
-                <div className="flex justify-between items-center pt-4 border-t border-zinc-800">
-                  <span className="text-lg font-semibold">Gesamtsumme:</span>
-                  <span className="text-3xl font-bold text-purple-400">
+                <div className="flex justify-between items-center pt-6 border-t-2 border-zinc-700">
+                  <span className="text-xl md:text-2xl font-black text-zinc-100">Gesamtsumme:</span>
+                  <span className="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">
                     {selectedRequest.total_sum.toFixed(2)}€
                   </span>
                 </div>
