@@ -108,44 +108,83 @@ export default function Profile() {
     });
   }
 
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
   return (
-    <div className="min-h-screen pb-24 md:pb-8">
+    <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 ${
+      isDark
+        ? 'bg-gradient-to-br from-zinc-950 to-zinc-900'
+        : 'bg-gradient-to-br from-zinc-50 to-white'
+    }`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
           className="mb-12 text-center relative"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 blur-3xl -z-10" />
+          <div className={`absolute inset-0 rounded-full blur-3xl -z-10 ${
+            isDark 
+              ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/30 to-purple-600/20'
+              : 'bg-gradient-to-br from-purple-200/40 via-pink-200/40 to-purple-200/20'
+          }`} />
           
           <motion.div
-            whileHover={{ scale: 1.05, rotate: 5 }}
-            className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 glow-effect shadow-2xl shadow-purple-500/50 relative"
+            whileHover={{ scale: 1.08, rotate: -5 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 inline-block"
           >
-            <User className="w-12 h-12 md:w-16 md:h-16 text-white" />
+            <div className={`absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-3xl shadow-2xl ${
+              isDark ? 'shadow-purple-600/50' : 'shadow-purple-400/40'
+            }`} />
+            <div className="relative w-full h-full flex items-center justify-center rounded-3xl">
+              <User className="w-12 h-12 md:w-16 md:h-16 text-white" />
+            </div>
             <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center justify-center"
+              animate={{ scale: [1, 1.25, 1], rotate: [0, 360, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute -top-1 -right-1 w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-yellow-300 to-amber-500 rounded-full flex items-center justify-center shadow-lg"
             >
-              <Star className="w-4 h-4 text-white" fill="white" />
+              <Star className="w-4 h-4 md:w-5 md:h-5 text-white" fill="white" />
             </motion.div>
           </motion.div>
           
-          <h1 className="text-4xl md:text-6xl font-black mb-4 bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent animate-gradient">
+          <motion.h1
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className={`text-4xl sm:text-5xl md:text-6xl font-black mb-3 ${
+              isDark
+                ? 'bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent'
+                : 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent'
+            }`}
+          >
             {user?.full_name || 'Mein Profil'}
-          </h1>
-          <p className="text-zinc-300 text-lg md:text-xl flex items-center justify-center gap-2 flex-wrap">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+          </motion.h1>
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className={`text-base md:text-lg flex items-center justify-center gap-2 flex-wrap font-semibold ${
+              isDark ? 'text-zinc-300' : 'text-zinc-600'
+            }`}
+          >
+            <Sparkles className="w-5 h-5 text-purple-500" />
             {user?.email}
-          </p>
+          </motion.div>
 
           {user?.role === 'admin' && (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500/20 to-pink-500/20 border border-red-500/30 rounded-full text-sm font-bold text-red-400"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.4, type: 'spring' }}
+              className={`mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border-2 ${
+                isDark
+                  ? 'bg-red-500/15 border-red-500/40 text-red-300'
+                  : 'bg-red-500/10 border-red-500/30 text-red-600'
+              }`}
             >
               <Shield className="w-4 h-4" />
               Administrator
@@ -154,35 +193,52 @@ export default function Profile() {
         </motion.div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="grid grid-cols-2 gap-4 mb-12"
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            whileHover={{ y: -5 }}
-            className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl p-6 text-center hover:border-purple-500/50 transition-all"
+            whileHover={{ y: -8, scale: 1.02 }}
+            className={`rounded-2xl p-6 text-center border-2 transition-all ${
+              isDark
+                ? 'bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-purple-500/30 hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-600/20'
+                : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-300/30'
+            }`}
           >
-            <Package className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-            <div className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-1">
+            <motion.div
+              whileHover={{ rotate: 360, scale: 1.1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Package className={`w-8 h-8 mx-auto mb-3 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+            </motion.div>
+            <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-purple-400 to-pink-400' : 'bg-gradient-to-r from-purple-600 to-pink-600'} bg-clip-text text-transparent`}>
               {stats.requestCount}
             </div>
-            <p className="text-sm text-zinc-400 font-semibold">Anfragen</p>
+            <p className={`text-sm font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Anfragen</p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            whileHover={{ y: -5 }}
-            className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl p-6 text-center hover:border-purple-500/50 transition-all"
+            whileHover={{ y: -8, scale: 1.02 }}
+            className={`rounded-2xl p-6 text-center border-2 transition-all ${
+              isDark
+                ? 'bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-blue-500/30 hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-600/20'
+                : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-300/30'
+            }`}
           >
-            <ShoppingBag className="w-8 h-8 text-pink-400 mx-auto mb-3" />
-            <div className="text-3xl font-black bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent mb-1">
+            <motion.div
+              whileHover={{ rotate: 360, scale: 1.1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <ShoppingBag className={`w-8 h-8 mx-auto mb-3 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+            </motion.div>
+            <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>
               {stats.cartCount}
             </div>
-            <p className="text-sm text-zinc-400 font-semibold">Im Warenkorb</p>
+            <p className={`text-sm font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Im Warenkorb</p>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Menu Grid */}
         <div className="grid sm:grid-cols-2 gap-4 mb-8">
