@@ -267,59 +267,96 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
               )}
             </div>
 
-            {/* Color Variants */}
+            {/* Color Variants with Image Preview */}
             {colorVariants.length > 1 && (
-              <div className="mb-6 p-5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30 rounded-2xl">
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25 }}
+                className="mb-6 p-5 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30 rounded-2xl"
+              >
                 <h3 className="font-black text-base text-white uppercase tracking-wide mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-                  Farbe wählen
+                  Verfügbare Farben
                 </h3>
-                <div className="flex flex-wrap gap-3">
-                  {colorVariants.map((color, index) => (
-                    <motion.button
-                      key={index}
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => {
-                        setSelectedColor(color.name);
-                        setSelectedImage(color.image);
-                      }}
-                      className={`group relative w-16 h-16 rounded-2xl border-3 transition-all overflow-hidden ${
-                        selectedColor === color.name
-                          ? 'border-purple-400 shadow-2xl shadow-purple-500/60 scale-110'
-                          : 'border-zinc-700 hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/30'
-                      }`}
-                    >
-                      <div 
-                        className="absolute inset-0 transition-transform group-hover:scale-110"
-                        style={{ backgroundColor: color.hex }}
-                      />
-                      {selectedColor === color.name && (
-                        <motion.div
-                          layoutId="selectedColor"
-                          className="absolute inset-0 border-4 border-purple-400 rounded-2xl"
-                          transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
+                
+                <div className="grid grid-cols-5 gap-2 mb-4">
+                  {colorVariants.map((color, index) => {
+                    const colorImage = getColorImage(color.imageIndex);
+                    const isSelected = selectedColor === color.name;
+                    
+                    return (
+                      <motion.button
+                        key={index}
+                        whileHover={{ scale: 1.08, y: -3 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setSelectedColor(color.name);
+                          setSelectedImage(colorImage);
+                        }}
+                        className={`group relative aspect-square rounded-xl border-3 overflow-hidden transition-all ${
+                          isSelected
+                            ? 'border-purple-400 shadow-2xl shadow-purple-500/60 ring-2 ring-purple-400/50'
+                            : 'border-zinc-700 hover:border-purple-500/60 hover:shadow-lg hover:shadow-purple-500/30'
+                        }`}
+                      >
+                        {/* Thumbnail Image */}
+                        <img
+                          src={colorImage}
+                          alt={color.name}
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110"
                         />
-                      )}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className={`text-xs font-black ${color.hex === '#000000' ? 'text-white' : 'text-zinc-900'} opacity-0 group-hover:opacity-100 transition-opacity`}>
-                          {color.name[0]}
-                        </span>
-                      </div>
-                    </motion.button>
-                  ))}
+                        
+                        {/* Color Overlay */}
+                        <div 
+                          className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity pointer-events-none"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                        
+                        {/* Selection Indicator */}
+                        {isSelected && (
+                          <motion.div
+                            layoutId="colorSelector"
+                            className="absolute inset-0 border-3 border-purple-300 rounded-xl flex items-center justify-center bg-black/20"
+                            transition={{ type: "spring", bounce: 0.3 }}
+                          >
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 0.6, repeat: Infinity }}
+                              className="w-3 h-3 bg-purple-400 rounded-full"
+                            />
+                          </motion.div>
+                        )}
+                        
+                        {/* Label */}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1">
+                          <p className="text-xs font-black text-white text-center truncate">
+                            {color.name}
+                          </p>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
                 </div>
+                
                 {selectedColor && (
-                  <motion.p
+                  <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 text-sm font-bold text-purple-300 flex items-center gap-2"
+                    className="flex items-center gap-2 px-3 py-2 bg-purple-500/20 border border-purple-500/40 rounded-lg"
                   >
-                    <Star className="w-4 h-4 fill-purple-400 text-purple-400" />
-                    Gewählt: {selectedColor}
-                  </motion.p>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: colorVariants.find(c => c.name === selectedColor)?.hex }}
+                    />
+                    <span className="text-sm font-bold text-purple-300">
+                      Ausgewählt: <span className="text-purple-100">{selectedColor}</span>
+                    </span>
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
             )}
 
             {/* Shipping Info Card */}
