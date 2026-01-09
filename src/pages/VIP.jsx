@@ -287,13 +287,25 @@ export default function VIP() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => {
-                    if (user && navigator.share) {
-                      navigator.share({
-                        title: 'Nebula Supply',
-                        text: 'Schau dir Nebula Supply an! 🌟',
-                        url: `https://nebulasupply.com/invite/${user.id}`
-                      });
+                  onClick={async () => {
+                    if (!user) return;
+                    
+                    const shareData = {
+                      title: 'Nebula Supply',
+                      text: 'Schau dir Nebula Supply an! 🌟',
+                      url: `https://nebulasupply.com/invite/${user.id}`
+                    };
+
+                    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                      try {
+                        await navigator.share(shareData);
+                      } catch (err) {
+                        if (err.name !== 'AbortError') {
+                          navigator.clipboard.writeText(`https://nebulasupply.com/invite/${user.id}`);
+                        }
+                      }
+                    } else {
+                      navigator.clipboard.writeText(`https://nebulasupply.com/invite/${user.id}`);
                     }
                   }}
                   className="p-4 glass border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-colors group"
