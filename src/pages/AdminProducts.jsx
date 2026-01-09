@@ -275,91 +275,95 @@ export default function AdminProducts() {
 
       {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-zinc-800">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glass backdrop-blur-xl border-2 border-zinc-700">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-2xl md:text-3xl font-black bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
               {editingProduct ? 'Produkt bearbeiten' : 'Neues Produkt'}
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="space-y-6 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>SKU *</Label>
+                <Label className="text-sm font-bold text-zinc-200 mb-2 block">SKU *</Label>
                 <Input
                   value={formData.sku}
                   onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                   placeholder="NS-12345"
+                  className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 font-medium focus:border-purple-500/50 focus:ring-purple-500/20"
                 />
               </div>
               <div>
-                <Label>Preis (€) *</Label>
+                <Label className="text-sm font-bold text-zinc-200 mb-2 block">Preis (€) *</Label>
                 <Input
                   type="number"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
                   step="0.01"
+                  className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 font-medium focus:border-purple-500/50 focus:ring-purple-500/20"
                 />
               </div>
             </div>
 
             <div>
-              <Label>Name *</Label>
+              <Label className="text-sm font-bold text-zinc-200 mb-2 block">Name *</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Produktname"
+                className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 font-medium focus:border-purple-500/50 focus:ring-purple-500/20"
               />
             </div>
 
             <div>
-              <Label>Beschreibung</Label>
+              <Label className="text-sm font-bold text-zinc-200 mb-2 block">Beschreibung</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Produktbeschreibung..."
                 rows={3}
+                className="bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 font-medium focus:border-purple-500/50 focus:ring-purple-500/20"
               />
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <Label>Department</Label>
+                <Label className="text-sm font-bold text-zinc-200 mb-2 block">Department</Label>
                 <Select value={formData.department_id} onValueChange={(val) => setFormData({ ...formData, department_id: val })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wählen..." />
+                  <SelectTrigger className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 font-medium focus:border-purple-500/50">
+                    <SelectValue placeholder="Wählen..." className="text-zinc-400" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass backdrop-blur-xl border-2 border-zinc-700">
                     {departments.map(dept => (
-                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                      <SelectItem key={dept.id} value={dept.id} className="text-zinc-100 font-medium">{dept.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label>Kategorie *</Label>
+                <Label className="text-sm font-bold text-zinc-200 mb-2 block">Kategorie *</Label>
                 <Select value={formData.category_id} onValueChange={(val) => setFormData({ ...formData, category_id: val })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wählen..." />
+                  <SelectTrigger className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 font-medium focus:border-purple-500/50">
+                    <SelectValue placeholder="Wählen..." className="text-zinc-400" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass backdrop-blur-xl border-2 border-zinc-700">
                     {categories.map(cat => (
-                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      <SelectItem key={cat.id} value={cat.id} className="text-zinc-100 font-medium">{cat.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
               <div>
-                <Label>Marke</Label>
+                <Label className="text-sm font-bold text-zinc-200 mb-2 block">Marke</Label>
                 <Select value={formData.brand_id} onValueChange={(val) => setFormData({ ...formData, brand_id: val })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Wählen..." />
+                  <SelectTrigger className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 font-medium focus:border-purple-500/50">
+                    <SelectValue placeholder="Wählen..." className="text-zinc-400" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="glass backdrop-blur-xl border-2 border-zinc-700">
                     {brands.map(brand => (
-                      <SelectItem key={brand.id} value={brand.id}>{brand.name}</SelectItem>
+                      <SelectItem key={brand.id} value={brand.id} className="text-zinc-100 font-medium">{brand.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -367,55 +371,58 @@ export default function AdminProducts() {
             </div>
 
             <div>
-              <Label>Cover Bild URL</Label>
+              <Label className="text-sm font-bold text-zinc-200 mb-2 block">Cover Bild URL</Label>
               <Input
                 value={formData.cover_image}
                 onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
                 placeholder="https://..."
+                className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 font-medium focus:border-purple-500/50 focus:ring-purple-500/20"
               />
             </div>
 
             <div>
-              <Label>Tags</Label>
-              <div className="flex gap-2 mb-2">
+              <Label className="text-sm font-bold text-zinc-200 mb-2 block">Tags</Label>
+              <div className="flex gap-2 mb-3">
                 <Input
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                   placeholder="Tag eingeben..."
+                  className="h-12 bg-zinc-800/50 border-2 border-zinc-700 text-zinc-100 placeholder:text-zinc-400 font-medium focus:border-purple-500/50 focus:ring-purple-500/20"
                 />
-                <Button onClick={addTag} variant="outline">
-                  <Plus className="w-4 h-4" />
+                <Button onClick={addTag} variant="outline" className="h-12 px-6 border-2 border-zinc-700 hover:border-purple-500/50 hover:bg-purple-500/20">
+                  <Plus className="w-5 h-5" />
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
                 {formData.tags.map((tag, i) => (
-                  <div key={i} className="flex items-center gap-1 px-3 py-1 bg-zinc-800 rounded-full">
-                    <span className="text-sm">{tag}</span>
-                    <button onClick={() => removeTag(tag)}>
-                      <X className="w-3 h-3" />
+                  <div key={i} className="flex items-center gap-2 px-4 py-2 glass backdrop-blur border-2 border-zinc-700 rounded-xl hover:border-purple-500/50 transition-all">
+                    <span className="text-sm font-bold text-zinc-100">{tag}</span>
+                    <button onClick={() => removeTag(tag)} className="hover:text-red-400 transition-colors">
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-4 glass backdrop-blur border-2 border-zinc-700 rounded-xl">
               <Checkbox
                 id="in_stock"
                 checked={formData.in_stock}
                 onCheckedChange={(checked) => setFormData({ ...formData, in_stock: checked })}
+                className="border-2 border-zinc-600"
               />
-              <Label htmlFor="in_stock">Auf Lager</Label>
+              <Label htmlFor="in_stock" className="text-base font-bold text-zinc-100 cursor-pointer">Auf Lager</Label>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+          <div className="flex justify-end gap-3 pt-4 border-t-2 border-zinc-700">
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-12 px-6 border-2 border-zinc-700 hover:border-red-500/50 hover:bg-red-500/20 font-bold">
               Abbrechen
             </Button>
-            <Button onClick={handleSave} className="bg-gradient-to-r from-purple-500 to-pink-500">
-              <Save className="w-4 h-4 mr-2" />
+            <Button onClick={handleSave} className="h-12 px-8 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-2xl hover:shadow-purple-500/50 font-black text-lg">
+              <Save className="w-5 h-5 mr-2" />
               Speichern
             </Button>
           </div>
