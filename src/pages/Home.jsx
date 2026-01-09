@@ -5,12 +5,15 @@ import { base44 } from '@/api/base44Client';
 import { Star, Sparkles, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import ProductQuickView from '../components/products/ProductQuickView';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
   const [products, setProducts] = useState([]);
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
   useEffect(() => {
     loadDepartments();
@@ -36,6 +39,34 @@ export default function Home() {
       console.error('Error loading products:', error);
     } finally {
       setLoadingProducts(false);
+    }
+  };
+
+  const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
+    try {
+      const user = await base44.auth.me();
+      const existing = await base44.entities.StarCartItem.filter({
+        user_id: user.id,
+        product_id: product.id
+      });
+
+      if (existing.length > 0) {
+        await base44.entities.StarCartItem.update(existing[0].id, {
+          quantity: existing[0].quantity + quantity,
+          selected_options: selectedOptions
+        });
+      } else {
+        await base44.entities.StarCartItem.create({
+          user_id: user.id,
+          product_id: product.id,
+          quantity: quantity,
+          selected_options: selectedOptions
+        });
+      }
+      setIsQuickViewOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error adding to cart:', error);
     }
   };
 
@@ -178,10 +209,11 @@ export default function Home() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
                   whileTap={{ scale: 0.97 }}
+                  className="group relative"
                 >
                   <Link
                     to={createPageUrl('ProductDetail') + `?id=${product.id}`}
-                    className="group block bg-white border border-zinc-200 rounded-xl overflow-hidden hover:border-purple-400 hover:shadow-lg transition-all"
+                    className="block bg-white border border-zinc-200 rounded-xl overflow-hidden hover:border-purple-400 hover:shadow-lg transition-all"
                   >
                     <div className="relative aspect-square overflow-hidden bg-zinc-100">
                       {product.cover_image ? (
