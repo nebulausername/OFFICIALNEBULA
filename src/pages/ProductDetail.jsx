@@ -673,14 +673,46 @@ export default function ProductDetail() {
             </div>
 
             {/* Total Price Preview */}
-            <div className="glass backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10">
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-400">Gesamtpreis:</span>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="glass backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-zinc-300 font-bold">Gesamtpreis:</span>
                 <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                   {(currentPrice * quantity).toFixed(2)}€
                 </span>
               </div>
-            </div>
+
+              {/* Delivery Time Info */}
+              <div className="pt-4 border-t border-purple-500/20 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Germany Delivery */}
+                  <motion.div 
+                    whileHover={{ y: -2 }}
+                    className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
+                  >
+                    <p className="text-xs font-black text-green-300 mb-1">🇩🇪 AUS DEUTSCHLAND</p>
+                    <p className="text-xs text-green-200 font-bold">
+                      {calculateDeliveryDate(1, 5).startShort} - {new Date(new Date().setDate(new Date().getDate() + 7)).getDate()}.{new Date(new Date().setDate(new Date().getDate() + 7)).getMonth() + 1}.
+                    </p>
+                  </motion.div>
+
+                  {/* China Delivery */}
+                  <motion.div 
+                    whileHover={{ y: -2 }}
+                    className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg"
+                  >
+                    <p className="text-xs font-black text-orange-300 mb-1">🇨🇳 AUS CHINA</p>
+                    <p className="text-xs text-orange-200 font-bold">
+                      {calculateDeliveryDate(8, 15).startShort} - {new Date(new Date().setDate(new Date().getDate() + 22)).getDate()}.{new Date(new Date().setDate(new Date().getDate() + 22)).getMonth() + 1}.
+                    </p>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           {/* Features */}
