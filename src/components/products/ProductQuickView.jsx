@@ -106,10 +106,23 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-zinc-950 border-zinc-800 p-0">
-        <div className="grid md:grid-cols-2 gap-0">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-zinc-950 to-zinc-900 border-2 border-purple-500/30 p-0 rounded-3xl shadow-2xl shadow-purple-600/40">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="grid md:grid-cols-2 gap-0 relative"
+        >
+          {/* Gradient Background Glow */}
+          <div className="absolute -inset-1 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-transparent rounded-3xl blur-2xl -z-10" />
           {/* Image Section */}
-          <div className="relative bg-zinc-900/50 p-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="relative bg-gradient-to-br from-zinc-900/80 to-black/50 p-6 border-r border-purple-500/10"
+          >
             {/* Main Image */}
             <div className="relative aspect-square mb-4 rounded-xl overflow-hidden bg-zinc-800 group">
               {selectedImage ? (
@@ -172,12 +185,17 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
-              </div>
-            )}
-          </div>
+                </div>
+                )}
+                </motion.div>
 
-          {/* Details Section */}
-          <div className="p-6 flex flex-col">
+                {/* Details Section */}
+                <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 }}
+                className="p-6 flex flex-col bg-gradient-to-br from-zinc-900/50 to-zinc-900/20"
+                >
             {/* Header */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -378,11 +396,11 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 In den Warenkorb
               </Button>
-            </div>
-          </div>
-        </div>
+              </div>
+              </motion.div>
+              </motion.div>
 
-        {/* Zoom Modal */}
+              {/* Zoom Modal */}
         <AnimatePresence>
           {showZoom && (
             <motion.div
@@ -406,6 +424,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
             </motion.div>
           )}
         </AnimatePresence>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );
