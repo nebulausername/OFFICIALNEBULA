@@ -19,7 +19,7 @@ export default function SideDrawer({ isOpen, onClose }) {
       { name: 'GELDBÖRSEN', hasSubmenu: false },
       { name: 'GÜRTEL', hasSubmenu: false },
       { name: 'HIGH HEELS', hasSubmenu: true },
-      { name: 'ANMELDEN', hasSubmenu: false, link: 'Profile' }
+      { name: 'PROFIL', hasSubmenu: false, link: 'Profile' }
     ],
     SNEAKER: [
       {
@@ -114,29 +114,29 @@ export default function SideDrawer({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-            className="fixed left-0 top-0 bottom-0 w-[90%] max-w-[420px] bg-white z-[101] shadow-2xl overflow-y-auto"
+            className="fixed left-0 top-0 bottom-0 w-[90%] max-w-[420px] bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-950 z-[101] shadow-2xl overflow-y-auto"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div className="min-h-full flex flex-col">
               {/* Header */}
-              <div className="sticky top-0 bg-white z-10 border-b border-zinc-200">
+              <div className="sticky top-0 bg-gradient-to-b from-zinc-900 to-zinc-900/95 z-10 border-b border-zinc-800">
                 <div className="flex items-center justify-between px-5 py-4">
                   {currentLevel === 'submenu' ? (
                     <button
                       onClick={handleBack}
-                      className="flex items-center gap-2 text-zinc-900 font-bold text-base hover:text-zinc-600 transition-colors touch-manipulation"
+                      className="flex items-center gap-2 text-white font-bold text-base hover:text-zinc-300 transition-colors touch-manipulation"
                     >
                       <ChevronLeft className="w-5 h-5" />
                       {selectedCategory}
                     </button>
                   ) : (
-                    <div className="text-zinc-900 font-black text-lg tracking-tight">MENÜ</div>
+                    <div className="text-white font-black text-lg tracking-tight">MENÜ</div>
                   )}
                   <button
                     onClick={onClose}
-                    className="p-2 -mr-2 touch-manipulation hover:bg-zinc-100 rounded-lg transition-colors"
+                    className="p-2 -mr-2 touch-manipulation hover:bg-zinc-800 rounded-lg transition-colors"
                   >
-                    <X className="w-6 h-6 text-zinc-900" />
+                    <X className="w-6 h-6 text-white" />
                   </button>
                 </div>
 
@@ -144,12 +144,12 @@ export default function SideDrawer({ isOpen, onClose }) {
                 {currentLevel === 'main' && (
                   <div className="px-5 pb-4">
                     <div className="relative">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400" />
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                       <Input
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Suche..."
-                        className="h-12 pl-12 bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 rounded-xl"
+                        className="h-12 pl-12 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 rounded-xl focus:border-purple-500"
                       />
                     </div>
                   </div>
@@ -171,13 +171,17 @@ export default function SideDrawer({ isOpen, onClose }) {
                         <button
                           key={index}
                           onClick={() => handleCategoryClick(category)}
-                          className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-zinc-50 active:bg-zinc-100 transition-colors touch-manipulation"
+                          className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-zinc-800 active:bg-zinc-700 transition-colors touch-manipulation border-b border-zinc-800"
                         >
-                          <span className="text-zinc-900 font-bold text-base tracking-tight">
+                          <span className={`font-bold text-base tracking-tight ${
+                            category.name === 'PROFIL' 
+                              ? 'text-purple-400 font-black'
+                              : 'text-white'
+                          }`}>
                             {category.name}
                           </span>
                           {category.hasSubmenu && (
-                            <ChevronRight className="w-5 h-5 text-zinc-400" />
+                            <ChevronRight className="w-5 h-5 text-zinc-600" />
                           )}
                         </button>
                       ))}
@@ -193,7 +197,7 @@ export default function SideDrawer({ isOpen, onClose }) {
                     >
                       {categories[selectedCategory]?.map((section, sectionIndex) => (
                         <div key={sectionIndex}>
-                          <h3 className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3">
+                          <h3 className="text-xs font-black text-purple-400 uppercase tracking-wider mb-3">
                             {section.section}
                           </h3>
                           <div className="space-y-1">
@@ -202,14 +206,14 @@ export default function SideDrawer({ isOpen, onClose }) {
                                 key={itemIndex}
                                 to={createPageUrl('Products')}
                                 onClick={handleItemClick}
-                                className="block py-3 text-zinc-900 font-medium text-base hover:text-zinc-600 transition-colors touch-manipulation"
+                                className="block py-3 text-white font-medium text-base hover:text-purple-300 transition-colors touch-manipulation"
                               >
                                 {item}
                               </Link>
                             ))}
                           </div>
                           {sectionIndex < categories[selectedCategory].length - 1 && (
-                            <div className="mt-4 border-t border-zinc-100" />
+                            <div className="mt-4 border-t border-zinc-800" />
                           )}
                         </div>
                       ))}

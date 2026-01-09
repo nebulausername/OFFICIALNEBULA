@@ -3,10 +3,10 @@ import MobileHeader from './components/layout/MobileHeader';
 import { Star } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
-    const saved = localStorage.getItem('nebula-theme') || 'light';
+    const saved = localStorage.getItem('nebula-theme') || 'dark';
     setTheme(saved);
     document.documentElement.setAttribute('data-theme', saved);
   }, []);
