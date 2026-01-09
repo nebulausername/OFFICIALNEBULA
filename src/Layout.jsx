@@ -42,11 +42,21 @@ export default function Layout({ children, currentPageName }) {
     }
   };
 
-  const navigation = [
-    { name: 'Home', page: 'Home', icon: Home },
-    { name: 'Shop', page: 'Products', icon: Package },
-    { name: 'Anfragen', page: 'Requests', icon: ShoppingBag },
-  ];
+  const getNavigation = () => {
+    const baseNav = [
+      { name: 'Home', page: 'Home', icon: Home },
+      { name: 'Shop', page: 'Products', icon: Package },
+    ];
+
+    // Nur Admins sehen Anfragen
+    if (user?.role === 'admin') {
+      baseNav.push({ name: 'Admin', page: 'Admin', icon: Star });
+    }
+
+    return baseNav;
+  };
+
+  const navigation = getNavigation();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white">
@@ -78,16 +88,16 @@ export default function Layout({ children, currentPageName }) {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-50 glass-strong border-b border-zinc-800/50 shadow-2xl">
+      <header className="sticky top-0 z-50 glass-strong border-b border-zinc-700/50 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to={createPageUrl('Home')} className="flex items-center space-x-3 group">
-              <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 glow-effect">
+              <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 glow-effect shadow-lg shadow-purple-500/50">
                 <Star className="w-6 h-6 text-white" fill="white" />
                 <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent animate-gradient">
                 Nebula Supply
               </span>
             </Link>
@@ -103,8 +113,8 @@ export default function Layout({ children, currentPageName }) {
                     to={createPageUrl(item.page)}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
                       isActive
-                        ? 'bg-purple-500/20 text-purple-400'
-                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        ? 'bg-purple-500/20 text-purple-300 font-semibold'
+                        : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80 font-medium'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -145,14 +155,14 @@ export default function Layout({ children, currentPageName }) {
                     align="end"
                     className="w-64 glass border-zinc-800 bg-zinc-950/98 backdrop-blur-2xl shadow-2xl shadow-purple-500/20 rounded-2xl p-2"
                   >
-                    <div className="px-3 py-4 border-b border-zinc-800/50">
+                    <div className="px-3 py-4 border-b border-zinc-700/50">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
                           <User className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">{user.full_name || 'User'}</p>
-                          <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                          <p className="font-bold text-sm truncate text-zinc-100">{user.full_name || 'User'}</p>
+                          <p className="text-xs text-zinc-400 truncate">{user.email}</p>
                         </div>
                       </div>
                     </div>
@@ -161,14 +171,14 @@ export default function Layout({ children, currentPageName }) {
                       <DropdownMenuItem asChild>
                         <Link 
                           to={createPageUrl('Profile')} 
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/50 transition-colors group"
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/80 transition-colors group"
                         >
                           <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
                             <User className="w-4 h-4 text-purple-400" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-sm">Mein Profil</p>
-                            <p className="text-xs text-zinc-500">Account verwalten</p>
+                            <p className="font-semibold text-sm text-zinc-100">Mein Profil</p>
+                            <p className="text-xs text-zinc-400">Account verwalten</p>
                           </div>
                         </Link>
                       </DropdownMenuItem>
@@ -176,14 +186,14 @@ export default function Layout({ children, currentPageName }) {
                       <DropdownMenuItem asChild>
                         <Link 
                           to={createPageUrl('Help')} 
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/50 transition-colors group"
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/80 transition-colors group"
                         >
                           <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
                             <HelpCircle className="w-4 h-4 text-blue-400" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-sm">Hilfe & Support</p>
-                            <p className="text-xs text-zinc-500">Wir helfen dir</p>
+                            <p className="font-semibold text-sm text-zinc-100">Hilfe & Support</p>
+                            <p className="text-xs text-zinc-400">Wir helfen dir</p>
                           </div>
                         </Link>
                       </DropdownMenuItem>
@@ -191,14 +201,14 @@ export default function Layout({ children, currentPageName }) {
                       <DropdownMenuItem asChild>
                         <Link 
                           to={createPageUrl('FAQ')} 
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/50 transition-colors group"
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/80 transition-colors group"
                         >
                           <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
                             <MessageCircle className="w-4 h-4 text-green-400" />
                           </div>
                           <div className="flex-1">
-                            <p className="font-medium text-sm">FAQ</p>
-                            <p className="text-xs text-zinc-500">Häufige Fragen</p>
+                            <p className="font-semibold text-sm text-zinc-100">FAQ</p>
+                            <p className="text-xs text-zinc-400">Häufige Fragen</p>
                           </div>
                         </Link>
                       </DropdownMenuItem>
@@ -232,25 +242,15 @@ export default function Layout({ children, currentPageName }) {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
                       isActive
-                        ? 'bg-purple-500/20 text-purple-400'
-                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                        ? 'bg-purple-500/20 text-purple-300 font-semibold'
+                        : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80 font-medium'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
-                    <span className="font-medium">{item.name}</span>
+                    <span>{item.name}</span>
                   </Link>
                 );
               })}
-              {user && user.role === 'admin' && (
-                <Link
-                  to={createPageUrl('Admin')}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
-                >
-                  <Star className="w-5 h-5" />
-                  <span className="font-medium">Admin</span>
-                </Link>
-              )}
             </div>
           </div>
         )}
@@ -267,12 +267,12 @@ export default function Layout({ children, currentPageName }) {
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <div className="flex items-center space-x-2">
               <Star className="w-5 h-5 text-purple-400" fill="currentColor" />
-              <span className="text-sm text-zinc-400">© 2024 Nebula Supply. Premium Quality.</span>
+              <span className="text-sm text-zinc-400">© 2026 Nebula Supply. Premium Quality.</span>
             </div>
             <div className="flex space-x-6">
-              <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors">Impressum</a>
-              <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors">Datenschutz</a>
-              <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors">AGB</a>
+              <a href="#" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors font-medium">Impressum</a>
+              <a href="#" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors font-medium">Datenschutz</a>
+              <a href="#" className="text-sm text-zinc-400 hover:text-zinc-200 transition-colors font-medium">AGB</a>
             </div>
           </div>
         </div>

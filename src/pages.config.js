@@ -4,13 +4,13 @@ import AdminCategories from './pages/AdminCategories';
 import AdminProducts from './pages/AdminProducts';
 import AdminRequests from './pages/AdminRequests';
 import Cart from './pages/Cart';
+import FAQ from './pages/FAQ';
+import Help from './pages/Help';
 import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
 import Products from './pages/Products';
-import Requests from './pages/Requests';
 import Profile from './pages/Profile';
-import Help from './pages/Help';
-import FAQ from './pages/FAQ';
+import Requests from './pages/Requests';
 import VIP from './pages/VIP';
 import __Layout from './Layout.jsx';
 
@@ -22,13 +22,13 @@ export const PAGES = {
     "AdminProducts": AdminProducts,
     "AdminRequests": AdminRequests,
     "Cart": Cart,
+    "FAQ": FAQ,
+    "Help": Help,
     "Home": Home,
     "ProductDetail": ProductDetail,
     "Products": Products,
-    "Requests": Requests,
     "Profile": Profile,
-    "Help": Help,
-    "FAQ": FAQ,
+    "Requests": Requests,
     "VIP": VIP,
 }
 
