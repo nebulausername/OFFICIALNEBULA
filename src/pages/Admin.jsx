@@ -8,10 +8,12 @@ import {
   Tag, 
   Star,
   Plus,
-  Settings
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
+import { motion } from 'framer-motion';
 
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -107,35 +109,53 @@ export default function Admin() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-12">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-            <Settings className="w-6 h-6" />
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 mb-4"
+        >
+          <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center glow-effect">
+            <Settings className="w-7 h-7" />
           </div>
           <div>
-            <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-            <p className="text-zinc-400">Willkommen zurück, {user.full_name}</p>
+            <h1 className="text-5xl font-black mb-2 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+              Admin Dashboard
+            </h1>
+            <p className="text-zinc-400 text-lg flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              Willkommen zurück, <span className="text-purple-400 font-semibold">{user.full_name}</span>
+            </p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {adminSections.map((section) => {
+        {adminSections.map((section, index) => {
           const Icon = section.icon;
           return (
-            <Link
-              key={section.title}
-              to={createPageUrl(section.link)}
-              className="group relative overflow-hidden bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 hover:border-purple-500/50 transition-all hover:scale-105"
-            >
-              <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${section.color} opacity-10 rounded-full transform translate-x-16 -translate-y-16`} />
-              
-              <div className="relative z-10">
-                <Icon className="w-10 h-10 text-purple-400 mb-4" />
-                <div className="text-3xl font-bold mb-2">{section.count}</div>
-                <div className="text-lg font-semibold mb-1">{section.title}</div>
-                <div className="text-sm text-zinc-400">{section.description}</div>
-              </div>
+            <Link key={section.title} to={createPageUrl(section.link)}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="group relative overflow-hidden glass border border-zinc-800 rounded-2xl p-6 cursor-pointer hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-10 group-hover:opacity-20 transition-opacity`} />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${section.color} rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-4xl font-black bg-gradient-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      {section.count}
+                    </span>
+                  </div>
+                  <h3 className="text-white font-bold mb-1 text-lg">{section.title}</h3>
+                  <p className="text-zinc-400 text-sm">{section.description}</p>
+                </div>
+              </motion.div>
             </Link>
           );
         })}

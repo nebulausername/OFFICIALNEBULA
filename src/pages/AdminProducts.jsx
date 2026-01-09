@@ -152,12 +152,33 @@ export default function AdminProducts() {
     setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) });
   };
 
+  const handleInlineUpdate = async (productId, field, value) => {
+    try {
+      await base44.entities.Product.update(productId, { [field]: value });
+      setProducts(products.map(p => p.id === productId ? { ...p, [field]: value } : p));
+      toast({
+        title: '✨ Gespeichert',
+        description: 'Änderung wurde übernommen'
+      });
+    } catch (error) {
+      toast({
+        title: 'Fehler',
+        description: 'Änderung konnte nicht gespeichert werden',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Produkte</h1>
-          <p className="text-zinc-400">{products.length} Produkte insgesamt</p>
+          <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Produkte verwalten
+          </h1>
+          <p className="text-zinc-400 text-lg">
+            {products.length} Produkte • <span className="text-purple-400">Echtzeit-Bearbeitung</span> aktiviert
+          </p>
         </div>
         <Button onClick={handleNew} className="bg-gradient-to-r from-purple-500 to-pink-500">
           <Plus className="w-5 h-5 mr-2" />
@@ -165,17 +186,21 @@ export default function AdminProducts() {
         </Button>
       </div>
 
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass backdrop-blur border border-zinc-800 rounded-2xl overflow-hidden"
+      >
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>SKU</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Preis</TableHead>
-              <TableHead>Kategorie</TableHead>
-              <TableHead>Marke</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Aktionen</TableHead>
+            <TableRow className="border-zinc-800 hover:bg-transparent bg-zinc-900/50">
+              <TableHead className="font-bold">SKU</TableHead>
+              <TableHead className="font-bold">Name</TableHead>
+              <TableHead className="font-bold">Preis</TableHead>
+              <TableHead className="font-bold">Kategorie</TableHead>
+              <TableHead className="font-bold">Marke</TableHead>
+              <TableHead className="font-bold">Status</TableHead>
+              <TableHead className="text-right font-bold">Aktionen</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -184,18 +209,42 @@ export default function AdminProducts() {
               const brand = brands.find(b => b.id === product.brand_id);
               
               return (
-                <TableRow key={product.id}>
-                  <TableCell className="font-mono text-sm">{product.sku}</TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.price}€</TableCell>
-                  <TableCell>{category?.name || '-'}</TableCell>
-                  <TableCell>{brand?.name || '-'}</TableCell>
+                <TableRow key={product.id} className="border-zinc-800 hover:bg-zinc-900/30 transition-colors">
+                  <TableCell className="font-mono text-purple-400 text-sm">{product.sku}</TableCell>
                   <TableCell>
-                    {product.in_stock ? (
-                      <span className="text-green-400">Verfügbar</span>
-                    ) : (
-                      <span className="text-red-400">Ausverkauft</span>
-                    )}
+                    <InlineEditableField
+                      value={product.name}
+                      onSave={(value) => handleInlineUpdate(product.id, 'name', value)}
+                      className="font-medium"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <InlineEditableField
+                      value={product.price}
+                      type="number"
+                      onSave={(value) => handleInlineUpdate(product.id, 'price', parseFloat(value))}
+                      className="text-purple-400 font-bold"
+                    />
+                  </TableCell>
+                  <TableCell className="text-zinc-400 text-sm">{category?.name || '-'}</TableCell>
+                  <TableCell className="text-zinc-400 text-sm">{brand?.name || '-'}</TableCell>
+                  <TableCell>
+                    <button
+                      onClick={() => handleInlineUpdate(product.id, 'in_stock', !product.in_stock)}
+                      className="group"
+                    >
+                      {product.in_stock ? (
+                        <span className="text-green-400 group-hover:text-green-300 transition-colors flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-400 rounded-full" />
+                          Verfügbar
+                        </span>
+                      ) : (
+                        <span className="text-red-400 group-hover:text-red-300 transition-colors flex items-center gap-1">
+                          <span className="w-2 h-2 bg-red-400 rounded-full" />
+                          Ausverkauft
+                        </span>
+                      )}
+                    </button>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -203,6 +252,7 @@ export default function AdminProducts() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleEdit(product)}
+                        className="hover:bg-purple-500/20 hover:text-purple-400 transition-colors"
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -210,7 +260,7 @@ export default function AdminProducts() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(product.id)}
-                        className="text-red-400 hover:text-red-300"
+                        className="text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -221,7 +271,7 @@ export default function AdminProducts() {
             })}
           </TableBody>
         </Table>
-      </div>
+      </motion.div>
 
       {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
