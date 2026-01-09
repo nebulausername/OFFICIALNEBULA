@@ -474,7 +474,12 @@ export default function ProductDetail() {
             <motion.div
               whileHover={{ x: 4, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="group relative p-5 bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-2 border-green-500/40 rounded-2xl overflow-hidden hover:border-green-400/60 hover:shadow-lg hover:shadow-green-500/30 transition-all cursor-pointer"
+              onClick={() => setSelectedShippingOption('Germany')}
+              className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${
+                selectedShippingOption === 'Germany'
+                  ? 'bg-gradient-to-br from-green-500/25 via-emerald-500/15 to-green-600/15 border-green-400/80 shadow-lg shadow-green-500/40'
+                  : 'bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-green-500/40 hover:border-green-400/60 hover:shadow-lg hover:shadow-green-500/30'
+              }`}
             >
               <div className="absolute -right-20 -top-20 w-40 h-40 bg-green-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
 
@@ -488,7 +493,7 @@ export default function ProductDetail() {
                     <Truck className="w-7 h-7 text-white" />
                   </motion.div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-green-300 uppercase tracking-widest mb-2">🚚 Express aus Deutschland</p>
+                    <p className="text-xs font-black text-green-300 uppercase tracking-widest mb-2">🚚 Deutschland</p>
                     <div className="flex items-center gap-3 flex-wrap">
                       <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-green-500/20 px-2.5 py-1 rounded-lg">
                         <Clock className="w-4 h-4 text-green-400" />
@@ -518,7 +523,12 @@ export default function ProductDetail() {
             <motion.div
               whileHover={{ x: 4, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="group relative p-5 bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-2 border-orange-500/30 rounded-2xl overflow-hidden hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/30 transition-all cursor-pointer"
+              onClick={() => setSelectedShippingOption('China')}
+              className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${
+                selectedShippingOption === 'China'
+                  ? 'bg-gradient-to-br from-orange-500/25 via-amber-500/15 to-yellow-600/15 border-orange-400/80 shadow-lg shadow-orange-500/40'
+                  : 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-orange-500/30 hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/30'
+              }`}
             >
               <div className="absolute -right-20 -top-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
 
@@ -532,7 +542,7 @@ export default function ProductDetail() {
                     <Truck className="w-7 h-7 text-white" />
                   </motion.div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-2">🌍 Budget aus China</p>
+                    <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-2">🌍 China</p>
                     <div className="flex items-center gap-3 flex-wrap">
                       <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-orange-500/20 px-2.5 py-1 rounded-lg">
                         <Clock className="w-4 h-4 text-orange-400" />
@@ -543,9 +553,15 @@ export default function ProductDetail() {
                         <span className="font-bold text-sm text-orange-200">CN</span>
                       </div>
                     </div>
-                    <div className="mt-2 text-xs font-bold text-orange-100 bg-gradient-to-r from-orange-500/30 to-red-500/30 px-2.5 py-1 rounded-lg w-fit">
-                      💰 10-20% günstiger
-                    </div>
+                    {selectedShippingOption === 'China' && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 text-xs font-bold text-orange-100 bg-gradient-to-r from-orange-500/30 to-red-500/30 px-2.5 py-1 rounded-lg w-fit"
+                      >
+                        ✓ Günstiger
+                      </motion.div>
+                    )}
                   </div>
                 </div>
                 <motion.div
