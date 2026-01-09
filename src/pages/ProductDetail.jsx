@@ -355,7 +355,7 @@ export default function ProductDetail() {
           className="space-y-5 sm:space-y-6"
         >
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-300">
             <Link to={createPageUrl('Products')} className="text-zinc-400 hover:text-purple-400 transition-colors">
               Shop
             </Link>
