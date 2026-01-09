@@ -604,10 +604,10 @@ export default function ProductDetail() {
               <h3 className="text-lg sm:text-xl font-bold text-white">Optionen wählen</h3>
               {product.option_schema.options.map((option, index) => (
                 <div key={index} className="space-y-3">
-                  <label className="text-sm font-bold text-zinc-300 flex items-center gap-2">
+                  <label className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                     {option.name}
                     {selectedOptions[option.name] && (
-                      <span className="text-xs text-purple-400">
+                      <span className="text-xs text-purple-300">
                         • {selectedOptions[option.name]}
                       </span>
                     )}
