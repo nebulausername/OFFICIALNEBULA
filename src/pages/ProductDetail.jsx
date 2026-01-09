@@ -429,11 +429,11 @@ export default function ProductDetail() {
                   <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/50">
                     <Package className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+                  <h3 className="text-lg sm:text-xl font-black text-white">
                     Produktbeschreibung
                   </h3>
                 </div>
-                <p className="text-zinc-300 leading-relaxed text-base font-medium">{product.description}</p>
+                <p className="text-zinc-200 leading-relaxed text-sm sm:text-base font-medium">{product.description}</p>
 
                 {/* Additional Info Bar */}
                 <div className="mt-4 pt-4 border-t border-zinc-700 flex items-center gap-4 text-sm">
