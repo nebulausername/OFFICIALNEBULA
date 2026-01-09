@@ -616,9 +616,23 @@ export default function ProductDetail() {
           transition={{ delay: 0.3 }}
           className="mt-20"
         >
-          <div className="mb-8">
-            <h2 className="text-3xl font-black mb-2">Das könnte dir auch gefallen</h2>
-            <p className="text-zinc-400">Ähnliche Produkte aus der gleichen Kategorie</p>
+          <div className="mb-8 relative">
+            <div className="absolute -top-10 right-0 w-96 h-96 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-transparent rounded-full blur-3xl -z-10" />
+            <motion.h2 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
+            >
+              Das könnte dir auch gefallen
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-lg text-zinc-300 font-medium"
+            >
+              Ähnliche Produkte aus der gleichen Kategorie
+            </motion.p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
