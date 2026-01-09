@@ -601,7 +601,7 @@ export default function ProductDetail() {
           {/* Options with Price Impact */}
           {product.option_schema?.options && product.option_schema.options.length > 0 && (
             <div className="space-y-5">
-              <h3 className="text-xl font-bold text-white">Optionen wählen</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white">Optionen wählen</h3>
               {product.option_schema.options.map((option, index) => (
                 <div key={index} className="space-y-3">
                   <label className="text-sm font-bold text-zinc-300 flex items-center gap-2">
