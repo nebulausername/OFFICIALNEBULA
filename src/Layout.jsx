@@ -141,46 +141,68 @@ export default function Layout({ children, currentPageName }) {
                       <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-purple-400 transition-colors" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 glass border-zinc-800 bg-zinc-900/95 backdrop-blur-xl">
-                    <DropdownMenuLabel className="text-purple-400">Mein Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-zinc-800" />
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Profile')} className="flex items-center gap-2 cursor-pointer">
-                        <User className="w-4 h-4" />
-                        Profil
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('Help')} className="flex items-center gap-2 cursor-pointer">
-                        <HelpCircle className="w-4 h-4" />
-                        Hilfe & Support
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={createPageUrl('FAQ')} className="flex items-center gap-2 cursor-pointer">
-                        <MessageCircle className="w-4 h-4" />
-                        FAQ
-                      </Link>
-                    </DropdownMenuItem>
-                    {user.role === 'admin' && (
-                      <>
-                        <DropdownMenuSeparator className="bg-zinc-800" />
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl('Admin')} className="flex items-center gap-2 cursor-pointer text-purple-400">
-                            <Settings className="w-4 h-4" />
-                            Admin Dashboard
-                          </Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuSeparator className="bg-zinc-800" />
-                    <DropdownMenuItem 
-                      onClick={() => base44.auth.logout()}
-                      className="flex items-center gap-2 cursor-pointer text-red-400"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Abmelden
-                    </DropdownMenuItem>
+                  <DropdownMenuContent 
+                    align="end"
+                    className="w-64 glass border-zinc-800 bg-zinc-950/98 backdrop-blur-2xl shadow-2xl shadow-purple-500/20 rounded-2xl p-2"
+                  >
+                    <div className="px-3 py-4 border-b border-zinc-800/50">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm truncate">{user.full_name || 'User'}</p>
+                          <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="py-2">
+                      <DropdownMenuItem asChild>
+                        <Link 
+                          to={createPageUrl('Profile')} 
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/50 transition-colors group"
+                        >
+                          <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
+                            <User className="w-4 h-4 text-purple-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">Mein Profil</p>
+                            <p className="text-xs text-zinc-500">Account verwalten</p>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem asChild>
+                        <Link 
+                          to={createPageUrl('Help')} 
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/50 transition-colors group"
+                        >
+                          <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
+                            <HelpCircle className="w-4 h-4 text-blue-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">Hilfe & Support</p>
+                            <p className="text-xs text-zinc-500">Wir helfen dir</p>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem asChild>
+                        <Link 
+                          to={createPageUrl('FAQ')} 
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/50 transition-colors group"
+                        >
+                          <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
+                            <MessageCircle className="w-4 h-4 text-green-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">FAQ</p>
+                            <p className="text-xs text-zinc-500">Häufige Fragen</p>
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
