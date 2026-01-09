@@ -36,20 +36,20 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative">
       {/* Animated Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-2000" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-400/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-400/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl animate-pulse delay-2000" />
       </div>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden z-10 min-h-[90vh] flex items-center">
+      <section className="relative overflow-hidden z-10 min-h-[85vh] flex items-center">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-600/20 via-pink-500/10 to-transparent animate-gradient" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-pink-500/20 rounded-full blur-2xl float-animation" />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-purple-100/40 via-pink-50/30 to-transparent" />
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-pink-200/15 rounded-full blur-2xl" />
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative w-full">
@@ -63,11 +63,11 @@ export default function Home() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center gap-3 px-6 py-3 glass backdrop-blur-xl border-2 border-purple-500/40 rounded-full mb-6 glow-effect shadow-2xl shadow-purple-500/30"
+              className="inline-flex items-center gap-3 px-6 py-3 bg-white/90 backdrop-blur-xl border-2 border-gray-200 rounded-full mb-6 shadow-xl shadow-purple-500/20"
             >
-              <Sparkles className="w-5 h-5 text-purple-300 animate-pulse" />
-              <span className="text-base font-black text-purple-200 uppercase tracking-wider">Dein Premium Lifestyle Shop</span>
-              <Sparkles className="w-5 h-5 text-pink-300 animate-pulse" />
+              <Sparkles className="w-5 h-5 text-purple-600 animate-pulse" />
+              <span className="text-base font-black text-gray-800 uppercase tracking-wider">Dein Premium Lifestyle Shop</span>
+              <Sparkles className="w-5 h-5 text-pink-600 animate-pulse" />
             </motion.div>
             
             <motion.h1 
@@ -76,11 +76,11 @@ export default function Home() {
               transition={{ delay: 0.4, type: "spring", stiffness: 100 }}
               className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-8 leading-none"
             >
-              <span className="inline-block bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent animate-gradient drop-shadow-2xl">
+              <span className="inline-block bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent animate-gradient drop-shadow-lg">
                 Nebula
               </span>
               <br />
-              <span className="inline-block bg-gradient-to-r from-pink-300 via-purple-300 to-pink-300 bg-clip-text text-transparent animate-gradient">
+              <span className="inline-block bg-gradient-to-r from-pink-600 via-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
                 Supply
               </span>
             </motion.h1>
@@ -89,11 +89,11 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="text-xl sm:text-2xl md:text-3xl text-zinc-200 max-w-4xl mx-auto font-bold leading-relaxed"
+              className="text-xl sm:text-2xl md:text-3xl text-gray-700 max-w-4xl mx-auto font-bold leading-relaxed"
             >
               Premium Sneaker, Fashion, Tech & Lifestyle
               <br />
-              <span className="bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Exklusiv für dich
               </span>
             </motion.p>
@@ -131,21 +131,21 @@ export default function Home() {
               const Icon = feature.icon;
               return (
                 <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.1 + index * 0.15 }}
-                  whileHover={{ y: -10, scale: 1.03 }}
-                  className="relative p-8 glass backdrop-blur-xl border-2 border-zinc-700 rounded-3xl hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 group overflow-hidden"
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.1 + index * 0.15 }}
+                whileHover={{ y: -10, scale: 1.03 }}
+                className="relative p-8 bg-white/80 backdrop-blur-xl border-2 border-gray-200 rounded-3xl hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 group overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative z-10">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-purple-500/50">
-                      <Icon className="w-9 h-9 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-black mb-3 text-zinc-100 group-hover:text-white transition-colors">{feature.title}</h3>
-                    <p className="text-base font-semibold text-zinc-300 group-hover:text-zinc-200 transition-colors">{feature.description}</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative z-10">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg shadow-purple-500/30">
+                    <Icon className="w-9 h-9 text-white" />
                   </div>
+                  <h3 className="text-2xl font-black mb-3 text-gray-900 transition-colors">{feature.title}</h3>
+                  <p className="text-base font-semibold text-gray-600 transition-colors">{feature.description}</p>
+                </div>
                 </motion.div>
               );
             })}
@@ -161,8 +161,8 @@ export default function Home() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">Kategorien</h2>
-          <p className="text-zinc-200 text-xl font-bold">Entdecke unsere exklusiven Sortimente</p>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Kategorien</h2>
+          <p className="text-gray-700 text-xl font-bold">Entdecke unsere exklusiven Sortimente</p>
         </motion.div>
 
         {loading ? (
@@ -183,14 +183,14 @@ export default function Home() {
               >
                 <Link
                   to={createPageUrl('Products') + `?department=${dept.id}`}
-                  className="group relative overflow-hidden glass backdrop-blur-xl border-2 border-zinc-700 rounded-3xl p-12 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/40 transition-all hover:scale-105 block h-full"
+                  className="group relative overflow-hidden bg-white/80 backdrop-blur-xl border-2 border-gray-200 rounded-3xl p-12 hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/20 transition-all hover:scale-105 block h-full"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-purple-500/40 to-pink-500/30 rounded-full transform translate-x-24 -translate-y-24 group-hover:scale-150 group-hover:rotate-45 transition-all duration-700 blur-3xl" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-pink-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-purple-300/30 to-pink-300/20 rounded-full transform translate-x-24 -translate-y-24 group-hover:scale-150 group-hover:rotate-45 transition-all duration-700 blur-3xl" />
                   
                   <div className="relative z-10">
-                    <h3 className="text-4xl md:text-5xl font-black mb-4 text-zinc-100 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text transition-all">{dept.name}</h3>
-                    <div className="flex items-center gap-2 text-purple-400 text-base font-black group-hover:text-pink-300 transition-colors">
+                    <h3 className="text-4xl md:text-5xl font-black mb-4 text-gray-900 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 group-hover:bg-clip-text transition-all">{dept.name}</h3>
+                    <div className="flex items-center gap-2 text-purple-600 text-base font-black group-hover:text-pink-600 transition-colors">
                       <span className="uppercase tracking-wider">Jetzt shoppen</span>
                       <ChevronRight className="w-6 h-6 group-hover:translate-x-3 transition-transform" />
                     </div>
@@ -213,12 +213,12 @@ export default function Home() {
             viewport={{ once: true }}
             className="text-center mb-16 relative z-10"
           >
-            <div className="inline-flex items-center gap-2 px-6 py-2 glass backdrop-blur-xl border-2 border-purple-500/30 rounded-full mb-6">
-              <Star className="w-5 h-5 text-purple-400" fill="currentColor" />
-              <span className="text-sm font-black text-purple-300 uppercase tracking-wider">Featured</span>
+            <div className="inline-flex items-center gap-2 px-6 py-2 bg-white/80 backdrop-blur-xl border-2 border-gray-200 rounded-full mb-6 shadow-lg">
+              <Star className="w-5 h-5 text-purple-600" fill="currentColor" />
+              <span className="text-sm font-black text-gray-800 uppercase tracking-wider">Featured</span>
             </div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">Neu eingetroffen</h2>
-            <p className="text-zinc-200 text-xl font-bold">Die neuesten Premium-Produkte</p>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Neu eingetroffen</h2>
+            <p className="text-gray-700 text-xl font-bold">Die neuesten Premium-Produkte</p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
@@ -232,27 +232,27 @@ export default function Home() {
               >
                 <Link
                   to={createPageUrl('ProductDetail') + `?id=${product.id}`}
-                  className="group relative glass backdrop-blur-xl border-2 border-zinc-700 rounded-3xl overflow-hidden hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/40 transition-all hover:scale-105 block"
+                  className="group relative bg-white/80 backdrop-blur-xl border-2 border-gray-200 rounded-3xl overflow-hidden hover:border-purple-400 hover:shadow-2xl hover:shadow-purple-500/20 transition-all hover:scale-105 block"
                 >
                   {product.cover_image && (
-                    <div className="aspect-square overflow-hidden bg-zinc-800 relative">
+                    <div className="aspect-square overflow-hidden bg-gray-100 relative">
                       <img
                         src={product.cover_image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                   )}
                   <div className="p-8">
-                    <div className="text-xs font-black text-purple-400 mb-3 uppercase tracking-wider">{product.sku}</div>
-                    <h3 className="font-black text-xl mb-4 line-clamp-2 text-zinc-100 group-hover:text-white transition-colors">{product.name}</h3>
+                    <div className="text-xs font-black text-purple-600 mb-3 uppercase tracking-wider">{product.sku}</div>
+                    <h3 className="font-black text-xl mb-4 line-clamp-2 text-gray-900 transition-colors">{product.name}</h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{product.price}€</span>
+                      <span className="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{product.price}€</span>
                       {product.in_stock ? (
-                        <span className="text-xs font-black text-green-300 bg-green-400/20 px-4 py-2 rounded-full border border-green-400/30">Verfügbar</span>
+                        <span className="text-xs font-black text-green-700 bg-green-100 px-4 py-2 rounded-full border border-green-300">Verfügbar</span>
                       ) : (
-                        <span className="text-xs font-black text-red-300 bg-red-400/20 px-4 py-2 rounded-full border border-red-400/30">Ausverkauft</span>
+                        <span className="text-xs font-black text-red-700 bg-red-100 px-4 py-2 rounded-full border border-red-300">Ausverkauft</span>
                       )}
                     </div>
                   </div>
@@ -271,7 +271,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center gap-3 px-10 py-5 glass backdrop-blur-xl border-2 border-purple-500/50 rounded-2xl hover:border-purple-400 hover:bg-purple-500/20 transition-all font-black text-lg text-white shadow-lg shadow-purple-500/30"
+                className="inline-flex items-center gap-3 px-10 py-5 bg-white/80 backdrop-blur-xl border-2 border-gray-200 rounded-2xl hover:border-purple-400 hover:shadow-xl hover:shadow-purple-500/20 transition-all font-black text-lg text-gray-900"
               >
                 <span className="uppercase tracking-wider">Alle Produkte ansehen</span>
                 <ChevronRight className="w-6 h-6" />
