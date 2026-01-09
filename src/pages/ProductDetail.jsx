@@ -668,7 +668,7 @@ export default function ProductDetail() {
                     key={quantity}
                     initial={{ scale: 1.2, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="w-14 text-center font-black text-xl bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent"
+                    className="w-12 sm:w-14 text-center font-black text-lg sm:text-xl text-white"
                   >
                     {quantity}
                   </motion.div>
