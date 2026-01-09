@@ -318,7 +318,7 @@ export default function ProductDetail() {
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm">
             <Link to={createPageUrl('Products')} className="text-zinc-400 hover:text-purple-400 transition-colors">
-              Produkte
+              Shop
             </Link>
             {category && (
               <>

@@ -176,37 +176,54 @@ export default function Products() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Produkte</h1>
-        <p className="text-zinc-400 text-lg">Entdecke unsere Premium-Auswahl</p>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-12 text-center"
+      >
+        <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+          Shop
+        </h1>
+        <p className="text-zinc-400 text-xl">Entdecke unsere Premium-Auswahl</p>
+      </motion.div>
 
       {/* Search Bar */}
-      <div className="mb-8">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-400" />
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mb-8 max-w-3xl mx-auto"
+      >
+        <div className="relative group">
+          <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-zinc-400 group-focus-within:text-purple-400 transition-colors" />
           <Input
             type="text"
-            placeholder="Produkte suchen..."
+            placeholder="Suche nach Produkten, Marken, Kategorien..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-14 bg-zinc-900 border-zinc-800 text-lg"
+            className="pl-14 pr-14 h-16 glass backdrop-blur-xl border-zinc-800 text-lg rounded-2xl group-focus-within:border-purple-500/50 transition-all shadow-lg"
           />
           {searchQuery && (
-            <button
+            <motion.button
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white"
+              className="absolute right-5 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-full flex items-center justify-center transition-colors"
             >
-              <X className="w-5 h-5" />
-            </button>
+              <X className="w-4 h-4" />
+            </motion.button>
           )}
         </div>
-      </div>
+      </motion.div>
 
       <div className="flex gap-8">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-24 bg-zinc-900/50 backdrop-blur border border-zinc-800 rounded-2xl p-6">
+        <aside className="hidden lg:block w-72 flex-shrink-0">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="sticky top-24 glass backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 shadow-2xl"
+          >
             <FilterSidebar
               departments={departments}
               categories={categories}
@@ -215,7 +232,7 @@ export default function Products() {
               onFilterChange={setFilters}
               onClearFilters={handleClearFilters}
             />
-          </div>
+          </motion.div>
         </aside>
 
         {/* Main Content */}
@@ -224,14 +241,14 @@ export default function Products() {
           <div className="lg:hidden mb-6">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full h-14 glass backdrop-blur-xl border-zinc-800 hover:border-purple-500/50 transition-all rounded-xl text-lg font-bold">
                   <SlidersHorizontal className="w-5 h-5 mr-2" />
                   Filter & Sortierung
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-zinc-900 border-zinc-800 w-80">
+              <SheetContent side="left" className="glass backdrop-blur-xl border-zinc-800 w-80">
                 <SheetHeader>
-                  <SheetTitle>Filter</SheetTitle>
+                  <SheetTitle className="text-2xl font-bold">Filter</SheetTitle>
                 </SheetHeader>
                 <div className="mt-6">
                   <FilterSidebar
@@ -247,11 +264,20 @@ export default function Products() {
             </Sheet>
           </div>
 
-          {/* Results Count */}
-          <div className="mb-6 flex items-center justify-between">
-            <p className="text-zinc-400">
-              {loading ? 'Laden...' : `${products.length} Produkte gefunden`}
-            </p>
+          {/* Results Count & Sort */}
+          <div className="mb-8 flex items-center justify-between glass backdrop-blur-xl border border-zinc-800 rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+              <p className="text-zinc-300 font-semibold">
+                {loading ? 'Laden...' : `${products.length} ${products.length === 1 ? 'Produkt' : 'Produkte'} gefunden`}
+              </p>
+            </div>
+            {!loading && products.length > 0 && (
+              <div className="flex items-center gap-2 text-sm text-zinc-400">
+                <span>Sortiert nach:</span>
+                <span className="text-purple-400 font-semibold">Neueste</span>
+              </div>
+            )}
           </div>
 
           {/* Products Grid */}
@@ -266,20 +292,33 @@ export default function Products() {
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-96 skeleton rounded-2xl" />
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="h-96 skeleton rounded-2xl"
+                />
               ))}
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-10 h-10 text-zinc-600" />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20"
+            >
+              <div className="w-24 h-24 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <Search className="w-12 h-12 text-zinc-600" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Keine Produkte gefunden</h3>
-              <p className="text-zinc-400 mb-6">Versuche es mit anderen Filtereinstellungen</p>
-              <Button onClick={handleClearFilters} variant="outline">
+              <h3 className="text-2xl font-bold mb-3">Keine Produkte gefunden</h3>
+              <p className="text-zinc-400 mb-8 text-lg">Versuche es mit anderen Filtereinstellungen</p>
+              <Button 
+                onClick={handleClearFilters} 
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition-transform h-12 px-8 font-bold"
+              >
                 Filter zurücksetzen
               </Button>
-            </div>
+            </motion.div>
           ) : (
             <motion.div 
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"

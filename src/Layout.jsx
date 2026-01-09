@@ -44,7 +44,7 @@ export default function Layout({ children, currentPageName }) {
 
   const navigation = [
     { name: 'Home', page: 'Home', icon: Home },
-    { name: 'Produkte', page: 'Products', icon: Package },
+    { name: 'Shop', page: 'Products', icon: Package },
     { name: 'Anfragen', page: 'Requests', icon: ShoppingBag },
   ];
 

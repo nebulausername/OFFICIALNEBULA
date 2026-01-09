@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Crown, Star, Users, ShoppingBag, Sparkles, CheckCircle2, ArrowRight, Gift, Zap, MessageCircle, Send } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -359,9 +361,9 @@ export default function VIP() {
           <div>
             <h4 className="font-bold mb-4 text-zinc-300">Shop</h4>
             <ul className="space-y-2 text-sm text-zinc-500">
-              <li><a href="/Products" className="hover:text-purple-400 transition-colors">Alle Produkte</a></li>
-              <li><a href="/Products?new=true" className="hover:text-purple-400 transition-colors">Neu eingetroffen</a></li>
-              <li><a href="/Products?sale=true" className="hover:text-purple-400 transition-colors">Sale</a></li>
+              <li><Link to={createPageUrl('Products')} className="hover:text-purple-400 transition-colors">Alle Produkte</Link></li>
+              <li><Link to={createPageUrl('Products')} className="hover:text-purple-400 transition-colors">Neu eingetroffen</Link></li>
+              <li><Link to={createPageUrl('Products')} className="hover:text-purple-400 transition-colors">Sale</Link></li>
             </ul>
           </div>
 
