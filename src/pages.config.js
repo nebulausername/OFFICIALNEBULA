@@ -12,6 +12,7 @@ import Products from './pages/Products';
 import Profile from './pages/Profile';
 import Requests from './pages/Requests';
 import VIP from './pages/VIP';
+import ProfileSettings from './pages/ProfileSettings';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "Profile": Profile,
     "Requests": Requests,
     "VIP": VIP,
+    "ProfileSettings": ProfileSettings,
 }
 
 export const pagesConfig = {

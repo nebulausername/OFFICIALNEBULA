@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import { base44 } from '@/api/base44Client';
-import { ShoppingBag, Home, Package, User, Menu, X, Star, Sparkles, ChevronDown, HelpCircle, MessageCircle, Settings, LogOut } from 'lucide-react';
+import { ShoppingBag, Home, Package, User, Menu, X, Star, Sparkles, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -42,21 +42,11 @@ export default function Layout({ children, currentPageName }) {
     }
   };
 
-  const getNavigation = () => {
-    const baseNav = [
-      { name: 'Home', page: 'Home', icon: Home },
-      { name: 'Shop', page: 'Products', icon: Package },
-    ];
-
-    // Nur Admins sehen Anfragen
-    if (user?.role === 'admin') {
-      baseNav.push({ name: 'Admin', page: 'Admin', icon: Star });
-    }
-
-    return baseNav;
-  };
-
-  const navigation = getNavigation();
+  const navigation = [
+    { name: 'Home', page: 'Home', icon: Home },
+    { name: 'Shop', page: 'Products', icon: Package },
+    { name: 'Profil', page: 'Profile', icon: User },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white">
@@ -140,126 +130,46 @@ export default function Layout({ children, currentPageName }) {
               </Link>
 
               {/* User Menu */}
-              {user && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="hidden md:flex items-center space-x-3 px-4 py-2 glass border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all hover:shadow-lg hover:shadow-purple-500/20 group">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <User className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-sm font-semibold">{user.full_name || user.email}</span>
-                      <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-purple-400 transition-colors" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    align="end"
-                    className="w-64 glass border-zinc-800 bg-zinc-950/98 backdrop-blur-2xl shadow-2xl shadow-purple-500/20 rounded-2xl p-2"
-                  >
-                    <div className="px-3 py-4 border-b border-zinc-700/50">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                          <User className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm truncate text-zinc-100">{user.full_name || 'User'}</p>
-                          <p className="text-xs text-zinc-400 truncate">{user.email}</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="py-2">
-                      <DropdownMenuItem asChild>
-                        <Link 
-                          to={createPageUrl('Profile')} 
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/80 transition-colors group"
-                        >
-                          <div className="w-8 h-8 bg-purple-500/10 rounded-lg flex items-center justify-center group-hover:bg-purple-500/20 transition-colors">
-                            <User className="w-4 h-4 text-purple-400" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm text-zinc-100">Mein Profil</p>
-                            <p className="text-xs text-zinc-400">Account verwalten</p>
-                          </div>
-                        </Link>
-                      </DropdownMenuItem>
 
-                      <DropdownMenuItem asChild>
-                        <Link 
-                          to={createPageUrl('Help')} 
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/80 transition-colors group"
-                        >
-                          <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                            <HelpCircle className="w-4 h-4 text-blue-400" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm text-zinc-100">Hilfe & Support</p>
-                            <p className="text-xs text-zinc-400">Wir helfen dir</p>
-                          </div>
-                        </Link>
-                      </DropdownMenuItem>
 
-                      <DropdownMenuItem asChild>
-                        <Link 
-                          to={createPageUrl('FAQ')} 
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-zinc-800/80 transition-colors group"
-                        >
-                          <div className="w-8 h-8 bg-green-500/10 rounded-lg flex items-center justify-center group-hover:bg-green-500/20 transition-colors">
-                            <MessageCircle className="w-4 h-4 text-green-400" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-semibold text-sm text-zinc-100">FAQ</p>
-                            <p className="text-xs text-zinc-400">Häufige Fragen</p>
-                          </div>
-                        </Link>
-                      </DropdownMenuItem>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-zinc-800 transition-colors"
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-zinc-800 bg-zinc-900">
-            <div className="px-4 py-4 space-y-2">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentPageName === item.page;
-                return (
-                  <Link
-                    key={item.page}
-                    to={createPageUrl(item.page)}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                      isActive
-                        ? 'bg-purple-500/20 text-purple-300 font-semibold'
-                        : 'text-zinc-300 hover:text-white hover:bg-zinc-800/80 font-medium'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
       </header>
 
       {/* Main Content */}
       <main className="min-h-[calc(100vh-4rem)]">
         {children}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-zinc-700/50 shadow-2xl pb-safe">
+        <div className="grid grid-cols-3 gap-1 px-2 py-3">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentPageName === item.page;
+            return (
+              <Link
+                key={item.page}
+                to={createPageUrl(item.page)}
+                className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all ${
+                  isActive
+                    ? 'bg-purple-500/20 text-purple-300'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                }`}
+              >
+                <Icon className={`w-6 h-6 ${isActive ? 'scale-110' : ''} transition-transform`} />
+                <span className={`text-xs font-bold ${isActive ? 'text-purple-300' : 'text-zinc-400'}`}>
+                  {item.name}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Footer */}
       <footer className="bg-zinc-900 border-t border-zinc-800 mt-20">
