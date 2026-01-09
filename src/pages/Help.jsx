@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { HelpCircle, Mail, MessageCircle, Phone, Send, Sparkles, Crown } from 'lucide-react';
+import { HelpCircle, Mail, MessageCircle, Phone, Send, Sparkles, Crown, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { Link } from 'react-router-dom';
@@ -50,10 +50,12 @@ export default function Help() {
     {
       icon: Phone,
       title: 'WhatsApp',
-      value: '+49 123 456789',
+      value: '+49 •••• ••••89',
+      fullValue: '+49 123 456789',
       description: 'Täglich 10-20 Uhr',
       color: 'from-green-500 to-emerald-500',
-      badge: 'VIP'
+      badge: 'VIP',
+      locked: true
     }
   ];
 
@@ -92,21 +94,36 @@ export default function Help() {
               <div className={`w-12 h-12 bg-gradient-to-br ${method.color} rounded-xl flex items-center justify-center mb-4`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-bold text-lg">{method.title}</h3>
-                {method.badge && (
-                  <Link to={createPageUrl('VIP')} className="group flex items-center gap-1.5">
-                    <span className="text-xs font-black bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent animate-gradient">
-                      VIP
-                    </span>
-                    <span className="text-xs font-bold text-pink-500 group-hover:text-pink-400 transition-colors animate-pulse">
-                      VIP?
-                    </span>
-                  </Link>
+              <h3 className="font-bold text-lg mb-2">{method.title}</h3>
+              <div className="relative group/number mb-2">
+                <p className="text-purple-400 font-mono text-sm">{method.value}</p>
+                {method.locked && (
+                  <div className="absolute inset-0 backdrop-blur-[2px] bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded flex items-center justify-center opacity-0 group-hover/number:opacity-100 transition-opacity">
+                    <Link 
+                      to={createPageUrl('VIP')}
+                      className="text-xs font-bold bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent"
+                    >
+                      VIP freischalten
+                    </Link>
+                  </div>
                 )}
               </div>
-              <p className="text-purple-400 font-mono text-sm mb-2">{method.value}</p>
-              <p className="text-zinc-500 text-sm">{method.description}</p>
+              <p className="text-zinc-500 text-sm mb-3">{method.description}</p>
+              
+              {method.badge && (
+                <Link 
+                  to={createPageUrl('VIP')} 
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-yellow-500/30 rounded-lg hover:border-yellow-500/50 transition-colors group"
+                >
+                  <span className="text-xs font-black bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
+                    VIP
+                  </span>
+                  <span className="text-xs font-bold text-pink-500 group-hover:text-pink-400 transition-colors">
+                    Mehr erfahren
+                  </span>
+                  <ArrowRight className="w-3 h-3 text-pink-500 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              )}
             </motion.div>
           );
         })}

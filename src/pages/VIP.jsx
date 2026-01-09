@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Crown, Star, Users, ShoppingBag, Sparkles, CheckCircle2, ArrowRight, Gift, Zap } from 'lucide-react';
+import { Crown, Star, Users, ShoppingBag, Sparkles, CheckCircle2, ArrowRight, Gift, Zap, MessageCircle, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -223,24 +223,167 @@ export default function VIP() {
             </div>
           </div>
 
-          {/* CTA */}
+          {/* Invite System */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="text-center"
+            className="space-y-6"
           >
-            <Button className="h-16 px-12 text-lg font-bold bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 hover:scale-105 transition-transform shadow-2xl shadow-yellow-500/50">
-              <Users className="w-6 h-6 mr-2" />
-              Jetzt Freunde einladen
-              <ArrowRight className="w-6 h-6 ml-2" />
-            </Button>
-            <p className="text-zinc-500 text-sm mt-4">
-              Teile deinen persönlichen Einladungslink und sammle VIP-Punkte
-            </p>
+            <div className="glass backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-8 bg-gradient-to-br from-yellow-500/5 to-amber-500/5">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-black mb-2 bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent">
+                  Dein Einladungslink
+                </h3>
+                <p className="text-zinc-400">Teile diesen Link und sammle VIP-Punkte</p>
+              </div>
+
+              <div className="flex gap-3 mb-6">
+                <div className="flex-1 px-4 py-3 bg-zinc-900/50 border border-zinc-700 rounded-xl font-mono text-sm truncate">
+                  {user ? `https://nebulasupply.com/invite/${user.id}` : 'Lädt...'}
+                </div>
+                <Button
+                  onClick={() => {
+                    if (user) {
+                      navigator.clipboard.writeText(`https://nebulasupply.com/invite/${user.id}`);
+                      // Show toast notification
+                    }
+                  }}
+                  className="px-6 bg-gradient-to-r from-yellow-500 to-amber-600 hover:scale-105 transition-transform"
+                >
+                  Kopieren
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (user) {
+                      window.open(`https://wa.me/?text=${encodeURIComponent(`Schau dir Nebula Supply an! 🌟 https://nebulasupply.com/invite/${user.id}`)}`, '_blank');
+                    }
+                  }}
+                  className="p-4 glass border border-zinc-800 rounded-xl hover:border-green-500/50 transition-colors group"
+                >
+                  <MessageCircle className="w-8 h-8 mx-auto mb-2 text-green-400 group-hover:scale-110 transition-transform" />
+                  <p className="text-xs font-semibold">WhatsApp</p>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (user) {
+                      window.open(`https://t.me/share/url?url=${encodeURIComponent(`https://nebulasupply.com/invite/${user.id}`)}&text=${encodeURIComponent('Schau dir Nebula Supply an! 🌟')}`, '_blank');
+                    }
+                  }}
+                  className="p-4 glass border border-zinc-800 rounded-xl hover:border-blue-500/50 transition-colors group"
+                >
+                  <Send className="w-8 h-8 mx-auto mb-2 text-blue-400 group-hover:scale-110 transition-transform" />
+                  <p className="text-xs font-semibold">Telegram</p>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (user && navigator.share) {
+                      navigator.share({
+                        title: 'Nebula Supply',
+                        text: 'Schau dir Nebula Supply an! 🌟',
+                        url: `https://nebulasupply.com/invite/${user.id}`
+                      });
+                    }
+                  }}
+                  className="p-4 glass border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-colors group"
+                >
+                  <Sparkles className="w-8 h-8 mx-auto mb-2 text-purple-400 group-hover:scale-110 transition-transform" />
+                  <p className="text-xs font-semibold">Mehr</p>
+                </motion.button>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4 text-center">
+              <div className="p-6 glass border border-zinc-800 rounded-xl">
+                <div className="text-3xl font-black text-purple-400 mb-2">{stats.normalInvites}</div>
+                <p className="text-sm text-zinc-400">Einladungen</p>
+              </div>
+              <div className="p-6 glass border border-zinc-800 rounded-xl">
+                <div className="text-3xl font-black text-green-400 mb-2">{stats.premiumInvites}</div>
+                <p className="text-sm text-zinc-400">Premium Einladungen</p>
+              </div>
+              <div className="p-6 glass border border-zinc-800 rounded-xl">
+                <div className="text-3xl font-black bg-gradient-to-r from-yellow-400 to-amber-600 bg-clip-text text-transparent mb-2">
+                  {stats.normalInvites >= 10 || stats.premiumInvites >= 5 || stats.normalInvites >= 2 ? '100%' : '0%'}
+                </div>
+                <p className="text-sm text-zinc-400">VIP Fortschritt</p>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}
+
+      {/* Footer */}
+      <motion.footer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.7 }}
+        className="mt-20 pt-12 border-t border-zinc-800"
+      >
+        <div className="grid md:grid-cols-4 gap-8 mb-12">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <Star className="w-4 h-4 text-white" fill="white" />
+              </div>
+              <span className="font-bold text-lg">Nebula Supply</span>
+            </div>
+            <p className="text-sm text-zinc-500 leading-relaxed">
+              Premium Lifestyle & Fashion - Exklusiv für dich
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4 text-zinc-300">Shop</h4>
+            <ul className="space-y-2 text-sm text-zinc-500">
+              <li><a href="/Products" className="hover:text-purple-400 transition-colors">Alle Produkte</a></li>
+              <li><a href="/Products?new=true" className="hover:text-purple-400 transition-colors">Neu eingetroffen</a></li>
+              <li><a href="/Products?sale=true" className="hover:text-purple-400 transition-colors">Sale</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4 text-zinc-300">Support</h4>
+            <ul className="space-y-2 text-sm text-zinc-500">
+              <li><a href="/Help" className="hover:text-purple-400 transition-colors">Hilfe & Support</a></li>
+              <li><a href="/FAQ" className="hover:text-purple-400 transition-colors">FAQ</a></li>
+              <li><a href="/Requests" className="hover:text-purple-400 transition-colors">Meine Anfragen</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4 text-zinc-300">VIP</h4>
+            <ul className="space-y-2 text-sm text-zinc-500">
+              <li><a href="/VIP" className="hover:text-yellow-400 transition-colors">VIP Programm</a></li>
+              <li><a href="/VIP#benefits" className="hover:text-yellow-400 transition-colors">Vorteile</a></li>
+              <li><a href="/VIP#invite" className="hover:text-yellow-400 transition-colors">Freunde einladen</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-zinc-800">
+          <div className="flex items-center gap-2 mb-4 md:mb-0">
+            <Star className="w-4 h-4 text-purple-400" fill="currentColor" />
+            <span className="text-sm text-zinc-500">© 2024 Nebula Supply. Premium Quality.</span>
+          </div>
+          <div className="flex gap-6 text-sm text-zinc-500">
+            <a href="#" className="hover:text-white transition-colors">Impressum</a>
+            <a href="#" className="hover:text-white transition-colors">Datenschutz</a>
+            <a href="#" className="hover:text-white transition-colors">AGB</a>
+          </div>
+        </div>
+      </motion.footer>
     </div>
   );
 }
