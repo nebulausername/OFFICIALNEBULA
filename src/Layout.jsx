@@ -37,8 +37,8 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Mobile Header */}
-      <MobileHeader theme={theme} toggleTheme={toggleTheme} />
+      {/* Premium Header */}
+      <PremiumHeader />
 
       {/* Main Content */}
       <main className="min-h-[calc(100vh-8rem)]">
