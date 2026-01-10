@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Search, SlidersHorizontal, X, Package, Sparkles } from 'lucide-react';
 import FilterSidebar from '../components/products/FilterSidebar';
-import ProductCard from '../components/products/ProductCard';
+import PremiumProductCard from '../components/products/PremiumProductCard';
 import ProductQuickView from '../components/products/ProductQuickView';
+import ProductRequestModal from '../components/products/ProductRequestModal';
+import EmptyStateModal from '../components/products/EmptyStateModal';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
 import {
@@ -32,6 +35,9 @@ export default function Products() {
   });
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [requestProduct, setRequestProduct] = useState(null);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [isEmptyStateModalOpen, setIsEmptyStateModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -119,6 +125,11 @@ export default function Products() {
     setIsQuickViewOpen(true);
   };
 
+  const handleRequestProduct = (product) => {
+    setRequestProduct(product);
+    setIsRequestModalOpen(true);
+  };
+
   const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
     try {
       const user = await base44.auth.me();
@@ -179,12 +190,20 @@ export default function Products() {
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-12 text-center"
+        className="mb-8 text-center relative"
       >
-        <h1 className="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient">
+        <motion.div
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+          className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
+        />
+        <h1 className="text-6xl md:text-7xl font-black mb-3 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent relative">
           Shop
         </h1>
-        <p className="text-zinc-400 text-xl">Entdecke unsere Premium-Auswahl</p>
+        <p className="text-zinc-300 text-lg md:text-xl font-medium">Entdecke unsere Premium-Auswahl</p>
       </motion.div>
 
       {/* Search Bar */}
@@ -192,27 +211,36 @@ export default function Products() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="mb-8 max-w-3xl mx-auto"
+        className="mb-10 max-w-4xl mx-auto"
       >
         <div className="relative group">
-          <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 w-6 h-6 text-zinc-400 group-focus-within:text-purple-400 transition-colors" />
-          <Input
-            type="text"
-            placeholder="Suche nach Produkten, Marken, Kategorien..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-14 pr-14 h-16 glass backdrop-blur-xl border-zinc-800 text-lg rounded-2xl group-focus-within:border-purple-500/50 transition-all shadow-lg"
-          />
-          {searchQuery && (
-            <motion.button
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              onClick={() => setSearchQuery('')}
-              className="absolute right-5 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-zinc-800 hover:bg-zinc-700 rounded-full flex items-center justify-center transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </motion.button>
-          )}
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity" />
+          <div className="relative flex items-center">
+            <Search className="absolute left-6 w-6 h-6 text-zinc-500 group-focus-within:text-purple-400 transition-colors z-10" />
+            <Input
+              type="text"
+              placeholder="Suchbegriff, Produkt-ID oder Marke… wir finden's für dich ✨"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-16 pr-24 h-16 glass backdrop-blur-xl border-2 border-zinc-800/50 text-white text-base md:text-lg rounded-2xl group-focus-within:border-purple-500/50 transition-all shadow-xl placeholder:text-zinc-500 font-medium"
+            />
+            {searchQuery ? (
+              <motion.button
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 w-10 h-10 bg-zinc-800/80 hover:bg-zinc-700 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+              >
+                <X className="w-5 h-5 text-zinc-300" />
+              </motion.button>
+            ) : (
+              <div className="absolute right-6 hidden md:flex items-center gap-2">
+                <Badge variant="outline" className="text-xs border-zinc-700 text-zinc-500 font-mono">
+                  ⌘K
+                </Badge>
+              </div>
+            )}
+          </div>
         </div>
       </motion.div>
 
@@ -265,20 +293,44 @@ export default function Products() {
           </div>
 
           {/* Results Count & Sort */}
-          <div className="mb-8 flex items-center justify-between glass backdrop-blur-xl border border-zinc-800 rounded-xl p-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-5"
+          >
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
-              <p className="text-zinc-300 font-semibold">
-                {loading ? 'Laden...' : `${products.length} ${products.length === 1 ? 'Produkt' : 'Produkte'} gefunden`}
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-2.5 h-2.5 bg-purple-500 rounded-full shadow-lg shadow-purple-500/50"
+              />
+              <p className="text-white font-bold text-base">
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 animate-spin" />
+                    Laden...
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      {products.length}
+                    </span>
+                    <span className="text-zinc-300 ml-2">
+                      {products.length === 1 ? 'Produkt' : 'Produkte'} gefunden
+                    </span>
+                  </>
+                )}
               </p>
             </div>
             {!loading && products.length > 0 && (
-              <div className="flex items-center gap-2 text-sm text-zinc-400">
-                <span>Sortiert nach:</span>
-                <span className="text-purple-400 font-semibold">Neueste</span>
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-zinc-400 font-medium">Sortiert nach:</span>
+                <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30 font-bold">
+                  Neueste zuerst
+                </Badge>
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Products Grid */}
           {/* Quick View Modal */}
@@ -287,6 +339,20 @@ export default function Products() {
             isOpen={isQuickViewOpen}
             onClose={() => setIsQuickViewOpen(false)}
             onAddToCart={handleAddToCart}
+          />
+
+          {/* Product Request Modal */}
+          <ProductRequestModal
+            product={requestProduct}
+            isOpen={isRequestModalOpen}
+            onClose={() => setIsRequestModalOpen(false)}
+          />
+
+          {/* Empty State Modal */}
+          <EmptyStateModal
+            isOpen={isEmptyStateModalOpen}
+            onClose={() => setIsEmptyStateModalOpen(false)}
+            searchQuery={searchQuery}
           />
 
           {loading ? (
@@ -307,17 +373,40 @@ export default function Products() {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-20"
             >
-              <div className="w-24 h-24 bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                <Search className="w-12 h-12 text-zinc-600" />
-              </div>
-              <h3 className="text-2xl font-bold mb-3">Keine Produkte gefunden</h3>
-              <p className="text-zinc-400 mb-8 text-lg">Versuche es mit anderen Filtereinstellungen</p>
-              <Button 
-                onClick={handleClearFilters} 
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition-transform h-12 px-8 font-bold"
+              <motion.div
+                animate={{ 
+                  rotate: [0, 10, -10, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="w-32 h-32 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-xl border-2 border-zinc-700/50 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl"
               >
-                Filter zurücksetzen
-              </Button>
+                <Package className="w-16 h-16 text-zinc-600" />
+              </motion.div>
+              <h3 className="text-3xl font-black text-white mb-4">Nichts gefunden 😕</h3>
+              <p className="text-zinc-400 mb-8 text-lg max-w-md mx-auto leading-relaxed">
+                {searchQuery 
+                  ? `Keine Treffer für "${searchQuery}". Willst du es anfragen?`
+                  : 'Versuche es mit anderen Filtereinstellungen'}
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button 
+                  onClick={handleClearFilters} 
+                  variant="outline"
+                  className="bg-zinc-900 border-zinc-700 hover:bg-zinc-800 h-12 px-8 font-bold text-white"
+                >
+                  Filter zurücksetzen
+                </Button>
+                {searchQuery && (
+                  <Button 
+                    onClick={() => setIsEmptyStateModalOpen(true)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 transition-transform h-12 px-8 font-bold shadow-xl shadow-purple-500/30"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Produkt anfragen
+                  </Button>
+                )}
+              </div>
             </motion.div>
           ) : (
             <motion.div 
@@ -332,10 +421,11 @@ export default function Products() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <ProductCard
+                  <PremiumProductCard
                     product={product}
                     onAddToCart={handleAddToCart}
                     onQuickView={handleQuickView}
+                    onRequestProduct={handleRequestProduct}
                   />
                 </motion.div>
               ))}
