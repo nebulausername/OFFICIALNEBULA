@@ -136,7 +136,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-zinc-950 to-zinc-900 border-2 border-purple-500/30 p-0 rounded-3xl shadow-2xl shadow-purple-600/40">
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-white border-0 p-0 rounded-3xl shadow-2xl sm:rounded-3xl">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
