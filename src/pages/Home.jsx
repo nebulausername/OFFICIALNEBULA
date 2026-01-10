@@ -71,11 +71,17 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-zinc-100 to-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-950 to-black">
+        {/* Animated Background Effects */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+
         {/* Content */}
-        <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-20">
+        <div className="relative max-w-7xl mx-auto px-4 py-16 md:py-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -83,33 +89,50 @@ export default function Home() {
             className="text-center"
           >
             <motion.div
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="inline-block mb-6"
+              animate={{ 
+                scale: [1, 1.05, 1],
+                rotate: [0, 5, -5, 0]
+              }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="inline-block mb-8"
             >
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto shadow-xl shadow-purple-500/30">
-                <Star className="w-8 h-8 md:w-10 md:h-10 text-white" fill="white" />
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto shadow-2xl shadow-purple-500/50">
+                <Star className="w-10 h-10 md:w-12 md:h-12 text-white" fill="white" />
               </div>
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 leading-tight text-zinc-900">
-              Premium Lifestyle
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-5xl sm:text-6xl md:text-7xl font-black mb-6 leading-tight"
+            >
+              <span className="text-white">Premium Lifestyle</span>
               <br />
-              <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
                 Exklusiv für dich
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-base md:text-lg text-zinc-600 mb-8 max-w-xl mx-auto">
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg md:text-xl text-zinc-300 mb-10 max-w-2xl mx-auto font-medium"
+            >
               Entdecke die neuesten Trends in Streetwear, Sneaker & Accessoires
-            </p>
+            </motion.p>
 
             <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
             >
               <Link to={createPageUrl('Products')}>
-                <Button className="h-14 px-10 text-base font-black bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-xl hover:shadow-purple-500/40 rounded-xl text-white">
-                  <Sparkles className="w-5 h-5 mr-2" />
+                <Button className="h-16 px-12 text-lg font-black bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 hover:shadow-2xl hover:shadow-purple-500/50 rounded-2xl text-white transition-all">
+                  <Sparkles className="w-6 h-6 mr-2" />
                   Jetzt shoppen
                 </Button>
               </Link>
@@ -119,24 +142,24 @@ export default function Home() {
       </section>
 
       {/* Departments Section */}
-      <section className="py-12">
+      <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-8"
+            className="mb-10 text-center"
           >
-            <h2 className="text-2xl md:text-3xl font-black text-zinc-900 mb-2">
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-3">
               Kategorien
             </h2>
-            <p className="text-zinc-600">Entdecke unsere Produktwelten</p>
+            <p className="text-zinc-300 text-lg font-medium">Entdecke unsere Produktwelten</p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
             {loadingDepts ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="skeleton aspect-square rounded-xl" />
+                <div key={i} className="skeleton aspect-square rounded-2xl" />
               ))
             ) : (
               departments.map((dept, index) => (
@@ -146,18 +169,23 @@ export default function Home() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.05 }}
+                  whileHover={{ y: -6, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                   className="group"
                 >
                   <Link
                     to={createPageUrl('Products') + `?department=${dept.id}`}
-                    className="block bg-white border border-zinc-200 rounded-xl p-6 hover:border-purple-400 hover:shadow-lg transition-all"
+                    className="block glass backdrop-blur-xl border-2 border-zinc-800/50 rounded-2xl p-6 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all"
                   >
-                    <div className="aspect-square flex flex-col items-center justify-center gap-4">
-                      <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                        <Package className="w-7 h-7 text-white" />
-                      </div>
-                      <h3 className="text-sm font-black text-center text-zinc-900 group-hover:text-purple-600 transition-colors">
+                    <div className="aspect-square flex flex-col items-center justify-center gap-5">
+                      <motion.div 
+                        whileHover={{ rotate: 360, scale: 1.15 }}
+                        transition={{ duration: 0.5 }}
+                        className="w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/40"
+                      >
+                        <Package className="w-8 h-8 text-white" />
+                      </motion.div>
+                      <h3 className="text-base font-black text-center text-white group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
                         {dept.name}
                       </h3>
                     </div>
@@ -172,9 +200,9 @@ export default function Home() {
       {/* Featured Products - Premium Redesign */}
       <section className="py-20 relative overflow-hidden">
         {/* Premium Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 via-white to-zinc-50" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.05),transparent_40%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(236,72,153,0.05),transparent_40%)]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(236,72,153,0.15),transparent_50%)]" />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Section Header */}
@@ -188,16 +216,16 @@ export default function Home() {
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 mb-6 bg-white/80 backdrop-blur-sm border border-zinc-200/60 rounded-full shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 mb-8 glass backdrop-blur-xl border-2 border-purple-500/30 rounded-full shadow-xl shadow-purple-500/20"
             >
-              <Sparkles className="w-4 h-4 text-purple-600" />
-              <span className="text-xs font-black text-zinc-700 uppercase tracking-wider">Fresh Arrivals</span>
+              <Sparkles className="w-5 h-5 text-purple-400" />
+              <span className="text-sm font-black text-purple-300 uppercase tracking-wider">Fresh Arrivals</span>
             </motion.div>
             
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-zinc-900 mb-4 tracking-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-5 tracking-tight">
               Neu eingetroffen
             </h2>
-            <p className="text-base sm:text-lg text-zinc-600 max-w-2xl mx-auto font-medium">
+            <p className="text-lg sm:text-xl text-zinc-300 max-w-2xl mx-auto font-medium">
               Die neuesten Drops – handverlesen, limitiert, authentisch
             </p>
           </motion.div>
@@ -231,10 +259,10 @@ export default function Home() {
                       <motion.div
                         whileHover={{ y: -8 }}
                         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        className="bg-white rounded-2xl overflow-hidden border border-zinc-200/60 shadow-sm hover:shadow-xl hover:shadow-zinc-900/10 hover:border-zinc-300 transition-all duration-300"
+                        className="glass backdrop-blur-xl rounded-2xl overflow-hidden border-2 border-zinc-800/50 shadow-xl hover:shadow-2xl hover:shadow-purple-500/30 hover:border-purple-500/60 transition-all duration-300"
                       >
                         {/* Image Container */}
-                        <div className="relative aspect-[3/4] overflow-hidden bg-zinc-50">
+                        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-800">
                           {product.cover_image ? (
                             <motion.img
                               whileHover={{ scale: 1.08 }}
@@ -245,17 +273,17 @@ export default function Home() {
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <Package className="w-16 h-16 text-zinc-300" />
+                              <Package className="w-16 h-16 text-zinc-600" />
                             </div>
                           )}
                           
                           {/* Availability Badge */}
                           {product.in_stock ? (
-                            <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm border border-green-500/20 text-green-700 text-xs font-black rounded-full shadow-sm">
+                            <div className="absolute top-3 right-3 px-3.5 py-2 bg-green-500/90 backdrop-blur-sm text-white text-xs font-black rounded-full shadow-lg shadow-green-500/50">
                               ✓ Verfügbar
                             </div>
                           ) : (
-                            <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm border border-red-500/20 text-red-700 text-xs font-black rounded-full shadow-sm">
+                            <div className="absolute top-3 right-3 px-3.5 py-2 bg-red-500/90 backdrop-blur-sm text-white text-xs font-black rounded-full shadow-lg shadow-red-500/50">
                               Ausverkauft
                             </div>
                           )}
@@ -264,7 +292,7 @@ export default function Home() {
                           <motion.div
                             initial={{ opacity: 0 }}
                             whileHover={{ opacity: 1 }}
-                            className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6"
+                            className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6"
                           >
                             <motion.button
                               initial={{ y: 20, opacity: 0 }}
@@ -276,7 +304,7 @@ export default function Home() {
                                 setQuickViewProduct(product);
                                 setIsQuickViewOpen(true);
                               }}
-                              className="px-6 py-3 bg-white text-zinc-900 font-black text-sm rounded-xl shadow-lg hover:bg-purple-600 hover:text-white transition-all duration-200"
+                              className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black text-sm rounded-xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-200"
                             >
                               Quick View
                             </motion.button>
@@ -285,15 +313,15 @@ export default function Home() {
 
                         {/* Product Info */}
                         <div className="p-5 space-y-3">
-                          <h3 className="font-bold text-base text-zinc-900 line-clamp-2 leading-snug group-hover:text-purple-600 transition-colors">
+                          <h3 className="font-bold text-base text-white line-clamp-2 leading-snug group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
                             {product.name}
                           </h3>
                           
                           <div className="flex items-baseline justify-between">
-                            <div className="text-2xl font-black text-zinc-900">
+                            <div className="text-2xl font-black text-white">
                               {product.price}€
                             </div>
-                            <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                            <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
                               {product.sku}
                             </div>
                           </div>
@@ -321,9 +349,89 @@ export default function Home() {
             className="text-center"
           >
             <Link to={createPageUrl('Products')}>
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Button className="h-14 px-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-base rounded-2xl shadow-lg shadow-purple-600/25 hover:shadow-xl hover:shadow-purple-600/40 transition-all">
+              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
+                <Button className="h-16 px-14 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 hover:from-purple-400 hover:via-pink-400 hover:to-purple-500 text-white font-black text-lg rounded-2xl shadow-2xl shadow-purple-600/40 hover:shadow-purple-600/60 transition-all">
                   Alle Produkte ansehen
+                </Button>
+              </motion.div>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* VIP Section */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 via-purple-900/20 to-pink-900/20" />
+        <div className="absolute inset-0">
+          <div className="absolute top-10 right-10 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-10 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="glass backdrop-blur-2xl border-2 border-yellow-500/30 rounded-3xl p-8 md:p-12 text-center shadow-2xl shadow-yellow-500/20"
+          >
+            {/* Crown Icon */}
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                y: [0, -10, 0]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="inline-block mb-6"
+            >
+              <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-yellow-500/50">
+                <span className="text-4xl">👑</span>
+              </div>
+            </motion.div>
+
+            <h2 className="text-3xl md:text-5xl font-black mb-4">
+              <span className="bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-300 bg-clip-text text-transparent">
+                VIP Premium Access
+              </span>
+            </h2>
+
+            <p className="text-lg md:text-xl text-zinc-200 mb-8 max-w-2xl mx-auto font-medium">
+              Werde VIP-Mitglied und erhalte exklusive Vorteile, frühen Zugang zu Drops und besondere Rabatte
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6 mb-10">
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.03 }}
+                className="glass backdrop-blur-xl border-2 border-yellow-500/20 rounded-2xl p-6"
+              >
+                <div className="text-3xl mb-3">⚡</div>
+                <h3 className="font-black text-white mb-2">Early Access</h3>
+                <p className="text-sm text-zinc-300">Erster Zugriff auf neue Produkte</p>
+              </motion.div>
+
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.03 }}
+                className="glass backdrop-blur-xl border-2 border-yellow-500/20 rounded-2xl p-6"
+              >
+                <div className="text-3xl mb-3">💎</div>
+                <h3 className="font-black text-white mb-2">Exklusive Deals</h3>
+                <p className="text-sm text-zinc-300">Spezielle VIP-Rabatte & Angebote</p>
+              </motion.div>
+
+              <motion.div 
+                whileHover={{ y: -5, scale: 1.03 }}
+                className="glass backdrop-blur-xl border-2 border-yellow-500/20 rounded-2xl p-6"
+              >
+                <div className="text-3xl mb-3">🎁</div>
+                <h3 className="font-black text-white mb-2">Priority Support</h3>
+                <p className="text-sm text-zinc-300">Bevorzugter Kundenservice</p>
+              </motion.div>
+            </div>
+
+            <Link to={createPageUrl('VIP')}>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Button className="h-16 px-12 bg-gradient-to-r from-yellow-500 via-amber-500 to-yellow-600 hover:from-yellow-400 hover:via-amber-400 hover:to-yellow-500 text-zinc-900 font-black text-lg rounded-2xl shadow-2xl shadow-yellow-500/40 hover:shadow-yellow-500/60 transition-all">
+                  <span className="mr-2">👑</span>
+                  VIP werden
                 </Button>
               </motion.div>
             </Link>
