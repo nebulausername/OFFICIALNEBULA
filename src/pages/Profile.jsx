@@ -64,9 +64,9 @@ export default function Profile() {
       stat: null
     },
     {
-      title: 'Meine Anfragen',
+      title: 'Meine Bestellungen',
       description: 'Bestellungen & Status verfolgen',
-      icon: ShoppingBag,
+      icon: Package,
       color: 'from-blue-500 to-cyan-500',
       link: createPageUrl('Requests'),
       stat: stats.requestCount
@@ -216,7 +216,7 @@ export default function Profile() {
             <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-purple-400 to-pink-400' : 'bg-gradient-to-r from-purple-600 to-pink-600'} bg-clip-text text-transparent`}>
               {stats.requestCount}
             </div>
-            <p className={`text-sm font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Anfragen</p>
+            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>Bestellungen</p>
           </motion.div>
 
           <motion.div
@@ -236,7 +236,7 @@ export default function Profile() {
             <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>
               {stats.cartCount}
             </div>
-            <p className={`text-sm font-bold ${isDark ? 'text-zinc-400' : 'text-zinc-600'}`}>Im Warenkorb</p>
+            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>Im Warenkorb</p>
           </motion.div>
         </motion.div>
 
@@ -254,33 +254,43 @@ export default function Profile() {
               >
                 <Link
                   to={item.link}
-                  className="block glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl p-6 hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all group relative overflow-hidden"
+                  className="block glass backdrop-blur-xl border-2 border-zinc-800/50 rounded-2xl p-6 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all group relative overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/8 to-pink-500/8 opacity-0 group-hover:opacity-100 transition-opacity" />
                   
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-4">
-                      <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                        <Icon className="w-7 h-7 text-white" />
-                      </div>
+                      <motion.div 
+                        whileHover={{ rotate: 360, scale: 1.15 }}
+                        transition={{ duration: 0.6 }}
+                        className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all`}
+                      >
+                        <Icon className="w-8 h-8 text-white" />
+                      </motion.div>
                       
                       {item.badge ? (
-                        <div className={`px-3 py-1 bg-gradient-to-r ${item.color} rounded-full text-xs font-bold shadow-lg`}>
+                        <motion.div 
+                          whileHover={{ scale: 1.1 }}
+                          className={`px-3.5 py-1.5 bg-gradient-to-r ${item.color} rounded-full text-xs font-black shadow-lg text-white`}
+                        >
                           {item.badge}
-                        </div>
+                        </motion.div>
                       ) : item.stat !== null && item.stat > 0 ? (
-                        <div className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs font-bold text-purple-400">
+                        <motion.div 
+                          whileHover={{ scale: 1.15 }}
+                          className="px-3.5 py-1.5 bg-purple-500/30 border-2 border-purple-500/50 rounded-full text-xs font-black text-purple-300 shadow-lg"
+                        >
                           {item.stat}
-                        </div>
+                        </motion.div>
                       ) : (
-                        <ArrowRight className="w-5 h-5 text-zinc-500 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-6 h-6 text-zinc-600 group-hover:text-purple-400 group-hover:translate-x-2 transition-all" />
                       )}
                     </div>
                     
-                    <h3 className="font-black text-xl mb-2 text-zinc-100 group-hover:text-purple-300 transition-colors">
+                    <h3 className="font-black text-xl mb-2 text-white group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
                       {item.title}
                     </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed">
+                    <p className="text-sm text-zinc-300 leading-relaxed font-medium">
                       {item.description}
                     </p>
                   </div>
@@ -295,13 +305,18 @@ export default function Profile() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleLogout}
-          className="w-full glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl p-5 hover:border-red-500/50 transition-all group flex items-center justify-center gap-3"
+          className="w-full glass backdrop-blur-xl border-2 border-zinc-800/50 rounded-2xl p-5 hover:border-red-500/60 hover:bg-red-500/10 hover:shadow-xl hover:shadow-red-500/20 transition-all group flex items-center justify-center gap-3"
         >
-          <LogOut className="w-5 h-5 text-zinc-400 group-hover:text-red-400 transition-colors" />
-          <span className="font-bold text-zinc-300 group-hover:text-red-400 transition-colors">
+          <motion.div
+            whileHover={{ rotate: 180 }}
+            transition={{ duration: 0.3 }}
+          >
+            <LogOut className="w-6 h-6 text-zinc-400 group-hover:text-red-400 transition-colors" />
+          </motion.div>
+          <span className="font-black text-lg text-zinc-200 group-hover:text-red-400 transition-colors">
             Abmelden
           </span>
         </motion.button>
@@ -312,30 +327,48 @@ export default function Profile() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="glass backdrop-blur border border-zinc-800 rounded-xl p-5 text-center"
+            whileHover={{ y: -5, scale: 1.03 }}
+            className="glass backdrop-blur border-2 border-zinc-800/50 rounded-2xl p-6 text-center hover:border-purple-500/40 hover:shadow-xl hover:shadow-purple-500/20 transition-all group"
           >
-            <Zap className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-            <p className="text-xs text-zinc-400 font-semibold">Schneller Support</p>
+            <motion.div
+              whileHover={{ rotate: 360, scale: 1.2 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Zap className="w-10 h-10 text-purple-400 mx-auto mb-3 group-hover:text-purple-300" />
+            </motion.div>
+            <p className="text-sm text-zinc-300 font-bold">Schneller Support</p>
           </motion.div>
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="glass backdrop-blur border border-zinc-800 rounded-xl p-5 text-center"
+            whileHover={{ y: -5, scale: 1.03 }}
+            className="glass backdrop-blur border-2 border-zinc-800/50 rounded-2xl p-6 text-center hover:border-green-500/40 hover:shadow-xl hover:shadow-green-500/20 transition-all group"
           >
-            <Shield className="w-8 h-8 text-green-400 mx-auto mb-3" />
-            <p className="text-xs text-zinc-400 font-semibold">100% Sicher</p>
+            <motion.div
+              whileHover={{ rotate: 360, scale: 1.2 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Shield className="w-10 h-10 text-green-400 mx-auto mb-3 group-hover:text-green-300" />
+            </motion.div>
+            <p className="text-sm text-zinc-300 font-bold">100% Sicher</p>
           </motion.div>
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="glass backdrop-blur border border-zinc-800 rounded-xl p-5 text-center"
+            whileHover={{ y: -5, scale: 1.03 }}
+            className="glass backdrop-blur border-2 border-zinc-800/50 rounded-2xl p-6 text-center hover:border-yellow-500/40 hover:shadow-xl hover:shadow-yellow-500/20 transition-all group"
           >
-            <Star className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
-            <p className="text-xs text-zinc-400 font-semibold">Premium Qualität</p>
+            <motion.div
+              whileHover={{ rotate: 360, scale: 1.2 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Star className="w-10 h-10 text-yellow-400 mx-auto mb-3 group-hover:text-yellow-300" fill="currentColor" />
+            </motion.div>
+            <p className="text-sm text-zinc-300 font-bold">Premium Qualität</p>
           </motion.div>
         </div>
       </div>
