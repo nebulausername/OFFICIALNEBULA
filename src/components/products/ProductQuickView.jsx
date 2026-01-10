@@ -220,12 +220,12 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                 )}
                 </motion.div>
 
-                {/* Details Section */}
+                {/* Product Info Section */}
                 <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 }}
-                className="p-6 flex flex-col bg-gradient-to-br from-zinc-900/50 to-zinc-900/20"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="p-8 flex flex-col bg-white relative"
                 >
             {/* Header */}
             <div className="mb-6">
