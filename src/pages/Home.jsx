@@ -169,97 +169,138 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
+      {/* Featured Products - Premium Redesign */}
+      <section className="py-20 relative overflow-hidden">
+        {/* Premium Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-50 via-white to-zinc-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(139,92,246,0.05),transparent_40%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(236,72,153,0.05),transparent_40%)]" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Section Header */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex items-center justify-between mb-8"
+            className="text-center mb-16"
           >
-            <div>
-              <h2 className="text-2xl md:text-3xl font-black text-zinc-900 mb-2">
-                Neu eingetroffen
-              </h2>
-              <p className="text-zinc-600">Die neuesten Highlights</p>
-            </div>
-            <Link to={createPageUrl('Products')}>
-              <Button variant="outline" className="hidden md:flex border-zinc-300 text-zinc-900 hover:border-purple-500 hover:text-purple-600 font-bold">
-                Alle →
-              </Button>
-            </Link>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 mb-6 bg-white/80 backdrop-blur-sm border border-zinc-200/60 rounded-full shadow-sm"
+            >
+              <Sparkles className="w-4 h-4 text-purple-600" />
+              <span className="text-xs font-black text-zinc-700 uppercase tracking-wider">Fresh Arrivals</span>
+            </motion.div>
+            
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-zinc-900 mb-4 tracking-tight">
+              Neu eingetroffen
+            </h2>
+            <p className="text-base sm:text-lg text-zinc-600 max-w-2xl mx-auto font-medium">
+              Die neuesten Drops – handverlesen, limitiert, authentisch
+            </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {/* Premium Product Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {loadingProducts ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-3">
-                  <div className="skeleton aspect-square rounded-xl" />
+                <div key={i} className="space-y-4">
+                  <div className="skeleton aspect-[3/4] rounded-2xl" />
                   <div className="skeleton h-5 w-3/4 rounded" />
-                  <div className="skeleton h-6 w-1/2 rounded" />
+                  <div className="skeleton h-7 w-1/2 rounded" />
                 </div>
               ))
             ) : (
               products.slice(0, 4).map((product, index) => (
                 <motion.div
                   key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group relative"
+                  transition={{ delay: index * 0.08, type: "spring", stiffness: 100 }}
+                  className="group"
                 >
-                  <Link
-                    to={createPageUrl('ProductDetail') + `?id=${product.id}`}
-                    className="block bg-white border border-zinc-200 rounded-xl overflow-hidden hover:border-purple-400 hover:shadow-lg transition-all"
-                  >
-                    <div className="relative aspect-square overflow-hidden bg-zinc-100">
-                      {product.cover_image ? (
-                        <img
-                          src={product.cover_image}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package className="w-12 h-12 text-zinc-300" />
+                  <div className="relative">
+                    {/* Product Card */}
+                    <Link
+                      to={createPageUrl('ProductDetail') + `?id=${product.id}`}
+                      className="block"
+                    >
+                      <motion.div
+                        whileHover={{ y: -8 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        className="bg-white rounded-2xl overflow-hidden border border-zinc-200/60 shadow-sm hover:shadow-xl hover:shadow-zinc-900/10 hover:border-zinc-300 transition-all duration-300"
+                      >
+                        {/* Image Container */}
+                        <div className="relative aspect-[3/4] overflow-hidden bg-zinc-50">
+                          {product.cover_image ? (
+                            <motion.img
+                              whileHover={{ scale: 1.08 }}
+                              transition={{ duration: 0.6, ease: "easeOut" }}
+                              src={product.cover_image}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Package className="w-16 h-16 text-zinc-300" />
+                            </div>
+                          )}
+                          
+                          {/* Availability Badge */}
+                          {product.in_stock ? (
+                            <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm border border-green-500/20 text-green-700 text-xs font-black rounded-full shadow-sm">
+                              ✓ Verfügbar
+                            </div>
+                          ) : (
+                            <div className="absolute top-3 right-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm border border-red-500/20 text-red-700 text-xs font-black rounded-full shadow-sm">
+                              Ausverkauft
+                            </div>
+                          )}
+                          
+                          {/* Quick View Overlay */}
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            whileHover={{ opacity: 1 }}
+                            className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6"
+                          >
+                            <motion.button
+                              initial={{ y: 20, opacity: 0 }}
+                              whileHover={{ y: 0, opacity: 1, scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              transition={{ delay: 0.1 }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setQuickViewProduct(product);
+                                setIsQuickViewOpen(true);
+                              }}
+                              className="px-6 py-3 bg-white text-zinc-900 font-black text-sm rounded-xl shadow-lg hover:bg-purple-600 hover:text-white transition-all duration-200"
+                            >
+                              Quick View
+                            </motion.button>
+                          </motion.div>
                         </div>
-                      )}
-                      {product.in_stock ? (
-                        <span className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-md">
-                          Verfügbar
-                        </span>
-                      ) : (
-                        <span className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-md">
-                          Ausverkauft
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-sm mb-2 line-clamp-2 text-zinc-900 group-hover:text-purple-600 transition-colors">
-                        {product.name}
-                      </h3>
-                      <div className="text-xl font-black text-zinc-900">
-                        {product.price}€
-                      </div>
-                    </div>
-                  </Link>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setQuickViewProduct(product);
-                      setIsQuickViewOpen(true);
-                    }}
-                    className="absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl"
-                  >
-                    <Button className="bg-white text-zinc-900 hover:bg-purple-500 hover:text-white font-black px-6 py-2">
-                      Quick View
-                    </Button>
-                  </motion.button>
+
+                        {/* Product Info */}
+                        <div className="p-5 space-y-3">
+                          <h3 className="font-bold text-base text-zinc-900 line-clamp-2 leading-snug group-hover:text-purple-600 transition-colors">
+                            {product.name}
+                          </h3>
+                          
+                          <div className="flex items-baseline justify-between">
+                            <div className="text-2xl font-black text-zinc-900">
+                              {product.price}€
+                            </div>
+                            <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                              {product.sku}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </Link>
+                  </div>
                 </motion.div>
               ))
             )}
@@ -272,13 +313,21 @@ export default function Home() {
             onAddToCart={handleAddToCart}
           />
 
-          <div className="text-center">
+          {/* View All CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
             <Link to={createPageUrl('Products')}>
-              <Button className="h-12 px-8 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg text-base font-black rounded-xl text-white">
-                Alle Produkte ansehen
-              </Button>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                <Button className="h-14 px-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-base rounded-2xl shadow-lg shadow-purple-600/25 hover:shadow-xl hover:shadow-purple-600/40 transition-all">
+                  Alle Produkte ansehen
+                </Button>
+              </motion.div>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>
