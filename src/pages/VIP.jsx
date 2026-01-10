@@ -409,7 +409,7 @@ export default function VIP() {
         <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-zinc-800">
           <div className="flex items-center gap-2 mb-4 md:mb-0">
             <Star className="w-4 h-4 text-purple-400" fill="currentColor" />
-            <span className="text-sm text-zinc-500">© 2024 Nebula Supply. Premium Quality.</span>
+            <span className="text-sm text-zinc-500">© 2026 Nebula Supply. Premium Quality.</span>
           </div>
           <div className="flex gap-6 text-sm text-zinc-500">
             <a href="#" className="hover:text-white transition-colors">Impressum</a>
