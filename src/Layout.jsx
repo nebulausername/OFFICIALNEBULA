@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import MobileHeader from './components/layout/MobileHeader';
+import PremiumHeader from './components/layout/PremiumHeader';
 import { Star } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
