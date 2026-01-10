@@ -227,47 +227,56 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                   transition={{ delay: 0.15 }}
                   className="p-8 flex flex-col bg-white relative"
                 >
-            {/* Header */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Badge variant="outline" className="text-purple-400 border-purple-500/50 font-mono font-black">
-                  ID: {product.sku}
-                </Badge>
+            {/* Close Button */}
+            <button
+              onClick={onClose}
+              className="absolute top-6 right-6 p-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors z-10"
+            >
+              <X className="w-5 h-5 text-zinc-700" />
+            </button>
+
+            {/* Product Header */}
+            <div className="mb-8 space-y-4">
+              {/* Brand & SKU */}
+              <div className="flex items-center gap-2 flex-wrap">
                 {brand && (
-                  <Badge variant="outline" className="text-zinc-400">
+                  <span className="text-sm font-bold text-zinc-500 uppercase tracking-wider">
                     {brand.name}
-                  </Badge>
+                  </span>
                 )}
-                {category && (
-                  <Badge variant="outline" className="text-zinc-400">
-                    {category.name}
-                  </Badge>
-                )}
-                {product.in_stock ? (
-                  <Badge className="bg-green-500/20 text-green-400 border border-green-500/30">
-                    Verfügbar
-                  </Badge>
-                ) : (
-                  <Badge className="bg-red-500/20 text-red-400 border border-red-500/30">
-                    Ausverkauft
-                  </Badge>
-                )}
+                {brand && <span className="text-zinc-300">•</span>}
+                <span className="text-sm font-mono font-bold text-zinc-400">
+                  {product.sku}
+                </span>
               </div>
               
-              <h2 className="text-3xl font-black mb-4">{product.name}</h2>
+              {/* Product Name */}
+              <h2 className="text-3xl md:text-4xl font-black text-zinc-900 leading-tight">
+                {product.name}
+              </h2>
               
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-4xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              {/* Price & Availability */}
+              <div className="flex items-center justify-between">
+                <div className="text-4xl font-black text-zinc-900">
                   {product.price}€
-                </span>
-                {product.currency && product.currency !== 'EUR' && (
-                  <span className="text-sm text-zinc-500">{product.currency}</span>
+                </div>
+                {product.in_stock ? (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-xl">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-sm font-black text-green-700">Verfügbar</span>
+                  </div>
+                ) : (
+                  <div className="px-4 py-2 bg-red-50 border border-red-200 rounded-xl">
+                    <span className="text-sm font-black text-red-700">Ausverkauft</span>
+                  </div>
                 )}
               </div>
 
-              {/* Description */}
+              {/* Short Description */}
               {product.description && (
-                <p className="text-zinc-400 leading-relaxed">{product.description}</p>
+                <p className="text-zinc-600 leading-relaxed text-sm">
+                  {product.description}
+                </p>
               )}
             </div>
 
