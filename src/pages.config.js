@@ -16,6 +16,7 @@ import VIP from './pages/VIP';
 import Wishlist from './pages/Wishlist';
 import Support from './pages/Support';
 import AdminSupport from './pages/AdminSupport';
+import SupportTicketDetail from './pages/SupportTicketDetail';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +39,7 @@ export const PAGES = {
     "Wishlist": Wishlist,
     "Support": Support,
     "AdminSupport": AdminSupport,
+    "SupportTicketDetail": SupportTicketDetail,
 }
 
 export const pagesConfig = {
