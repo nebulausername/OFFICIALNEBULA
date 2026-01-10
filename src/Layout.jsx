@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PremiumHeader from './components/layout/PremiumHeader';
+import { WishlistProvider } from './components/wishlist/WishlistContext';
 import { Star } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
@@ -19,31 +20,32 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      theme === 'light' 
-        ? 'bg-gradient-to-br from-zinc-50 via-white to-zinc-50' 
-        : 'bg-gradient-to-br from-zinc-950 via-zinc-900 to-black'
-    }`}>
-      <style>{`
-        :root {
-          --nebula-primary: #8B5CF6;
-          --nebula-secondary: #EC4899;
-        }
-        [data-theme="dark"] {
-          color-scheme: dark;
-        }
-        [data-theme="light"] {
-          color-scheme: light;
-        }
-      `}</style>
+    <WishlistProvider>
+      <div className={`min-h-screen transition-colors duration-300 ${
+        theme === 'light' 
+          ? 'bg-gradient-to-br from-zinc-50 via-white to-zinc-50' 
+          : 'bg-gradient-to-br from-zinc-950 via-zinc-900 to-black'
+      }`}>
+        <style>{`
+          :root {
+            --nebula-primary: #8B5CF6;
+            --nebula-secondary: #EC4899;
+          }
+          [data-theme="dark"] {
+            color-scheme: dark;
+          }
+          [data-theme="light"] {
+            color-scheme: light;
+          }
+        `}</style>
 
-      {/* Premium Header */}
-      <PremiumHeader />
+        {/* Premium Header */}
+        <PremiumHeader />
 
-      {/* Main Content */}
-      <main className="min-h-[calc(100vh-8rem)]">
-        {children}
-      </main>
+        {/* Main Content */}
+        <main className="min-h-[calc(100vh-8rem)]">
+          {children}
+        </main>
 
       {/* Footer */}
       <footer className="bg-white border-t border-zinc-200 mt-20">
@@ -61,6 +63,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </WishlistProvider>
   );
 }

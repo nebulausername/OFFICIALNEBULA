@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import ProfileSettings from './pages/ProfileSettings';
 import Requests from './pages/Requests';
 import VIP from './pages/VIP';
+import Wishlist from './pages/Wishlist';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "ProfileSettings": ProfileSettings,
     "Requests": Requests,
     "VIP": VIP,
+    "Wishlist": Wishlist,
 }
 
 export const pagesConfig = {

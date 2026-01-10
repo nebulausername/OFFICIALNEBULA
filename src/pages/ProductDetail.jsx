@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Heart, Star, Shield, Zap, Package, Truck, Clock, MapPin } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import WishlistButton from '../components/wishlist/WishlistButton';
 
 export default function ProductDetail() {
   const [product, setProduct] = useState(null);
@@ -300,15 +301,10 @@ export default function ProductDetail() {
               </>
             )}
 
-            {/* Favorite Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setIsFavorite(!isFavorite)}
-              className="absolute top-4 right-4 w-12 h-12 bg-black/60 backdrop-blur rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
-            >
-              <Heart className={`w-6 h-6 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`} />
-            </motion.button>
+            {/* Wishlist Button */}
+            <div className="absolute top-4 right-4">
+              <WishlistButton productId={product.id} size="lg" variant="ghost" />
+            </div>
 
             {/* Image Counter */}
             {allImages.length > 1 && (
