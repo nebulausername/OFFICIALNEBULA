@@ -1,61 +1,64 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { User, Mail, Calendar, Shield, ArrowLeft, Save, Sparkles, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, User, Moon, Sun, Mail, Shield, Calendar, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { motion } from 'framer-motion';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
+import GlassCard from '../components/settings/GlassCard';
+import ProfileFormCard from '../components/settings/ProfileFormCard';
+import InfoRowCard from '../components/settings/InfoRowCard';
+import WishlistCard from '../components/settings/WishlistCard';
+import SupportCard from '../components/settings/SupportCard';
+import NotificationsCard from '../components/settings/NotificationsCard';
 
 export default function ProfileSettings() {
   const [user, setUser] = useState(null);
-  const [theme, setTheme] = useState('light');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ full_name: '' });
+  const [hasChanges, setHasChanges] = useState(false);
+  const [theme, setTheme] = useState('dark');
   const { toast } = useToast();
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('nebula-theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  };
 
   useEffect(() => {
     loadUser();
+    const savedTheme = localStorage.getItem('nebula-theme') || 'dark';
+    setTheme(savedTheme);
   }, []);
 
   const loadUser = async () => {
     try {
       const userData = await base44.auth.me();
       setUser(userData);
-      setFormData({ full_name: userData.full_name || '' });
-      const saved = localStorage.getItem('nebula-theme') || 'light';
-      setTheme(saved);
     } catch (error) {
       console.error('Error loading user:', error);
+      toast({
+        title: 'Fehler',
+        description: 'Benutzerdaten konnten nicht geladen werden',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (newName) => {
     setSaving(true);
     try {
-      await base44.auth.updateMe({ full_name: formData.full_name });
+      await base44.auth.updateMe({ full_name: newName });
+      setUser({ ...user, full_name: newName });
       toast({
         title: '✓ Gespeichert',
-        description: 'Deine Änderungen wurden gespeichert'
+        description: 'Deine Änderungen wurden übernommen',
       });
-      await loadUser();
+      setHasChanges(false);
     } catch (error) {
       console.error('Error saving:', error);
       toast({
         title: 'Fehler',
-        description: 'Änderungen konnten nicht gespeichert werden',
+        description: 'Speichern fehlgeschlagen – bitte erneut versuchen',
         variant: 'destructive'
       });
     } finally {
@@ -63,168 +66,157 @@ export default function ProfileSettings() {
     }
   };
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('nebula-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
+
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-4">
-          <div className="h-32 skeleton rounded-2xl" />
-          <div className="h-64 skeleton rounded-2xl" />
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-[#0a0a12] via-[#14141f] to-[#0a0a12] flex items-center justify-center">
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/50"
+        >
+          <User className="w-8 h-8 text-white" />
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 ${
-      theme === 'light'
-        ? 'bg-gradient-to-br from-zinc-50 to-white'
-        : 'bg-gradient-to-br from-zinc-950 to-zinc-900'
-    }`}>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-        {/* Back Button + Theme */}
-        <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a12] via-[#14141f] to-[#0a0a12] relative overflow-hidden">
+      {/* Subtle noise texture */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none" 
+        style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")'
+        }}
+      />
+
+      {/* Gradient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Sticky Header */}
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="sticky top-0 z-50 backdrop-blur-xl bg-black/20 border-b border-white/[0.06]"
+      >
+        <div className="max-w-2xl mx-auto px-5 h-16 flex items-center justify-between">
           <Link
             to={createPageUrl('Profile')}
-            className={`inline-flex items-center gap-2 mb-0 transition-colors group ${
-              theme === 'light'
-                ? 'text-zinc-600 hover:text-zinc-900'
-                : 'text-zinc-400 hover:text-white'
-            }`}
+            className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors group"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Zurück</span>
+            <span className="font-semibold text-sm">Zurück</span>
           </Link>
-          
+
+          <h2 className="absolute left-1/2 -translate-x-1/2 text-white font-black text-base">
+            Konto
+          </h2>
+
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={toggleTheme}
-            className={`p-3 rounded-lg transition-colors ${
-              theme === 'light'
-                ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-900'
-                : 'bg-zinc-800 hover:bg-zinc-700 text-yellow-400'
-            }`}
+            className="w-10 h-10 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] rounded-xl flex items-center justify-center transition-all"
           >
-            {theme === 'light' ? (
-              <Moon className="w-5 h-5" />
+            {theme === 'dark' ? (
+              <Moon className="w-5 h-5 text-zinc-300" />
             ) : (
-              <Sun className="w-5 h-5" />
+              <Sun className="w-5 h-5 text-amber-400" />
             )}
           </motion.button>
         </div>
+      </motion.header>
 
-        {/* Header */}
+      {/* Main Content */}
+      <div className="max-w-2xl mx-auto px-5 py-8 pb-24">
+        {/* Hero Section */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
+          className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/50">
+          <div className="flex items-start gap-4 mb-4">
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              className="w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-[20px] flex items-center justify-center shadow-xl shadow-purple-500/40"
+            >
               <User className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+            </motion.div>
+            <div className="flex-1">
+              <h1 className="text-3xl font-black text-white mb-2 leading-tight">
                 Konto Einstellungen
               </h1>
-              <p className="text-zinc-400 flex items-center gap-2 mt-1">
-                <Sparkles className="w-4 h-4 text-purple-400" />
+              <p className="text-zinc-400 text-sm font-medium">
                 Verwalte deine persönlichen Daten
               </p>
             </div>
           </div>
-        </motion.div>
 
-        {/* Editable Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl p-6 md:p-8 mb-6"
-        >
-          <h2 className="text-xl font-black mb-6 flex items-center gap-2 text-zinc-100">
-            <User className="w-5 h-5 text-purple-400" />
-            Persönliche Daten
-          </h2>
-          
-          <div className="space-y-6">
-            <div>
-              <Label className="text-sm font-bold text-zinc-300 mb-2 block">Name</Label>
-              <Input
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                placeholder="Dein vollständiger Name"
-                className="h-12 bg-zinc-900/50 border-2 border-zinc-700 focus:border-purple-500 transition-all rounded-xl"
-              />
-            </div>
-
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-2xl hover:shadow-purple-500/50 font-bold rounded-xl transition-all"
+          {/* Status Indicator */}
+          <AnimatePresence>
+            {!hasChanges && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex items-center gap-2 text-green-400 text-sm font-semibold"
               >
-                {saving ? (
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
-                  />
-                ) : (
-                  <>
-                    <Save className="w-5 h-5 mr-2" />
-                    Änderungen speichern
-                  </>
-                )}
-              </Button>
-            </motion.div>
-          </div>
+                <Check className="w-4 h-4" />
+                Gespeichert
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
-        {/* Read-only Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-4"
-        >
-          <div className="glass backdrop-blur border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                <Mail className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-zinc-500 font-semibold">E-Mail</p>
-                <p className="text-zinc-200 font-medium">{user?.email}</p>
-              </div>
-            </div>
-          </div>
+        {/* Form Card */}
+        <div className="space-y-4 mb-8">
+          <ProfileFormCard
+            fullName={user?.full_name}
+            onSave={handleSave}
+            loading={saving}
+          />
+        </div>
 
-          <div className="glass backdrop-blur border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
-                <Shield className="w-5 h-5 text-green-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-zinc-500 font-semibold">Rolle</p>
-                <p className="text-zinc-200 font-medium capitalize">{user?.role}</p>
-              </div>
-            </div>
-          </div>
+        {/* Info Section */}
+        <div className="space-y-4 mb-8">
+          <InfoRowCard
+            icon={Mail}
+            label="E-Mail"
+            value={user?.email || '-'}
+            copiable
+            iconColor="from-blue-500 to-cyan-500"
+          />
+          
+          <InfoRowCard
+            icon={Shield}
+            label="Rolle"
+            value={user?.role === 'admin' ? 'Admin' : 'Benutzer'}
+            badge
+            iconColor="from-purple-500 to-pink-500"
+          />
+          
+          <InfoRowCard
+            icon={Calendar}
+            label="Mitglied seit"
+            value={user?.created_date ? format(new Date(user.created_date), 'dd. MMMM yyyy', { locale: de }) : '-'}
+            iconColor="from-green-500 to-emerald-500"
+          />
+        </div>
 
-          <div className="glass backdrop-blur border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-purple-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-zinc-500 font-semibold">Mitglied seit</p>
-                <p className="text-zinc-200 font-medium">
-                  {user?.created_date ? new Date(user.created_date).toLocaleDateString('de-DE') : 'Unbekannt'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        {/* Features Section */}
+        <div className="space-y-4 mb-8">
+          <WishlistCard />
+          <SupportCard unreadCount={0} />
+        </div>
+
+        {/* Notifications */}
+        <NotificationsCard />
       </div>
     </div>
   );
