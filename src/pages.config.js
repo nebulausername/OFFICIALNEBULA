@@ -14,6 +14,8 @@ import ProfileSettings from './pages/ProfileSettings';
 import Requests from './pages/Requests';
 import VIP from './pages/VIP';
 import Wishlist from './pages/Wishlist';
+import Support from './pages/Support';
+import AdminSupport from './pages/AdminSupport';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +36,8 @@ export const PAGES = {
     "Requests": Requests,
     "VIP": VIP,
     "Wishlist": Wishlist,
+    "Support": Support,
+    "AdminSupport": AdminSupport,
 }
 
 export const pagesConfig = {
