@@ -144,12 +144,12 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
           transition={{ duration: 0.25, ease: "easeOut" }}
           className="grid md:grid-cols-2 gap-0 relative bg-white rounded-3xl overflow-hidden"
         >
-          {/* Image Section */}
+          {/* Gallery Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="relative bg-gradient-to-br from-zinc-900/80 to-black/50 p-6 border-r border-purple-500/10"
+            className="relative bg-zinc-50 p-8"
           >
             {/* Main Image */}
             <div className="relative aspect-square mb-4 rounded-xl overflow-hidden bg-zinc-800 group">
