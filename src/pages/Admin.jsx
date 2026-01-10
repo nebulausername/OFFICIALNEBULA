@@ -16,7 +16,8 @@ import {
   Activity,
   ArrowUpRight,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  MessageCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -131,6 +132,14 @@ export default function Admin() {
       description: 'Marken verwalten',
       color: 'from-orange-500 to-red-500',
       link: 'AdminBrands'
+    },
+    {
+      title: 'Support',
+      icon: MessageCircle,
+      count: 0,
+      description: 'Kundenanfragen',
+      color: 'from-blue-500 to-cyan-500',
+      link: 'AdminSupport'
     }
   ];
 
