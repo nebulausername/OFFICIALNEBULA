@@ -151,25 +151,26 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
             transition={{ delay: 0.1 }}
             className="relative bg-zinc-50 p-8"
           >
-            {/* Main Image */}
-            <div className="relative aspect-square mb-4 rounded-xl overflow-hidden bg-zinc-800 group">
+            {/* Main Product Image */}
+            <div className="relative aspect-square mb-4 rounded-2xl overflow-hidden bg-white group shadow-sm">
               {selectedImage ? (
                 <>
                   <motion.img
                     key={selectedImage}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
                     src={selectedImage}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />
                   
-                  {/* Zoom Button */}
+                  {/* Zoom Icon */}
                   <button
                     onClick={() => setShowZoom(true)}
-                    className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur rounded-lg hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100"
+                    className="absolute top-4 right-4 p-2.5 bg-white/95 backdrop-blur-sm rounded-xl hover:bg-white shadow-sm hover:shadow-md transition-all opacity-0 group-hover:opacity-100 border border-zinc-200/60"
                   >
-                    <ZoomIn className="w-5 h-5 text-white" />
+                    <ZoomIn className="w-5 h-5 text-zinc-700" />
                   </button>
 
                   {/* Navigation Arrows */}
@@ -177,41 +178,43 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                     <>
                       <button
                         onClick={handlePrevImage}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 backdrop-blur rounded-full hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 bg-white/95 backdrop-blur-sm rounded-full hover:bg-white shadow-sm transition-all opacity-0 group-hover:opacity-100 border border-zinc-200/60"
                       >
-                        <ChevronLeft className="w-5 h-5 text-white" />
+                        <ChevronLeft className="w-5 h-5 text-zinc-700" />
                       </button>
                       <button
                         onClick={handleNextImage}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 backdrop-blur rounded-full hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-white/95 backdrop-blur-sm rounded-full hover:bg-white shadow-sm transition-all opacity-0 group-hover:opacity-100 border border-zinc-200/60"
                       >
-                        <ChevronRight className="w-5 h-5 text-white" />
+                        <ChevronRight className="w-5 h-5 text-zinc-700" />
                       </button>
                     </>
                   )}
                 </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Package className="w-20 h-20 text-zinc-700" />
+                  <Package className="w-20 h-20 text-zinc-300" />
                 </div>
               )}
             </div>
 
-            {/* Thumbnails */}
+            {/* Thumbnail Gallery */}
             {allImages.length > 1 && (
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-3">
                 {allImages.map((img, index) => (
-                  <button
+                  <motion.button
                     key={index}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedImage(img)}
-                    className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`aspect-square rounded-xl overflow-hidden border-2 transition-all shadow-sm ${
                       selectedImage === img
-                        ? 'border-purple-500 ring-2 ring-purple-500/50'
-                        : 'border-zinc-700 hover:border-zinc-600'
+                        ? 'border-purple-600 ring-2 ring-purple-600/30'
+                        : 'border-zinc-200 hover:border-zinc-300'
                     }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
-                  </button>
+                  </motion.button>
                 ))}
                 </div>
                 )}
