@@ -94,7 +94,7 @@ export default function Help() {
               <div className={`w-12 h-12 bg-gradient-to-br ${method.color} rounded-xl flex items-center justify-center mb-4`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-bold text-lg mb-2">{method.title}</h3>
+              <h3 className="font-bold text-lg mb-2 text-white">{method.title}</h3>
               <div className="relative group/number mb-2">
                 <p className="text-purple-400 font-mono text-sm">{method.value}</p>
                 {method.locked && (
@@ -108,7 +108,7 @@ export default function Help() {
                   </div>
                 )}
               </div>
-              <p className="text-zinc-500 text-sm mb-3">{method.description}</p>
+              <p className="text-zinc-300 text-sm mb-3">{method.description}</p>
               
               {method.badge && (
                 <Link 
@@ -142,26 +142,26 @@ export default function Help() {
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label className="text-sm font-semibold text-zinc-400 mb-2">Deine E-Mail</Label>
+            <Label className="text-sm font-semibold text-zinc-200 mb-2">Deine E-Mail</Label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="deine@email.com"
               required
-              className="h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
+              className="h-12 bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors text-white placeholder:text-zinc-500"
             />
           </div>
 
           <div>
-            <Label className="text-sm font-semibold text-zinc-400 mb-2">Deine Nachricht</Label>
+            <Label className="text-sm font-semibold text-zinc-200 mb-2">Deine Nachricht</Label>
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Wie können wir dir helfen?"
               required
               rows={6}
-              className="bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors"
+              className="bg-zinc-900/50 border-zinc-700 focus:border-purple-500 transition-colors text-white placeholder:text-zinc-500"
             />
           </div>
 

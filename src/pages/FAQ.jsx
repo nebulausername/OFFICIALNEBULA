@@ -122,7 +122,7 @@ export default function FAQ() {
                   <div className={`w-10 h-10 bg-gradient-to-br ${category.color} rounded-xl flex items-center justify-center`}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold">{category.category}</h2>
+                  <h2 className="text-2xl font-bold text-white">{category.category}</h2>
                 </div>
               </div>
 
@@ -137,7 +137,7 @@ export default function FAQ() {
                         className="w-full p-6 text-left hover:bg-zinc-900/30 transition-colors"
                       >
                         <div className="flex items-center justify-between gap-4">
-                          <span className="font-semibold text-lg">{faq.q}</span>
+                          <span className="font-semibold text-lg text-white">{faq.q}</span>
                           <motion.div
                             animate={{ rotate: isOpen ? 180 : 0 }}
                             transition={{ duration: 0.2 }}
@@ -156,7 +156,7 @@ export default function FAQ() {
                             transition={{ duration: 0.2 }}
                             className="overflow-hidden"
                           >
-                            <div className="px-6 pb-6 text-zinc-400 leading-relaxed">
+                            <div className="px-6 pb-6 text-zinc-300 leading-relaxed">
                               {faq.a}
                             </div>
                           </motion.div>
@@ -178,8 +178,8 @@ export default function FAQ() {
         transition={{ delay: 0.5 }}
         className="mt-12 p-8 glass border border-zinc-800 rounded-2xl text-center"
       >
-        <h3 className="text-2xl font-bold mb-3">Noch Fragen?</h3>
-        <p className="text-zinc-400 mb-6">
+        <h3 className="text-2xl font-bold mb-3 text-white">Noch Fragen?</h3>
+        <p className="text-zinc-300 mb-6">
           Wir helfen dir gerne weiter! Kontaktiere uns über Telegram, E-Mail oder WhatsApp.
         </p>
         <a href="/Help">
