@@ -7,7 +7,7 @@ import GlassCard from './GlassCard';
 
 export default function SupportCard({ unreadCount = 0 }) {
   return (
-    <Link to={createPageUrl('Help')}>
+    <Link to={createPageUrl('Support')}>
       <GlassCard hover className="p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">

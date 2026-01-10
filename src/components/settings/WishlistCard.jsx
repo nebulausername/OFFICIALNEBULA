@@ -7,7 +7,7 @@ import GlassCard from './GlassCard';
 import { useWishlist } from '../wishlist/WishlistContext';
 
 export default function WishlistCard() {
-  const { wishlistCount } = useWishlist();
+  const { count: wishlistCount } = useWishlist();
 
   return (
     <Link to={createPageUrl('Wishlist')}>
