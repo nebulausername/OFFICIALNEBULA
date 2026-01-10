@@ -59,15 +59,15 @@ export default function Requests() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-4">Meine Anfragen</h1>
-        <p className="text-zinc-400 text-lg">Übersicht über alle deine Bestellanfragen</p>
+        <h1 className="text-4xl font-bold mb-4 text-white">Meine Bestellungen</h1>
+        <p className="text-zinc-300 text-lg">Übersicht über alle deine Bestellungen</p>
       </div>
 
       {requests.length === 0 ?
       <div className="text-center py-20 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
-          <Package className="w-20 h-20 text-zinc-700 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Noch keine Anfragen</h2>
-          <p className="text-zinc-400">Deine Bestellanfragen werden hier angezeigt</p>
+          <Package className="w-20 h-20 text-zinc-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold mb-2 text-white">Noch keine Bestellungen</h2>
+          <p className="text-zinc-300">Deine Bestellungen werden hier angezeigt</p>
         </div> :
 
       <div className="space-y-6">
@@ -84,10 +84,10 @@ export default function Requests() {
                         <Package className="w-6 h-6" />
                       </div>
                       <div>
-                        <CardTitle className="text-slate-400 text-lg font-semibold tracking-tight">
-                          Anfrage #{request.id.slice(0, 8)}
+                        <CardTitle className="text-white text-lg font-semibold tracking-tight">
+                          Bestellung #{request.id.slice(0, 8)}
                         </CardTitle>
-                        <div className="flex items-center gap-2 text-sm text-zinc-400 mt-1">
+                        <div className="flex items-center gap-2 text-sm text-zinc-300 mt-1">
                           <Calendar className="w-4 h-4" />
                           {format(new Date(request.created_date), 'dd. MMMM yyyy, HH:mm', { locale: de })} Uhr
                         </div>
@@ -107,20 +107,20 @@ export default function Requests() {
                       {request.contact_info.name &&
                   <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-purple-400" />
-                          <span className="text-sm text-zinc-400">Name:</span>
-                          <span className="text-sm font-medium">{request.contact_info.name}</span>
+                          <span className="text-sm text-zinc-300">Name:</span>
+                          <span className="text-sm font-medium text-white">{request.contact_info.name}</span>
                         </div>
                   }
                       {request.contact_info.phone &&
                   <div className="flex items-center gap-2">
-                          <span className="text-sm text-zinc-400">Tel:</span>
-                          <span className="text-sm font-medium">{request.contact_info.phone}</span>
+                          <span className="text-sm text-zinc-300">Tel:</span>
+                          <span className="text-sm font-medium text-white">{request.contact_info.phone}</span>
                         </div>
                   }
                       {request.contact_info.telegram &&
                   <div className="flex items-center gap-2">
-                          <span className="text-sm text-zinc-400">Telegram:</span>
-                          <span className="text-sm font-medium">{request.contact_info.telegram}</span>
+                          <span className="text-sm text-zinc-300">Telegram:</span>
+                          <span className="text-sm font-medium text-white">{request.contact_info.telegram}</span>
                         </div>
                   }
                     </div>
@@ -128,19 +128,19 @@ export default function Requests() {
 
                   {/* Items */}
                   <div className="space-y-3 mb-6">
-                    <h4 className="font-semibold text-sm text-zinc-400 uppercase">Artikel</h4>
+                    <h4 className="font-semibold text-sm text-zinc-300 uppercase">Artikel</h4>
                     {items.map((item) =>
                   <div
                     key={item.id}
                     className="flex items-center justify-between p-4 bg-zinc-800/30 rounded-lg">
 
                         <div className="flex-1">
-                          <div className="font-medium">{item.name_snapshot}</div>
-                          <div className="text-sm text-zinc-400">
+                          <div className="font-medium text-white">{item.name_snapshot}</div>
+                          <div className="text-sm text-zinc-300">
                             SKU: {item.sku_snapshot} • Anzahl: {item.quantity_snapshot}
                           </div>
                           {item.selected_options_snapshot && Object.keys(item.selected_options_snapshot).length > 0 &&
-                      <div className="text-xs text-zinc-500 mt-1">
+                      <div className="text-xs text-zinc-400 mt-1">
                               {Object.entries(item.selected_options_snapshot).map(([key, value]) =>
                         <span key={key} className="mr-3">
                                   {key}: {value}
@@ -167,8 +167,8 @@ export default function Requests() {
                       <div className="flex items-start gap-2">
                         <MessageSquare className="w-4 h-4 text-purple-400 mt-1" />
                         <div>
-                          <div className="text-sm text-zinc-400 mb-1">Notiz:</div>
-                          <div className="text-sm">{request.note}</div>
+                          <div className="text-sm text-zinc-300 mb-1">Notiz:</div>
+                          <div className="text-sm text-white">{request.note}</div>
                         </div>
                       </div>
                     </div>
@@ -176,7 +176,7 @@ export default function Requests() {
 
                   {/* Total */}
                   <div className="flex items-center justify-between pt-6 border-t border-zinc-800">
-                    <div className="flex items-center gap-2 text-zinc-400">
+                    <div className="flex items-center gap-2 text-zinc-200">
                       <Euro className="w-5 h-5" />
                       <span className="font-semibold">Gesamtsumme:</span>
                     </div>
