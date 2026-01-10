@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Heart, Eye, MapPin, Clock, Zap } from 'lucide-react';
+import { ShoppingBag, Eye, MapPin, Clock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
+import WishlistButton from '../wishlist/WishlistButton';
 
 export default function PremiumProductCard({ product, onAddToCart, onQuickView, onRequestProduct }) {
-  const [isFavorite, setIsFavorite] = React.useState(false);
-
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -23,12 +22,6 @@ export default function PremiumProductCard({ product, onAddToCart, onQuickView, 
     e.preventDefault();
     e.stopPropagation();
     onQuickView(product);
-  };
-
-  const handleFavorite = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFavorite(!isFavorite);
   };
 
   // Get default shipping option (Germany)
@@ -101,15 +94,10 @@ export default function PremiumProductCard({ product, onAddToCart, onQuickView, 
             </motion.div>
           </div>
 
-          {/* Favorite Button */}
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleFavorite}
-            className="absolute bottom-3 right-3 w-10 h-10 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/80 transition-all opacity-0 group-hover:opacity-100 border border-white/10"
-          >
-            <Heart className={`w-5 h-5 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`} />
-          </motion.button>
+          {/* Wishlist Button */}
+          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <WishlistButton productId={product.id} variant="ghost" />
+          </div>
 
           {/* Quick View Button */}
           <motion.button

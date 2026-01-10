@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
+import { useWishlist } from '../components/wishlist/WishlistContext';
 import { 
   User, 
   ShoppingBag, 
@@ -16,10 +17,12 @@ import {
   Package,
   Sparkles,
   Shield,
-  Zap
+  Zap,
+  Heart
 } from 'lucide-react';
 
 export default function Profile() {
+  const { count: wishlistCount } = useWishlist();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     requestCount: 0,
@@ -70,6 +73,14 @@ export default function Profile() {
       color: 'from-blue-500 to-cyan-500',
       link: createPageUrl('Requests'),
       stat: stats.requestCount
+    },
+    {
+      title: 'Merkliste',
+      description: 'Deine Favoriten',
+      icon: Heart,
+      color: 'from-red-500 to-pink-500',
+      link: createPageUrl('Wishlist'),
+      stat: wishlistCount
     },
     {
       title: 'VIP Programm',
