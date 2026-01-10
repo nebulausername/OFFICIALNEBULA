@@ -358,66 +358,7 @@ export default function VIP() {
         </div>
       )}
 
-      {/* Footer */}
-      <motion.footer
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7 }}
-        className="mt-20 pt-12 border-t border-zinc-800"
-      >
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <Star className="w-4 h-4 text-white" fill="white" />
-              </div>
-              <span className="font-bold text-lg">Nebula Supply</span>
-            </div>
-            <p className="text-sm text-zinc-500 leading-relaxed">
-              Premium Lifestyle & Fashion - Exklusiv für dich
-            </p>
-          </div>
 
-          <div>
-            <h4 className="font-bold mb-4 text-zinc-300">Shop</h4>
-            <ul className="space-y-2 text-sm text-zinc-500">
-              <li><Link to={createPageUrl('Products')} className="hover:text-purple-400 transition-colors">Alle Produkte</Link></li>
-              <li><Link to={createPageUrl('Products')} className="hover:text-purple-400 transition-colors">Neu eingetroffen</Link></li>
-              <li><Link to={createPageUrl('Products')} className="hover:text-purple-400 transition-colors">Sale</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold mb-4 text-zinc-300">Support</h4>
-            <ul className="space-y-2 text-sm text-zinc-500">
-              <li><a href="/Help" className="hover:text-purple-400 transition-colors">Hilfe & Support</a></li>
-              <li><a href="/FAQ" className="hover:text-purple-400 transition-colors">FAQ</a></li>
-              <li><a href="/Requests" className="hover:text-purple-400 transition-colors">Meine Anfragen</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold mb-4 text-zinc-300">VIP</h4>
-            <ul className="space-y-2 text-sm text-zinc-500">
-              <li><a href="/VIP" className="hover:text-yellow-400 transition-colors">VIP Programm</a></li>
-              <li><a href="/VIP#benefits" className="hover:text-yellow-400 transition-colors">Vorteile</a></li>
-              <li><a href="/VIP#invite" className="hover:text-yellow-400 transition-colors">Freunde einladen</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-zinc-800">
-          <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <Star className="w-4 h-4 text-purple-400" fill="currentColor" />
-            <span className="text-sm text-zinc-500">© 2026 Nebula Supply. Premium Quality.</span>
-          </div>
-          <div className="flex gap-6 text-sm text-zinc-500">
-            <a href="#" className="hover:text-white transition-colors">Impressum</a>
-            <a href="#" className="hover:text-white transition-colors">Datenschutz</a>
-            <a href="#" className="hover:text-white transition-colors">AGB</a>
-          </div>
-        </div>
-      </motion.footer>
     </div>
   );
 }
