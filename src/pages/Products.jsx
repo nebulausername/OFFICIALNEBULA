@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, SlidersHorizontal, X, Package, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Package, Sparkles, Grid3x3, List, TrendingUp, Clock, DollarSign, ArrowUpCircle } from 'lucide-react';
 import FilterSidebar from '../components/products/FilterSidebar';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import ProductQuickView from '../components/products/ProductQuickView';
@@ -38,6 +38,9 @@ export default function Products() {
   const [requestProduct, setRequestProduct] = useState(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isEmptyStateModalOpen, setIsEmptyStateModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
+  const [sortBy, setSortBy] = useState('newest');
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,7 +49,15 @@ export default function Products() {
 
   useEffect(() => {
     loadProducts();
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, sortBy]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const loadInitialData = async () => {
     try {
@@ -105,6 +116,17 @@ export default function Products() {
           p.description?.toLowerCase().includes(query) ||
           (p.tags && p.tags.some(tag => tag.toLowerCase().includes(query)))
         );
+      }
+
+      // Sort products
+      if (sortBy === 'newest') {
+        filtered.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      } else if (sortBy === 'price_low') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sortBy === 'price_high') {
+        filtered.sort((a, b) => b.price - a.price);
+      } else if (sortBy === 'popular') {
+        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
       }
 
       setProducts(filtered);
@@ -183,6 +205,17 @@ export default function Products() {
     });
     setSearchQuery('');
   };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getSortOptions = () => [
+    { value: 'newest', label: 'Neueste zuerst', icon: Clock },
+    { value: 'price_low', label: 'Preis aufsteigend', icon: DollarSign },
+    { value: 'price_high', label: 'Preis absteigend', icon: DollarSign },
+    { value: 'popular', label: 'Am beliebtesten', icon: TrendingUp }
+  ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -292,43 +325,128 @@ export default function Products() {
             </Sheet>
           </div>
 
-          {/* Results Count & Sort */}
+          {/* Results Count, View Toggle & Sort */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-5"
+            className="mb-8 glass backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-5 shadow-xl"
           >
-            <div className="flex items-center gap-3">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-2.5 h-2.5 bg-purple-500 rounded-full shadow-lg shadow-purple-500/50"
-              />
-              <p className="text-white font-bold text-base">
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 animate-spin" />
-                    Laden...
-                  </span>
-                ) : (
-                  <>
-                    <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      {products.length}
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              {/* Results Count */}
+              <div className="flex items-center gap-3">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2.5 h-2.5 bg-purple-500 rounded-full shadow-lg shadow-purple-500/50"
+                />
+                <p className="text-white font-bold text-base">
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" />
+                      Laden...
                     </span>
-                    <span className="text-zinc-300 ml-2">
-                      {products.length === 1 ? 'Produkt' : 'Produkte'} gefunden
-                    </span>
-                  </>
-                )}
-              </p>
-            </div>
-            {!loading && products.length > 0 && (
-              <div className="flex items-center gap-3 text-sm">
-                <span className="text-zinc-400 font-medium">Sortiert nach:</span>
-                <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30 font-bold">
-                  Neueste zuerst
-                </Badge>
+                  ) : (
+                    <>
+                      <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        {products.length}
+                      </span>
+                      <span className="text-zinc-300 ml-2">
+                        {products.length === 1 ? 'Produkt' : 'Produkte'} gefunden
+                      </span>
+                    </>
+                  )}
+                </p>
               </div>
+
+              {/* Controls */}
+              {!loading && products.length > 0 && (
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-1 bg-zinc-900/50 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded transition-all ${
+                        viewMode === 'grid'
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                          : 'text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      <Grid3x3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded transition-all ${
+                        viewMode === 'list'
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                          : 'text-zinc-500 hover:text-white'
+                      }`}
+                    >
+                      <List className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Sort Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-zinc-400 font-medium text-sm hidden sm:block">Sortierung:</span>
+                    <div className="flex gap-1 bg-zinc-900/50 rounded-lg p-1">
+                      {getSortOptions().map((option) => {
+                        const Icon = option.icon;
+                        return (
+                          <button
+                            key={option.value}
+                            onClick={() => setSortBy(option.value)}
+                            className={`px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                              sortBy === option.value
+                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            <Icon className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">{option.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Active Filters Summary */}
+            {!loading && (filters.departments.length > 0 || filters.categories.length > 0 || filters.brands.length > 0 || filters.inStockOnly) && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="mt-4 pt-4 border-t border-zinc-800/50 flex flex-wrap gap-2"
+              >
+                <span className="text-zinc-400 text-sm font-medium">Aktive Filter:</span>
+                {filters.departments.length > 0 && (
+                  <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                    {filters.departments.length} Dept.
+                  </Badge>
+                )}
+                {filters.categories.length > 0 && (
+                  <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/30">
+                    {filters.categories.length} Kat.
+                  </Badge>
+                )}
+                {filters.brands.length > 0 && (
+                  <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30">
+                    {filters.brands.length} Marken
+                  </Badge>
+                )}
+                {filters.inStockOnly && (
+                  <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                    Nur Lagerware
+                  </Badge>
+                )}
+                <button
+                  onClick={handleClearFilters}
+                  className="text-xs text-zinc-400 hover:text-white underline ml-2 font-medium"
+                >
+                  Alle löschen
+                </button>
+              </motion.div>
             )}
           </motion.div>
 
@@ -410,7 +528,11 @@ export default function Products() {
             </motion.div>
           ) : (
             <motion.div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+              className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                  : 'flex flex-col gap-4'
+              }
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -420,12 +542,14 @@ export default function Products() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
+                  layout
                 >
                   <PremiumProductCard
                     product={product}
                     onAddToCart={handleAddToCart}
                     onQuickView={handleQuickView}
                     onRequestProduct={handleRequestProduct}
+                    viewMode={viewMode}
                   />
                 </motion.div>
               ))}
@@ -433,6 +557,19 @@ export default function Products() {
           )}
         </div>
       </div>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0, opacity: 0 }}
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full shadow-2xl shadow-purple-500/50 flex items-center justify-center text-white hover:scale-110 transition-transform z-50"
+        >
+          <ArrowUpCircle className="w-6 h-6" />
+        </motion.button>
+      )}
     </div>
   );
 }

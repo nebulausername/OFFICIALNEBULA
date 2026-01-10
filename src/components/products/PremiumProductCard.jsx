@@ -7,7 +7,7 @@ import { ShoppingBag, Eye, MapPin, Clock, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import WishlistButton from '../wishlist/WishlistButton';
 
-export default function PremiumProductCard({ product, onAddToCart, onQuickView, onRequestProduct }) {
+export default function PremiumProductCard({ product, onAddToCart, onQuickView, onRequestProduct, viewMode = 'grid' }) {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -28,6 +28,118 @@ export default function PremiumProductCard({ product, onAddToCart, onQuickView, 
   const defaultShipping = product.shipping_options?.find(opt => opt.location === 'Germany') || 
                          product.shipping_options?.[0];
 
+  // List view rendering
+  if (viewMode === 'list') {
+    return (
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        className="glass backdrop-blur-xl border-2 border-zinc-800/50 rounded-2xl overflow-hidden hover:border-purple-500/60 transition-all shadow-xl hover:shadow-2xl hover:shadow-purple-500/20"
+      >
+        <div className="flex flex-col sm:flex-row">
+          {/* Image */}
+          <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`} className="relative sm:w-64 h-48 sm:h-auto bg-gradient-to-br from-zinc-900 to-zinc-800 overflow-hidden flex-shrink-0">
+            {product.cover_image ? (
+              <img
+                src={product.cover_image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Package className="w-16 h-16 text-zinc-600" />
+              </div>
+            )}
+            
+            {/* Badges */}
+            <div className="absolute top-3 left-3 flex flex-col gap-2">
+              {product.tags?.includes('limited') && (
+                <Badge className="bg-red-500/90 text-white font-black backdrop-blur-sm">
+                  🔥 LIMITED
+                </Badge>
+              )}
+              {product.tags?.includes('new') && (
+                <Badge className="bg-blue-500/90 text-white font-black backdrop-blur-sm">
+                  ✨ NEU
+                </Badge>
+              )}
+            </div>
+
+            {product.in_stock ? (
+              <div className="absolute top-3 right-3 px-3 py-1.5 bg-green-500/90 backdrop-blur-sm text-white text-xs font-black rounded-full">
+                ✓ Verfügbar
+              </div>
+            ) : (
+              <div className="absolute top-3 right-3 px-3 py-1.5 bg-red-500/90 backdrop-blur-sm text-white text-xs font-black rounded-full">
+                Ausverkauft
+              </div>
+            )}
+          </Link>
+
+          {/* Content */}
+          <div className="flex-1 p-6 flex flex-col justify-between">
+            <div>
+              <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`}>
+                <h3 className="font-bold text-lg text-white mb-2 hover:bg-gradient-to-r hover:from-purple-300 hover:to-pink-300 hover:bg-clip-text hover:text-transparent transition-all line-clamp-2">
+                  {product.name}
+                </h3>
+              </Link>
+              
+              {product.description && (
+                <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{product.description}</p>
+              )}
+
+              <div className="flex items-center gap-2 mb-4">
+                <Badge variant="outline" className="text-xs border-zinc-700 text-zinc-400">
+                  SKU: {product.sku}
+                </Badge>
+                {product.tags?.slice(0, 2).map((tag, i) => (
+                  <Badge key={i} className="bg-purple-500/10 text-purple-300 text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div className="text-3xl font-black text-white">
+                {product.price}€
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => onQuickView(product)}
+                  variant="outline"
+                  size="sm"
+                  className="border-zinc-700 hover:border-purple-500/50 text-white"
+                >
+                  Quick View
+                </Button>
+                {product.in_stock ? (
+                  <Button
+                    onClick={() => onAddToCart(product)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-xl hover:shadow-purple-500/40"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    In den Korb
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => onRequestProduct(product)}
+                    variant="outline"
+                    className="border-zinc-700"
+                  >
+                    Anfragen
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Grid view rendering (default)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
