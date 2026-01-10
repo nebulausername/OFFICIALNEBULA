@@ -202,6 +202,198 @@ export default function Help() {
           <li>• <strong>Support:</strong> Wir antworten innerhalb von 24h</li>
         </ul>
       </motion.div>
+
+      {/* VIP Premium Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mt-16"
+      >
+        <div className="relative overflow-hidden glass backdrop-blur-xl border-2 border-yellow-500/30 rounded-3xl p-8 md:p-12 bg-gradient-to-br from-yellow-500/5 via-amber-500/5 to-yellow-500/5">
+          {/* Animated Background */}
+          <div className="absolute inset-0 opacity-30">
+            <motion.div
+              animate={{ 
+                scale: [1, 1.2, 1],
+                rotate: [0, 180, 360]
+              }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-yellow-500/20 to-amber-500/20 rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{ 
+                scale: [1.2, 1, 1.2],
+                rotate: [360, 180, 0]
+              }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-pink-500/20 to-purple-500/20 rounded-full blur-3xl"
+            />
+          </div>
+
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="text-center mb-10">
+              <motion.div
+                animate={{ 
+                  rotate: [0, 5, -5, 0],
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
+                className="w-20 h-20 bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-yellow-500/50"
+              >
+                <Crown className="w-10 h-10 text-white" />
+              </motion.div>
+              
+              <h2 className="text-4xl md:text-5xl font-black mb-4 bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-300 bg-clip-text text-transparent animate-gradient">
+                VIP Premium Support
+              </h2>
+              <p className="text-zinc-300 text-lg font-medium mb-2">
+                Upgrade dein Support-Erlebnis auf das nächste Level
+              </p>
+              <p className="text-zinc-400 text-sm">
+                Exklusiver WhatsApp-Zugang • Sofort-Antworten • Premium-Service
+              </p>
+            </div>
+
+            {/* Benefits Grid */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              {[
+                {
+                  icon: '⚡',
+                  title: 'Blitzschnell',
+                  desc: 'Antwort in Minuten'
+                },
+                {
+                  icon: '💎',
+                  title: 'WhatsApp',
+                  desc: 'Direkter Kontakt'
+                },
+                {
+                  icon: '🎯',
+                  title: 'Priorität',
+                  desc: 'VIP-Bearbeitung'
+                },
+                {
+                  icon: '🎁',
+                  title: 'Exklusiv',
+                  desc: 'Sonder-Deals'
+                }
+              ].map((benefit, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 + index * 0.1 }}
+                  whileHover={{ y: -5, scale: 1.05 }}
+                  className="bg-zinc-900/60 border border-yellow-500/20 rounded-xl p-5 text-center hover:border-yellow-500/50 transition-all"
+                >
+                  <div className="text-4xl mb-3">{benefit.icon}</div>
+                  <h4 className="font-black text-yellow-400 mb-1">{benefit.title}</h4>
+                  <p className="text-xs text-zinc-400">{benefit.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="text-center p-4 bg-zinc-900/40 border border-yellow-500/20 rounded-xl"
+              >
+                <div className="text-3xl font-black bg-gradient-to-r from-yellow-300 to-amber-400 bg-clip-text text-transparent mb-1">
+                  5 Min
+                </div>
+                <p className="text-xs text-zinc-400 font-semibold">Ø Antwortzeit</p>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="text-center p-4 bg-zinc-900/40 border border-yellow-500/20 rounded-xl"
+              >
+                <div className="text-3xl font-black bg-gradient-to-r from-yellow-300 to-amber-400 bg-clip-text text-transparent mb-1">
+                  24/7
+                </div>
+                <p className="text-xs text-zinc-400 font-semibold">Verfügbar</p>
+              </motion.div>
+              
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="text-center p-4 bg-zinc-900/40 border border-yellow-500/20 rounded-xl"
+              >
+                <div className="text-3xl font-black bg-gradient-to-r from-yellow-300 to-amber-400 bg-clip-text text-transparent mb-1">
+                  100%
+                </div>
+                <p className="text-xs text-zinc-400 font-semibold">Zufriedenheit</p>
+              </motion.div>
+            </div>
+
+            {/* CTA */}
+            <div className="text-center">
+              <Link to={createPageUrl('VIP')}>
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -3 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-400 rounded-2xl font-black text-lg text-zinc-900 shadow-2xl shadow-yellow-500/50 hover:shadow-yellow-500/70 transition-all group"
+                >
+                  <Crown className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                  <span>Jetzt VIP werden</span>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                </motion.button>
+              </Link>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="mt-4 text-sm text-zinc-400"
+              >
+                Lade Freunde ein oder erfülle die Anforderungen • <Link to={createPageUrl('VIP')} className="text-yellow-400 hover:text-yellow-300 underline font-bold">Mehr erfahren</Link>
+              </motion.p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* FAQ Quick Links */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        className="mt-12 grid sm:grid-cols-2 gap-4"
+      >
+        <Link to={createPageUrl('FAQ')}>
+          <motion.div
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="glass backdrop-blur-xl border border-zinc-800 rounded-xl p-6 hover:border-purple-500/50 transition-all group"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <HelpCircle className="w-6 h-6 text-white" />
+              </div>
+              <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+            </div>
+            <h3 className="font-black text-xl mb-2 text-white">FAQ</h3>
+            <p className="text-zinc-400 text-sm">Antworten auf häufige Fragen</p>
+          </motion.div>
+        </Link>
+
+        <Link to={createPageUrl('Requests')}>
+          <motion.div
+            whileHover={{ y: -5, scale: 1.02 }}
+            className="glass backdrop-blur-xl border border-zinc-800 rounded-xl p-6 hover:border-blue-500/50 transition-all group"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <ArrowRight className="w-5 h-5 text-zinc-600 group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+            </div>
+            <h3 className="font-black text-xl mb-2 text-white">Meine Anfragen</h3>
+            <p className="text-zinc-400 text-sm">Verfolge deine Bestellungen</p>
+          </motion.div>
+        </Link>
+      </motion.div>
     </div>
   );
 }
