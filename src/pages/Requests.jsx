@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, Calendar, Euro, MessageSquare, User } from 'lucide-react';
+import { Package, Calendar, Euro, MessageSquare, User, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { createPageUrl } from '../utils';
 
 export default function Requests() {
   const [requests, setRequests] = useState([]);
@@ -58,6 +60,15 @@ export default function Requests() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Back Button */}
+      <Link
+        to={createPageUrl('Profile')}
+        className="inline-flex items-center space-x-2 text-zinc-400 hover:text-white mb-6 transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm sm:text-base font-medium">Zurück zum Profil</span>
+      </Link>
+
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-4 text-white">Meine Bestellungen</h1>
         <p className="text-zinc-300 text-lg">Übersicht über alle deine Bestellungen</p>
