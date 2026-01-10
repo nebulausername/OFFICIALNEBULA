@@ -138,14 +138,12 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto bg-white border-0 p-0 rounded-3xl shadow-2xl sm:rounded-3xl">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="grid md:grid-cols-2 gap-0 relative"
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.96 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="grid md:grid-cols-2 gap-0 relative bg-white rounded-3xl overflow-hidden"
         >
-          {/* Gradient Background Glow */}
-          <div className="absolute -inset-1 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-transparent rounded-3xl blur-2xl -z-10" />
           {/* Image Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
