@@ -164,6 +164,16 @@ export default function PremiumHeader() {
                   Profil
                   <span className="absolute bottom-[-1px] left-0 w-0 h-[2px] bg-zinc-900 transition-all duration-200 group-hover:w-full" />
                 </Link>
+                <Link 
+                  to={createPageUrl('Support')} 
+                  className="text-sm font-medium text-zinc-700 hover:text-zinc-900 transition-colors relative group"
+                >
+                  <span className="flex items-center gap-1.5">
+                    Tickets
+                    <span className="text-[9px] font-black text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-full">NEU</span>
+                  </span>
+                  <span className="absolute bottom-[-1px] left-0 w-0 h-[2px] bg-zinc-900 transition-all duration-200 group-hover:w-full" />
+                </Link>
               </nav>
 
               {/* Right Icons */}
@@ -335,24 +345,34 @@ export default function PremiumHeader() {
               <div className="p-6 border-b border-zinc-100 space-y-4">
                 <Link 
                   to={createPageUrl('Home')} 
-                  className="block text-sm font-medium text-zinc-900"
+                  className="block text-sm font-medium text-zinc-900 hover:text-purple-600 transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   Home
                 </Link>
                 <Link 
                   to={createPageUrl('Products')} 
-                  className="block text-sm font-medium text-zinc-900"
+                  className="block text-sm font-medium text-zinc-900 hover:text-purple-600 transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   Shop
                 </Link>
                 <Link 
                   to={createPageUrl('Profile')} 
-                  className="block text-sm font-medium text-zinc-900"
+                  className="block text-sm font-medium text-zinc-900 hover:text-purple-600 transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   Profil
+                </Link>
+                <Link 
+                  to={createPageUrl('Support')} 
+                  className="block text-sm font-medium text-zinc-900 hover:text-purple-600 transition-colors relative"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <span className="flex items-center gap-2">
+                    Support Tickets
+                    <span className="text-[10px] font-black text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">NEU</span>
+                  </span>
                 </Link>
               </div>
 
