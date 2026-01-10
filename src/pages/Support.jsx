@@ -87,10 +87,12 @@ export default function Support() {
 
   const handleTicketCreated = (result) => {
     if (result === 'LIMIT_REACHED') {
-      setShowVipModal(true);
+      setTimeout(() => setShowVipModal(true), 300);
     } else {
       loadData();
-      navigate(createPageUrl('SupportTicketDetail') + `?id=${result.id}`);
+      setTimeout(() => {
+        navigate(createPageUrl('SupportTicketDetail') + `?id=${result.id}`);
+      }, 400);
     }
   };
 
@@ -101,6 +103,7 @@ export default function Support() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
           className="mb-8"
         >
           <div className="flex items-start gap-4 mb-6">
@@ -118,7 +121,12 @@ export default function Support() {
           </div>
 
           {/* Ticket Counter */}
-          <div className="flex items-center justify-between bg-white/[0.02] border border-white/[0.08] rounded-xl p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
+            className="flex items-center justify-between bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-xl p-4 hover:border-white/[0.12] transition-all"
+          >
             <div>
               <p className="text-zinc-400 text-sm font-medium mb-1">Offene Tickets</p>
               {user?.is_vip ? (
@@ -129,19 +137,30 @@ export default function Support() {
                   </span>
                 </div>
               ) : (
-                <p className="text-2xl font-black text-white">
-                  {openTicketCount} / 2
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-2xl font-black text-white">
+                    {openTicketCount} / 2
+                  </p>
+                  {openTicketCount >= 2 && (
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/30 rounded-full px-2 py-0.5"
+                    >
+                      Limit erreicht
+                    </motion.span>
+                  )}
+                </div>
               )}
             </div>
             <Button
               onClick={handleCreateTicket}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/40 font-black"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/40 hover:scale-105 font-black transition-all"
             >
               <Plus className="w-5 h-5 mr-2" />
               Neues Ticket
             </Button>
-          </div>
+          </motion.div>
         </motion.div>
 
         {/* Tabs */}

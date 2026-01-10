@@ -97,6 +97,19 @@ export default function SupportTicketDetail() {
     const tempMessage = newMessage;
     setNewMessage('');
 
+    // Optimistic UI update
+    const optimisticMsg = {
+      id: 'temp-' + Date.now(),
+      ticket_id: ticketId,
+      sender_id: user.id,
+      sender_role: user.role,
+      body: tempMessage,
+      attachments: [],
+      created_date: new Date().toISOString(),
+      read_by_admin: false
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+
     try {
       await base44.entities.TicketMessage.create({
         ticket_id: ticketId,
@@ -113,10 +126,12 @@ export default function SupportTicketDetail() {
       });
 
       await loadMessages();
+      toast({ title: '✓ Gesendet', duration: 1500 });
     } catch (error) {
       console.error('Error sending message:', error);
       toast({ title: 'Fehler', description: 'Nachricht konnte nicht gesendet werden', variant: 'destructive' });
       setNewMessage(tempMessage);
+      setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     } finally {
       setSending(false);
     }
@@ -124,10 +139,11 @@ export default function SupportTicketDetail() {
 
   const handleCloseTicket = async () => {
     try {
-      await base44.entities.Ticket.update(ticketId, { status: 'closed' });
       setTicket({ ...ticket, status: 'closed' });
-      toast({ title: '✓ Ticket geschlossen' });
+      await base44.entities.Ticket.update(ticketId, { status: 'closed' });
+      toast({ title: '✓ Ticket geschlossen', description: 'Du kannst es jederzeit wieder öffnen', duration: 2000 });
     } catch (error) {
+      setTicket({ ...ticket, status: ticket.status });
       toast({ title: 'Fehler', description: 'Aktion fehlgeschlagen', variant: 'destructive' });
     }
   };
@@ -208,10 +224,10 @@ export default function SupportTicketDetail() {
                   transition={{ delay: index * 0.05 }}
                   className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}
                 >
-                  <div className={`max-w-[80%] ${isAdmin ? 'bg-blue-500/15 border-blue-400/30' : 'bg-purple-500/15 border-purple-400/30'} border rounded-2xl p-4`}>
+                  <div className={`max-w-[80%] ${isAdmin ? 'bg-blue-500/15 border-blue-400/30' : 'bg-purple-500/15 border-purple-400/30'} border rounded-2xl p-4 backdrop-blur-sm transition-all hover:border-opacity-50`}>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-bold text-white">
-                        {isAdmin ? 'Support Team' : 'Du'}
+                        {isAdmin ? '🎧 Support Team' : '👤 Du'}
                       </span>
                       <span className="text-xs text-zinc-500">
                         {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm', { locale: de })}

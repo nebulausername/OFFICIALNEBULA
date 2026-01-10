@@ -26,7 +26,9 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     requestCount: 0,
-    cartCount: 0
+    cartCount: 0,
+    ticketCount: 0,
+    openTicketCount: 0
   });
 
   useEffect(() => {
@@ -39,14 +41,21 @@ export default function Profile() {
       setUser(userData);
       
       // Load stats
-      const [requests, cartItems] = await Promise.all([
+      const [requests, cartItems, tickets] = await Promise.all([
         base44.entities.Request.filter({ user_id: userData.id }),
-        base44.entities.StarCartItem.filter({ user_id: userData.id })
+        base44.entities.StarCartItem.filter({ user_id: userData.id }),
+        base44.entities.Ticket.filter({ user_id: userData.id })
       ]);
+
+      const openTickets = tickets.filter(t => 
+        t.status === 'open' || t.status === 'in_progress'
+      ).length;
       
       setStats({
         requestCount: requests.length,
-        cartCount: cartItems.length
+        cartCount: cartItems.length,
+        ticketCount: tickets.length,
+        openTicketCount: openTickets
       });
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -73,6 +82,15 @@ export default function Profile() {
       color: 'from-blue-500 to-cyan-500',
       link: createPageUrl('Requests'),
       stat: stats.requestCount
+    },
+    {
+      title: 'Support Tickets',
+      description: 'Deine Anfragen & Chat',
+      icon: MessageCircle,
+      color: 'from-cyan-500 to-blue-600',
+      link: createPageUrl('Support'),
+      stat: stats.openTicketCount,
+      badge: stats.openTicketCount > 0 ? `${stats.openTicketCount} offen` : null
     },
     {
       title: 'Merkliste',

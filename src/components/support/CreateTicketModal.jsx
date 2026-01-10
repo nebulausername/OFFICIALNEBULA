@@ -90,7 +90,13 @@ export default function CreateTicketModal({ isOpen, onClose, onSuccess }) {
         read_by_admin: false
       });
 
-      toast({ title: '✓ Ticket erstellt', description: 'Wir melden uns in Kürze' });
+      toast({ 
+        title: '✓ Ticket erstellt', 
+        description: 'Wir melden uns in Kürze bei dir',
+        duration: 2500
+      });
+      setFormData({ category: 'other', subject: '', body: '', order_id: '' });
+      setAttachments([]);
       onClose();
       onSuccess(ticket);
     } catch (error) {
