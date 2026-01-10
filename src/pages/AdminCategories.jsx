@@ -105,25 +105,25 @@ export default function AdminCategories() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-4xl font-bold mb-8 text-white">Kategorien & Departments</h1>
+      <h1 className="text-5xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent mb-8">Kategorien & Departments</h1>
 
       <Tabs defaultValue="departments" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="departments">Departments</TabsTrigger>
-          <TabsTrigger value="categories">Kategorien</TabsTrigger>
+        <TabsList className="mb-6 bg-zinc-800 border-2 border-zinc-700">
+          <TabsTrigger value="departments" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold">Departments</TabsTrigger>
+          <TabsTrigger value="categories" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold">Kategorien</TabsTrigger>
         </TabsList>
 
         {/* Departments Tab */}
         <TabsContent value="departments">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-zinc-400">{departments.length} Departments</p>
-            <Button onClick={() => handleNew('department')} className="bg-gradient-to-r from-purple-500 to-pink-500">
+            <p className="text-zinc-300 text-lg font-medium">{departments.length} Departments</p>
+            <Button onClick={() => handleNew('department')} className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 hover:shadow-xl hover:shadow-purple-500/50 font-bold h-12 px-6">
               <Plus className="w-5 h-5 mr-2" />
               Neues Department
             </Button>
           </div>
 
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+          <div className="glass backdrop-blur-xl border-2 border-zinc-800 rounded-2xl overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -166,14 +166,14 @@ export default function AdminCategories() {
         {/* Categories Tab */}
         <TabsContent value="categories">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-zinc-400">{categories.length} Kategorien</p>
-            <Button onClick={() => handleNew('category')} className="bg-gradient-to-r from-purple-500 to-pink-500">
+            <p className="text-zinc-300 text-lg font-medium">{categories.length} Kategorien</p>
+            <Button onClick={() => handleNew('category')} className="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 hover:shadow-xl hover:shadow-purple-500/50 font-bold h-12 px-6">
               <Plus className="w-5 h-5 mr-2" />
               Neue Kategorie
             </Button>
           </div>
 
-          <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl overflow-hidden">
+          <div className="glass backdrop-blur-xl border-2 border-zinc-800 rounded-2xl overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
