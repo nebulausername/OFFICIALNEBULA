@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Crown, MessageSquare, HelpCircle } from 'lucide-react';
+import { Plus, Search, Crown, MessageSquare, HelpCircle, ChevronDown, Package, CreditCard, Truck, RotateCcw, Shield, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -23,6 +23,9 @@ export default function Support() {
   const [openTicketCount, setOpenTicketCount] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showVipModal, setShowVipModal] = useState(false);
+  const [faqSearch, setFaqSearch] = useState('');
+  const [expandedFaq, setExpandedFaq] = useState(null);
+  const [faqCategory, setFaqCategory] = useState('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -95,6 +98,79 @@ export default function Support() {
       }, 400);
     }
   };
+
+  const getFaqItems = () => [
+    {
+      category: 'orders',
+      question: 'Wie lange dauert die Bearbeitung meiner Bestellung?',
+      answer: 'Bestellungen werden in der Regel innerhalb von 24-48 Stunden bearbeitet. Nach Bestätigung erhältst du eine E-Mail mit Tracking-Informationen. VIP-Mitglieder erhalten Prioritätsbearbeitung.'
+    },
+    {
+      category: 'orders',
+      question: 'Kann ich meine Bestellung noch ändern?',
+      answer: 'Solange deine Bestellung noch nicht versendet wurde, können wir Änderungen vornehmen. Erstelle dafür bitte ein Support-Ticket mit deiner Bestellnummer und den gewünschten Änderungen.'
+    },
+    {
+      category: 'payment',
+      question: 'Welche Zahlungsmethoden akzeptiert ihr?',
+      answer: 'Wir akzeptieren Kreditkarten, PayPal, Sofortüberweisung und Klarna. Alle Zahlungen werden sicher über verschlüsselte Verbindungen abgewickelt.'
+    },
+    {
+      category: 'payment',
+      question: 'Ist meine Zahlung sicher?',
+      answer: 'Ja, alle Zahlungen werden über sichere SSL-verschlüsselte Verbindungen abgewickelt. Wir speichern keine Kreditkartendaten auf unseren Servern.'
+    },
+    {
+      category: 'shipping',
+      question: 'Wie hoch sind die Versandkosten?',
+      answer: 'Der Versand ist für alle Bestellungen kostenlos. Je nach Versandort (Deutschland oder China) variiert die Lieferzeit zwischen 1-5 bzw. 8-15 Werktagen.'
+    },
+    {
+      category: 'shipping',
+      question: 'Wie kann ich meine Bestellung verfolgen?',
+      answer: 'Nach dem Versand erhältst du eine E-Mail mit der Tracking-Nummer. Du kannst deine Bestellung auch jederzeit unter "Meine Bestellungen" in deinem Profil verfolgen.'
+    },
+    {
+      category: 'shipping',
+      question: 'Versendet ihr international?',
+      answer: 'Derzeit versenden wir hauptsächlich innerhalb Deutschlands und der EU. Für internationale Bestellungen kontaktiere bitte unser Support-Team.'
+    },
+    {
+      category: 'returns',
+      question: 'Wie funktioniert die Rückgabe?',
+      answer: 'Du hast 14 Tage Rückgaberecht. Erstelle ein Support-Ticket mit deiner Bestellnummer und dem Rückgabegrund. Wir senden dir dann ein Retourenlabel zu.'
+    },
+    {
+      category: 'returns',
+      question: 'Wann erhalte ich meine Rückerstattung?',
+      answer: 'Nach Erhalt und Prüfung der Rücksendung erfolgt die Rückerstattung innerhalb von 5-7 Werktagen auf deine ursprüngliche Zahlungsmethode.'
+    },
+    {
+      category: 'account',
+      question: 'Wie werde ich VIP-Mitglied?',
+      answer: 'Du kannst VIP-Status durch Einladungen erreichen: Lade entweder 10 Personen ein oder 5 Premium-Käufer. VIP-Mitglieder erhalten unbegrenzte Tickets, Priority Support und exklusive Angebote.'
+    },
+    {
+      category: 'account',
+      question: 'Was ist das Ticket-Limit?',
+      answer: 'Normale User können maximal 2 offene Support-Tickets gleichzeitig haben. VIP-Mitglieder haben unbegrenzten Zugang zu Support-Tickets und erhalten schnellere Antworten.'
+    },
+    {
+      category: 'account',
+      question: 'Wie ändere ich meine Profildaten?',
+      answer: 'Gehe zu "Profil" → "Einstellungen" und bearbeite dort deine persönlichen Daten. Änderungen werden sofort gespeichert.'
+    },
+    {
+      category: 'orders',
+      question: 'Was bedeutet "Versand aus Deutschland" vs "Versand aus China"?',
+      answer: 'Produkte aus Deutschland werden schneller geliefert (1-5 Tage) zum regulären Preis. China-Versand dauert länger (8-15 Tage), ist aber 15% günstiger.'
+    },
+    {
+      category: 'account',
+      question: 'Wie kontaktiere ich den Support am schnellsten?',
+      answer: 'Erstelle ein Support-Ticket über "Neues Ticket". VIP-Mitglieder erhalten zusätzlich Zugang zu unserem exklusiven WhatsApp-Support für sofortige Hilfe.'
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a12] via-[#14141f] to-[#0a0a12]">
@@ -222,14 +298,140 @@ export default function Support() {
           </TabsContent>
 
           <TabsContent value="faq">
-            <div className="text-center py-16">
-              <HelpCircle className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">FAQ Coming Soon</h3>
-              <p className="text-zinc-400 mb-6">Häufig gestellte Fragen werden hier angezeigt</p>
-              <Button onClick={handleCreateTicket} className="bg-gradient-to-r from-purple-500 to-pink-500">
-                Direkt Ticket erstellen
-              </Button>
+            {/* FAQ Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <h2 className="text-2xl font-black text-white mb-2">Häufige Fragen</h2>
+              <p className="text-zinc-400">Schnelle Antworten auf die wichtigsten Fragen</p>
+            </motion.div>
+
+            {/* FAQ Search */}
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                <Input
+                  value={faqSearch}
+                  onChange={(e) => setFaqSearch(e.target.value)}
+                  placeholder="Frage durchsuchen..."
+                  className="pl-12 bg-white/[0.02] border-white/[0.08] text-white h-12"
+                />
+              </div>
             </div>
+
+            {/* FAQ Categories */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+              {[
+                { key: 'all', label: 'Alle', icon: HelpCircle },
+                { key: 'orders', label: 'Bestellungen', icon: Package },
+                { key: 'payment', label: 'Zahlung', icon: CreditCard },
+                { key: 'shipping', label: 'Versand', icon: Truck },
+                { key: 'returns', label: 'Retouren', icon: RotateCcw },
+                { key: 'account', label: 'Konto', icon: Shield }
+              ].map((cat) => {
+                const Icon = cat.icon;
+                return (
+                  <button
+                    key={cat.key}
+                    onClick={() => setFaqCategory(cat.key)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 ${
+                      faqCategory === cat.key
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                        : 'bg-white/[0.02] text-zinc-400 hover:bg-white/[0.05] border border-white/[0.08]'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* FAQ Items */}
+            <div className="space-y-3">
+              {getFaqItems()
+                .filter(item => 
+                  (faqCategory === 'all' || item.category === faqCategory) &&
+                  (faqSearch === '' || 
+                   item.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
+                   item.answer.toLowerCase().includes(faqSearch.toLowerCase()))
+                )
+                .map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <button
+                      onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                      className="w-full text-left bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-xl p-4 hover:border-white/[0.15] transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-white mb-1">{item.question}</h3>
+                          <AnimatePresence>
+                            {expandedFaq === index && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <p className="text-zinc-400 text-sm leading-relaxed mt-3 pt-3 border-t border-white/[0.08]">
+                                  {item.answer}
+                                </p>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: expandedFaq === index ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ChevronDown className="w-5 h-5 text-zinc-400 flex-shrink-0" />
+                        </motion.div>
+                      </div>
+                    </button>
+                  </motion.div>
+                ))}
+            </div>
+
+            {/* No Results */}
+            {getFaqItems().filter(item => 
+              (faqCategory === 'all' || item.category === faqCategory) &&
+              (faqSearch === '' || 
+               item.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
+               item.answer.toLowerCase().includes(faqSearch.toLowerCase()))
+            ).length === 0 && (
+              <div className="text-center py-16">
+                <HelpCircle className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">Keine Ergebnisse</h3>
+                <p className="text-zinc-400 mb-6">Versuche einen anderen Suchbegriff oder erstelle ein Ticket</p>
+                <Button onClick={handleCreateTicket} className="bg-gradient-to-r from-purple-500 to-pink-500">
+                  Ticket erstellen
+                </Button>
+              </div>
+            )}
+
+            {/* Quick Contact CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-8 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-6 text-center"
+            >
+              <Zap className="w-12 h-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-xl font-black text-white mb-2">Nicht gefunden?</h3>
+              <p className="text-zinc-400 mb-4">Erstelle ein Ticket und wir helfen dir weiter</p>
+              <Button onClick={handleCreateTicket} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/40">
+                <Plus className="w-5 h-5 mr-2" />
+                Neues Ticket
+              </Button>
+            </motion.div>
           </TabsContent>
         </Tabs>
       </div>
