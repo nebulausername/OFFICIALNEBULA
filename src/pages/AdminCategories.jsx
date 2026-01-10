@@ -105,7 +105,7 @@ export default function AdminCategories() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-4xl font-bold mb-8">Kategorien & Departments</h1>
+      <h1 className="text-4xl font-bold mb-8 text-white">Kategorien & Departments</h1>
 
       <Tabs defaultValue="departments" className="w-full">
         <TabsList className="mb-6">
@@ -127,16 +127,16 @@ export default function AdminCategories() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Reihenfolge</TableHead>
-                  <TableHead className="text-right">Aktionen</TableHead>
+                  <TableHead className="text-zinc-300">Name</TableHead>
+                  <TableHead className="text-zinc-300">Reihenfolge</TableHead>
+                  <TableHead className="text-right text-zinc-300">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {departments.map((dept) => (
                   <TableRow key={dept.id}>
-                    <TableCell className="font-medium">{dept.name}</TableCell>
-                    <TableCell>{dept.sort_order}</TableCell>
+                    <TableCell className="font-medium text-white">{dept.name}</TableCell>
+                    <TableCell className="text-zinc-300">{dept.sort_order}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button
@@ -177,10 +177,10 @@ export default function AdminCategories() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Reihenfolge</TableHead>
-                  <TableHead className="text-right">Aktionen</TableHead>
+                  <TableHead className="text-zinc-300">Name</TableHead>
+                  <TableHead className="text-zinc-300">Department</TableHead>
+                  <TableHead className="text-zinc-300">Reihenfolge</TableHead>
+                  <TableHead className="text-right text-zinc-300">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -188,9 +188,9 @@ export default function AdminCategories() {
                   const dept = departments.find(d => d.id === cat.department_id);
                   return (
                     <TableRow key={cat.id}>
-                      <TableCell className="font-medium">{cat.name}</TableCell>
-                      <TableCell>{dept?.name || '-'}</TableCell>
-                      <TableCell>{cat.sort_order}</TableCell>
+                      <TableCell className="font-medium text-white">{cat.name}</TableCell>
+                      <TableCell className="text-zinc-300">{dept?.name || '-'}</TableCell>
+                      <TableCell className="text-zinc-300">{cat.sort_order}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Button
@@ -223,26 +223,27 @@ export default function AdminCategories() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-zinc-900 border-zinc-800">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-white">
               {editing ? 'Bearbeiten' : 'Neu'} - {dialogType === 'department' ? 'Department' : 'Kategorie'}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div>
-              <Label>Name *</Label>
+              <Label className="text-zinc-300">Name *</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Name..."
+                className="text-white"
               />
             </div>
 
             {dialogType === 'category' && (
               <div>
-                <Label>Department</Label>
+                <Label className="text-zinc-300">Department</Label>
                 <Select value={formData.department_id} onValueChange={(val) => setFormData({ ...formData, department_id: val })}>
-                  <SelectTrigger>
+                  <SelectTrigger className="text-white">
                     <SelectValue placeholder="Wählen..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -255,11 +256,12 @@ export default function AdminCategories() {
             )}
 
             <div>
-              <Label>Reihenfolge</Label>
+              <Label className="text-zinc-300">Reihenfolge</Label>
               <Input
                 type="number"
                 value={formData.sort_order}
                 onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) })}
+                className="text-white"
               />
             </div>
           </div>
