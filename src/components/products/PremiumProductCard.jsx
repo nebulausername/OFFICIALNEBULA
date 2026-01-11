@@ -177,22 +177,20 @@ export default function PremiumProductCard({ product, onQuickView }) {
           </div>
           
           {/* Delivery Info */}
-          {deliveryInfo && (
-            <div className="space-y-2 pt-3 border-t border-zinc-800/50">
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-5 h-5 rounded-md bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-3 h-3 text-purple-400" />
-                </div>
-                <span className="font-semibold text-zinc-300">nach {deliveryInfo.city}</span>
+          <div className="space-y-2 pt-3 border-t border-zinc-800/50">
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-5 h-5 rounded-md bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-3 h-3 text-red-400" />
               </div>
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-5 h-5 rounded-md bg-pink-500/20 flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-3 h-3 text-pink-400" />
-                </div>
-                <span className="font-semibold text-zinc-300">{getEtaText()}</span>
-              </div>
+              <span className="font-semibold text-zinc-300">🇨🇳 Lieferbar aus China</span>
             </div>
-          )}
+            <div className="flex items-center gap-2 text-xs">
+              <div className="w-5 h-5 rounded-md bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                <Clock className="w-3 h-3 text-blue-400" />
+              </div>
+              <span className="font-semibold text-zinc-300">8–17 Tage Lieferzeit</span>
+            </div>
+          </div>
         </div>
 
         {/* Hover Glow Effect */}
