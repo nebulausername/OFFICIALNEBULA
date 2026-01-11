@@ -79,6 +79,9 @@ export default function PremiumProductCard({ product, onQuickView }) {
 
   const getEtaText = () => {
     if (!deliveryInfo) return '';
+    if (deliveryInfo.eta_min >= 8) {
+      return `${deliveryInfo.eta_min}–${deliveryInfo.eta_max} Tage`;
+    }
     return `${deliveryInfo.eta_min}–${deliveryInfo.eta_max} Werktage`;
   };
 
