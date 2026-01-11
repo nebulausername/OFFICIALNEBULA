@@ -187,7 +187,7 @@ export default function VIP() {
                 
                 <h4 className="text-xl md:text-2xl font-black text-white mb-2">Lifetime</h4>
                 <div className="mb-4">
-                  <span className="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">60€</span>
+                  <span className="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">50€</span>
                   <span className="text-zinc-500 text-sm ml-2">einmalig</span>
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">Zahle einmal und bleibe für immer VIP</p>
