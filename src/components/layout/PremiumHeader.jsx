@@ -53,17 +53,17 @@ export default function PremiumHeader() {
   const IconButton = ({ icon: Icon, label, count, to, onClick }) => (
     <Link to={to} onClick={onClick}>
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="relative w-10 h-10 glass-panel rounded-full flex items-center justify-center hover:bg-[var(--glass-hover)] smooth-transition focus-ring"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center hover:from-purple-500/30 hover:to-pink-500/30 smooth-transition focus-ring border border-purple-500/30"
         aria-label={label}
       >
-        <Icon className="w-5 h-5 text-[hsl(var(--text))]" />
+        <Icon className="w-5 h-5 text-purple-300" />
         {count > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent2))] text-white text-[10px] font-black rounded-full flex items-center justify-center"
+            className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs font-black rounded-full flex items-center justify-center shadow-lg"
           >
             {count}
           </motion.span>
@@ -138,10 +138,21 @@ export default function PremiumHeader() {
             {/* Right Icons */}
             <div className="flex items-center gap-2 md:gap-3">
               {user?.is_vip && (
-                <div className="vip-badge hidden md:flex">
-                  <Crown className="w-3.5 h-3.5" />
-                  VIP
-                </div>
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.05, 1],
+                    boxShadow: [
+                      '0 0 10px rgba(251, 191, 36, 0.3)',
+                      '0 0 20px rgba(251, 191, 36, 0.5)',
+                      '0 0 10px rgba(251, 191, 36, 0.3)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="hidden md:flex px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 items-center gap-1.5 shadow-lg"
+                >
+                  <Crown className="w-4 h-4 text-zinc-900" />
+                  <span className="text-xs font-black text-zinc-900">VIP</span>
+                </motion.div>
               )}
               
               <IconButton 

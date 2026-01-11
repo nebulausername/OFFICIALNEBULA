@@ -17,11 +17,11 @@ export default function DeliveryBar() {
       setDeliveryLocation(JSON.parse(saved));
     } else {
       setDeliveryLocation({
-        city: 'Berlin',
-        country: 'DE',
-        eta_min: 1,
-        eta_max: 3,
-        free_shipping_threshold: 200
+        city: 'China',
+        country: 'CN',
+        eta_min: 8,
+        eta_max: 17,
+        free_shipping_threshold: 0
       });
     }
   };
@@ -35,14 +35,7 @@ export default function DeliveryBar() {
   if (!deliveryLocation) return null;
 
   const getEtaText = () => {
-    const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-    const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() + deliveryLocation.eta_min);
-    const endDate = new Date(today);
-    endDate.setDate(today.getDate() + deliveryLocation.eta_max);
-    
-    return `${days[startDate.getDay()]}–${days[endDate.getDay()]} (${deliveryLocation.eta_min}–${deliveryLocation.eta_max} Werktage)`;
+    return `${deliveryLocation.eta_min}–${deliveryLocation.eta_max} Tage`;
   };
 
   return (
