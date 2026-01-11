@@ -17,7 +17,8 @@ import {
   ArrowUpRight,
   Clock,
   CheckCircle2,
-  MessageCircle
+  MessageCircle,
+  Mail
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -140,6 +141,14 @@ export default function Admin() {
       description: 'Kundenanfragen',
       color: 'from-blue-500 to-cyan-500',
       link: 'AdminSupport'
+    },
+    {
+      title: 'Benachrichtigungen',
+      icon: Mail,
+      count: 0,
+      description: 'Vorlagen verwalten',
+      color: 'from-purple-500 to-violet-500',
+      link: 'AdminNotificationTemplates'
     }
   ];
 
