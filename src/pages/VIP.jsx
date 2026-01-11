@@ -179,22 +179,24 @@ export default function VIP() {
                 <span className="text-xs font-black text-purple-300">BELIEBT</span>
               </div>
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-              
+
               <div className="relative z-10">
                 <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform">
                   <Zap className="w-8 h-8 text-white" />
                 </div>
-                
+
                 <h4 className="text-xl md:text-2xl font-black text-white mb-2">Lifetime</h4>
                 <div className="mb-4">
                   <span className="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">50€</span>
                   <span className="text-zinc-500 text-sm ml-2">einmalig</span>
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">Zahle einmal und bleibe für immer VIP</p>
-                
-                <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 font-bold">
-                  Jetzt kaufen
-                </Button>
+
+                <Link to={createPageUrl('Support')}>
+                  <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 font-bold">
+                    Jetzt anfragen
+                  </Button>
+                </Link>
               </div>
             </motion.div>
 
@@ -204,22 +206,24 @@ export default function VIP() {
               className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl p-6 md:p-8 hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/20 transition-all group relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              
+
               <div className="relative z-10">
                 <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform">
                   <Calendar className="w-8 h-8 text-white" />
                 </div>
-                
+
                 <h4 className="text-xl md:text-2xl font-black text-white mb-2">Wöchentlich</h4>
                 <div className="mb-4">
                   <span className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-300 to-cyan-300 bg-clip-text text-transparent">5€</span>
                   <span className="text-zinc-500 text-sm ml-2">/Woche</span>
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">Flexibel und jederzeit kündbar</p>
-                
-                <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 font-bold">
-                  Abonnieren
-                </Button>
+
+                <Link to={createPageUrl('Support')}>
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 font-bold">
+                    Jetzt anfragen
+                  </Button>
+                </Link>
               </div>
             </motion.div>
 
@@ -229,22 +233,24 @@ export default function VIP() {
               className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-2xl p-6 md:p-8 hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/20 transition-all group relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              
+
               <div className="relative z-10">
                 <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-2xl flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform">
                   <CreditCard className="w-8 h-8 text-white" />
                 </div>
-                
+
                 <h4 className="text-xl md:text-2xl font-black text-white mb-2">Monatlich</h4>
                 <div className="mb-4">
                   <span className="text-4xl md:text-5xl font-black bg-gradient-to-r from-amber-300 to-yellow-300 bg-clip-text text-transparent">20€</span>
                   <span className="text-zinc-500 text-sm ml-2">/Monat</span>
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">Günstigster Abo-Preis</p>
-                
-                <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 font-bold">
-                  Abonnieren
-                </Button>
+
+                <Link to={createPageUrl('Support')}>
+                  <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 font-bold">
+                    Jetzt anfragen
+                  </Button>
+                </Link>
               </div>
             </motion.div>
           </div>

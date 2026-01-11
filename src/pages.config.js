@@ -17,6 +17,8 @@ import Support from './pages/Support';
 import SupportTicketDetail from './pages/SupportTicketDetail';
 import VIP from './pages/VIP';
 import Wishlist from './pages/Wishlist';
+import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +42,8 @@ export const PAGES = {
     "SupportTicketDetail": SupportTicketDetail,
     "VIP": VIP,
     "Wishlist": Wishlist,
+    "Checkout": Checkout,
+    "OrderConfirmation": OrderConfirmation,
 }
 
 export const pagesConfig = {
