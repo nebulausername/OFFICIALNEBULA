@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Crown, Star, Users, ShoppingBag, Sparkles, CheckCircle2, ArrowRight, Gift, Zap, MessageCircle, Send, CreditCard, Calendar } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import VipPlanModal from '../components/vip/VipPlanModal';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function VIP() {
   const [user, setUser] = useState(null);
@@ -14,6 +16,10 @@ export default function VIP() {
     premiumInvites: 0,
     isVIP: false
   });
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     loadUserData();
@@ -84,6 +90,88 @@ export default function VIP() {
 
   const normalProgress = (stats.normalInvites / 10) * 100;
   const premiumProgress = (stats.premiumInvites / 5) * 100;
+
+  const vipPlans = [
+    {
+      type: 'lifetime',
+      name: 'Lifetime VIP',
+      price: 50,
+      period: 'einmalig',
+      features: [
+        'Lebenslanger VIP-Status',
+        'Alle Premium-Features',
+        'Exklusiver WhatsApp Support',
+        'Priority Bearbeitung'
+      ]
+    },
+    {
+      type: 'weekly',
+      name: 'Wöchentliches VIP',
+      price: 5,
+      period: '/Woche',
+      features: [
+        'Flexibel kündbar',
+        'Alle Premium-Features',
+        'WhatsApp Support',
+        'Priority Zugang'
+      ]
+    },
+    {
+      type: 'monthly',
+      name: 'Monatliches VIP',
+      price: 20,
+      period: '/Monat',
+      features: [
+        'Bester Preis',
+        'Alle Premium-Features',
+        'WhatsApp Support',
+        'Exklusive Deals'
+      ]
+    }
+  ];
+
+  const handlePlanClick = (plan) => {
+    setSelectedPlan(plan);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmPlan = async () => {
+    if (!selectedPlan || !user) return;
+
+    try {
+      // Create a special VIP cart item
+      await base44.entities.StarCartItem.create({
+        user_id: user.id,
+        product_id: 'vip-plan', // Special identifier
+        quantity: 1,
+        selected_options: {
+          plan_type: selectedPlan.type,
+          plan_name: selectedPlan.name,
+          price: selectedPlan.price,
+          period: selectedPlan.period
+        }
+      });
+
+      toast({
+        title: '✨ VIP Plan hinzugefügt!',
+        description: `${selectedPlan.name} wurde zu deinem Warenkorb hinzugefügt.`,
+      });
+
+      setIsModalOpen(false);
+      
+      // Navigate to cart after a short delay
+      setTimeout(() => {
+        navigate(createPageUrl('Cart'));
+      }, 1000);
+    } catch (error) {
+      console.error('Error adding VIP plan:', error);
+      toast({
+        title: 'Fehler',
+        description: 'VIP Plan konnte nicht hinzugefügt werden.',
+        variant: 'destructive'
+      });
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
@@ -192,11 +280,12 @@ export default function VIP() {
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">Zahle einmal und bleibe für immer VIP</p>
 
-                <Link to={createPageUrl('Support')}>
-                  <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 font-bold">
-                    Jetzt anfragen
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => handlePlanClick(vipPlans[0])}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 font-bold"
+                >
+                  Jetzt anfragen
+                </Button>
               </div>
             </motion.div>
 
@@ -219,11 +308,12 @@ export default function VIP() {
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">Flexibel und jederzeit kündbar</p>
 
-                <Link to={createPageUrl('Support')}>
-                  <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 font-bold">
-                    Jetzt anfragen
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => handlePlanClick(vipPlans[1])}
+                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 font-bold"
+                >
+                  Jetzt anfragen
+                </Button>
               </div>
             </motion.div>
 
@@ -246,11 +336,12 @@ export default function VIP() {
                 </div>
                 <p className="text-zinc-400 text-sm mb-6">Günstigster Abo-Preis</p>
 
-                <Link to={createPageUrl('Support')}>
-                  <Button className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 font-bold">
-                    Jetzt anfragen
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => handlePlanClick(vipPlans[2])}
+                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 font-bold"
+                >
+                  Jetzt anfragen
+                </Button>
               </div>
             </motion.div>
           </div>
@@ -460,6 +551,12 @@ export default function VIP() {
       )}
 
 
+      <VipPlanModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        plan={selectedPlan}
+        onConfirm={handleConfirmPlan}
+      />
     </div>
   );
 }
