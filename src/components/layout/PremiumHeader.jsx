@@ -180,10 +180,10 @@ export default function PremiumHeader() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsMenuOpen(true)}
-                className="w-10 h-10 glass-panel rounded-full flex items-center justify-center hover:bg-[var(--glass-hover)] smooth-transition md:hidden focus-ring"
+                className="w-11 h-11 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center md:hidden focus-ring backdrop-blur-xl shadow-lg"
                 aria-label="Menu öffnen"
               >
-                <Menu className="w-5 h-5 text-[hsl(var(--text))]" />
+                <Menu className="w-6 h-6 text-white" />
               </motion.button>
             </div>
           </div>
