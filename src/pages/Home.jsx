@@ -6,6 +6,8 @@ import { Star, Sparkles, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import ProductQuickView from '../components/products/ProductQuickView';
+import DeliveryBar from '../components/delivery/DeliveryBar';
+import PremiumProductCard from '../components/products/PremiumProductCard';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
@@ -71,7 +73,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background Grid */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
@@ -197,7 +199,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
             >
               <Link to={createPageUrl('Products')}>
                 <motion.div
@@ -234,6 +236,16 @@ export default function Home() {
                   </Button>
                 </motion.div>
               </Link>
+            </motion.div>
+
+            {/* Delivery Bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+              className="max-w-4xl mx-auto"
+            >
+              <DeliveryBar />
             </motion.div>
 
             {/* Stats Bar */}
@@ -581,87 +593,14 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.08, type: "spring", stiffness: 100 }}
-                  className="group"
                 >
-                  <div className="relative">
-                    {/* Product Card */}
-                    <Link
-                      to={createPageUrl('ProductDetail') + `?id=${product.id}`}
-                      className="block"
-                    >
-                      <motion.div
-                        whileHover={{ y: -8 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        className="glass backdrop-blur-xl rounded-2xl overflow-hidden border-2 border-zinc-800/50 shadow-xl hover:shadow-2xl hover:shadow-purple-500/30 hover:border-purple-500/60 transition-all duration-300"
-                      >
-                        {/* Image Container */}
-                        <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-zinc-900 to-zinc-800">
-                          {product.cover_image ? (
-                            <motion.img
-                              whileHover={{ scale: 1.08 }}
-                              transition={{ duration: 0.6, ease: "easeOut" }}
-                              src={product.cover_image}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Package className="w-16 h-16 text-zinc-600" />
-                            </div>
-                          )}
-                          
-                          {/* Availability Badge */}
-                          {product.in_stock ? (
-                            <div className="absolute top-3 right-3 px-3.5 py-2 bg-green-500/90 backdrop-blur-sm text-white text-xs font-black rounded-full shadow-lg shadow-green-500/50">
-                              ✓ Verfügbar
-                            </div>
-                          ) : (
-                            <div className="absolute top-3 right-3 px-3.5 py-2 bg-red-500/90 backdrop-blur-sm text-white text-xs font-black rounded-full shadow-lg shadow-red-500/50">
-                              Ausverkauft
-                            </div>
-                          )}
-                          
-                          {/* Quick View Overlay */}
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            whileHover={{ opacity: 1 }}
-                            className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6"
-                          >
-                            <motion.button
-                              initial={{ y: 20, opacity: 0 }}
-                              whileHover={{ y: 0, opacity: 1, scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              transition={{ delay: 0.1 }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setQuickViewProduct(product);
-                                setIsQuickViewOpen(true);
-                              }}
-                              className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black text-sm rounded-xl shadow-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-200"
-                            >
-                              Quick View
-                            </motion.button>
-                          </motion.div>
-                        </div>
-
-                        {/* Product Info */}
-                        <div className="p-5 space-y-3">
-                          <h3 className="font-bold text-base text-white line-clamp-2 leading-snug group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
-                            {product.name}
-                          </h3>
-                          
-                          <div className="flex items-baseline justify-between">
-                            <div className="text-2xl font-black text-white">
-                              {product.price}€
-                            </div>
-                            <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                              {product.sku}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    </Link>
-                  </div>
+                  <PremiumProductCard
+                    product={product}
+                    onQuickView={(p) => {
+                      setQuickViewProduct(p);
+                      setIsQuickViewOpen(true);
+                    }}
+                  />
                 </motion.div>
               ))
             )}
