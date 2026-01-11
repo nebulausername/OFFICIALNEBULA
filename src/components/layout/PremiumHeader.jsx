@@ -88,10 +88,20 @@ export default function PremiumHeader() {
                 whileHover={{ scale: 1.05 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-[hsl(var(--accent))] to-[hsl(var(--accent2))] rounded-xl flex items-center justify-center">
-                  <span className="text-white font-black text-lg">N</span>
-                </div>
-                <span className="hidden sm:block text-xl font-black text-gradient-primary">
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(168, 85, 247, 0.5)',
+                      '0 0 30px rgba(236, 72, 153, 0.5)',
+                      '0 0 20px rgba(168, 85, 247, 0.5)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl"
+                >
+                  <span className="text-white font-black text-2xl">N</span>
+                </motion.div>
+                <span className="hidden sm:block text-2xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
                   NEBULA
                 </span>
               </motion.div>
@@ -99,17 +109,29 @@ export default function PremiumHeader() {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link to={createPageUrl('Home')} className="text-sm font-bold text-[hsl(var(--text))] hover:text-[hsl(var(--accent))] smooth-transition relative group">
+              <Link to={createPageUrl('Home')} className="text-base font-black text-white hover:text-purple-400 smooth-transition relative group">
                 Home
-                <span className="absolute bottom-[-4px] left-0 w-0 h-0.5 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent2))] group-hover:w-full smooth-transition" />
+                <motion.span
+                  className="absolute bottom-[-4px] left-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full smooth-transition"
+                  initial={{ width: 0 }}
+                  whileHover={{ width: '100%' }}
+                />
               </Link>
-              <Link to={createPageUrl('Products')} className="text-sm font-bold text-[hsl(var(--text))] hover:text-[hsl(var(--accent))] smooth-transition relative group">
+              <Link to={createPageUrl('Products')} className="text-base font-black text-white hover:text-purple-400 smooth-transition relative group">
                 Shop
-                <span className="absolute bottom-[-4px] left-0 w-0 h-0.5 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent2))] group-hover:w-full smooth-transition" />
+                <motion.span
+                  className="absolute bottom-[-4px] left-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full smooth-transition"
+                  initial={{ width: 0 }}
+                  whileHover={{ width: '100%' }}
+                />
               </Link>
-              <Link to={createPageUrl('Profile')} className="text-sm font-bold text-[hsl(var(--text))] hover:text-[hsl(var(--accent))] smooth-transition relative group">
+              <Link to={createPageUrl('Profile')} className="text-base font-black text-white hover:text-purple-400 smooth-transition relative group">
                 Profil
-                <span className="absolute bottom-[-4px] left-0 w-0 h-0.5 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent2))] group-hover:w-full smooth-transition" />
+                <motion.span
+                  className="absolute bottom-[-4px] left-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full smooth-transition"
+                  initial={{ width: 0 }}
+                  whileHover={{ width: '100%' }}
+                />
               </Link>
             </nav>
 
