@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { base44 } from '@/api/base44Client';
-import { Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, MessageCircle, Bell } from 'lucide-react';
+import { Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, MessageCircle, Bell, MapPin, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PremiumHeader() {
@@ -200,7 +200,7 @@ export default function PremiumHeader() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 overlay-blur z-50"
+              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50"
             />
 
             {/* Drawer */}
@@ -208,97 +208,183 @@ export default function PremiumHeader() {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 w-[85%] max-w-sm glass-panel z-50 overflow-y-auto custom-scrollbar"
+              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+              className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md bg-gradient-to-br from-zinc-950 via-zinc-900 to-black border-l-2 border-purple-500/30 z-50 overflow-y-auto custom-scrollbar shadow-2xl shadow-purple-500/20"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-[hsl(var(--border))]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[hsl(var(--accent))] to-[hsl(var(--accent2))] rounded-xl flex items-center justify-center">
-                    <span className="text-white font-black text-lg">N</span>
-                  </div>
-                  <span className="text-xl font-black text-gradient-primary">NEBULA</span>
+              <div className="relative p-6 border-b border-white/10">
+                {/* Background Glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 blur-2xl" />
+                
+                <div className="relative flex items-center justify-between">
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-3"
+                  >
+                    <motion.div
+                      animate={{
+                        boxShadow: [
+                          '0 0 20px rgba(168, 85, 247, 0.6)',
+                          '0 0 30px rgba(236, 72, 153, 0.6)',
+                          '0 0 20px rgba(168, 85, 247, 0.6)',
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl"
+                    >
+                      <span className="text-white font-black text-2xl">N</span>
+                    </motion.div>
+                    <span className="text-2xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">NEBULA</span>
+                  </motion.div>
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="w-11 h-11 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 flex items-center justify-center transition-all border border-white/10"
+                    aria-label="Menu schließen"
+                  >
+                    <X className="w-6 h-6 text-white" />
+                  </motion.button>
                 </div>
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  className="w-10 h-10 rounded-full hover:bg-[var(--glass-hover)] flex items-center justify-center smooth-transition focus-ring"
-                  aria-label="Menu schließen"
-                >
-                  <X className="w-6 h-6 text-[hsl(var(--text))]" />
-                </button>
               </div>
+
+              {/* Delivery Info Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="m-4 p-4 rounded-2xl bg-gradient-to-br from-zinc-900/80 to-zinc-800/80 border border-white/10 backdrop-blur-xl"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-red-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs text-zinc-400 font-semibold">Versand aus</div>
+                    <div className="text-sm font-black text-white">🇨🇳 China</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
+                    <Clock className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-xs text-zinc-400 font-semibold">Lieferzeit</div>
+                    <div className="text-sm font-black text-white">8-17 Tage</div>
+                  </div>
+                </div>
+              </motion.div>
 
               {/* User Info */}
               {user && (
-                <div className="p-6 border-b border-[hsl(var(--border))]">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[hsl(var(--accent))] to-[hsl(var(--accent2))] flex items-center justify-center">
-                      <User className="w-6 h-6 text-white" />
-                    </div>
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="mx-4 mb-4 p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-xl"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl"
+                    >
+                      <User className="w-7 h-7 text-white" />
+                    </motion.div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-bold text-[hsl(var(--text))] truncate">{user.full_name}</div>
-                      <div className="text-xs text-[hsl(var(--text-muted))] truncate">{user.email}</div>
+                      <div className="font-black text-white truncate">{user.full_name}</div>
+                      <div className="text-xs text-zinc-400 truncate">{user.email}</div>
                     </div>
                   </div>
                   {user.is_vip && (
-                    <div className="vip-badge inline-flex">
-                      <Crown className="w-3.5 h-3.5" />
-                      VIP Member
-                    </div>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 shadow-lg"
+                    >
+                      <Crown className="w-4 h-4 text-zinc-900" />
+                      <span className="text-xs font-black text-zinc-900">VIP MEMBER</span>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               )}
 
               {/* Menu Items */}
-              <nav className="p-6 space-y-2">
+              <nav className="px-4 py-6 space-y-2">
                 {[
-                  { icon: Home, label: 'Home', to: 'Home' },
-                  { icon: Package, label: 'Shop', to: 'Products' },
-                  { icon: Heart, label: 'Merkliste', to: 'Wishlist', badge: wishlistCount },
-                  { icon: ShoppingCart, label: 'Warenkorb', to: 'Cart', badge: cartCount },
-                  { icon: User, label: 'Profil', to: 'Profile' },
-                  { icon: Crown, label: 'VIP werden', to: 'VIP', highlight: true },
-                  { icon: MessageCircle, label: 'Support', to: 'Support' }
-                ].map((item) => (
-                  <Link
+                  { icon: Home, label: 'Home', to: 'Home', gradient: 'from-blue-500 to-cyan-500' },
+                  { icon: Package, label: 'Shop', to: 'Products', gradient: 'from-purple-500 to-pink-500' },
+                  { icon: Heart, label: 'Merkliste', to: 'Wishlist', badge: wishlistCount, gradient: 'from-pink-500 to-rose-500' },
+                  { icon: ShoppingCart, label: 'Warenkorb', to: 'Cart', badge: cartCount, gradient: 'from-green-500 to-emerald-500' },
+                  { icon: User, label: 'Profil', to: 'Profile', gradient: 'from-indigo-500 to-purple-500' },
+                  { icon: Crown, label: 'VIP werden', to: 'VIP', highlight: true, gradient: 'from-yellow-500 to-amber-500' },
+                  { icon: MessageCircle, label: 'Support', to: 'Support', gradient: 'from-orange-500 to-red-500' }
+                ].map((item, index) => (
+                  <motion.div
                     key={item.to}
-                    to={createPageUrl(item.to)}
-                    onClick={() => setIsMenuOpen(false)}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 + index * 0.05 }}
                   >
-                    <motion.div
-                      whileHover={{ x: 4 }}
-                      className={`flex items-center justify-between p-4 rounded-[var(--radius-md)] smooth-transition focus-ring ${
-                        item.highlight
-                          ? 'bg-gradient-to-r from-[hsl(var(--vip))]/20 to-amber-500/20 border border-[hsl(var(--vip))]/30'
-                          : 'hover:bg-[var(--glass-hover)]'
-                      }`}
+                    <Link
+                      to={createPageUrl(item.to)}
+                      onClick={() => setIsMenuOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
-                        <item.icon className={`w-5 h-5 ${item.highlight ? 'text-[hsl(var(--vip))]' : 'text-[hsl(var(--text-muted))];'}`} />
-                        <span className={`font-bold ${item.highlight ? 'text-[hsl(var(--vip))]' : 'text-[hsl(var(--text))];'}`}>
-                          {item.label}
-                        </span>
-                      </div>
-                      {item.badge > 0 && (
-                        <span className="w-6 h-6 bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent2))] text-white text-xs font-black rounded-full flex items-center justify-center">
-                          {item.badge}
-                        </span>
-                      )}
-                    </motion.div>
-                  </Link>
+                      <motion.div
+                        whileHover={{ x: 6, scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`relative flex items-center justify-between p-4 rounded-2xl transition-all overflow-hidden group ${
+                          item.highlight
+                            ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/40'
+                            : 'bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5'
+                        }`}
+                      >
+                        {/* Hover Glow */}
+                        <motion.div
+                          className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity`}
+                        />
+                        
+                        <div className="relative flex items-center gap-4">
+                          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+                            <item.icon className="w-5 h-5 text-white" />
+                          </div>
+                          <span className={`font-black text-base ${item.highlight ? 'text-yellow-400' : 'text-white'}`}>
+                            {item.label}
+                          </span>
+                        </div>
+                        
+                        {item.badge > 0 && (
+                          <motion.span
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className={`relative w-7 h-7 bg-gradient-to-br ${item.gradient} text-white text-xs font-black rounded-full flex items-center justify-center shadow-xl`}
+                          >
+                            {item.badge}
+                          </motion.span>
+                        )}
+                      </motion.div>
+                    </Link>
+                  </motion.div>
                 ))}
               </nav>
 
               {/* Logout */}
               {user && (
-                <div className="p-6 border-t border-[hsl(var(--border))]">
-                  <button
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="p-4 mt-4"
+                >
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => base44.auth.logout()}
-                    className="w-full btn-secondary text-[hsl(var(--error))] hover:bg-[hsl(var(--error))]/10"
+                    className="w-full p-4 bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 rounded-2xl font-black text-red-400 transition-all"
                   >
                     Abmelden
-                  </button>
-                </div>
+                  </motion.button>
+                </motion.div>
               )}
             </motion.div>
           </>
