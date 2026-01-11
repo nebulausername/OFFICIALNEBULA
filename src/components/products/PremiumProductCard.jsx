@@ -87,8 +87,8 @@ export default function PremiumProductCard({ product, onQuickView }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -8 }}
-        className="premium-card group smooth-transition relative"
+        whileHover={{ y: -8, scale: 1.02 }}
+        className="premium-card group smooth-transition relative overflow-hidden"
       >
         {/* Image Container */}
         <div className="relative aspect-[2/3] overflow-hidden rounded-t-[var(--radius-lg)] bg-[hsl(var(--panel))]">
@@ -113,11 +113,16 @@ export default function PremiumProductCard({ product, onQuickView }) {
           {/* Availability Badge */}
           <div className="absolute top-3 right-3">
             {product.in_stock ? (
-              <div className="badge-available backdrop-blur-sm">
-                ✓ Verfügbar
-              </div>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="px-3 py-1.5 rounded-full bg-green-500/90 backdrop-blur-md text-white text-xs font-black flex items-center gap-1.5 shadow-lg"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                Verfügbar
+              </motion.div>
             ) : (
-              <div className="badge-unavailable backdrop-blur-sm">
+              <div className="px-3 py-1.5 rounded-full bg-red-500/90 backdrop-blur-md text-white text-xs font-black shadow-lg">
                 Ausverkauft
               </div>
             )}
@@ -125,16 +130,16 @@ export default function PremiumProductCard({ product, onQuickView }) {
           
           {/* Wishlist Button */}
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.15 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleWishlist}
             disabled={isPending}
-            className="absolute top-3 left-3 w-10 h-10 glass-panel rounded-full flex items-center justify-center focus-ring smooth-transition hover:bg-[var(--glass-hover)]"
+            className="absolute top-3 left-3 w-11 h-11 rounded-full backdrop-blur-xl bg-black/40 flex items-center justify-center focus-ring smooth-transition hover:bg-black/60 shadow-lg"
             aria-label={isWishlisted ? 'Von Merkliste entfernen' : 'Zu Merkliste hinzufügen'}
           >
             <Heart
               className={`w-5 h-5 smooth-transition ${
-                isWishlisted ? 'fill-[hsl(var(--error))] text-[hsl(var(--error))]' : 'text-white'
+                isWishlisted ? 'fill-red-500 text-red-500' : 'text-white'
               }`}
             />
           </motion.button>
@@ -144,7 +149,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
             initial={{ opacity: 0, y: 10 }}
             whileHover={{ opacity: 1, y: 0 }}
             onClick={handleQuickView}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition btn-primary text-sm py-2 px-6 flex items-center gap-2"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-sm py-2.5 px-8 rounded-xl shadow-2xl flex items-center gap-2"
           >
             <Eye className="w-4 h-4" />
             Quick View
@@ -152,32 +157,36 @@ export default function PremiumProductCard({ product, onQuickView }) {
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-3">
+        <div className="p-5 space-y-3 bg-gradient-to-b from-zinc-900/50 to-zinc-900/80">
           {/* Product Name */}
-          <h3 className="font-bold text-base text-[hsl(var(--text))] line-clamp-2 leading-snug min-h-[2.5rem]">
+          <h3 className="font-bold text-base text-white line-clamp-2 leading-snug min-h-[2.5rem] group-hover:text-gradient-primary smooth-transition">
             {product.name}
           </h3>
           
           {/* Price & SKU Row */}
-          <div className="flex items-baseline justify-between gap-2">
-            <div className="text-2xl font-black text-gradient-primary">
+          <div className="flex items-baseline justify-between gap-3">
+            <div className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               {product.price}€
             </div>
-            <div className="text-xs font-mono text-[hsl(var(--text-subtle))] bg-[hsl(var(--panel))] px-2 py-1 rounded">
+            <div className="text-xs font-mono text-zinc-400 bg-zinc-800/50 px-2.5 py-1.5 rounded-lg border border-zinc-700/50">
               {product.sku}
             </div>
           </div>
           
           {/* Delivery Info */}
           {deliveryInfo && (
-            <div className="space-y-1.5 pt-2 border-t border-[hsl(var(--border))]">
-              <div className="flex items-center gap-1.5 text-xs text-[hsl(var(--text-muted))]">
-                <MapPin className="w-3.5 h-3.5 text-[hsl(var(--accent))] flex-shrink-0" />
-                <span className="font-medium">Lieferung nach {deliveryInfo.city}</span>
+            <div className="space-y-2 pt-3 border-t border-zinc-800/50">
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-5 h-5 rounded-md bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-3 h-3 text-purple-400" />
+                </div>
+                <span className="font-semibold text-zinc-300">nach {deliveryInfo.city}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-xs text-[hsl(var(--text-muted))]">
-                <Clock className="w-3.5 h-3.5 text-[hsl(var(--accent2))] flex-shrink-0" />
-                <span className="font-medium">{getEtaText()}</span>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="w-5 h-5 rounded-md bg-pink-500/20 flex items-center justify-center flex-shrink-0">
+                  <Clock className="w-3 h-3 text-pink-400" />
+                </div>
+                <span className="font-semibold text-zinc-300">{getEtaText()}</span>
               </div>
             </div>
           )}

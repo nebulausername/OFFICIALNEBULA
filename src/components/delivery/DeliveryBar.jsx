@@ -50,40 +50,46 @@ export default function DeliveryBar() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-panel rounded-[var(--radius-md)] p-3 md:p-4 mb-6"
+        className="glass-panel rounded-[var(--radius-lg)] p-4 md:p-5 mb-8 shadow-2xl"
       >
-        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
           {/* Location */}
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 text-left focus-ring rounded-lg px-2 py-1 -mx-2 hover:bg-[var(--glass-hover)] smooth-transition"
+            className="flex items-center gap-3 text-left focus-ring rounded-xl px-3 py-2 hover:bg-[var(--glass-hover)] smooth-transition group"
           >
-            <MapPin className="w-4 h-4 text-[hsl(var(--accent))] flex-shrink-0" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center group-hover:scale-110 smooth-transition">
+              <MapPin className="w-5 h-5 text-purple-400" />
+            </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-[hsl(var(--text-muted))] font-medium">Lieferung nach</div>
-              <div className="text-sm font-bold text-[hsl(var(--text))] truncate">{deliveryLocation.city}</div>
+              <div className="text-xs text-zinc-400 font-semibold">Lieferung nach</div>
+              <div className="text-base font-black text-white truncate">{deliveryLocation.city}</div>
             </div>
           </button>
 
-          <div className="hidden md:block w-px h-8 bg-[hsl(var(--border))]" />
+          <div className="hidden md:block w-px h-12 bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
 
           {/* ETA */}
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[hsl(var(--accent2))] flex-shrink-0" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500/20 to-purple-500/20 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-pink-400" />
+            </div>
             <div>
-              <div className="text-xs text-[hsl(var(--text-muted))] font-medium">Lieferzeit</div>
-              <div className="text-sm font-bold text-[hsl(var(--text))]">{getEtaText()}</div>
+              <div className="text-xs text-zinc-400 font-semibold">Lieferzeit</div>
+              <div className="text-base font-black text-white">{getEtaText()}</div>
             </div>
           </div>
 
-          <div className="hidden md:block w-px h-8 bg-[hsl(var(--border))]" />
+          <div className="hidden md:block w-px h-12 bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
 
           {/* Shipping Info */}
-          <div className="flex items-center gap-2">
-            <Truck className="w-4 h-4 text-[hsl(var(--success))] flex-shrink-0" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+              <Truck className="w-5 h-5 text-green-400" />
+            </div>
             <div>
-              <div className="text-xs text-[hsl(var(--text-muted))] font-medium">Versand</div>
-              <div className="text-sm font-bold text-[hsl(var(--text))]">
+              <div className="text-xs text-zinc-400 font-semibold">Versand</div>
+              <div className="text-base font-black text-white">
                 Gratis ab {deliveryLocation.free_shipping_threshold}€
               </div>
             </div>
