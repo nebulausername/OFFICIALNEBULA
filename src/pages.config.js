@@ -19,6 +19,7 @@ import VIP from './pages/VIP';
 import Wishlist from './pages/Wishlist';
 import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
+import AdminNotificationTemplates from './pages/AdminNotificationTemplates';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "Wishlist": Wishlist,
     "Checkout": Checkout,
     "OrderConfirmation": OrderConfirmation,
+    "AdminNotificationTemplates": AdminNotificationTemplates,
 }
 
 export const pagesConfig = {

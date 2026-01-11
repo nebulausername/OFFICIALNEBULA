@@ -27,6 +27,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Eye, Package } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import StatusChangeDialog from '../components/admin/StatusChangeDialog';
 
 export default function AdminRequests() {
   const [requests, setRequests] = useState([]);
@@ -34,6 +35,8 @@ export default function AdminRequests() {
   const [users, setUsers] = useState({});
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [statusChangeDialogOpen, setStatusChangeDialogOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState({ request: null, newStatus: null });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -68,15 +71,13 @@ export default function AdminRequests() {
     }
   };
 
-  const handleStatusChange = async (requestId, newStatus) => {
-    try {
-      await base44.entities.Request.update(requestId, { status: newStatus });
-      toast({ title: 'Status aktualisiert' });
-      loadData();
-    } catch (error) {
-      console.error('Error updating status:', error);
-      toast({ title: 'Fehler', description: 'Status konnte nicht aktualisiert werden', variant: 'destructive' });
-    }
+  const handleStatusChange = (request, newStatus) => {
+    setPendingStatusChange({ request, newStatus });
+    setStatusChangeDialogOpen(true);
+  };
+
+  const handleStatusChangeConfirm = () => {
+    loadData();
   };
 
   const handleViewDetails = (request) => {
@@ -140,7 +141,7 @@ export default function AdminRequests() {
                   <TableCell>
                     <Select
                       value={request.status}
-                      onValueChange={(val) => handleStatusChange(request.id, val)}
+                      onValueChange={(val) => handleStatusChange(request, val)}
                     >
                       <SelectTrigger className="w-40 font-bold border-2 border-zinc-700 bg-zinc-800/50">
                         <SelectValue />
@@ -266,6 +267,16 @@ export default function AdminRequests() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Status Change Dialog */}
+      <StatusChangeDialog
+        open={statusChangeDialogOpen}
+        onOpenChange={setStatusChangeDialogOpen}
+        request={pendingStatusChange.request}
+        newStatus={pendingStatusChange.newStatus}
+        onConfirm={handleStatusChangeConfirm}
+        statusConfig={statusConfig}
+      />
     </div>
   );
 }
