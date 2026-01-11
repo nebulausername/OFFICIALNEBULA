@@ -142,58 +142,121 @@ export default function Home() {
       </section>
 
       {/* Departments Section */}
-      <section className="py-16 relative">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-20 relative">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-500/5 to-transparent" />
+
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-10 text-center"
+            className="mb-12 text-center"
           >
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-3">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-6 py-3 mb-6 glass backdrop-blur-xl border-2 border-purple-500/30 rounded-full shadow-xl shadow-purple-500/20"
+            >
+              <Sparkles className="w-5 h-5 text-purple-400" />
+              <span className="text-sm font-black text-purple-300 uppercase tracking-wider">Premium Selection</span>
+            </motion.div>
+
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
               Kategorien
             </h2>
-            <p className="text-zinc-300 text-lg font-medium">Entdecke unsere Produktwelten</p>
+            <p className="text-zinc-300 text-lg md:text-xl font-medium max-w-2xl mx-auto">Entdecke unsere Produktwelten – von Streetwear bis Accessoires</p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {loadingDepts ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="skeleton aspect-square rounded-2xl" />
               ))
             ) : (
-              departments.map((dept, index) => (
-                <motion.div
-                  key={dept.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="group"
-                >
-                  <Link
-                    to={createPageUrl('Products') + `?department=${dept.id}`}
-                    className="block glass backdrop-blur-xl border-2 border-zinc-800/50 rounded-2xl p-6 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all"
+              departments.map((dept, index) => {
+                // Define gradient colors for each department
+                const gradients = [
+                  { from: 'from-purple-500', via: 'via-pink-500', to: 'to-purple-600', shadow: 'shadow-purple-500/50' },
+                  { from: 'from-pink-500', via: 'via-rose-500', to: 'to-pink-600', shadow: 'shadow-pink-500/50' },
+                  { from: 'from-blue-500', via: 'via-cyan-500', to: 'to-blue-600', shadow: 'shadow-blue-500/50' },
+                  { from: 'from-amber-500', via: 'via-orange-500', to: 'to-amber-600', shadow: 'shadow-amber-500/50' }
+                ];
+                const gradient = gradients[index % gradients.length];
+
+                return (
+                  <motion.div
+                    key={dept.id}
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.08, type: 'spring', stiffness: 100 }}
+                    whileHover={{ y: -8, scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="group relative"
                   >
-                    <div className="aspect-square flex flex-col items-center justify-center gap-5">
-                      <motion.div 
-                        whileHover={{ rotate: 360, scale: 1.15 }}
-                        transition={{ duration: 0.5 }}
-                        className="w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/40"
-                      >
-                        <Package className="w-8 h-8 text-white" />
-                      </motion.div>
-                      <h3 className="text-base font-black text-center text-white group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
-                        {dept.name}
-                      </h3>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))
+                    {/* Glow Effect */}
+                    <div className={`absolute -inset-1 bg-gradient-to-r ${gradient.from} ${gradient.via} ${gradient.to} rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition-all duration-500`} />
+
+                    <Link
+                      to={createPageUrl('Products') + `?department=${dept.id}`}
+                      className="relative block glass backdrop-blur-2xl border-2 border-zinc-800/50 rounded-2xl overflow-hidden hover:border-white/20 transition-all shadow-xl"
+                    >
+                      {/* Shimmer Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
+                      <div className="relative aspect-square flex flex-col items-center justify-center gap-4 p-6">
+                        {/* Icon with Gradient */}
+                        <motion.div 
+                          whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.15 }}
+                          transition={{ duration: 0.6 }}
+                          className={`relative w-20 h-20 bg-gradient-to-br ${gradient.from} ${gradient.via} ${gradient.to} rounded-2xl flex items-center justify-center shadow-2xl ${gradient.shadow}`}
+                        >
+                          {/* Inner Glow */}
+                          <div className="absolute inset-2 bg-white/10 rounded-xl" />
+                          <Package className="relative w-10 h-10 text-white drop-shadow-lg" />
+                        </motion.div>
+
+                        {/* Department Name */}
+                        <div className="text-center">
+                          <h3 className="text-lg md:text-xl font-black text-white mb-1 group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
+                            {dept.name}
+                          </h3>
+                          <p className="text-xs text-zinc-400 font-medium">Jetzt entdecken</p>
+                        </div>
+
+                        {/* Arrow Indicator */}
+                        <motion.div
+                          initial={{ x: -5, opacity: 0 }}
+                          whileHover={{ x: 0, opacity: 1 }}
+                          className="absolute bottom-4 right-4 w-6 h-6 bg-white/10 rounded-full flex items-center justify-center"
+                        >
+                          <span className="text-white text-lg">→</span>
+                        </motion.div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })
             )}
           </div>
+
+          {/* View All CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="text-center mt-10"
+          >
+            <Link to={createPageUrl('Products')}>
+              <Button variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-bold">
+                Alle Produkte durchstöbern
+                <Sparkles className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
