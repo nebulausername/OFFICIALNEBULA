@@ -246,6 +246,7 @@ export default function MainDrawer({
                 </motion.div>
               )}
             </div>
+            </div>
           </motion.div>
         </>
       )}
