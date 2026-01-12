@@ -182,18 +182,18 @@ export default function PremiumProductCard({ product, onQuickView }) {
         {/* Content */}
         <div className="p-5 space-y-3" style={{ background: 'var(--surface)' }}>
           {/* Product Name */}
-          <h3 className="font-bold text-base text-white line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition">
+          <h3 className="font-bold text-base line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
             {product.name}
           </h3>
           
           {/* Price & SKU Row */}
           <div className="flex items-baseline justify-between gap-3">
-            <div className="text-3xl font-black text-white">
+            <div className="text-3xl font-black" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
               {product.price}€
             </div>
-            <div className="text-xs font-mono px-2.5 py-1.5 rounded-lg"
+            <div className="text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg"
               style={{
-                color: 'var(--muted)',
+                color: 'rgba(255, 255, 255, 0.75)',
                 background: 'var(--surface2)',
                 border: '1px solid var(--border-subtle)'
               }}
@@ -210,7 +210,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
               >
                 <MapPin className="w-3 h-3 text-gold" />
               </div>
-              <span className="font-semibold" style={{ color: 'var(--muted)' }}>🇨🇳 Lieferbar aus China</span>
+              <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>🇨🇳 Lieferbar aus China</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
@@ -218,7 +218,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
               >
                 <Clock className="w-3 h-3" style={{ color: 'var(--text)' }} />
               </div>
-              <span className="font-semibold" style={{ color: 'var(--muted)' }}>8–17 Tage Lieferzeit</span>
+              <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>8–17 Tage Lieferzeit</span>
             </div>
           </div>
         </div>

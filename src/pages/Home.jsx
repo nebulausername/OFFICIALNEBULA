@@ -188,10 +188,11 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-xl md:text-2xl text-zinc-400 mb-12 max-w-3xl mx-auto font-medium tracking-wide"
+              className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-medium tracking-wide"
+              style={{ color: 'rgba(255, 255, 255, 0.70)' }}
             >
-              Wo <span className="text-purple-400 font-bold">Style</span> auf{' '}
-              <span className="text-pink-400 font-bold">Premium</span> trifft ✨
+              Wo <span className="text-gold font-bold">Style</span> auf{' '}
+              <span className="text-gold2 font-bold">Premium</span> trifft ✨
             </motion.p>
 
             {/* CTA Buttons */}
@@ -568,10 +569,11 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-xl sm:text-2xl text-zinc-400 max-w-3xl mx-auto font-medium"
+              className="text-xl sm:text-2xl max-w-3xl mx-auto font-medium"
+              style={{ color: 'rgba(255, 255, 255, 0.70)' }}
             >
-              Die <span className="text-purple-400 font-bold">heißesten</span> Drops –{' '}
-              <span className="text-pink-400 font-bold">limitiert</span> & exklusiv ✨
+              Die <span className="text-gold font-bold">heißesten</span> Drops –{' '}
+              <span className="text-gold2 font-bold">limitiert</span> & exklusiv ✨
             </motion.p>
           </motion.div>
 
@@ -727,10 +729,11 @@ export default function Home() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-xl md:text-2xl text-zinc-300 mb-12 max-w-3xl mx-auto font-medium leading-relaxed"
+              className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-medium leading-relaxed"
+              style={{ color: 'rgba(255, 255, 255, 0.75)' }}
             >
-              Tritt der <span className="text-yellow-400 font-black">Elite</span> bei und erlebe{' '}
-              <span className="text-amber-400 font-black">Premium Shopping</span> ✨
+              Tritt der <span className="text-gold font-black">Elite</span> bei und erlebe{' '}
+              <span className="text-gold2 font-black">Premium Shopping</span> ✨
             </motion.p>
 
             <div className="grid md:grid-cols-3 gap-6 mb-10">
