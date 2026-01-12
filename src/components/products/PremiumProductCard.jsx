@@ -223,59 +223,70 @@ export default function PremiumProductCard({ product, onQuickView }) {
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-3" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
-          {/* Product Name */}
-          <h3 className="font-black text-base line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition" style={{ 
-            color: 'rgba(255, 255, 255, 0.95)',
-            textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)'
-          }}>
-            {product.name}
-          </h3>
-          
-          {/* Price & SKU Row */}
-          <div className="flex items-baseline justify-between gap-3">
-            <div className="text-3xl font-black" style={{ 
-              color: 'rgba(255, 255, 255, 0.98)',
-              textShadow: '0 2px 12px rgba(0, 0, 0, 0.5)'
-            }}>
-              {product.price}€
-            </div>
-            <div className="text-xs font-mono font-black px-2.5 py-1.5 rounded-lg"
+        <div className="p-5 space-y-4">
+          {/* SKU Badge - Top */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono font-bold px-2 py-1 rounded-md tracking-wider"
               style={{
-                color: 'rgba(214, 178, 94, 0.9)',
-                background: 'rgba(214, 178, 94, 0.10)',
-                border: '1px solid rgba(214, 178, 94, 0.25)'
+                color: 'rgba(139,92,246,0.9)',
+                background: 'rgba(139,92,246,0.1)',
+                border: '1px solid rgba(139,92,246,0.2)'
               }}
             >
               {product.sku}
-            </div>
+            </span>
           </div>
           
-          {/* Delivery Info */}
-          <div className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(214, 178, 94, 0.15)' }}
-              >
-                <MapPin className="w-3 h-3" style={{ color: 'rgba(214, 178, 94, 0.9)' }} />
+          {/* Product Name */}
+          <h3 className="font-bold text-[15px] leading-tight line-clamp-2 min-h-[40px] text-white/95 group-hover:text-white transition-colors">
+            {product.name}
+          </h3>
+          
+          {/* Price Row */}
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-[10px] font-medium text-white/40 mb-0.5">Preis</p>
+              <div className="text-2xl font-black text-white tracking-tight">
+                {product.price}
+                <span className="text-base font-bold text-white/60 ml-0.5">€</span>
               </div>
-              <span className="font-black" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>🇨🇳 Lieferbar aus China</span>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: 'var(--surface2)' }}
-              >
-                <Clock className="w-3 h-3" style={{ color: 'rgba(255, 255, 255, 0.85)' }} />
+            
+            {/* Quick Add Indicator */}
+            <motion.div 
+              whileHover={{ scale: 1.1 }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+              style={{
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(236,72,153,0.15) 100%)',
+                border: '1px solid rgba(139,92,246,0.3)'
+              }}
+            >
+              <Sparkles className="w-4 h-4 text-purple-400" />
+            </motion.div>
+          </div>
+          
+          {/* Delivery Info - Compact */}
+          <div className="pt-3 border-t border-white/5">
+            <div className="flex items-center justify-between text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base">🇨🇳</span>
+                <span className="font-medium text-white/50">China</span>
               </div>
-              <span className="font-black" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>8–17 Tage Lieferzeit</span>
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-white/40" />
+                <span className="font-medium text-white/50">8-17 Tage</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Hover Glow Effect */}
-        <div 
-          className="absolute inset-0 rounded-[var(--radius-lg)] opacity-0 group-hover:opacity-100 smooth-transition pointer-events-none" 
-          style={{ boxShadow: '0 0 40px rgba(var(--gold-rgb), 0.15)' }}
+        <motion.div 
+          className="absolute inset-0 rounded-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+          style={{ 
+            boxShadow: '0 0 60px rgba(139,92,246,0.15), inset 0 0 60px rgba(139,92,246,0.05)',
+            border: '1px solid rgba(139,92,246,0.2)'
+          }}
         />
       </motion.div>
     </Link>
