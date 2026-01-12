@@ -16,6 +16,8 @@ export default function PremiumHeader() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoriesOnly, setCategoriesOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dragStartY, setDragStartY] = useState(0);
+  const [dragOffsetY, setDragOffsetY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -66,25 +68,94 @@ export default function PremiumHeader() {
       id: 'sneaker', 
       label: 'SNEAKER', 
       icon: '👟',
+      gradient: 'from-blue-500 to-cyan-500',
       children: [
         { 
           id: 'nike', 
           label: 'NIKE', 
-          children: ['AirMax 95', 'AirMax DN', 'SHOX TL', 'AIR FORCE', 'Dunk SB'] 
+          children: ['AirMax 95', 'AirMax DN', 'SHOX TL', 'AIR FORCE', 'Dunk SB', 'Cortez', 'Blazer'] 
         },
         { 
           id: 'airjordan', 
           label: 'AIR JORDAN', 
-          children: ['AIR JORDAN 1 HIGH', 'AIR JORDAN 1 LOW', 'AIR JORDAN 3', 'AIR JORDAN 4', 'AIR JORDAN 5', 'AIR JORDAN 6'] 
+          children: ['AIR JORDAN 1 HIGH', 'AIR JORDAN 1 LOW', 'AIR JORDAN 3', 'AIR JORDAN 4', 'AIR JORDAN 5', 'AIR JORDAN 6', 'AIR JORDAN 11', 'AIR JORDAN 13'] 
+        },
+        {
+          id: 'adidas',
+          label: 'ADIDAS',
+          children: ['Yeezy Boost 350', 'Yeezy Boost 700', 'Ultraboost', 'Superstar', 'Stan Smith']
+        },
+        {
+          id: 'newbalance',
+          label: 'NEW BALANCE',
+          children: ['550', '574', '990', '2002R', '1906R']
         }
       ]
     },
-    { id: 'kleidung', label: 'KLEIDUNG', icon: '👕', children: [] },
-    { id: 'taschen', label: 'TASCHEN', icon: '👜', children: [] },
-    { id: 'muetzen', label: 'MÜTZEN & CAPS', icon: '🧢', children: [] },
-    { id: 'geldboersen', label: 'GELDBÖRSEN', icon: '💰', children: [] },
-    { id: 'guertel', label: 'GÜRTEL', icon: '⭕', children: [] },
-    { id: 'highheels', label: 'HIGH HEELS', icon: '👠', children: [] }
+    { 
+      id: 'kleidung', 
+      label: 'KLEIDUNG', 
+      icon: '👕',
+      gradient: 'from-purple-500 to-pink-500',
+      children: [
+        { id: 'tshirts', label: 'T-SHIRTS', children: ['Oversize', 'Slim Fit', 'Regular', 'Vintage'] },
+        { id: 'hoodies', label: 'HOODIES & SWEATER', children: ['Hoodies', 'Zip Hoodies', 'Crewneck', 'Sweatshirts'] },
+        { id: 'jacken', label: 'JACKEN', children: ['Bomber', 'Denim', 'Puffer', 'Windbreaker'] },
+        { id: 'hosen', label: 'HOSEN', children: ['Jeans', 'Jogger', 'Cargo', 'Shorts'] }
+      ]
+    },
+    { 
+      id: 'taschen', 
+      label: 'TASCHEN', 
+      icon: '👜',
+      gradient: 'from-amber-500 to-orange-500',
+      children: [
+        { id: 'rucksaecke', label: 'RUCKSÄCKE', children: ['Backpacks', 'Mini Backpacks', 'Laptop Bags'] },
+        { id: 'umhaenge', label: 'UMHÄNGETASCHEN', children: ['Crossbody', 'Messenger', 'Shoulder Bags'] },
+        { id: 'luxus', label: 'LUXUS TASCHEN', children: ['Designer', 'Clutch', 'Tote Bags'] }
+      ]
+    },
+    { 
+      id: 'muetzen', 
+      label: 'MÜTZEN & CAPS', 
+      icon: '🧢',
+      gradient: 'from-green-500 to-emerald-500',
+      children: [
+        { id: 'caps', label: 'CAPS', children: ['Baseball Caps', 'Snapbacks', 'Dad Hats', '5-Panel'] },
+        { id: 'beanies', label: 'BEANIES', children: ['Classic', 'Slouchy', 'Cuffed'] }
+      ]
+    },
+    { 
+      id: 'geldboersen', 
+      label: 'GELDBÖRSEN', 
+      icon: '💰',
+      gradient: 'from-yellow-500 to-amber-500',
+      children: [
+        { id: 'herren', label: 'HERREN', children: ['Bifold', 'Trifold', 'Kartenhalter', 'Geldbörsen'] },
+        { id: 'damen', label: 'DAMEN', children: ['Clutch Wallets', 'Zip Around', 'Kartenhalter'] }
+      ]
+    },
+    { 
+      id: 'guertel', 
+      label: 'GÜRTEL', 
+      icon: '⭕',
+      gradient: 'from-red-500 to-pink-500',
+      children: [
+        { id: 'designer', label: 'DESIGNER', children: ['Gucci', 'Louis Vuitton', 'Hermès', 'Versace'] },
+        { id: 'casual', label: 'CASUAL', children: ['Canvas', 'Leder', 'Textil'] }
+      ]
+    },
+    { 
+      id: 'highheels', 
+      label: 'HIGH HEELS', 
+      icon: '👠',
+      gradient: 'from-pink-500 to-rose-500',
+      children: [
+        { id: 'pumps', label: 'PUMPS', children: ['Classic Pumps', 'Pointed Toe', 'Peep Toe'] },
+        { id: 'stiefel', label: 'STIEFEL', children: ['Ankle Boots', 'Knee High', 'Thigh High'] },
+        { id: 'sandalen', label: 'SANDALEN', children: ['Heeled Sandals', 'Strappy', 'Platform'] }
+      ]
+    }
   ];
 
   const handleCategoryClick = (category) => {
@@ -111,6 +182,25 @@ export default function PremiumHeader() {
   const filteredCategories = categories.filter(cat => 
     cat.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleTouchStart = (e) => {
+    setDragStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchMove = (e) => {
+    const currentY = e.touches[0].clientY;
+    const offset = currentY - dragStartY;
+    if (offset > 0) {
+      setDragOffsetY(offset);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (dragOffsetY > 100) {
+      setIsMenuOpen(false);
+    }
+    setDragOffsetY(0);
+  };
 
   const IconButton = ({ icon: Icon, label, count, to, onClick }) => (
     <Link to={to} onClick={onClick}>
@@ -315,15 +405,25 @@ export default function PremiumHeader() {
             {/* Drawer */}
             <motion.div
               initial={{ x: '100%' }}
-              animate={{ x: 0 }}
+              animate={{ 
+                x: 0,
+                y: dragOffsetY 
+              }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 400 }}
               onKeyDown={(e) => e.key === 'Escape' && setIsMenuOpen(false)}
-              className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md md:max-w-lg lg:max-w-xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-black border-l-2 border-purple-500/30 z-50 overflow-y-auto custom-scrollbar shadow-2xl shadow-purple-500/20"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md md:max-w-lg lg:max-w-xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-black border-l-2 border-purple-500/30 z-50 overflow-hidden shadow-2xl shadow-purple-500/20 flex flex-col"
               role="dialog"
               aria-modal="true"
               aria-label="Navigation Menu"
             >
+              {/* Swipe Handle (Mobile) */}
+              <div className="md:hidden flex justify-center py-2 px-4 border-b border-white/5">
+                <div className="w-12 h-1.5 rounded-full bg-zinc-700" />
+              </div>
               {/* Header */}
               <div className="relative p-6 border-b border-white/10">
                 {/* Background Glow */}
@@ -567,6 +667,7 @@ export default function PremiumHeader() {
                   </motion.button>
                 </motion.div>
               )}
+              </div>
               </>
               )}
 
@@ -624,19 +725,27 @@ export default function PremiumHeader() {
                             whileHover={{ x: 4, scale: 1.01 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => cat.children.length > 0 ? handleCategoryClick(cat) : handleSubcategoryClick(cat.id, cat.label)}
-                            className="w-full min-h-[56px] p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-2xl transition-all duration-200 flex items-center justify-between group"
+                            className="w-full min-h-[56px] p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-2xl transition-all duration-200 flex items-center justify-between group relative overflow-hidden"
                             aria-label={`${cat.label} ${cat.children.length > 0 ? 'öffnen' : 'anzeigen'}`}
                           >
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-2xl">
+                            {/* Gradient Glow */}
+                            <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+
+                            <div className="flex items-center gap-4 relative z-10">
+                              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.gradient} bg-opacity-20 flex items-center justify-center text-2xl shadow-lg`}>
                                 {cat.icon}
                               </div>
-                              <span className="font-black text-white text-base">{cat.label}</span>
+                              <div className="text-left">
+                                <span className="font-black text-white text-base block">{cat.label}</span>
+                                {cat.children.length > 0 && (
+                                  <span className="text-xs text-zinc-500 font-bold">{cat.children.length} Kategorien</span>
+                                )}
+                              </div>
                             </div>
                             {cat.children.length > 0 && (
-                              <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors duration-200" />
-                              )}
-                              </motion.button>
+                              <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors duration-200 relative z-10" />
+                            )}
+                          </motion.button>
                               ))
                               ) : (
                               <motion.div
@@ -758,49 +867,9 @@ export default function PremiumHeader() {
                   </AnimatePresence>
                   </div>
                   )}
-
-                  {/* Quick Action Footer (nur im Menu Mode auf Mobile) */}
-                  {drawerMode === 'menu' && (
-                  <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="md:hidden sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent backdrop-blur-xl border-t border-white/10"
-                  >
-                  <div className="flex gap-2">
-                    <Link to={createPageUrl('Cart')} className="flex-1" onClick={() => setIsMenuOpen(false)}>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-white flex items-center justify-center gap-2 shadow-lg"
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                        Warenkorb
-                        {cartCount > 0 && (
-                          <span className="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-black">
-                            {cartCount}
-                          </span>
-                        )}
-                      </motion.button>
-                    </Link>
-                    <Link to={createPageUrl('Wishlist')} onClick={() => setIsMenuOpen(false)}>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="h-14 w-14 bg-zinc-900/60 hover:bg-zinc-800/80 border border-white/10 rounded-2xl flex items-center justify-center transition-all relative"
-                      >
-                        <Heart className="w-5 h-5 text-pink-400" />
-                        {wishlistCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-pink-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-black">
-                            {wishlistCount}
-                          </span>
-                        )}
-                      </motion.button>
-                    </Link>
-                  </div>
                   </motion.div>
-                  )}
-            </motion.div>
+
+
           </>
         )}
       </AnimatePresence>
