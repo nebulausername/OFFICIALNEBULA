@@ -4,10 +4,11 @@ import { base44 } from '@/api/base44Client';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Heart, Star, Shield, Zap, Package, Truck, Clock, MapPin } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Heart, Star, Shield, Zap, Package, Truck, Clock, MapPin, Check, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import WishlistButton from '../components/wishlist/WishlistButton';
+import { useWishlist } from '../components/wishlist/WishlistContext';
 
 export default function ProductDetail() {
   const [product, setProduct] = useState(null);
@@ -21,7 +22,10 @@ export default function ProductDetail() {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedShippingOption, setSelectedShippingOption] = useState('Germany');
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
   const { toast } = useToast();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   useEffect(() => {
     loadProduct();
@@ -60,7 +64,14 @@ export default function ProductDetail() {
       const prod = productData[0];
       setProduct(prod);
       setImages(productImages.sort((a, b) => a.sort_order - b.sort_order));
-      setSelectedImage(prod.cover_image || (productImages[0]?.url));
+      
+      // Auto-select first color if available
+      if (prod.colors && prod.colors.length > 0) {
+        setSelectedColor(prod.colors[0]);
+        setSelectedImage(prod.colors[0].images?.[0] || prod.cover_image || (productImages[0]?.url));
+      } else {
+        setSelectedImage(prod.cover_image || (productImages[0]?.url));
+      }
 
       // Load related data
       if (prod.category_id) {

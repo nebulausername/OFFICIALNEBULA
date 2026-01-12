@@ -313,7 +313,7 @@ export default function Admin() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-              <Link to={createPageUrl('AdminProducts') + '?action=new'}>
+              <Link to={createPageUrl('AdminProductEditor')}>
                 <motion.button
                   whileHover={{ scale: 1.03, y: -3 }}
                   whileTap={{ scale: 0.98 }}
