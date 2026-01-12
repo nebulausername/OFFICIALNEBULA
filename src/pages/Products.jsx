@@ -493,13 +493,18 @@ export default function Products() {
             >
               <motion.div
                 animate={{ 
-                  rotate: [0, 10, -10, 0],
-                  scale: [1, 1.1, 1]
+                  scale: [1, 1.05, 1],
+                  opacity: [0.5, 0.7, 0.5]
                 }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="w-32 h-32 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-xl border-2 border-zinc-700/50 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl"
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-24 h-24 mx-auto mb-8 relative"
               >
-                <Package className="w-16 h-16 text-zinc-600" />
+                <img 
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                  alt="Nebula Supply"
+                  className="w-full h-full object-contain opacity-30"
+                  style={{ filter: 'drop-shadow(0 0 12px rgba(139, 92, 246, 0.3))' }}
+                />
               </motion.div>
               <h3 className="text-3xl font-black text-white mb-4">Nichts gefunden 😕</h3>
               <p className="text-zinc-400 mb-8 text-lg max-w-md mx-auto leading-relaxed">

@@ -86,22 +86,27 @@ export default function PremiumHeader() {
             <Link to={createPageUrl('Home')}>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="flex items-center gap-3"
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 focus-ring rounded-2xl"
               >
                 <motion.div
                   animate={{
-                    boxShadow: [
-                      '0 0 20px rgba(168, 85, 247, 0.5)',
-                      '0 0 30px rgba(236, 72, 153, 0.5)',
-                      '0 0 20px rgba(168, 85, 247, 0.5)',
+                    filter: [
+                      'drop-shadow(0 0 12px rgba(168, 85, 247, 0.4))',
+                      'drop-shadow(0 0 18px rgba(236, 72, 153, 0.4))',
+                      'drop-shadow(0 0 12px rgba(168, 85, 247, 0.4))',
                     ]
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl"
+                  className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center p-1.5 sm:p-2"
                 >
-                  <span className="text-white font-black text-2xl">N</span>
+                  <img 
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                    alt="Nebula Supply"
+                    className="w-full h-full object-contain"
+                  />
                 </motion.div>
-                <span className="hidden sm:block text-2xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                <span className="hidden sm:block text-lg md:text-xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
                   NEBULA
                 </span>
               </motion.div>
@@ -224,16 +229,20 @@ export default function PremiumHeader() {
                   >
                     <motion.div
                       animate={{
-                        boxShadow: [
-                          '0 0 20px rgba(168, 85, 247, 0.6)',
-                          '0 0 30px rgba(236, 72, 153, 0.6)',
-                          '0 0 20px rgba(168, 85, 247, 0.6)',
+                        filter: [
+                          'drop-shadow(0 0 16px rgba(168, 85, 247, 0.5))',
+                          'drop-shadow(0 0 24px rgba(236, 72, 153, 0.5))',
+                          'drop-shadow(0 0 16px rgba(168, 85, 247, 0.5))',
                         ]
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl"
+                      className="w-12 h-12 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center p-2"
                     >
-                      <span className="text-white font-black text-2xl">N</span>
+                      <img 
+                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                        alt="Nebula Supply"
+                        className="w-full h-full object-contain"
+                      />
                     </motion.div>
                     <span className="text-2xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">NEBULA</span>
                   </motion.div>
