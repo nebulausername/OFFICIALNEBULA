@@ -15,6 +15,7 @@ export default function PremiumHeader() {
   const [drawerMode, setDrawerMode] = useState('menu'); // 'menu' or 'categories'
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoriesOnly, setCategoriesOnly] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -106,6 +107,10 @@ export default function PremiumHeader() {
     setDrawerMode('categories');
     setIsMenuOpen(true);
   };
+
+  const filteredCategories = categories.filter(cat => 
+    cat.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const IconButton = ({ icon: Icon, label, count, to, onClick }) => (
     <Link to={to} onClick={onClick}>
@@ -303,7 +308,8 @@ export default function PremiumHeader() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50"
+              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 cursor-pointer"
+              aria-label="Overlay schließen"
             />
 
             {/* Drawer */}
@@ -556,7 +562,37 @@ export default function PremiumHeader() {
 
               {/* CATEGORIES MODE */}
               {drawerMode === 'categories' && (
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  {/* Search Bar */}
+                  {!selectedCategory && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="px-4 py-3 border-b border-white/10"
+                    >
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Kategorie suchen..."
+                          className="w-full h-12 pl-12 pr-4 rounded-xl bg-zinc-900/60 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-bold text-sm"
+                          autoComplete="off"
+                        />
+                        <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-zinc-700 hover:bg-zinc-600 flex items-center justify-center transition-colors"
+                            aria-label="Suche löschen"
+                          >
+                            <X className="w-4 h-4 text-white" />
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+
                   <AnimatePresence mode="wait">
                     {!selectedCategory ? (
                       /* Main Categories List - Mobile & Desktop */
@@ -566,10 +602,10 @@ export default function PremiumHeader() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.18 }}
-                        className="px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar"
-                        style={{ maxHeight: 'calc(100vh - 240px)' }}
+                        className="flex-1 px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar"
                       >
-                        {categories.map((cat, index) => (
+                        {filteredCategories.length > 0 ? (
+                          filteredCategories.map((cat, index) => (
                           <motion.button
                             key={cat.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -589,10 +625,30 @@ export default function PremiumHeader() {
                             </div>
                             {cat.children.length > 0 && (
                               <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors duration-200" />
-                            )}
-                          </motion.button>
-                        ))}
-                      </motion.div>
+                              )}
+                              </motion.button>
+                              ))
+                              ) : (
+                              <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="flex flex-col items-center justify-center py-16 px-4"
+                              >
+                              <div className="w-20 h-20 rounded-2xl bg-zinc-900/60 border border-white/10 flex items-center justify-center mb-4">
+                              <Package className="w-10 h-10 text-zinc-600" />
+                              </div>
+                              <p className="text-zinc-400 text-sm font-bold text-center">
+                              Keine Kategorien gefunden
+                              </p>
+                              <button
+                              onClick={() => setSearchQuery('')}
+                              className="mt-4 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-400 text-xs font-black transition-all"
+                              >
+                              Suche zurücksetzen
+                              </button>
+                              </motion.div>
+                              )}
+                              </motion.div>
                     ) : (
                       /* Subcategories View - Mobile: Drilldown, Desktop: 2-Column */
                       <motion.div
@@ -690,8 +746,50 @@ export default function PremiumHeader() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
-              )}
+                  </div>
+                  )}
+
+                  {/* Quick Action Footer (nur im Menu Mode auf Mobile) */}
+                  {drawerMode === 'menu' && (
+                  <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="md:hidden sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent backdrop-blur-xl border-t border-white/10"
+                  >
+                  <div className="flex gap-2">
+                    <Link to={createPageUrl('Cart')} className="flex-1" onClick={() => setIsMenuOpen(false)}>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-white flex items-center justify-center gap-2 shadow-lg"
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        Warenkorb
+                        {cartCount > 0 && (
+                          <span className="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-black">
+                            {cartCount}
+                          </span>
+                        )}
+                      </motion.button>
+                    </Link>
+                    <Link to={createPageUrl('Wishlist')} onClick={() => setIsMenuOpen(false)}>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="h-14 w-14 bg-zinc-900/60 hover:bg-zinc-800/80 border border-white/10 rounded-2xl flex items-center justify-center transition-all relative"
+                      >
+                        <Heart className="w-5 h-5 text-pink-400" />
+                        {wishlistCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-pink-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-black">
+                            {wishlistCount}
+                          </span>
+                        )}
+                      </motion.button>
+                    </Link>
+                  </div>
+                  </motion.div>
+                  )}
             </motion.div>
           </>
         )}
