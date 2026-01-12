@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Crown, MessageSquare, HelpCircle, ChevronDown, Package, CreditCard, Truck, RotateCcw, Shield, Zap } from 'lucide-react';
+import { Plus, Search, Crown, MessageSquare, HelpCircle, ChevronDown, Package, CreditCard, Truck, RotateCcw, Shield, Zap, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -182,6 +182,15 @@ export default function Support() {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="mb-8"
         >
+          <Button
+            onClick={() => navigate(createPageUrl('Profile'))}
+            variant="outline"
+            className="mb-4 bg-white/[0.02] border-white/[0.08] text-white hover:bg-white/[0.05]"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Zurück zum Profil
+          </Button>
+          
           <div className="flex items-start gap-4 mb-6">
             <motion.div
               animate={{ rotate: [0, 5, -5, 0] }}
