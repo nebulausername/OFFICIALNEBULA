@@ -292,12 +292,17 @@ export default function ProductDetail() {
                     src={selectedImage}
                     alt={product.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.parentElement.classList.add('fallback-active');
+                    }}
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingBag className="w-24 h-24 text-zinc-700" />
-                  </div>
-                )}
+                ) : null}
+                <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900 ${selectedImage ? 'hidden' : ''}`}>
+                  <Package className="w-20 h-20 mb-4" style={{ color: 'rgba(214, 178, 94, 0.4)' }} />
+                  <span className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>Kein Bild verfügbar</span>
+                </div>
               </motion.div>
             </AnimatePresence>
 

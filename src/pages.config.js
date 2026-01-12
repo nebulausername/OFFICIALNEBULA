@@ -2,6 +2,7 @@ import Admin from './pages/Admin';
 import AdminBrands from './pages/AdminBrands';
 import AdminCategories from './pages/AdminCategories';
 import AdminNotificationTemplates from './pages/AdminNotificationTemplates';
+import AdminProductEditor from './pages/AdminProductEditor';
 import AdminProducts from './pages/AdminProducts';
 import AdminRequests from './pages/AdminRequests';
 import AdminSupport from './pages/AdminSupport';
@@ -20,7 +21,6 @@ import Support from './pages/Support';
 import SupportTicketDetail from './pages/SupportTicketDetail';
 import VIP from './pages/VIP';
 import Wishlist from './pages/Wishlist';
-import AdminProductEditor from './pages/AdminProductEditor';
 import __Layout from './Layout.jsx';
 
 
@@ -29,6 +29,7 @@ export const PAGES = {
     "AdminBrands": AdminBrands,
     "AdminCategories": AdminCategories,
     "AdminNotificationTemplates": AdminNotificationTemplates,
+    "AdminProductEditor": AdminProductEditor,
     "AdminProducts": AdminProducts,
     "AdminRequests": AdminRequests,
     "AdminSupport": AdminSupport,
@@ -47,7 +48,6 @@ export const PAGES = {
     "SupportTicketDetail": SupportTicketDetail,
     "VIP": VIP,
     "Wishlist": Wishlist,
-    "AdminProductEditor": AdminProductEditor,
 }
 
 export const pagesConfig = {
