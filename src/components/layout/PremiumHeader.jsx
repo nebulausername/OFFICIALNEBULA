@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { base44 } from '@/api/base44Client';
-import { Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, MessageCircle, Bell, MapPin, Clock } from 'lucide-react';
+import { Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, MessageCircle, MapPin, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PremiumHeader() {
@@ -180,8 +180,8 @@ export default function PremiumHeader() {
               />
               
               <IconButton 
-                icon={Bell} 
-                label="Benachrichtigungen" 
+                icon={User} 
+                label="Profil" 
                 count={0} 
                 to={createPageUrl('Profile')} 
               />
