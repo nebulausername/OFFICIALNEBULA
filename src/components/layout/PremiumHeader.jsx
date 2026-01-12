@@ -496,7 +496,7 @@ export default function PremiumHeader() {
 
               {/* MENU MODE */}
               {drawerMode === 'menu' && (
-                <>
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
                   {/* Delivery Info Bar */}
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -667,8 +667,49 @@ export default function PremiumHeader() {
                   </motion.button>
                 </motion.div>
               )}
-              </div>
-              </>
+                </div>
+              )}
+
+              {/* Quick Action Footer (nur im Menu Mode auf Mobile) */}
+              {drawerMode === 'menu' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="md:hidden sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent backdrop-blur-xl border-t border-white/10"
+                >
+                  <div className="flex gap-2">
+                    <Link to={createPageUrl('Cart')} className="flex-1" onClick={() => setIsMenuOpen(false)}>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-white flex items-center justify-center gap-2 shadow-lg"
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        Warenkorb
+                        {cartCount > 0 && (
+                          <span className="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-black">
+                            {cartCount}
+                          </span>
+                        )}
+                      </motion.button>
+                    </Link>
+                    <Link to={createPageUrl('Wishlist')} onClick={() => setIsMenuOpen(false)}>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="h-14 w-14 bg-zinc-900/60 hover:bg-zinc-800/80 border border-white/10 rounded-2xl flex items-center justify-center transition-all relative"
+                      >
+                        <Heart className="w-5 h-5 text-pink-400" />
+                        {wishlistCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-pink-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-black">
+                            {wishlistCount}
+                          </span>
+                        )}
+                      </motion.button>
+                    </Link>
+                  </div>
+                </motion.div>
               )}
 
               {/* CATEGORIES MODE */}
@@ -865,11 +906,9 @@ export default function PremiumHeader() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  </div>
-                  )}
-                  </motion.div>
-
-
+                </div>
+              )}
+            </motion.div>
           </>
         )}
       </AnimatePresence>
