@@ -286,38 +286,45 @@ export default function PremiumHeader() {
                       className="w-full h-full object-contain drop-shadow-lg"
                     />
                   </motion.div>
-                  <span className="hidden sm:block text-base md:text-lg font-black tracking-tight text-gradient-gold">
+                  <span className="hidden sm:block text-base md:text-lg font-black tracking-tight bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
                     NEBULA
                   </span>
                 </motion.div>
               </Link>
 
-              {/* Shop Categories Icon - Always Visible */}
+              {/* Premium Gold Shop Icon - Always Visible */}
               <motion.button
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
                 onClick={openShopCategories}
-                className="relative w-11 h-11 rounded-xl flex items-center justify-center focus-ring group"
+                className="relative w-11 h-11 rounded-xl flex items-center justify-center focus-ring group overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.12), rgba(var(--gold-rgb), 0.08))',
-                  border: '1px solid rgba(var(--gold-rgb), 0.35)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)'
+                  background: 'linear-gradient(135deg, #E8C76A, #F5D98B)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 4px 20px rgba(var(--gold-rgb), 0.4), 0 0 40px rgba(var(--gold-rgb), 0.2)'
                 }}
                 title="Shop Kategorien"
               >
                 <motion.div
-                  animate={{ rotate: [0, 5, -5, 0] }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                />
+                <motion.div
+                  animate={{ rotate: [0, -8, 8, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
+                  className="relative z-10"
                 >
-                  <Store className="w-5 h-5 text-gold drop-shadow-lg" />
+                  <Store className="w-5 h-5 text-zinc-900 drop-shadow-lg" strokeWidth={2.5} />
                 </motion.div>
                 <motion.div
-                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                  style={{ background: 'var(--gold)' }}
-                  animate={{ scale: [1, 1.2, 1] }}
+                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center"
+                  style={{ background: '#FF3366', boxShadow: '0 0 12px rgba(255, 51, 102, 0.6)' }}
+                  animate={{ scale: [1, 1.3, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                />
+                >
+                  <Sparkles className="w-2.5 h-2.5 text-white" />
+                </motion.div>
               </motion.button>
             </div>
 

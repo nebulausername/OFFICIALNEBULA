@@ -116,7 +116,7 @@ export default function Home() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-center"
           >
-            {/* Floating Premium Logo */}
+            {/* Ultra Premium Floating Logo */}
             <motion.div
               animate={{ 
                 y: [0, -20, 0]
@@ -130,42 +130,70 @@ export default function Home() {
                 <motion.div
                   animate={{
                     boxShadow: [
-                      '0 0 60px rgba(var(--gold-rgb), 0.4)',
-                      '0 0 100px rgba(var(--gold-rgb), 0.6)',
-                      '0 0 60px rgba(var(--gold-rgb), 0.4)',
+                      '0 0 60px rgba(var(--gold-rgb), 0.6)',
+                      '0 0 100px rgba(var(--gold-rgb), 0.8)',
+                      '0 0 60px rgba(var(--gold-rgb), 0.6)',
                     ]
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="w-28 h-28 md:w-36 md:h-36 rounded-[2.5rem] p-3 mx-auto gold-border"
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] p-4 mx-auto relative"
                   style={{ 
-                    background: 'var(--surface)',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06))',
+                    border: '2px solid rgba(var(--gold-rgb), 0.5)',
                     backdropFilter: 'blur(24px)',
                     WebkitBackdropFilter: 'blur(24px)'
                   }}
                 >
+                  <div className="absolute inset-0 rounded-[2.5rem]" 
+                    style={{
+                      background: 'radial-gradient(circle at 30% 30%, rgba(var(--gold-rgb), 0.2), transparent 70%)'
+                    }}
+                  />
                   <img 
                     src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
                     alt="Nebula Supply"
-                    className="w-full h-full object-contain drop-shadow-2xl"
+                    className="relative w-full h-full object-contain drop-shadow-2xl"
+                    style={{ filter: 'drop-shadow(0 0 20px rgba(var(--gold-rgb), 0.5))' }}
                   />
                 </motion.div>
-                {/* Orbital Rings */}
+                {/* Premium Orbital Rings */}
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                   className="absolute -inset-6 border-2 rounded-full"
-                  style={{ borderColor: 'rgba(var(--gold-rgb), 0.30)' }}
+                  style={{ 
+                    borderColor: 'rgba(var(--gold-rgb), 0.4)',
+                    boxShadow: '0 0 30px rgba(var(--gold-rgb), 0.3)'
+                  }}
                 />
                 <motion.div
                   animate={{ rotate: -360 }}
                   transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                   className="absolute -inset-10 border-2 rounded-full"
-                  style={{ borderColor: 'rgba(var(--gold-rgb), 0.20)' }}
+                  style={{ 
+                    borderColor: 'rgba(var(--gold-rgb), 0.3)',
+                    boxShadow: '0 0 40px rgba(var(--gold-rgb), 0.2)'
+                  }}
                 />
+                {/* Sparkle Accents */}
+                <motion.div
+                  animate={{ 
+                    scale: [1, 1.5, 1],
+                    rotate: [0, 180, 360]
+                  }}
+                  transition={{ duration: 4, repeat: Infinity }}
+                  className="absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
+                    boxShadow: '0 0 30px rgba(var(--gold-rgb), 0.8)'
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 text-zinc-900" />
+                </motion.div>
               </div>
             </motion.div>
 
-            {/* Main Headline - Premium Gold/White */}
+            {/* Ultra Premium Headline */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -173,8 +201,11 @@ export default function Home() {
             >
               <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 leading-none">
                 <motion.span 
-                  className="block"
-                  style={{ color: 'var(--text)' }}
+                  className="block bg-gradient-to-r from-white via-zinc-100 to-white bg-clip-text text-transparent"
+                  style={{ 
+                    textShadow: '0 0 40px rgba(255, 255, 255, 0.3)',
+                    filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.2))'
+                  }}
                 >
                   NEBULA
                 </motion.span>
@@ -184,23 +215,33 @@ export default function Home() {
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                   }}
                   transition={{ duration: 5, repeat: Infinity }}
-                  style={{ backgroundSize: '200% auto' }}
+                  style={{ 
+                    backgroundSize: '200% auto',
+                    textShadow: '0 0 60px rgba(var(--gold-rgb), 0.6)',
+                    filter: 'drop-shadow(0 0 30px rgba(var(--gold-rgb), 0.4))'
+                  }}
                 >
                   SUPPLY
                 </motion.span>
               </h1>
             </motion.div>
 
-            {/* Subtitle */}
+            {/* Premium Subtitle */}
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-bold tracking-wide"
-              style={{ color: 'var(--muted)' }}
+              style={{ 
+                color: 'rgba(255, 255, 255, 0.85)',
+                textShadow: '0 2px 20px rgba(0, 0, 0, 0.5)'
+              }}
             >
               Premium Lifestyle •{' '}
-              <span className="text-gold2">Exklusiv für dich</span> ✨
+              <span className="bg-gradient-to-r from-[#E8C76A] to-[#F5D98B] bg-clip-text text-transparent font-black">
+                Exklusiv für dich
+              </span>{' '}
+              <span className="inline-block">✨</span>
             </motion.p>
 
             {/* CTA Buttons */}
