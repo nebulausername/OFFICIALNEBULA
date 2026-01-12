@@ -281,10 +281,10 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, onBack }) {
                         <span className="font-black text-sm uppercase tracking-wider text-gold">UNSERE WELTEN</span>
                       </motion.div>
                       
-                      <h3 className="text-3xl md:text-4xl font-black mb-3 tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+                      <h3 className="text-4xl md:text-5xl font-black mb-4 tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.98)' }}>
                         Kategorien
                       </h3>
-                      <p className="text-base md:text-lg font-semibold leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.70)' }}>
+                      <p className="text-lg md:text-xl font-bold leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
                         Tauche ein in unsere Premium-Kollektionen
                       </p>
                     </div>
