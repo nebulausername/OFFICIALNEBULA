@@ -600,6 +600,107 @@ export default function ProductDetail() {
             </motion.div>
           </motion.div>
 
+          {/* Color Selection */}
+          {product.colors && product.colors.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="space-y-4"
+            >
+              <h3 className="text-lg font-black" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+                Farbe: <span className="text-gold">{selectedColor?.name || 'Wählen'}</span>
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {product.colors.map((color) => (
+                  <motion.button
+                    key={color.id}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setSelectedColor(color);
+                      setSelectedSize(null);
+                      if (color.images?.[0]) {
+                        setSelectedImage(color.images[0]);
+                      }
+                    }}
+                    className={`relative w-14 h-14 rounded-xl transition-all ${
+                      selectedColor?.id === color.id 
+                        ? 'ring-2 ring-gold ring-offset-2 ring-offset-black scale-110' 
+                        : 'hover:scale-105'
+                    }`}
+                    style={{ 
+                      background: color.hex || '#888',
+                      border: '2px solid rgba(255,255,255,0.2)'
+                    }}
+                    title={color.name}
+                  >
+                    {selectedColor?.id === color.id && (
+                      <Check className="absolute inset-0 m-auto w-6 h-6 text-white drop-shadow-lg" />
+                    )}
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Size Selection */}
+          {product.sizes && product.sizes.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="space-y-4"
+            >
+              <h3 className="text-lg font-black" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+                Größe: <span className="text-gold">{selectedSize || 'Wählen'}</span>
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size) => {
+                  const variant = product.variants?.find(v => 
+                    v.color_id === selectedColor?.id && v.size === size && v.active !== false
+                  );
+                  const stock = variant?.stock ?? 0;
+                  const available = stock > 0;
+                  
+                  return (
+                    <motion.button
+                      key={size}
+                      whileHover={available ? { scale: 1.05 } : {}}
+                      whileTap={available ? { scale: 0.95 } : {}}
+                      onClick={() => available && setSelectedSize(size)}
+                      disabled={!available}
+                      className={`min-w-[56px] h-12 px-4 rounded-xl font-bold text-base transition-all ${
+                        selectedSize === size
+                          ? 'bg-gold text-black'
+                          : available
+                            ? 'hover:bg-white/10'
+                            : 'opacity-30 cursor-not-allowed line-through'
+                      }`}
+                      style={{
+                        background: selectedSize === size ? undefined : 'rgba(255,255,255,0.06)',
+                        border: selectedSize === size ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                        color: selectedSize === size ? undefined : available ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)'
+                      }}
+                    >
+                      {size}
+                      {available && stock <= 3 && (
+                        <span className="block text-xs text-amber-400 font-semibold">Nur {stock}</span>
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </div>
+              
+              {selectedColor && !selectedSize && (
+                <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: 'rgba(255, 180, 80, 0.1)', border: '1px solid rgba(255, 180, 80, 0.3)' }}>
+                  <AlertCircle className="w-5 h-5 text-amber-400" />
+                  <span className="text-sm font-bold text-amber-400">Bitte wähle eine Größe</span>
+                </div>
+              )}
+            </motion.div>
+          )}
+
           {/* Tags */}
           {product.tags && product.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
