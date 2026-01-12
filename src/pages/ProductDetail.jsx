@@ -400,30 +400,52 @@ export default function ProductDetail() {
           {/* Title & Status */}
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-4 leading-tight drop-shadow-lg" style={{ color: 'rgba(255,255,255,0.95)' }}>{product.name}</h1>
-            <div className="flex items-center gap-2.5 flex-wrap mb-4">
-              <motion.div whileHover={{ scale: 1.08, y: -2 }} whileTap={{ scale: 0.95 }} className="rounded-full">
-                <Badge className="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white font-mono text-sm font-black border border-purple-400/60 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transition-all">
-                  {product.sku}
-                </Badge>
-              </motion.div>
+            <div className="flex items-center gap-2 flex-wrap mb-4">
+              <span 
+                className="px-3 py-1.5 rounded-lg font-mono text-xs font-bold"
+                style={{ 
+                  background: 'rgba(214, 178, 94, 0.15)', 
+                  border: '1px solid rgba(214, 178, 94, 0.3)',
+                  color: 'var(--gold)'
+                }}
+              >
+                {product.sku}
+              </span>
               {product.in_stock ? (
-                <motion.div whileHover={{ scale: 1.08, y: -2 }} whileTap={{ scale: 0.95 }} className="rounded-full">
-                  <Badge className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 border border-green-300/70 text-white font-black text-sm shadow-lg shadow-green-500/40 hover:shadow-xl hover:shadow-green-500/60 transition-all">
-                    <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 2, repeat: Infinity }} className="w-2.5 h-2.5 bg-white rounded-full mr-2" />
-                    Auf Lager
-                  </Badge>
-                </motion.div>
+                <span 
+                  className="px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5"
+                  style={{ 
+                    background: 'rgba(34, 197, 94, 0.15)', 
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    color: '#22c55e'
+                  }}
+                >
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  Auf Lager
+                </span>
               ) : (
-                <Badge className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 border border-red-300/50 text-white font-black text-sm shadow-lg shadow-red-500/30">
+                <span 
+                  className="px-3 py-1.5 rounded-lg font-bold text-xs"
+                  style={{ 
+                    background: 'rgba(239, 68, 68, 0.15)', 
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#ef4444'
+                  }}
+                >
                   Ausverkauft
-                </Badge>
+                </span>
               )}
               {brand && (
-                <motion.div whileHover={{ scale: 1.08, y: -2 }} whileTap={{ scale: 0.95 }} className="rounded-full">
-                  <Badge className="px-3.5 py-2 bg-gradient-to-r from-pink-600/80 to-purple-600/80 text-white font-bold text-sm border border-pink-400/50 shadow-lg shadow-pink-500/25 transition-all">
-                    {brand.name}
-                  </Badge>
-                </motion.div>
+                <span 
+                  className="px-3 py-1.5 rounded-lg font-bold text-xs"
+                  style={{ 
+                    background: 'rgba(139, 92, 246, 0.15)', 
+                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                    color: '#a78bfa'
+                  }}
+                >
+                  {brand.name}
+                </span>
               )}
             </div>
           </div>
