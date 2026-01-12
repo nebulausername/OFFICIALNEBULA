@@ -804,11 +804,18 @@ export default function ProductDetail() {
                 >
                   <Button
                     onClick={handleAddToCart}
-                    disabled={!product.in_stock}
-                    className="w-full h-12 sm:h-14 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 hover:shadow-2xl hover:shadow-purple-500/50 text-sm sm:text-lg font-black shadow-xl shadow-purple-500/30 rounded-xl transition-all animate-gradient disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!product.in_stock || (product.sizes?.length > 0 && !selectedSize)}
+                    className="w-full h-12 sm:h-14 text-sm sm:text-lg font-black rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      background: (product.in_stock && (!product.sizes?.length || selectedSize))
+                        ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' 
+                        : 'rgba(255,255,255,0.1)',
+                      color: (product.in_stock && (!product.sizes?.length || selectedSize)) ? '#000' : 'rgba(255,255,255,0.4)',
+                      boxShadow: (product.in_stock && (!product.sizes?.length || selectedSize)) ? '0 8px 24px rgba(214, 178, 94, 0.3)' : 'none'
+                    }}
                   >
                     <ShoppingBag className="w-5 sm:w-6 h-5 sm:h-6 mr-2" />
-                    {product.in_stock ? 'In den Warenkorb' : 'Ausverkauft'}
+                    {!product.in_stock ? 'Ausverkauft' : (product.sizes?.length > 0 && !selectedSize) ? 'Größe wählen' : 'In den Warenkorb'}
                   </Button>
                 </motion.div>
               </div>
