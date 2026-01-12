@@ -85,19 +85,21 @@ export default function PremiumProductCard({ product, onQuickView }) {
     return `${deliveryInfo.eta_min}–${deliveryInfo.eta_max} Werktage`;
   };
 
+  const [showAddedFeedback, setShowAddedFeedback] = useState(false);
+
   return (
     <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -8, scale: 1.02 }}
-        className="group smooth-transition relative overflow-hidden rounded-[var(--radius-lg)]"
+        whileHover={{ y: -6 }}
+        className="group relative overflow-hidden rounded-3xl transition-all duration-500"
         style={{
-          background: 'rgba(255, 255, 255, 0.06)',
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+          border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)'
         }}
       >
         {/* Image Container */}
