@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PremiumHeader from './components/layout/PremiumHeader';
+import PremiumHeader from './components/layout/PremiumHeader.jsx';
 import { WishlistProvider } from './components/wishlist/WishlistContext';
 import { Star } from 'lucide-react';
 
