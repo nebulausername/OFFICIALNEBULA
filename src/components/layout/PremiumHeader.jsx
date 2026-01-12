@@ -53,17 +53,26 @@ export default function PremiumHeader() {
   const IconButton = ({ icon: Icon, label, count, to, onClick }) => (
     <Link to={to} onClick={onClick}>
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center hover:from-purple-500/30 hover:to-pink-500/30 smooth-transition focus-ring border border-purple-500/30"
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
+        className="relative w-10 h-10 rounded-xl flex items-center justify-center smooth-transition focus-ring"
+        style={{
+          background: 'var(--panel)',
+          border: '1px solid var(--border)'
+        }}
         aria-label={label}
       >
-        <Icon className="w-5 h-5 text-purple-300" />
+        <Icon className="w-5 h-5 text-chrome-muted" />
         {count > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 text-white text-xs font-black rounded-full flex items-center justify-center shadow-lg"
+            className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 text-xs font-black rounded-full flex items-center justify-center"
+            style={{
+              background: 'linear-gradient(135deg, var(--nebula-glow), rgba(236, 72, 153, 0.4))',
+              color: 'white',
+              boxShadow: '0 0 12px var(--nebula-glow)'
+            }}
           >
             {count}
           </motion.span>
@@ -78,27 +87,29 @@ export default function PremiumHeader() {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl bg-black/40 border-b border-white/10 shadow-2xl"
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl border-b shadow-2xl"
+        style={{
+          background: 'var(--panel)',
+          borderColor: 'var(--chrome-muted)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)'
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Logo */}
             <Link to={createPageUrl('Home')}>
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 className="flex items-center gap-2 focus-ring rounded-2xl"
               >
                 <motion.div
-                  animate={{
-                    filter: [
-                      'drop-shadow(0 0 12px rgba(168, 85, 247, 0.4))',
-                      'drop-shadow(0 0 18px rgba(236, 72, 153, 0.4))',
-                      'drop-shadow(0 0 12px rgba(168, 85, 247, 0.4))',
-                    ]
+                  className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center p-1.5 sm:p-2"
+                  style={{
+                    background: 'var(--panel2)',
+                    border: '1px solid var(--border)',
+                    filter: 'drop-shadow(0 0 12px var(--nebula-subtle))'
                   }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center p-1.5 sm:p-2"
                 >
                   <img 
                     src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
@@ -106,7 +117,7 @@ export default function PremiumHeader() {
                     className="w-full h-full object-contain"
                   />
                 </motion.div>
-                <span className="hidden sm:block text-lg md:text-xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                <span className="hidden sm:block text-base md:text-lg font-black text-chrome tracking-tight">
                   NEBULA
                 </span>
               </motion.div>
@@ -114,30 +125,23 @@ export default function PremiumHeader() {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link to={createPageUrl('Home')} className="text-base font-black text-white hover:text-purple-400 smooth-transition relative group">
-                Home
-                <motion.span
-                  className="absolute bottom-[-4px] left-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full smooth-transition"
-                  initial={{ width: 0 }}
-                  whileHover={{ width: '100%' }}
-                />
-              </Link>
-              <Link to={createPageUrl('Products')} className="text-base font-black text-white hover:text-purple-400 smooth-transition relative group">
-                Shop
-                <motion.span
-                  className="absolute bottom-[-4px] left-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full smooth-transition"
-                  initial={{ width: 0 }}
-                  whileHover={{ width: '100%' }}
-                />
-              </Link>
-              <Link to={createPageUrl('Profile')} className="text-base font-black text-white hover:text-purple-400 smooth-transition relative group">
-                Profil
-                <motion.span
-                  className="absolute bottom-[-4px] left-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full smooth-transition"
-                  initial={{ width: 0 }}
-                  whileHover={{ width: '100%' }}
-                />
-              </Link>
+              {[
+                { label: 'Home', to: 'Home' },
+                { label: 'Shop', to: 'Products' },
+                { label: 'Profil', to: 'Profile' }
+              ].map(item => (
+                <Link key={item.to} to={createPageUrl(item.to)} className="relative group">
+                  <span className="text-sm font-bold text-chrome-muted group-hover:text-chrome transition-colors">
+                    {item.label}
+                  </span>
+                  <motion.span
+                    className="absolute bottom-[-4px] left-0 h-0.5 bg-chrome opacity-0 group-hover:opacity-100 transition-opacity"
+                    initial={{ width: 0 }}
+                    whileHover={{ width: '100%' }}
+                    style={{ boxShadow: '0 0 8px var(--chrome)' }}
+                  />
+                </Link>
+              ))}
             </nav>
 
             {/* Right Icons */}
@@ -145,18 +149,17 @@ export default function PremiumHeader() {
               {user?.is_vip && (
                 <motion.div
                   animate={{ 
-                    scale: [1, 1.05, 1],
                     boxShadow: [
-                      '0 0 10px rgba(251, 191, 36, 0.3)',
-                      '0 0 20px rgba(251, 191, 36, 0.5)',
-                      '0 0 10px rgba(251, 191, 36, 0.3)',
+                      '0 0 12px var(--vip-gold-glow)',
+                      '0 0 20px var(--vip-gold-glow)',
+                      '0 0 12px var(--vip-gold-glow)',
                     ]
                   }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="hidden md:flex px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 items-center gap-1.5 shadow-lg"
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className="hidden md:flex vip-badge"
                 >
-                  <Crown className="w-4 h-4 text-zinc-900" />
-                  <span className="text-xs font-black text-zinc-900">VIP</span>
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>VIP</span>
                 </motion.div>
               )}
               
@@ -185,10 +188,14 @@ export default function PremiumHeader() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsMenuOpen(true)}
-                className="w-11 h-11 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center md:hidden focus-ring backdrop-blur-xl shadow-lg"
+                className="w-10 h-10 rounded-xl flex items-center justify-center md:hidden focus-ring"
+                style={{
+                  background: 'var(--panel)',
+                  border: '1px solid var(--border)'
+                }}
                 aria-label="Menu öffnen"
               >
-                <Menu className="w-6 h-6 text-white" />
+                <Menu className="w-5 h-5 text-chrome-muted" />
               </motion.button>
             </div>
           </div>

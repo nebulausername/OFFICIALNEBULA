@@ -4,45 +4,39 @@
 
 @layer base {
   :root {
-    /* Premium Dark Luxury Design Tokens */
-    --bg: 220 18% 8%;
-    --bg-gradient-start: 240 25% 10%;
-    --bg-gradient-end: 270 20% 5%;
+    /* Nebula Supply - Luxury Chrome & Cosmic Design System */
+    --bg0: #050509;
+    --bg1: #0B0B12;
+    --bg2: #121218;
     
-    --panel: 240 15% 12%;
-    --panel-hover: 240 15% 15%;
+    --panel: rgba(255, 255, 255, 0.06);
+    --panel2: rgba(255, 255, 255, 0.09);
+    --panel-hover: rgba(255, 255, 255, 0.11);
     
-    --border: 240 10% 18%;
-    --border-subtle: 240 8% 22%;
+    --border: rgba(255, 255, 255, 0.10);
+    --border-subtle: rgba(255, 255, 255, 0.06);
     
-    --text: 0 0% 98%;
-    --text-muted: 240 5% 65%;
-    --text-subtle: 240 5% 45%;
+    --text: rgba(255, 255, 255, 0.92);
+    --text-muted: rgba(255, 255, 255, 0.62);
+    --text-subtle: rgba(255, 255, 255, 0.42);
     
-    --accent: 270 70% 60%;
-    --accent2: 320 70% 60%;
-    --accent-hover: 270 70% 65%;
+    --chrome: rgba(230, 230, 240, 0.95);
+    --chrome-muted: rgba(200, 200, 215, 0.75);
     
-    --vip: 45 100% 60%;
-    --vip-glow: 45 100% 50%;
+    --nebula-glow: rgba(170, 90, 255, 0.35);
+    --nebula-subtle: rgba(170, 90, 255, 0.15);
     
-    --success: 142 76% 46%;
-    --warning: 38 92% 50%;
-    --error: 0 72% 51%;
+    --vip-gold: rgba(255, 198, 80, 0.9);
+    --vip-gold-glow: rgba(255, 198, 80, 0.4);
     
-    --shadow: 0 0% 0%;
-    --shadow-colored: 270 50% 20%;
+    --success: rgba(100, 230, 150, 0.85);
+    --warning: rgba(255, 180, 80, 0.85);
+    --error: rgba(255, 100, 120, 0.85);
     
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-hover: rgba(255, 255, 255, 0.06);
-    
-    --radius-sm: 12px;
-    --radius-md: 18px;
-    --radius-lg: 22px;
+    --radius-sm: 16px;
+    --radius-md: 20px;
+    --radius-lg: 24px;
     --radius-xl: 28px;
-    
-    --spacing-base: 8px;
   }
 }
 
@@ -52,84 +46,130 @@
   }
   
   body {
-    @apply bg-gradient-to-b from-[hsl(var(--bg-gradient-start))] via-[hsl(var(--bg))] to-[hsl(var(--bg-gradient-end))] text-[hsl(var(--text))] antialiased;
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, var(--nebula-subtle), transparent),
+      linear-gradient(180deg, var(--bg1) 0%, var(--bg0) 50%, var(--bg1) 100%);
+    color: var(--text);
     min-height: 100vh;
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Remove all white backgrounds */
+  /* No white backgrounds */
   .bg-white {
-    background: hsl(var(--panel)) !important;
+    background: var(--panel) !important;
   }
 }
 
 @layer components {
-  /* Glass Panel System */
-  .glass-panel {
-    background: var(--glass-bg);
+        /* Nebula Glass System */
+        .glass-panel {
+          background: var(--panel);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid var(--border-subtle);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        .glass-panel-hover {
+          @apply glass-panel;
+          transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel-hover:hover {
+          background: var(--panel-hover);
+          border-color: var(--border);
+          box-shadow: 0 12px 48px rgba(0, 0, 0, 0.7);
+        }
+
+        .chrome-border {
+          border: 1px solid var(--chrome-muted);
+        }
+  
+  /* Luxury Cards */
+  .luxury-card {
+    background: var(--panel);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+  }
+
+  /* Chrome Text */
+  .text-chrome {
+    color: var(--chrome);
+    text-shadow: 0 0 20px rgba(230, 230, 240, 0.3);
+  }
+
+  .text-chrome-muted {
+    color: var(--chrome-muted);
+  }
+
+  .text-vip-gold {
+    color: var(--vip-gold);
+    text-shadow: 0 0 20px var(--vip-gold-glow);
   }
   
-  .glass-panel-hover {
-    @apply glass-panel;
-    transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Luxury Buttons */
+  .btn-chrome {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--chrome-muted);
+    color: var(--chrome);
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.5rem;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
-  
-  .glass-panel-hover:hover {
-    background: var(--glass-hover);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+
+  .btn-chrome:hover {
+    transform: scale(1.02);
+    border-color: var(--chrome);
+    box-shadow: 0 0 24px var(--nebula-glow), 0 6px 24px rgba(0, 0, 0, 0.6);
   }
-  
-  /* Premium Card */
-  .premium-card {
-    @apply glass-panel rounded-[var(--radius-lg)] overflow-hidden;
+
+  .btn-chrome:active {
+    transform: scale(0.98);
   }
-  
-  /* Gradient Text */
-  .text-gradient-primary {
-    @apply bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent2))] bg-clip-text text-transparent;
-  }
-  
-  .text-gradient-vip {
-    @apply bg-gradient-to-r from-[hsl(var(--vip))] via-amber-400 to-[hsl(var(--vip))] bg-clip-text text-transparent;
-  }
-  
-  /* Premium Buttons */
-  .btn-primary {
-    @apply relative overflow-hidden bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--accent2))] text-white font-bold rounded-[var(--radius-md)] px-6 py-3 transition-all duration-200;
-    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
-  }
-  
-  .btn-primary:hover {
-    @apply scale-105;
-    box-shadow: 0 6px 24px rgba(139, 92, 246, 0.5);
-  }
-  
-  .btn-primary:active {
-    @apply scale-95;
-  }
-  
+
   .btn-vip {
-    @apply relative overflow-hidden bg-gradient-to-r from-[hsl(var(--vip))] via-amber-500 to-[hsl(var(--vip))] text-zinc-900 font-black rounded-[var(--radius-md)] px-6 py-3 transition-all duration-200;
-    box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4);
+    position: relative;
+    background: linear-gradient(135deg, rgba(255, 198, 80, 0.15), rgba(255, 178, 60, 0.15));
+    border: 1px solid var(--vip-gold);
+    color: var(--vip-gold);
+    font-weight: 900;
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.5rem;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 20px var(--vip-gold-glow);
   }
-  
+
   .btn-vip:hover {
-    @apply scale-105;
-    box-shadow: 0 6px 24px rgba(251, 191, 36, 0.6);
+    transform: scale(1.02);
+    box-shadow: 0 0 30px var(--vip-gold-glow);
   }
-  
-  .btn-secondary {
-    @apply glass-panel text-[hsl(var(--text))] font-bold rounded-[var(--radius-md)] px-6 py-3 hover:bg-[var(--glass-hover)] transition-all duration-200;
+
+  .btn-vip:active {
+    transform: scale(0.98);
   }
   
   /* VIP Badge */
   .vip-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[hsl(var(--vip))]/20 to-amber-500/20 border border-[hsl(var(--vip))]/30 text-[hsl(var(--vip))] text-xs font-black;
-    box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, rgba(255, 198, 80, 0.15), rgba(255, 178, 60, 0.15));
+    border: 1px solid var(--vip-gold);
+    color: var(--vip-gold);
+    font-size: 0.75rem;
+    font-weight: 900;
+    box-shadow: 0 0 16px var(--vip-gold-glow);
   }
   
   /* Glow Effects */
