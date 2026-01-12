@@ -103,89 +103,123 @@ export default function PremiumProductCard({ product, onQuickView }) {
         }}
       >
         {/* Image Container */}
-        <div className="relative aspect-[2/3] overflow-hidden rounded-t-[var(--radius-lg)] bg-[hsl(var(--panel))]">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-t-3xl">
+          {/* Shimmer Effect on Hover */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 z-10 pointer-events-none"
+          />
+          
           {product.cover_image ? (
             <motion.img
-              whileHover={{ scale: 1.08 }}
-              transition={{ duration: 0.4 }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
               src={product.cover_image}
               alt={product.name}
               className="w-full h-full object-cover"
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-[hsl(var(--border))] opacity-40" />
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-900 to-black">
+              <div className="w-20 h-20 rounded-full bg-white/5" />
             </div>
           )}
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 smooth-transition" />
+          {/* Top Gradient */}
+          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
           
-          {/* Availability Badge */}
-          <div className="absolute top-3 right-3">
-            {product.in_stock ? (
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-black flex items-center gap-1.5"
-                style={{
-                  background: 'rgba(100, 230, 150, 0.15)',
-                  border: '1px solid rgba(100, 230, 150, 0.3)',
-                  color: 'var(--success)',
-                  boxShadow: 'var(--shadow-subtle)'
-                }}
-              >
-                <div className="w-1.5 h-1.5 rounded-full bg-[rgba(100,230,150,0.85)] animate-pulse" />
-                Verfügbar
-              </motion.div>
-            ) : (
-              <div className="px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-black"
-                style={{
-                  background: 'rgba(255, 100, 120, 0.15)',
-                  border: '1px solid rgba(255, 100, 120, 0.3)',
-                  color: 'var(--error)',
-                  boxShadow: 'var(--shadow-subtle)'
-                }}
-              >
-                Ausverkauft
-              </div>
-            )}
+          {/* Bottom Gradient */}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none" />
+          
+          {/* Availability Badge - Top Right */}
+          <div className="absolute top-4 right-4 z-20">
+            <AnimatePresence mode="wait">
+              {product.in_stock ? (
+                <motion.div
+                  key="available"
+                  initial={{ scale: 0, rotate: -10 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  exit={{ scale: 0 }}
+                  className="px-3 py-1.5 rounded-full backdrop-blur-xl text-xs font-black flex items-center gap-2"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(34,197,94,0.25) 0%, rgba(22,163,74,0.15) 100%)',
+                    border: '1px solid rgba(34,197,94,0.4)',
+                    color: '#4ade80',
+                    boxShadow: '0 4px 15px rgba(34,197,94,0.2)'
+                  }}
+                >
+                  <motion.div 
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-2 h-2 rounded-full bg-green-400"
+                  />
+                  Verfügbar
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="unavailable"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="px-3 py-1.5 rounded-full backdrop-blur-xl text-xs font-bold"
+                  style={{
+                    background: 'rgba(239,68,68,0.2)',
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    color: '#f87171'
+                  }}
+                >
+                  Ausverkauft
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           
-          {/* Wishlist Button */}
+          {/* Wishlist Button - Top Left */}
           <motion.button
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.15, rotate: isWishlisted ? 0 : 15 }}
+            whileTap={{ scale: 0.85 }}
             onClick={toggleWishlist}
             disabled={isPending}
-            className="absolute top-3 left-3 w-11 h-11 rounded-full backdrop-blur-xl flex items-center justify-center focus-ring smooth-transition"
+            className="absolute top-4 left-4 z-20 w-12 h-12 rounded-2xl backdrop-blur-xl flex items-center justify-center transition-all duration-300"
             style={{
-              background: 'var(--surface2)',
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--shadow-subtle)'
+              background: isWishlisted 
+                ? 'linear-gradient(135deg, rgba(236,72,153,0.3) 0%, rgba(219,39,119,0.2) 100%)'
+                : 'rgba(255,255,255,0.1)',
+              border: isWishlisted 
+                ? '1px solid rgba(236,72,153,0.5)'
+                : '1px solid rgba(255,255,255,0.15)',
+              boxShadow: isWishlisted 
+                ? '0 4px 20px rgba(236,72,153,0.3)'
+                : '0 4px 15px rgba(0,0,0,0.2)'
             }}
             aria-label={isWishlisted ? 'Von Merkliste entfernen' : 'Zu Merkliste hinzufügen'}
           >
             <Heart
-              className={`w-5 h-5 smooth-transition ${
-                isWishlisted ? 'text-gold' : 'text-white'
+              className={`w-5 h-5 transition-all duration-300 ${
+                isWishlisted ? 'text-pink-400' : 'text-white/80'
               }`}
-              fill={isWishlisted ? 'var(--gold)' : 'none'}
-              style={isWishlisted ? { filter: 'drop-shadow(0 0 8px rgba(var(--gold-rgb), 0.6))' } : {}}
+              fill={isWishlisted ? '#f472b6' : 'none'}
             />
           </motion.button>
           
-          {/* Quick View Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            whileHover={{ opacity: 1, y: 0 }}
-            onClick={handleQuickView}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition btn-gold font-black text-sm py-2.5 px-8 flex items-center gap-2"
+          {/* Quick View Button - Bottom Center */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20"
           >
-            <Eye className="w-4 h-4" />
-            Quick View
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleQuickView}
+              className="h-11 px-6 rounded-xl font-bold text-sm flex items-center gap-2 transition-all"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%)',
+                color: '#0a0a0f',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.3)'
+              }}
+            >
+              <Eye className="w-4 h-4" />
+              Quick View
+            </motion.button>
+          </motion.div>
         </div>
 
         {/* Content */}
