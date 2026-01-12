@@ -451,19 +451,25 @@ export default function ProductDetail() {
           </div>
 
           {/* Price */}
-          <div className="py-5 sm:py-6 border-y border-zinc-800">
+          <div 
+            className="py-5 px-5 rounded-xl"
+            style={{
+              background: 'rgba(214, 178, 94, 0.08)',
+              border: '1px solid rgba(214, 178, 94, 0.2)'
+            }}
+          >
             <div className="flex items-baseline gap-3">
-              <div className="text-4xl sm:text-5xl md:text-6xl font-black text-white">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-gradient-gold">
                 {currentPrice.toFixed(2)}€
               </div>
               {currentPrice !== product.price && (
-                <div className="text-lg sm:text-2xl text-zinc-500 line-through">
+                <div className="text-base sm:text-lg line-through" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {product.price}€
                 </div>
               )}
             </div>
             {product.currency && product.currency !== 'EUR' && (
-              <div className="text-xs sm:text-sm text-zinc-400 mt-2">Preis in {product.currency}</div>
+              <div className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Preis in {product.currency}</div>
             )}
           </div>
 
