@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { base44 } from '@/api/base44Client';
-import { Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, MessageCircle, MapPin, Clock, Store, ChevronRight, ChevronLeft } from 'lucide-react';
+import { 
+  Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, 
+  MessageCircle, MapPin, Clock, Store, ChevronRight, ChevronLeft,
+  Sparkles, Star, Search, ArrowRight
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PremiumHeader() {
@@ -12,23 +16,18 @@ export default function PremiumHeader() {
   const [wishlistCount, setWishlistCount] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [drawerMode, setDrawerMode] = useState('menu'); // 'menu' or 'categories'
+  const [drawerMode, setDrawerMode] = useState('menu');
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [categoriesOnly, setCategoriesOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dragStartY, setDragStartY] = useState(0);
-  const [dragOffsetY, setDragOffsetY] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
     loadUserData();
-    const saved = localStorage.getItem('categories_only_mode');
-    if (saved) setCategoriesOnly(JSON.parse(saved));
   }, []);
 
   const loadUserData = async () => {
@@ -53,15 +52,13 @@ export default function PremiumHeader() {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
-      setDrawerMode(categoriesOnly ? 'categories' : 'menu');
       setSelectedCategory(null);
+      setSearchQuery('');
     }
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isMenuOpen, categoriesOnly]);
-
-  const isShopPage = location.pathname.includes('Product') || location.pathname.includes('Shop');
+  }, [isMenuOpen]);
 
   const categories = [
     { 
@@ -70,26 +67,10 @@ export default function PremiumHeader() {
       icon: '👟',
       gradient: 'from-blue-500 to-cyan-500',
       children: [
-        { 
-          id: 'nike', 
-          label: 'NIKE', 
-          children: ['AirMax 95', 'AirMax DN', 'SHOX TL', 'AIR FORCE', 'Dunk SB', 'Cortez', 'Blazer'] 
-        },
-        { 
-          id: 'airjordan', 
-          label: 'AIR JORDAN', 
-          children: ['AIR JORDAN 1 HIGH', 'AIR JORDAN 1 LOW', 'AIR JORDAN 3', 'AIR JORDAN 4', 'AIR JORDAN 5', 'AIR JORDAN 6', 'AIR JORDAN 11', 'AIR JORDAN 13'] 
-        },
-        {
-          id: 'adidas',
-          label: 'ADIDAS',
-          children: ['Yeezy Boost 350', 'Yeezy Boost 700', 'Ultraboost', 'Superstar', 'Stan Smith']
-        },
-        {
-          id: 'newbalance',
-          label: 'NEW BALANCE',
-          children: ['550', '574', '990', '2002R', '1906R']
-        }
+        { id: 'nike', label: 'NIKE', children: ['AirMax 95', 'AirMax DN', 'SHOX TL', 'AIR FORCE', 'Dunk SB', 'Cortez', 'Blazer'] },
+        { id: 'airjordan', label: 'AIR JORDAN', children: ['AIR JORDAN 1 HIGH', 'AIR JORDAN 1 LOW', 'AIR JORDAN 3', 'AIR JORDAN 4', 'AIR JORDAN 5', 'AIR JORDAN 6', 'AIR JORDAN 11', 'AIR JORDAN 13'] },
+        { id: 'adidas', label: 'ADIDAS', children: ['Yeezy Boost 350', 'Yeezy Boost 700', 'Ultraboost', 'Superstar', 'Stan Smith'] },
+        { id: 'newbalance', label: 'NEW BALANCE', children: ['550', '574', '990', '2002R', '1906R'] }
       ]
     },
     { 
@@ -115,51 +96,19 @@ export default function PremiumHeader() {
         { id: 'luxus', label: 'LUXUS TASCHEN', children: ['Designer', 'Clutch', 'Tote Bags'] }
       ]
     },
-    { 
-      id: 'muetzen', 
-      label: 'MÜTZEN & CAPS', 
-      icon: '🧢',
-      gradient: 'from-green-500 to-emerald-500',
-      children: [
-        { id: 'caps', label: 'CAPS', children: ['Baseball Caps', 'Snapbacks', 'Dad Hats', '5-Panel'] },
-        { id: 'beanies', label: 'BEANIES', children: ['Classic', 'Slouchy', 'Cuffed'] }
-      ]
-    },
-    { 
-      id: 'geldboersen', 
-      label: 'GELDBÖRSEN', 
-      icon: '💰',
-      gradient: 'from-yellow-500 to-amber-500',
-      children: [
-        { id: 'herren', label: 'HERREN', children: ['Bifold', 'Trifold', 'Kartenhalter', 'Geldbörsen'] },
-        { id: 'damen', label: 'DAMEN', children: ['Clutch Wallets', 'Zip Around', 'Kartenhalter'] }
-      ]
-    },
-    { 
-      id: 'guertel', 
-      label: 'GÜRTEL', 
-      icon: '⭕',
-      gradient: 'from-red-500 to-pink-500',
-      children: [
-        { id: 'designer', label: 'DESIGNER', children: ['Gucci', 'Louis Vuitton', 'Hermès', 'Versace'] },
-        { id: 'casual', label: 'CASUAL', children: ['Canvas', 'Leder', 'Textil'] }
-      ]
-    },
-    { 
-      id: 'highheels', 
-      label: 'HIGH HEELS', 
-      icon: '👠',
-      gradient: 'from-pink-500 to-rose-500',
-      children: [
-        { id: 'pumps', label: 'PUMPS', children: ['Classic Pumps', 'Pointed Toe', 'Peep Toe'] },
-        { id: 'stiefel', label: 'STIEFEL', children: ['Ankle Boots', 'Knee High', 'Thigh High'] },
-        { id: 'sandalen', label: 'SANDALEN', children: ['Heeled Sandals', 'Strappy', 'Platform'] }
-      ]
-    }
+    { id: 'muetzen', label: 'MÜTZEN & CAPS', icon: '🧢', gradient: 'from-green-500 to-emerald-500', children: [] },
+    { id: 'geldboersen', label: 'GELDBÖRSEN', icon: '💰', gradient: 'from-yellow-500 to-amber-500', children: [] },
+    { id: 'guertel', label: 'GÜRTEL', icon: '⭕', gradient: 'from-red-500 to-pink-500', children: [] },
+    { id: 'highheels', label: 'HIGH HEELS', icon: '👠', gradient: 'from-pink-500 to-rose-500', children: [] }
   ];
 
   const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
+    if (category.children.length > 0) {
+      setSelectedCategory(category);
+    } else {
+      setIsMenuOpen(false);
+      window.location.href = createPageUrl('Products') + `?category=${category.id}`;
+    }
   };
 
   const handleSubcategoryClick = (categoryId, subcategory) => {
@@ -167,15 +116,13 @@ export default function PremiumHeader() {
     window.location.href = createPageUrl('Products') + `?category=${categoryId}&subcategory=${encodeURIComponent(subcategory)}`;
   };
 
-  const toggleCategoriesOnly = () => {
-    const newValue = !categoriesOnly;
-    setCategoriesOnly(newValue);
-    localStorage.setItem('categories_only_mode', JSON.stringify(newValue));
-    if (newValue) setDrawerMode('categories');
-  };
-
   const openShopCategories = () => {
     setDrawerMode('categories');
+    setIsMenuOpen(true);
+  };
+
+  const openMainMenu = () => {
+    setDrawerMode('menu');
     setIsMenuOpen(true);
   };
 
@@ -183,94 +130,136 @@ export default function PremiumHeader() {
     cat.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleTouchStart = (e) => {
-    setDragStartY(e.touches[0].clientY);
-  };
-
-  const handleTouchMove = (e) => {
-    const currentY = e.touches[0].clientY;
-    const offset = currentY - dragStartY;
-    if (offset > 0) {
-      setDragOffsetY(offset);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (dragOffsetY > 100) {
-      setIsMenuOpen(false);
-    }
-    setDragOffsetY(0);
-  };
-
-  const IconButton = ({ icon: Icon, label, count, to, onClick }) => (
-    <Link to={to} onClick={onClick}>
+  // Premium Icon Button Component
+  const IconButton = ({ icon: Icon, label, count, to, onClick, isGold }) => {
+    const content = (
       <motion.button
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
-        className="relative rounded-xl flex items-center justify-center smooth-transition focus-ring"
+        whileHover={{ scale: 1.08, y: -2 }}
+        whileTap={{ scale: 0.92 }}
+        onClick={onClick}
+        className={`relative rounded-2xl flex items-center justify-center transition-all duration-300 ${
+          isGold 
+            ? 'bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/40 hover:border-amber-400/60' 
+            : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20'
+        }`}
         style={{
-          width: '44px',
-          height: '44px',
-          background: 'rgba(255, 255, 255, 0.08)',
-          border: '1px solid rgba(255, 255, 255, 0.10)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)'
+          width: '48px',
+          height: '48px',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          boxShadow: isGold 
+            ? '0 4px 20px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255,255,255,0.1)' 
+            : '0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)'
         }}
         aria-label={label}
       >
-        <Icon className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.92)' }} />
+        <Icon className={`w-5 h-5 transition-colors ${isGold ? 'text-amber-400' : 'text-white/80 group-hover:text-white'}`} />
         {count > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1.5 -right-1.5 min-w-[1.25rem] h-5 px-1.5 text-[0.7rem] font-black rounded-full flex items-center justify-center"
+            className="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1.5 text-[11px] font-black rounded-full flex items-center justify-center"
             style={{
-              background: '#D6B25E',
+              background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
               color: '#000',
-              boxShadow: '0 2px 8px rgba(214, 178, 94, 0.4)'
+              boxShadow: '0 4px 12px rgba(245, 158, 11, 0.5)'
             }}
           >
             {count}
           </motion.span>
         )}
       </motion.button>
-    </Link>
-  );
+    );
+
+    if (to) {
+      return <Link to={to}>{content}</Link>;
+    }
+    return content;
+  };
 
   return (
     <>
       {/* Header */}
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled ? 'h-16' : 'h-20'
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          isScrolled ? 'py-2' : 'py-3'
         }`}
-        style={{
-          background: 'linear-gradient(180deg, rgba(8, 8, 12, 0.60) 0%, rgba(8, 8, 12, 0.55) 100%)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.10)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
-        }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-          <div className="flex items-center justify-between h-full">
-            {/* Logo + Shop Icon */}
-            <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+          <motion.div
+            layout
+            className={`relative flex items-center justify-between rounded-2xl transition-all duration-500 ${
+              isScrolled ? 'h-16 px-4' : 'h-[72px] px-5'
+            }`}
+            style={{
+              background: isScrolled 
+                ? 'linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(20,20,25,0.9) 100%)'
+                : 'linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(20,20,25,0.7) 100%)',
+              backdropFilter: 'blur(24px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: isScrolled 
+                ? '0 8px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset'
+                : '0 4px 30px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.03) inset'
+            }}
+          >
+            {/* Left Section: Shop Icon + Logo */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Shop Categories Button - IMMER sichtbar */}
+              <motion.button
+                whileHover={{ scale: 1.08, rotate: 5 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={openShopCategories}
+                className="relative rounded-2xl flex items-center justify-center overflow-hidden group"
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(236,72,153,0.2) 100%)',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  boxShadow: '0 4px 20px rgba(139,92,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                }}
+                title="Kategorien"
+              >
+                {/* Animated Background */}
+                <motion.div
+                  animate={{
+                    background: [
+                      'linear-gradient(0deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3))',
+                      'linear-gradient(180deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3))',
+                      'linear-gradient(360deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3))'
+                    ]
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+                <Store className="w-5 h-5 relative z-10 text-purple-300 group-hover:text-white transition-colors" />
+              </motion.button>
+
+              {/* Logo */}
               <Link to={createPageUrl('Home')}>
                 <motion.div
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
-                  className="flex items-center gap-2 focus-ring rounded-2xl"
+                  className="flex items-center gap-2.5"
                 >
                   <motion.div
-                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center p-2"
+                    animate={{
+                      boxShadow: [
+                        '0 0 20px rgba(214,178,94,0.2)',
+                        '0 0 30px rgba(214,178,94,0.4)',
+                        '0 0 20px rgba(214,178,94,0.2)'
+                      ]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="w-11 h-11 rounded-xl flex items-center justify-center p-2 overflow-hidden"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(214, 178, 94, 0.35)',
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)'
+                      background: 'linear-gradient(135deg, rgba(214,178,94,0.15) 0%, rgba(242,210,124,0.15) 100%)',
+                      border: '1px solid rgba(214,178,94,0.4)',
                     }}
                   >
                     <img 
@@ -279,116 +268,123 @@ export default function PremiumHeader() {
                       className="w-full h-full object-contain"
                     />
                   </motion.div>
-                  <span className="hidden sm:block text-base md:text-lg font-black tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
-                    NEBULA
-                  </span>
+                  <div className="hidden sm:flex flex-col">
+                    <span className="text-lg font-black tracking-tight bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">
+                      NEBULA
+                    </span>
+                    <span className="text-[10px] font-bold tracking-[0.2em] text-amber-400/80 -mt-1">
+                      SUPPLY
+                    </span>
+                  </div>
                 </motion.div>
               </Link>
-
-              {/* Shop Categories Icon (nur im Shop) */}
-              {isShopPage && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={openShopCategories}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center focus-ring"
-                  style={{
-                    background: 'rgba(214, 178, 94, 0.12)',
-                    border: '1px solid rgba(214, 178, 94, 0.30)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)'
-                  }}
-                  title="Kategorien"
-                >
-                  <Store className="w-5 h-5" style={{ color: 'rgba(214, 178, 94, 0.9)' }} />
-                </motion.button>
-              )}
             </div>
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-8">
+            {/* Center: Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
               {[
-                { label: 'Home', to: 'Home' },
-                { label: 'Shop', to: 'Products' },
-                { label: 'Profil', to: 'Profile' }
+                { label: 'Home', to: 'Home', icon: Home },
+                { label: 'Shop', to: 'Products', icon: Package },
+                { label: 'VIP', to: 'VIP', icon: Crown, isGold: true },
               ].map(item => (
-                <Link key={item.to} to={createPageUrl(item.to)} className="relative group">
-                  <span className="text-sm font-bold text-muted group-hover:text-white transition-colors">
-                    {item.label}
-                  </span>
-                  <motion.span
-                    className="absolute bottom-[-4px] left-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    initial={{ width: 0 }}
-                    whileHover={{ width: '100%' }}
-                    style={{ background: 'var(--gold)' }}
-                  />
+                <Link key={item.to} to={createPageUrl(item.to)}>
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    className={`relative px-5 py-2.5 rounded-xl group transition-all duration-300 ${
+                      item.isGold 
+                        ? 'hover:bg-amber-500/10' 
+                        : 'hover:bg-white/5'
+                    }`}
+                  >
+                    <span className={`text-sm font-bold transition-colors flex items-center gap-2 ${
+                      item.isGold 
+                        ? 'text-amber-400 group-hover:text-amber-300' 
+                        : 'text-white/70 group-hover:text-white'
+                    }`}>
+                      {item.isGold && <Crown className="w-4 h-4" />}
+                      {item.label}
+                    </span>
+                    <motion.span
+                      className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-all ${
+                        item.isGold ? 'bg-amber-400' : 'bg-white'
+                      }`}
+                      initial={{ width: 0 }}
+                      whileHover={{ width: '60%' }}
+                    />
+                  </motion.div>
                 </Link>
               ))}
             </nav>
 
-            {/* Right Icons */}
-            <div className="flex items-center gap-2 md:gap-3">
+            {/* Right Section: Icons */}
+            <div className="flex items-center gap-2">
+              {/* VIP Badge - Desktop only */}
               {user?.is_vip && (
                 <motion.div
-                  animate={{ 
-                    boxShadow: [
-                      '0 0 12px rgba(var(--gold-rgb), 0.3)',
-                      '0 0 20px rgba(var(--gold-rgb), 0.4)',
-                      '0 0 12px rgba(var(--gold-rgb), 0.3)',
-                    ]
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full mr-1"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(217,119,6,0.2) 100%)',
+                    border: '1px solid rgba(245,158,11,0.4)',
+                    boxShadow: '0 0 20px rgba(245,158,11,0.2)'
                   }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="hidden md:flex vip-badge"
                 >
-                  <Crown className="w-3.5 h-3.5" />
-                  <span>VIP</span>
+                  <Crown className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-xs font-black text-amber-400">VIP</span>
                 </motion.div>
               )}
               
-              <IconButton 
-                icon={Heart} 
-                label="Merkliste" 
-                count={wishlistCount} 
-                to={createPageUrl('Wishlist')} 
-              />
+              {/* Wishlist - Desktop only */}
+              <div className="hidden md:block">
+                <IconButton 
+                  icon={Heart} 
+                  label="Merkliste" 
+                  count={wishlistCount} 
+                  to={createPageUrl('Wishlist')} 
+                />
+              </div>
               
+              {/* Profile */}
               <IconButton 
                 icon={User} 
                 label="Profil" 
-                count={0} 
                 to={createPageUrl('Profile')} 
               />
               
+              {/* Cart */}
               <IconButton 
                 icon={ShoppingCart} 
                 label="Warenkorb" 
                 count={cartCount} 
                 to={createPageUrl('Cart')} 
+                isGold={cartCount > 0}
               />
               
+              {/* Menu Button - Mobile only */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setIsMenuOpen(true)}
-                className="rounded-xl flex items-center justify-center md:hidden focus-ring"
+                onClick={openMainMenu}
+                className="lg:hidden rounded-2xl flex items-center justify-center"
                 style={{
-                  width: '44px',
-                  height: '44px',
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.10)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)'
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)'
                 }}
                 aria-label="Menu öffnen"
               >
-                <Menu className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.92)' }} />
+                <Menu className="w-5 h-5 text-white/90" />
               </motion.button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </motion.header>
 
-      {/* Mobile Menu Drawer */}
+      {/* Premium Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
@@ -398,523 +394,458 @@ export default function PremiumHeader() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 cursor-pointer"
-              aria-label="Overlay schließen"
+              className="fixed inset-0 z-50"
+              style={{
+                background: 'radial-gradient(circle at 80% 20%, rgba(139,92,246,0.1), transparent 50%), rgba(0,0,0,0.9)',
+                backdropFilter: 'blur(8px)',
+                WebkitBackdropFilter: 'blur(8px)'
+              }}
             />
 
             {/* Drawer */}
             <motion.div
-              initial={{ x: '100%' }}
-              animate={{ 
-                x: 0,
-                y: dragOffsetY 
+              initial={{ x: '100%', opacity: 0.8 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '100%', opacity: 0.8 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 bottom-0 w-full max-w-md z-50 flex flex-col overflow-hidden"
+              style={{
+                background: 'linear-gradient(180deg, #0a0a0f 0%, #0d0d14 50%, #0a0a0f 100%)',
+                boxShadow: '-20px 0 60px rgba(0,0,0,0.5), -1px 0 0 rgba(255,255,255,0.05)'
               }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-              onKeyDown={(e) => e.key === 'Escape' && setIsMenuOpen(false)}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md md:max-w-lg lg:max-w-xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-black border-l-2 border-purple-500/30 z-50 overflow-hidden shadow-2xl shadow-purple-500/20 flex flex-col"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Navigation Menu"
             >
-              {/* Swipe Handle (Mobile) */}
-              <div className="md:hidden flex justify-center py-2 px-4 border-b border-white/5">
-                <div className="w-12 h-1.5 rounded-full bg-zinc-700" />
-              </div>
-              {/* Header */}
-              <div className="relative p-6 border-b border-white/10">
-                {/* Background Glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 blur-2xl" />
-
-                <div className="relative flex items-center justify-between mb-4">
+              {/* Drawer Header */}
+              <div className="relative px-5 py-5 border-b border-white/5">
+                {/* Gradient Accent */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-amber-500" />
+                
+                <div className="flex items-center justify-between">
                   <motion.div 
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
                     className="flex items-center gap-3"
                   >
                     <motion.div
                       animate={{
-                        filter: [
-                          'drop-shadow(0 0 16px rgba(168, 85, 247, 0.5))',
-                          'drop-shadow(0 0 24px rgba(236, 72, 153, 0.5))',
-                          'drop-shadow(0 0 16px rgba(168, 85, 247, 0.5))',
+                        boxShadow: [
+                          '0 0 20px rgba(139,92,246,0.3)',
+                          '0 0 30px rgba(236,72,153,0.3)',
+                          '0 0 20px rgba(139,92,246,0.3)'
                         ]
                       }}
                       transition={{ duration: 2, repeat: Infinity }}
-                      className="w-12 h-12 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center p-2"
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center p-2.5"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.2))',
+                        border: '1px solid rgba(139,92,246,0.3)'
+                      }}
                     >
-                      <img 
-                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
-                        alt="Nebula Supply"
-                        className="w-full h-full object-contain"
-                      />
+                      {drawerMode === 'categories' ? (
+                        <Store className="w-6 h-6 text-purple-300" />
+                      ) : (
+                        <Sparkles className="w-6 h-6 text-purple-300" />
+                      )}
                     </motion.div>
-                    <span className="text-2xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
-                      {drawerMode === 'categories' ? 'Kategorien' : 'NEBULA'}
-                    </span>
+                    <div>
+                      <h2 className="text-xl font-black text-white">
+                        {drawerMode === 'categories' ? 'Kategorien' : 'Navigation'}
+                      </h2>
+                      <p className="text-xs text-white/40 font-medium">
+                        {drawerMode === 'categories' ? 'Alle Produkte durchsuchen' : 'Wohin möchtest du?'}
+                      </p>
+                    </div>
                   </motion.div>
+                  
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: 90 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setIsMenuOpen(false)}
-                    className="w-11 h-11 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 flex items-center justify-center transition-all border border-white/10"
-                    aria-label="Menu schließen"
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all"
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}
                   >
-                    <X className="w-6 h-6 text-white" />
+                    <X className="w-5 h-5 text-white/80" />
                   </motion.button>
                 </div>
 
-                {/* Tabs (nur im Shop) */}
-                {isShopPage && !categoriesOnly && (
-                  <div className="relative flex gap-2 p-1 rounded-xl bg-zinc-900/60 border border-white/10">
-                    <button
-                      onClick={() => { setDrawerMode('menu'); setSelectedCategory(null); }}
-                      className={`flex-1 px-4 py-2.5 rounded-lg font-black text-sm transition-all ${
-                        drawerMode === 'menu' 
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      Menü
-                    </button>
-                    <button
-                      onClick={() => { setDrawerMode('categories'); setSelectedCategory(null); }}
-                      className={`flex-1 px-4 py-2.5 rounded-lg font-black text-sm transition-all ${
-                        drawerMode === 'categories' 
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      Kategorien
-                    </button>
-                  </div>
-                )}
+                {/* Mode Toggle */}
+                <div className="flex gap-2 mt-4 p-1.5 rounded-2xl bg-white/5 border border-white/5">
+                  <button
+                    onClick={() => { setDrawerMode('menu'); setSelectedCategory(null); }}
+                    className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                      drawerMode === 'menu' 
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
+                        : 'text-white/50 hover:text-white/80'
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Menü
+                  </button>
+                  <button
+                    onClick={() => { setDrawerMode('categories'); setSelectedCategory(null); }}
+                    className={`flex-1 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                      drawerMode === 'categories' 
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
+                        : 'text-white/50 hover:text-white/80'
+                    }`}
+                  >
+                    <Store className="w-4 h-4" />
+                    Shop
+                  </button>
+                </div>
               </div>
 
-              {/* MENU MODE */}
-              {drawerMode === 'menu' && (
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  {/* Delivery Info Bar */}
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="m-4 p-5 rounded-3xl bg-gradient-to-br from-zinc-900/90 to-zinc-800/90 border border-white/10 backdrop-blur-xl shadow-2xl"
-                  >
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <MapPin className="w-7 h-7 text-red-400" />
-                      </div>
-                      <div className="flex-1 pt-1">
-                        <div className="text-xs text-zinc-400 font-bold uppercase tracking-wide mb-0.5">Versand aus</div>
-                        <div className="text-base font-black text-white">🇨🇳 China</div>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <Clock className="w-7 h-7 text-blue-400" />
-                      </div>
-                      <div className="flex-1 pt-1">
-                        <div className="text-xs text-zinc-400 font-bold uppercase tracking-wide mb-0.5">Lieferzeit</div>
-                        <div className="text-base font-black text-white">8-17 Tage</div>
-                      </div>
-                    </div>
-                  </motion.div>
-
-              {/* User Info */}
-              {user && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="mx-4 mb-4 p-5 rounded-3xl bg-gradient-to-br from-purple-500/15 to-pink-500/15 border border-purple-500/25 backdrop-blur-xl shadow-2xl"
-                >
-                  <div className="flex items-center gap-4 mb-3">
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <AnimatePresence mode="wait">
+                  {drawerMode === 'menu' ? (
                     <motion.div
-                      whileHover={{ scale: 1.08, rotate: 5 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-2xl"
+                      key="menu"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="p-4 space-y-3"
                     >
-                      <User className="w-8 h-8 text-white" />
-                    </motion.div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-black text-white text-lg truncate">{user.full_name}</div>
-                      <div className="text-xs text-zinc-400 font-semibold truncate">{user.email}</div>
-                    </div>
-                  </div>
-                  {user.is_vip && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', bounce: 0.5 }}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 shadow-xl"
-                    >
-                      <Crown className="w-4 h-4 text-zinc-900" />
-                      <span className="text-xs font-black text-zinc-900 tracking-wide">VIP MEMBER</span>
-                    </motion.div>
-                  )}
-                </motion.div>
-              )}
-
-              {/* Menu Items */}
-              <nav className="px-4 py-6 space-y-2">
-                {[
-                  { icon: Home, label: 'Home', to: 'Home', gradient: 'from-blue-500 to-cyan-500' },
-                  { icon: Package, label: 'Shop', to: 'Products', gradient: 'from-purple-500 to-pink-500' },
-                  { icon: Heart, label: 'Merkliste', to: 'Wishlist', badge: wishlistCount, gradient: 'from-pink-500 to-rose-500' },
-                  { icon: ShoppingCart, label: 'Warenkorb', to: 'Cart', badge: cartCount, gradient: 'from-green-500 to-emerald-500' },
-                  { icon: User, label: 'Profil', to: 'Profile', gradient: 'from-indigo-500 to-purple-500' },
-                  ...(user?.role === 'admin' ? [{ icon: Crown, label: 'Admin Dashboard', to: 'Admin', gradient: 'from-red-500 to-orange-500', admin: true }] : []),
-                  { icon: Crown, label: 'VIP werden', to: 'VIP', highlight: true, gradient: 'from-yellow-500 to-amber-500' },
-                  { icon: MessageCircle, label: 'Support', to: 'Support', gradient: 'from-orange-500 to-red-500' }
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.to}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + index * 0.05 }}
-                  >
-                    <Link
-                      to={createPageUrl(item.to)}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <motion.div
-                        whileHover={{ x: 4, scale: 1.01 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`relative flex items-center justify-between p-5 rounded-2xl transition-all duration-200 overflow-hidden group min-h-[72px] ${
-                          item.highlight
-                            ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/40 shadow-lg'
-                            : 'bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5'
-                        }`}
-                      >
-                        {/* Hover Glow */}
+                      {/* User Card */}
+                      {user && (
                         <motion.div
-                          className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-200`}
-                        />
-
-                        <div className="relative flex items-center gap-4">
-                          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-200`}>
-                            <item.icon className="w-6 h-6 text-white" />
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-5 rounded-3xl relative overflow-hidden"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.1))',
+                            border: '1px solid rgba(139,92,246,0.2)'
+                          }}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl">
+                              <User className="w-7 h-7 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-black text-white text-lg truncate">{user.full_name}</p>
+                              <p className="text-sm text-white/50 truncate">{user.email}</p>
+                            </div>
+                            {user.is_vip && (
+                              <div className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 shadow-lg">
+                                <span className="text-xs font-black text-black">VIP</span>
+                              </div>
+                            )}
                           </div>
-                          <span className={`font-black text-lg ${item.highlight ? 'text-yellow-400' : 'text-white'}`}>
-                            {item.label}
-                          </span>
-                        </div>
+                        </motion.div>
+                      )}
 
-                        {item.badge > 0 && (
-                          <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: 'spring', bounce: 0.5 }}
-                            className={`relative w-9 h-9 bg-gradient-to-br ${item.gradient} text-white text-sm font-black rounded-full flex items-center justify-center shadow-2xl`}
+                      {/* Quick Stats */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <Link to={createPageUrl('Cart')} onClick={() => setIsMenuOpen(false)}>
+                          <motion.div
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="p-4 rounded-2xl text-center"
+                            style={{
+                              background: 'rgba(245,158,11,0.1)',
+                              border: '1px solid rgba(245,158,11,0.2)'
+                            }}
                           >
-                            {item.badge}
-                          </motion.span>
-                        )}
-                      </motion.div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </nav>
-
-              {/* Categories Only Toggle */}
-              {isShopPage && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="px-4 pb-4"
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={toggleCategoriesOnly}
-                    className="w-full p-5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/10 rounded-2xl transition-all duration-200 flex items-center justify-between min-h-[64px]"
-                  >
-                    <div>
-                      <span className="font-black text-white text-sm block mb-0.5">Nur Kategorien anzeigen</span>
-                      <span className="text-xs text-zinc-500 font-semibold">Schneller Kategorie-Zugriff</span>
-                    </div>
-                    <div className={`relative w-14 h-7 rounded-full transition-all duration-300 ${categoriesOnly ? 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg shadow-purple-500/30' : 'bg-zinc-700'}`}>
-                      <motion.div
-                        animate={{ x: categoriesOnly ? 28 : 2 }}
-                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                        className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg"
-                      />
-                    </div>
-                  </motion.button>
-                </motion.div>
-              )}
-
-              {/* Logout */}
-              {user && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  className="p-4 mt-4 border-t border-white/10"
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.01, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => base44.auth.logout()}
-                    className="w-full p-5 min-h-[64px] bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 rounded-2xl font-black text-red-400 text-base transition-all duration-200 shadow-lg hover:shadow-red-500/20"
-                  >
-                    Abmelden
-                  </motion.button>
-                </motion.div>
-              )}
-                </div>
-              )}
-
-              {/* Quick Action Footer (nur im Menu Mode auf Mobile) */}
-              {drawerMode === 'menu' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="md:hidden sticky bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent backdrop-blur-xl border-t border-white/10"
-                >
-                  <div className="flex gap-2">
-                    <Link to={createPageUrl('Cart')} className="flex-1" onClick={() => setIsMenuOpen(false)}>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-black text-white flex items-center justify-center gap-2 shadow-lg"
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                        Warenkorb
-                        {cartCount > 0 && (
-                          <span className="bg-white text-purple-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-black">
-                            {cartCount}
-                          </span>
-                        )}
-                      </motion.button>
-                    </Link>
-                    <Link to={createPageUrl('Wishlist')} onClick={() => setIsMenuOpen(false)}>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="h-14 w-14 bg-zinc-900/60 hover:bg-zinc-800/80 border border-white/10 rounded-2xl flex items-center justify-center transition-all relative"
-                      >
-                        <Heart className="w-5 h-5 text-pink-400" />
-                        {wishlistCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-pink-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-black">
-                            {wishlistCount}
-                          </span>
-                        )}
-                      </motion.button>
-                    </Link>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* CATEGORIES MODE */}
-              {drawerMode === 'categories' && (
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  {/* Search Bar */}
-                  {!selectedCategory && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="px-4 py-3 border-b border-white/10"
-                    >
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Kategorie suchen..."
-                          className="w-full h-12 pl-12 pr-4 rounded-xl bg-zinc-900/60 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-bold text-sm"
-                          autoComplete="off"
-                        />
-                        <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                        {searchQuery && (
-                          <button
-                            onClick={() => setSearchQuery('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-zinc-700 hover:bg-zinc-600 flex items-center justify-center transition-colors"
-                            aria-label="Suche löschen"
+                            <ShoppingCart className="w-6 h-6 text-amber-400 mx-auto mb-2" />
+                            <p className="text-2xl font-black text-white">{cartCount}</p>
+                            <p className="text-xs text-white/50 font-bold">Im Warenkorb</p>
+                          </motion.div>
+                        </Link>
+                        <Link to={createPageUrl('Wishlist')} onClick={() => setIsMenuOpen(false)}>
+                          <motion.div
+                            whileHover={{ scale: 1.02, y: -2 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="p-4 rounded-2xl text-center"
+                            style={{
+                              background: 'rgba(236,72,153,0.1)',
+                              border: '1px solid rgba(236,72,153,0.2)'
+                            }}
                           >
-                            <X className="w-4 h-4 text-white" />
-                          </button>
-                        )}
+                            <Heart className="w-6 h-6 text-pink-400 mx-auto mb-2" />
+                            <p className="text-2xl font-black text-white">{wishlistCount}</p>
+                            <p className="text-xs text-white/50 font-bold">Favoriten</p>
+                          </motion.div>
+                        </Link>
                       </div>
-                    </motion.div>
-                  )}
 
-                  <AnimatePresence mode="wait">
-                    {!selectedCategory ? (
-                      /* Main Categories List - Mobile & Desktop */
-                      <motion.div
-                        key="main"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.18 }}
-                        className="flex-1 px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar"
-                      >
-                        {filteredCategories.length > 0 ? (
-                          filteredCategories.map((cat, index) => (
-                          <motion.button
-                            key={cat.id}
+                      {/* Navigation Items */}
+                      <div className="space-y-2 pt-2">
+                        {[
+                          { icon: Home, label: 'Home', to: 'Home', color: 'blue' },
+                          { icon: Package, label: 'Alle Produkte', to: 'Products', color: 'purple' },
+                          { icon: User, label: 'Mein Profil', to: 'Profile', color: 'indigo' },
+                          { icon: MessageCircle, label: 'Support', to: 'Support', color: 'cyan' },
+                          ...(user?.role === 'admin' ? [{ icon: Crown, label: 'Admin Dashboard', to: 'Admin', color: 'red' }] : []),
+                        ].map((item, index) => (
+                          <motion.div
+                            key={item.to}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.04, duration: 0.2 }}
-                            whileHover={{ x: 4, scale: 1.01 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => cat.children.length > 0 ? handleCategoryClick(cat) : handleSubcategoryClick(cat.id, cat.label)}
-                            className="w-full min-h-[56px] p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-2xl transition-all duration-200 flex items-center justify-between group relative overflow-hidden"
-                            aria-label={`${cat.label} ${cat.children.length > 0 ? 'öffnen' : 'anzeigen'}`}
+                            transition={{ delay: index * 0.05 }}
                           >
-                            {/* Gradient Glow */}
-                            <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-
-                            <div className="flex items-center gap-4 relative z-10">
-                              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.gradient} bg-opacity-20 flex items-center justify-center text-2xl shadow-lg`}>
-                                {cat.icon}
-                              </div>
-                              <div className="text-left">
-                                <span className="font-black text-white text-base block">{cat.label}</span>
-                                {cat.children.length > 0 && (
-                                  <span className="text-xs text-zinc-500 font-bold">{cat.children.length} Kategorien</span>
-                                )}
-                              </div>
-                            </div>
-                            {cat.children.length > 0 && (
-                              <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors duration-200 relative z-10" />
-                            )}
-                          </motion.button>
-                              ))
-                              ) : (
+                            <Link to={createPageUrl(item.to)} onClick={() => setIsMenuOpen(false)}>
                               <motion.div
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="flex flex-col items-center justify-center py-16 px-4"
+                                whileHover={{ x: 4 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center gap-4 p-4 rounded-2xl transition-all group"
+                                style={{
+                                  background: 'rgba(255,255,255,0.03)',
+                                  border: '1px solid rgba(255,255,255,0.05)'
+                                }}
                               >
-                              <div className="w-20 h-20 rounded-2xl bg-zinc-900/60 border border-white/10 flex items-center justify-center mb-4">
-                              <Package className="w-10 h-10 text-zinc-600" />
-                              </div>
-                              <p className="text-zinc-400 text-sm font-bold text-center">
-                              Keine Kategorien gefunden
-                              </p>
-                              <button
-                              onClick={() => setSearchQuery('')}
-                              className="mt-4 px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-400 text-xs font-black transition-all"
-                              >
-                              Suche zurücksetzen
-                              </button>
-                              </motion.div>
-                              )}
-                              </motion.div>
-                    ) : (
-                      /* Subcategories View - Mobile: Drilldown, Desktop: 2-Column */
-                      <motion.div
-                        key="sub"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.18 }}
-                        className="flex flex-col lg:flex-row h-full"
-                      >
-                        {/* Desktop: Left Column - Categories */}
-                        <div className="hidden lg:block lg:w-1/3 border-r border-white/10 overflow-y-auto custom-scrollbar">
-                          <div className="p-4 space-y-2">
-                            {categories.map((cat) => (
-                              <button
-                                key={cat.id}
-                                onClick={() => cat.children.length > 0 && handleCategoryClick(cat)}
-                                className={`w-full min-h-[48px] p-3 rounded-xl transition-all duration-200 flex items-center justify-between ${
-                                  selectedCategory?.id === cat.id
-                                    ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-500/50'
-                                    : 'bg-zinc-900/30 hover:bg-zinc-800/50 border border-white/5'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <span className="text-xl">{cat.icon}</span>
-                                  <span className="font-bold text-white text-sm">{cat.label}</span>
+                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-${item.color}-500/20 to-${item.color}-600/20 flex items-center justify-center`}>
+                                  <item.icon className={`w-5 h-5 text-${item.color}-400`} />
                                 </div>
-                                {cat.children.length > 0 && <ChevronRight className="w-4 h-4 text-zinc-500" />}
-                              </button>
-                            ))}
+                                <span className="font-bold text-white/80 group-hover:text-white transition-colors flex-1">
+                                  {item.label}
+                                </span>
+                                <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white/60 transition-colors" />
+                              </motion.div>
+                            </Link>
+                          </motion.div>
+                        ))}
+
+                        {/* VIP CTA */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <Link to={createPageUrl('VIP')} onClick={() => setIsMenuOpen(false)}>
+                            <motion.div
+                              whileHover={{ scale: 1.02, y: -2 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="p-5 rounded-2xl relative overflow-hidden group"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1))',
+                                border: '1px solid rgba(245,158,11,0.3)'
+                              }}
+                            >
+                              <motion.div
+                                animate={{ rotate: [0, 5, -5, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                                className="absolute top-4 right-4 text-3xl"
+                              >
+                                👑
+                              </motion.div>
+                              <Crown className="w-8 h-8 text-amber-400 mb-3" />
+                              <h3 className="font-black text-white text-lg mb-1">VIP werden</h3>
+                              <p className="text-sm text-white/50">Exklusive Vorteile sichern</p>
+                            </motion.div>
+                          </Link>
+                        </motion.div>
+                      </div>
+
+                      {/* Delivery Info */}
+                      <div className="mt-4 p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                            <MapPin className="w-5 h-5 text-red-400" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-white/40 font-bold">Versand aus</p>
+                            <p className="font-bold text-white">🇨🇳 China</p>
                           </div>
                         </div>
-
-                        {/* Mobile: Back Button + Title */}
-                        <div className="lg:hidden px-4 py-3 border-b border-white/10">
-                          <button
-                            onClick={() => setSelectedCategory(null)}
-                            className="flex items-center gap-2 min-h-[44px] text-white hover:text-purple-400 transition-colors"
-                            aria-label="Zurück zu allen Kategorien"
-                          >
-                            <ChevronLeft className="w-5 h-5" />
-                            <span className="font-black text-sm">Zurück</span>
-                          </button>
-                          <h3 className="text-xl font-black text-white mt-2">{selectedCategory.label}</h3>
-                        </div>
-
-                        {/* Subcategories Column */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar">
-                          {/* Desktop: Title */}
-                          <div className="hidden lg:block px-4 py-3 border-b border-white/10">
-                            <h3 className="text-lg font-black text-white">{selectedCategory.label}</h3>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                            <Clock className="w-5 h-5 text-blue-400" />
                           </div>
+                          <div>
+                            <p className="text-xs text-white/40 font-bold">Lieferzeit</p>
+                            <p className="font-bold text-white">8-17 Werktage</p>
+                          </div>
+                        </div>
+                      </div>
 
-                          <div className="px-4 py-4 space-y-2">
-                            {selectedCategory.children.map((sub, index) => (
-                              typeof sub === 'string' ? (
+                      {/* Logout */}
+                      {user && (
+                        <motion.button
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          onClick={() => base44.auth.logout()}
+                          className="w-full p-4 mt-4 rounded-2xl font-bold text-red-400 transition-all"
+                          style={{
+                            background: 'rgba(239,68,68,0.1)',
+                            border: '1px solid rgba(239,68,68,0.2)'
+                          }}
+                        >
+                          Abmelden
+                        </motion.button>
+                      )}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="categories"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="h-full flex flex-col"
+                    >
+                      {/* Search */}
+                      {!selectedCategory && (
+                        <div className="p-4 border-b border-white/5">
+                          <div className="relative">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                            <input
+                              type="text"
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="Kategorie suchen..."
+                              className="w-full h-12 pl-12 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500/50 font-medium"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Categories List */}
+                      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                        <AnimatePresence mode="wait">
+                          {!selectedCategory ? (
+                            <motion.div
+                              key="main"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="space-y-2"
+                            >
+                              {filteredCategories.map((cat, index) => (
                                 <motion.button
-                                  key={sub}
-                                  initial={{ opacity: 0, y: 8 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: index * 0.03, duration: 0.18 }}
+                                  key={cat.id}
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: index * 0.03 }}
                                   whileHover={{ x: 4, scale: 1.01 }}
                                   whileTap={{ scale: 0.98 }}
-                                  onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
-                                  className="w-full min-h-[48px] p-3.5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all duration-200 text-left"
-                                  aria-label={`${sub} anzeigen`}
+                                  onClick={() => handleCategoryClick(cat)}
+                                  className="w-full p-4 rounded-2xl flex items-center justify-between group transition-all"
+                                  style={{
+                                    background: 'rgba(255,255,255,0.03)',
+                                    border: '1px solid rgba(255,255,255,0.05)'
+                                  }}
                                 >
-                                  <span className="font-bold text-white text-sm">{sub}</span>
-                                </motion.button>
-                              ) : (
-                                <div key={sub.id}>
-                                  <div className="text-xs font-black text-zinc-500 uppercase tracking-wider mb-2 mt-4">
-                                    {sub.label}
+                                  <div className="flex items-center gap-4">
+                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.gradient} bg-opacity-20 flex items-center justify-center text-2xl`}>
+                                      {cat.icon}
+                                    </div>
+                                    <div className="text-left">
+                                      <p className="font-black text-white">{cat.label}</p>
+                                      {cat.children.length > 0 && (
+                                        <p className="text-xs text-white/40 font-medium">{cat.children.length} Unterkategorien</p>
+                                      )}
+                                    </div>
                                   </div>
-                                  {sub.children.map((item, i) => (
-                                    <motion.button
-                                      key={item}
-                                      initial={{ opacity: 0, y: 8 }}
-                                      animate={{ opacity: 1, y: 0 }}
-                                      transition={{ delay: (index + i) * 0.03, duration: 0.18 }}
-                                      whileHover={{ x: 4, scale: 1.01 }}
-                                      whileTap={{ scale: 0.98 }}
-                                      onClick={() => handleSubcategoryClick(selectedCategory.id, item)}
-                                      className="w-full min-h-[48px] p-3.5 mb-2 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all duration-200 text-left"
-                                      aria-label={`${item} anzeigen`}
-                                    >
-                                      <span className="font-bold text-white text-sm">{item}</span>
-                                    </motion.button>
-                                  ))}
+                                  <ChevronRight className="w-5 h-5 text-white/30 group-hover:text-white/60 transition-colors" />
+                                </motion.button>
+                              ))}
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              key="sub"
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: -20 }}
+                              className="space-y-3"
+                            >
+                              {/* Back Button */}
+                              <motion.button
+                                whileHover={{ x: -4 }}
+                                onClick={() => setSelectedCategory(null)}
+                                className="flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-4"
+                              >
+                                <ChevronLeft className="w-5 h-5" />
+                                <span className="font-bold">Zurück</span>
+                              </motion.button>
+
+                              {/* Category Title */}
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${selectedCategory.gradient} flex items-center justify-center text-3xl`}>
+                                  {selectedCategory.icon}
                                 </div>
-                              )
-                            ))}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
+                                <h3 className="text-2xl font-black text-white">{selectedCategory.label}</h3>
+                              </div>
+
+                              {/* Subcategories */}
+                              {selectedCategory.children.map((sub, index) => (
+                                typeof sub === 'string' ? (
+                                  <motion.button
+                                    key={sub}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.03 }}
+                                    whileHover={{ x: 4 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
+                                    className="w-full p-4 rounded-xl text-left transition-all"
+                                    style={{
+                                      background: 'rgba(255,255,255,0.03)',
+                                      border: '1px solid rgba(255,255,255,0.05)'
+                                    }}
+                                  >
+                                    <span className="font-bold text-white/80">{sub}</span>
+                                  </motion.button>
+                                ) : (
+                                  <div key={sub.id} className="space-y-2">
+                                    <p className="text-xs font-black text-white/40 uppercase tracking-wider pt-3">
+                                      {sub.label}
+                                    </p>
+                                    {sub.children.map((item, i) => (
+                                      <motion.button
+                                        key={item}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: (index + i) * 0.02 }}
+                                        whileHover={{ x: 4 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => handleSubcategoryClick(selectedCategory.id, item)}
+                                        className="w-full p-3.5 rounded-xl text-left transition-all"
+                                        style={{
+                                          background: 'rgba(255,255,255,0.02)',
+                                          border: '1px solid rgba(255,255,255,0.04)'
+                                        }}
+                                      >
+                                        <span className="font-medium text-white/70">{item}</span>
+                                      </motion.button>
+                                    ))}
+                                  </div>
+                                )
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Bottom CTA Bar */}
+              <div className="p-4 border-t border-white/5" style={{ background: 'rgba(0,0,0,0.5)' }}>
+                <Link to={createPageUrl('Products')} onClick={() => setIsMenuOpen(false)}>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full h-14 rounded-2xl font-black text-white flex items-center justify-center gap-3 shadow-xl"
+                    style={{
+                      background: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)',
+                      boxShadow: '0 8px 30px rgba(139,92,246,0.4)'
+                    }}
+                  >
+                    <Package className="w-5 h-5" />
+                    Alle Produkte entdecken
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.button>
+                </Link>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
       {/* Spacer */}
-      <div className="h-16 md:h-20" />
+      <div className={`transition-all duration-500 ${isScrolled ? 'h-20' : 'h-24'}`} />
     </>
   );
 }
