@@ -399,30 +399,30 @@ export default function PremiumHeader() {
                 <>
                   {/* Delivery Info Bar */}
                   <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="m-4 p-4 rounded-2xl bg-gradient-to-br from-zinc-900/80 to-zinc-800/80 border border-white/10 backdrop-blur-xl"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-red-400" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-xs text-zinc-400 font-semibold">Versand aus</div>
-                    <div className="text-sm font-black text-white">🇨🇳 China</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-blue-400" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-xs text-zinc-400 font-semibold">Lieferzeit</div>
-                    <div className="text-sm font-black text-white">8-17 Tage</div>
-                  </div>
-                </div>
-              </motion.div>
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="m-4 p-5 rounded-3xl bg-gradient-to-br from-zinc-900/90 to-zinc-800/90 border border-white/10 backdrop-blur-xl shadow-2xl"
+                  >
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <MapPin className="w-7 h-7 text-red-400" />
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <div className="text-xs text-zinc-400 font-bold uppercase tracking-wide mb-0.5">Versand aus</div>
+                        <div className="text-base font-black text-white">🇨🇳 China</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <Clock className="w-7 h-7 text-blue-400" />
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <div className="text-xs text-zinc-400 font-bold uppercase tracking-wide mb-0.5">Lieferzeit</div>
+                        <div className="text-base font-black text-white">8-17 Tage</div>
+                      </div>
+                    </div>
+                  </motion.div>
 
               {/* User Info */}
               {user && (
@@ -430,28 +430,30 @@ export default function PremiumHeader() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="mx-4 mb-4 p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-xl"
+                  className="mx-4 mb-4 p-5 rounded-3xl bg-gradient-to-br from-purple-500/15 to-pink-500/15 border border-purple-500/25 backdrop-blur-xl shadow-2xl"
                 >
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-4 mb-3">
                     <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-xl"
+                      whileHover={{ scale: 1.08, rotate: 5 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-2xl"
                     >
-                      <User className="w-7 h-7 text-white" />
+                      <User className="w-8 h-8 text-white" />
                     </motion.div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-black text-white truncate">{user.full_name}</div>
-                      <div className="text-xs text-zinc-400 truncate">{user.email}</div>
+                      <div className="font-black text-white text-lg truncate">{user.full_name}</div>
+                      <div className="text-xs text-zinc-400 font-semibold truncate">{user.email}</div>
                     </div>
                   </div>
                   {user.is_vip && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 shadow-lg"
+                      transition={{ type: 'spring', bounce: 0.5 }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 shadow-xl"
                     >
                       <Crown className="w-4 h-4 text-zinc-900" />
-                      <span className="text-xs font-black text-zinc-900">VIP MEMBER</span>
+                      <span className="text-xs font-black text-zinc-900 tracking-wide">VIP MEMBER</span>
                     </motion.div>
                   )}
                 </motion.div>
@@ -480,33 +482,34 @@ export default function PremiumHeader() {
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <motion.div
-                        whileHover={{ x: 6, scale: 1.02 }}
+                        whileHover={{ x: 4, scale: 1.01 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`relative flex items-center justify-between p-4 rounded-2xl transition-all overflow-hidden group ${
+                        className={`relative flex items-center justify-between p-5 rounded-2xl transition-all duration-200 overflow-hidden group min-h-[72px] ${
                           item.highlight
-                            ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/40'
+                            ? 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500/40 shadow-lg'
                             : 'bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5'
                         }`}
                       >
                         {/* Hover Glow */}
                         <motion.div
-                          className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity`}
+                          className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-200`}
                         />
-                        
+
                         <div className="relative flex items-center gap-4">
-                          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
-                            <item.icon className="w-5 h-5 text-white" />
+                          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-200`}>
+                            <item.icon className="w-6 h-6 text-white" />
                           </div>
-                          <span className={`font-black text-base ${item.highlight ? 'text-yellow-400' : 'text-white'}`}>
+                          <span className={`font-black text-lg ${item.highlight ? 'text-yellow-400' : 'text-white'}`}>
                             {item.label}
                           </span>
                         </div>
-                        
+
                         {item.badge > 0 && (
                           <motion.span
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className={`relative w-7 h-7 bg-gradient-to-br ${item.gradient} text-white text-xs font-black rounded-full flex items-center justify-center shadow-xl`}
+                            transition={{ type: 'spring', bounce: 0.5 }}
+                            className={`relative w-9 h-9 bg-gradient-to-br ${item.gradient} text-white text-sm font-black rounded-full flex items-center justify-center shadow-2xl`}
                           >
                             {item.badge}
                           </motion.span>
@@ -520,38 +523,45 @@ export default function PremiumHeader() {
               {/* Categories Only Toggle */}
               {isShopPage && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
                   className="px-4 pb-4"
                 >
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     onClick={toggleCategoriesOnly}
-                    className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/10 rounded-2xl transition-all flex items-center justify-between"
+                    className="w-full p-5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/10 rounded-2xl transition-all duration-200 flex items-center justify-between min-h-[64px]"
                   >
-                    <span className="font-black text-white text-sm">Nur Kategorien anzeigen</span>
-                    <div className={`w-12 h-6 rounded-full transition-all ${categoriesOnly ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-zinc-700'}`}>
+                    <div>
+                      <span className="font-black text-white text-sm block mb-0.5">Nur Kategorien anzeigen</span>
+                      <span className="text-xs text-zinc-500 font-semibold">Schneller Kategorie-Zugriff</span>
+                    </div>
+                    <div className={`relative w-14 h-7 rounded-full transition-all duration-300 ${categoriesOnly ? 'bg-gradient-to-r from-purple-500 to-pink-500 shadow-lg shadow-purple-500/30' : 'bg-zinc-700'}`}>
                       <motion.div
-                        animate={{ x: categoriesOnly ? 24 : 2 }}
-                        className="w-5 h-5 mt-0.5 bg-white rounded-full shadow-lg"
+                        animate={{ x: categoriesOnly ? 28 : 2 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-lg"
                       />
                     </div>
-                  </button>
+                  </motion.button>
                 </motion.div>
               )}
 
               {/* Logout */}
               {user && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="p-4 mt-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="p-4 mt-4 border-t border-white/10"
                 >
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
+                    whileHover={{ scale: 1.01, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => base44.auth.logout()}
-                    className="w-full p-4 bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 rounded-2xl font-black text-red-400 transition-all"
+                    className="w-full p-5 min-h-[64px] bg-gradient-to-r from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30 border border-red-500/30 rounded-2xl font-black text-red-400 text-base transition-all duration-200 shadow-lg hover:shadow-red-500/20"
                   >
                     Abmelden
                   </motion.button>
