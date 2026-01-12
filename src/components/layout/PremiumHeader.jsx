@@ -61,7 +61,7 @@ export default function PremiumHeader() {
     };
   }, [isMenuOpen, categoriesOnly]);
 
-  // Shop categories always available
+  const isShopPage = location.pathname.includes('Product') || location.pathname.includes('Shop');
 
   const categories = [
     { 
