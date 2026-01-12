@@ -57,24 +57,25 @@ export default function PremiumHeader() {
         whileTap={{ scale: 0.95 }}
         className="relative rounded-xl flex items-center justify-center smooth-transition focus-ring"
         style={{
-          width: '42px',
-          height: '42px',
-          background: 'var(--surface2)',
-          border: '1px solid var(--border)',
-          backdropFilter: 'blur(12px)'
+          width: '44px',
+          height: '44px',
+          background: 'rgba(255, 255, 255, 0.08)',
+          border: '1px solid rgba(255, 255, 255, 0.10)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)'
         }}
         aria-label={label}
       >
-        <Icon className="w-5 h-5" style={{ color: 'var(--text)' }} />
+        <Icon className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.92)' }} />
         {count > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 text-xs font-black rounded-full flex items-center justify-center"
+            className="absolute -top-1.5 -right-1.5 min-w-[1.25rem] h-5 px-1.5 text-[0.7rem] font-black rounded-full flex items-center justify-center"
             style={{
-              background: 'var(--gold)',
+              background: '#D6B25E',
               color: '#000',
-              boxShadow: '0 2px 8px rgba(var(--gold-rgb), 0.4)'
+              boxShadow: '0 2px 8px rgba(214, 178, 94, 0.4)'
             }}
           >
             {count}
@@ -94,11 +95,11 @@ export default function PremiumHeader() {
           isScrolled ? 'h-16' : 'h-20'
         }`}
         style={{
-          background: 'linear-gradient(180deg, rgba(8, 8, 12, 0.65) 0%, rgba(8, 8, 12, 0.55) 100%)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderBottom: '1px solid var(--border)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+          background: 'linear-gradient(180deg, rgba(8, 8, 12, 0.60) 0%, rgba(8, 8, 12, 0.55) 100%)',
+          backdropFilter: 'blur(14px)',
+          WebkitBackdropFilter: 'blur(14px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.10)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
@@ -111,11 +112,12 @@ export default function PremiumHeader() {
                 className="flex items-center gap-2 focus-ring rounded-2xl"
               >
                 <motion.div
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1.5 sm:p-2"
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center p-2"
                   style={{
-                    background: 'var(--surface2)',
-                    border: '1px solid rgba(var(--gold-rgb), 0.35)',
-                    boxShadow: '0 0 16px rgba(var(--gold-rgb), 0.15)'
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(214, 178, 94, 0.35)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)'
                   }}
                 >
                   <img 
@@ -124,7 +126,7 @@ export default function PremiumHeader() {
                     className="w-full h-full object-contain"
                   />
                 </motion.div>
-                <span className="hidden sm:block text-base md:text-lg font-black text-white tracking-tight">
+                <span className="hidden sm:block text-base md:text-lg font-black tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
                   NEBULA
                 </span>
               </motion.div>
@@ -197,15 +199,16 @@ export default function PremiumHeader() {
                 onClick={() => setIsMenuOpen(true)}
                 className="rounded-xl flex items-center justify-center md:hidden focus-ring"
                 style={{
-                  width: '42px',
-                  height: '42px',
-                  background: 'var(--surface2)',
-                  border: '1px solid var(--border)',
-                  backdropFilter: 'blur(12px)'
+                  width: '44px',
+                  height: '44px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.10)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)'
                 }}
                 aria-label="Menu öffnen"
               >
-                <Menu className="w-5 h-5" style={{ color: 'var(--text)' }} />
+                <Menu className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.92)' }} />
               </motion.button>
             </div>
           </div>
