@@ -125,11 +125,11 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, onBack }) {
         <>
           {/* Overlay */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-[70]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[60]"
           />
 
           {/* Premium Sheet Drawer */}
@@ -257,8 +257,37 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, onBack }) {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="p-4 space-y-3"
+                    className="p-5 space-y-4"
                   >
+                    {/* Premium Hero Section */}
+                    <div className="mb-6 text-center px-2">
+                      <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-4"
+                        style={{
+                          background: 'rgba(214, 178, 94, 0.12)',
+                          border: '1px solid rgba(214, 178, 94, 0.3)'
+                        }}
+                      >
+                        <motion.span
+                          animate={{ rotate: [0, 360] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                          className="text-lg"
+                        >
+                          ✨
+                        </motion.span>
+                        <span className="font-black text-sm uppercase tracking-wider text-gold">UNSERE WELTEN</span>
+                      </motion.div>
+                      
+                      <h3 className="text-3xl md:text-4xl font-black mb-3 tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+                        Kategorien
+                      </h3>
+                      <p className="text-base md:text-lg font-semibold leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.70)' }}>
+                        Tauche ein in unsere Premium-Kollektionen
+                      </p>
+                    </div>
                     {filteredCategories.map((cat, index) => (
                       <motion.button
                         key={cat.id}
@@ -268,31 +297,34 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, onBack }) {
                         whileHover={{ x: 6, scale: 1.02 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => setSelectedCategory(cat)}
-                        className="w-full min-h-[92px] p-6 rounded-2xl transition-all flex items-center justify-between group relative overflow-hidden"
+                        className="w-full min-h-[100px] p-6 rounded-2xl transition-all flex items-center justify-between group relative overflow-hidden"
                         style={{
-                          background: 'rgba(255, 255, 255, 0.06)',
-                          backdropFilter: 'blur(20px)',
-                          border: '1px solid rgba(214, 178, 94, 0.2)',
-                          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)'
+                          background: 'rgba(255, 255, 255, 0.07)',
+                          backdropFilter: 'blur(24px)',
+                          border: '1px solid rgba(214, 178, 94, 0.25)',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
                         }}
                       >
-                        <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} opacity-0 group-hover:opacity-[0.12] transition-opacity`} />
+                        <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} opacity-0 group-hover:opacity-[0.15] transition-all duration-300`} />
                         
                         <div className="flex items-center gap-5 relative z-10">
-                          <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-3xl shadow-xl`}>
+                          <motion.div 
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            className={`w-18 h-18 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-4xl shadow-2xl`}
+                          >
                             <span className="drop-shadow-lg">{cat.icon}</span>
-                          </div>
+                          </motion.div>
                           <div className="text-left">
-                            <div className="font-black text-xl md:text-2xl mb-1.5 group-hover:text-gold2 transition-colors tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
+                            <div className="font-black text-xl md:text-2xl mb-1.5 group-hover:text-gold2 transition-colors tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
                               {cat.label}
                             </div>
-                            <div className="text-sm md:text-base font-bold" style={{ color: 'rgba(214, 178, 94, 0.85)' }}>
+                            <div className="text-sm md:text-base font-bold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
                               {cat.children.length} Kategorien
                             </div>
                           </div>
                         </div>
 
-                        <ChevronRight className="w-6 h-6 text-gold group-hover:text-gold2 transition-colors relative z-10" strokeWidth={2.5} />
+                        <ChevronRight className="w-7 h-7 text-gold group-hover:text-gold2 transition-colors relative z-10" strokeWidth={2.5} />
                       </motion.button>
                     ))}
                   </motion.div>
@@ -335,14 +367,15 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, onBack }) {
                             whileHover={{ x: 8, scale: 1.03 }}
                             whileTap={{ scale: 0.96 }}
                             onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
-                            className="w-full min-h-[64px] p-5 glass-panel-hover rounded-2xl text-left group"
+                            className="w-full min-h-[72px] p-5 rounded-xl text-left group relative overflow-hidden"
                             style={{
                               background: 'rgba(255, 255, 255, 0.06)',
-                              border: '1px solid rgba(214, 178, 94, 0.15)'
+                              backdropFilter: 'blur(16px)',
+                              border: '1px solid rgba(214, 178, 94, 0.2)'
                             }}
                           >
-                            <div className={`absolute inset-0 bg-gradient-to-r ${selectedCategory.gradient} opacity-0 group-hover:opacity-[0.15] transition-opacity rounded-2xl`} />
-                            <span className="relative font-black text-white text-lg group-hover:text-gold2 transition-colors">{sub}</span>
+                            <div className={`absolute inset-0 bg-gradient-to-r ${selectedCategory.gradient} opacity-0 group-hover:opacity-[0.15] transition-opacity`} />
+                            <span className="relative font-black text-lg md:text-xl group-hover:text-gold2 transition-colors" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>{sub}</span>
                           </motion.button>
                         ) : (
                           <div key={sub.id}>
