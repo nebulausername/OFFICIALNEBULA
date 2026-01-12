@@ -276,7 +276,12 @@ export default function ProductDetail() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative aspect-square bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl overflow-hidden border border-zinc-800 group"
+            className="relative aspect-square rounded-2xl overflow-hidden group"
+            style={{
+              background: 'linear-gradient(135deg, rgba(20,20,25,1), rgba(10,10,15,1))',
+              border: '1px solid rgba(214, 178, 94, 0.2)',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.5)'
+            }}
           >
             <AnimatePresence mode="wait">
               <motion.div
