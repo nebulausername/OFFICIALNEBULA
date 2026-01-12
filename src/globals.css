@@ -226,17 +226,26 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: hsl(var(--surface));
+    background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, hsl(var(--accent)), hsl(var(--accent2)));
+    background: linear-gradient(180deg, rgba(214, 178, 94, 0.4), rgba(214, 178, 94, 0.6));
     border-radius: 4px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, hsl(var(--accent-hover)), hsl(var(--accent2)));
+    background: linear-gradient(180deg, rgba(214, 178, 94, 0.6), rgba(214, 178, 94, 0.8));
+  }
+
+  /* Hide Scrollbar (for horizontal chips) */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 

@@ -131,41 +131,75 @@ export default function PremiumHeader() {
           <div className="flex items-center justify-between h-full">
             {/* Logo + Shop Icon */}
             <div className="flex items-center gap-2 md:gap-3">
-              <Link to={createPageUrl('Home')}>
+              {/* Brand Logo - Opens Categories */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setIsShopDrawerOpen(true);
+                }}
+                className="flex items-center gap-2 focus-ring rounded-2xl"
+              >
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 focus-ring rounded-2xl"
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(var(--gold-rgb), 0.2)',
+                      '0 0 30px rgba(var(--gold-rgb), 0.3)',
+                      '0 0 20px rgba(var(--gold-rgb), 0.2)',
+                    ]
+                  }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center p-2 gold-border"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)'
+                  }}
                 >
-                  <motion.div
-                    animate={{
-                      boxShadow: [
-                        '0 0 20px rgba(var(--gold-rgb), 0.2)',
-                        '0 0 30px rgba(var(--gold-rgb), 0.3)',
-                        '0 0 20px rgba(var(--gold-rgb), 0.2)',
-                      ]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center p-2 gold-border"
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)'
-                    }}
-                  >
-                    <img 
-                      src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
-                      alt="Nebula Supply"
-                      className="w-full h-full object-contain drop-shadow-lg"
-                    />
-                  </motion.div>
-                  <span className="hidden sm:block text-base md:text-lg font-black tracking-tight bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
-                    NEBULA
-                  </span>
+                  <img 
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                    alt="Nebula Supply"
+                    className="w-full h-full object-contain drop-shadow-lg"
+                  />
                 </motion.div>
-              </Link>
+                <span className="hidden sm:block text-base md:text-lg font-black tracking-tight bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
+                  NEBULA
+                </span>
+              </motion.button>
 
-
+              {/* Premium Shop Icon */}
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => {
+                  setIsShopDrawerOpen(true);
+                }}
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center focus-ring"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(214, 178, 94, 0.3)'
+                }}
+                title="Shop durchsuchen"
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="rgba(255, 255, 255, 0.92)" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+              </motion.button>
             </div>
 
             {/* Desktop Nav */}
