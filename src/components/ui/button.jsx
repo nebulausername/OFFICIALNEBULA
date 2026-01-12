@@ -5,20 +5,20 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow hover:from-purple-500 hover:to-pink-500",
+          "bg-gradient-to-br from-[#D6B25E] to-[#F2D27C] text-black shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]",
         destructive:
           "bg-red-600 text-white shadow-sm hover:bg-red-500",
         outline:
-          "border border-zinc-700 bg-transparent text-white shadow-sm hover:bg-zinc-800 hover:text-white",
+          "border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] text-white shadow-sm hover:bg-[rgba(255,255,255,0.09)] backdrop-blur-xl",
         secondary:
-          "bg-zinc-800 text-white shadow-sm hover:bg-zinc-700",
-        ghost: "hover:bg-zinc-800 hover:text-white text-zinc-300",
-        link: "text-purple-400 underline-offset-4 hover:underline",
+          "bg-[rgba(255,255,255,0.06)] text-white shadow-sm hover:bg-[rgba(255,255,255,0.09)] backdrop-blur-xl",
+        ghost: "hover:bg-[rgba(255,255,255,0.06)] hover:text-white text-[rgba(255,255,255,0.62)]",
+        link: "text-[#D6B25E] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",

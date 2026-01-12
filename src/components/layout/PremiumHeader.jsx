@@ -55,23 +55,26 @@ export default function PremiumHeader() {
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
-        className="relative w-10 h-10 rounded-xl flex items-center justify-center smooth-transition focus-ring"
+        className="relative rounded-xl flex items-center justify-center smooth-transition focus-ring"
         style={{
-          background: 'var(--panel)',
-          border: '1px solid var(--border)'
+          width: '42px',
+          height: '42px',
+          background: 'var(--surface2)',
+          border: '1px solid var(--border)',
+          backdropFilter: 'blur(12px)'
         }}
         aria-label={label}
       >
-        <Icon className="w-5 h-5 text-chrome-muted" />
+        <Icon className="w-5 h-5" style={{ color: 'var(--text)' }} />
         {count > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             className="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 text-xs font-black rounded-full flex items-center justify-center"
             style={{
-              background: 'linear-gradient(135deg, var(--nebula-glow), rgba(236, 72, 153, 0.4))',
-              color: 'white',
-              boxShadow: '0 0 12px var(--nebula-glow)'
+              background: 'var(--gold)',
+              color: '#000',
+              boxShadow: '0 2px 8px rgba(var(--gold-rgb), 0.4)'
             }}
           >
             {count}
@@ -87,15 +90,19 @@ export default function PremiumHeader() {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-2xl border-b shadow-2xl"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled ? 'h-16' : 'h-20'
+        }`}
         style={{
-          background: 'var(--panel)',
-          borderColor: 'var(--chrome-muted)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)'
+          background: 'linear-gradient(180deg, rgba(8, 8, 12, 0.65) 0%, rgba(8, 8, 12, 0.55) 100%)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--border)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex items-center justify-between h-full">
             {/* Logo */}
             <Link to={createPageUrl('Home')}>
               <motion.div
@@ -104,11 +111,11 @@ export default function PremiumHeader() {
                 className="flex items-center gap-2 focus-ring rounded-2xl"
               >
                 <motion.div
-                  className="w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center p-1.5 sm:p-2"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center p-1.5 sm:p-2"
                   style={{
-                    background: 'var(--panel2)',
-                    border: '1px solid var(--border)',
-                    filter: 'drop-shadow(0 0 12px var(--nebula-subtle))'
+                    background: 'var(--surface2)',
+                    border: '1px solid rgba(var(--gold-rgb), 0.35)',
+                    boxShadow: '0 0 16px rgba(var(--gold-rgb), 0.15)'
                   }}
                 >
                   <img 
@@ -117,7 +124,7 @@ export default function PremiumHeader() {
                     className="w-full h-full object-contain"
                   />
                 </motion.div>
-                <span className="hidden sm:block text-base md:text-lg font-black text-chrome tracking-tight">
+                <span className="hidden sm:block text-base md:text-lg font-black text-white tracking-tight">
                   NEBULA
                 </span>
               </motion.div>
@@ -131,14 +138,14 @@ export default function PremiumHeader() {
                 { label: 'Profil', to: 'Profile' }
               ].map(item => (
                 <Link key={item.to} to={createPageUrl(item.to)} className="relative group">
-                  <span className="text-sm font-bold text-chrome-muted group-hover:text-chrome transition-colors">
+                  <span className="text-sm font-bold text-muted group-hover:text-white transition-colors">
                     {item.label}
                   </span>
                   <motion.span
-                    className="absolute bottom-[-4px] left-0 h-0.5 bg-chrome opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute bottom-[-4px] left-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     initial={{ width: 0 }}
                     whileHover={{ width: '100%' }}
-                    style={{ boxShadow: '0 0 8px var(--chrome)' }}
+                    style={{ background: 'var(--gold)' }}
                   />
                 </Link>
               ))}
@@ -150,9 +157,9 @@ export default function PremiumHeader() {
                 <motion.div
                   animate={{ 
                     boxShadow: [
-                      '0 0 12px var(--vip-gold-glow)',
-                      '0 0 20px var(--vip-gold-glow)',
-                      '0 0 12px var(--vip-gold-glow)',
+                      '0 0 12px rgba(var(--gold-rgb), 0.3)',
+                      '0 0 20px rgba(var(--gold-rgb), 0.4)',
+                      '0 0 12px rgba(var(--gold-rgb), 0.3)',
                     ]
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
@@ -188,14 +195,17 @@ export default function PremiumHeader() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsMenuOpen(true)}
-                className="w-10 h-10 rounded-xl flex items-center justify-center md:hidden focus-ring"
+                className="rounded-xl flex items-center justify-center md:hidden focus-ring"
                 style={{
-                  background: 'var(--panel)',
-                  border: '1px solid var(--border)'
+                  width: '42px',
+                  height: '42px',
+                  background: 'var(--surface2)',
+                  border: '1px solid var(--border)',
+                  backdropFilter: 'blur(12px)'
                 }}
                 aria-label="Menu öffnen"
               >
-                <Menu className="w-5 h-5 text-chrome-muted" />
+                <Menu className="w-5 h-5" style={{ color: 'var(--text)' }} />
               </motion.button>
             </div>
           </div>
