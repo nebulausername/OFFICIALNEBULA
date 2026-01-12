@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PremiumHeader from './components/layout/PremiumHeader.jsx';
+import PremiumHeader from './components/layout/PremiumHeader';
 import { WishlistProvider } from './components/wishlist/WishlistContext';
 import { Star } from 'lucide-react';
 
@@ -47,39 +47,22 @@ export default function Layout({ children, currentPageName }) {
           {children}
         </main>
 
-      {/* Premium Footer */}
-                  <footer className="relative mt-24 overflow-hidden">
-                    {/* Gradient Top Border */}
-                    <div className="h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-
-                    <div className="relative py-12 px-4" style={{ background: 'linear-gradient(180deg, rgba(10,10,15,0.95) 0%, rgba(5,5,8,1) 100%)' }}>
-                      {/* Background Glow */}
-                      <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
-                      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl pointer-events-none" />
-
-                      <div className="max-w-7xl mx-auto relative z-10">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                          {/* Logo & Copyright */}
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center p-2" style={{ background: 'rgba(214,178,94,0.15)', border: '1px solid rgba(214,178,94,0.3)' }}>
-                              <Star className="w-5 h-5 text-amber-400" fill="currentColor" />
-                            </div>
-                            <div>
-                              <span className="text-sm font-bold text-white/80">© 2026 Nebula Supply</span>
-                              <p className="text-xs text-white/40">Premium Quality Guaranteed</p>
-                            </div>
-                          </div>
-
-                          {/* Links */}
-                          <div className="flex items-center gap-6">
-                            <a href="#" className="text-sm text-white/50 hover:text-white transition-colors font-medium">Impressum</a>
-                            <a href="#" className="text-sm text-white/50 hover:text-white transition-colors font-medium">Datenschutz</a>
-                            <a href="#" className="text-sm text-white/50 hover:text-white transition-colors font-medium">AGB</a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </footer>
+      {/* Footer */}
+      <footer className="bg-white border-t border-zinc-200 mt-20">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-2">
+              <Star className="w-4 h-4 text-zinc-400" fill="currentColor" />
+              <span className="text-sm text-zinc-600">© 2026 Nebula Supply. Premium Quality.</span>
+            </div>
+            <div className="flex space-x-6 text-sm">
+              <a href="#" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">Impressum</a>
+              <a href="#" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">Datenschutz</a>
+              <a href="#" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">AGB</a>
+            </div>
+          </div>
+        </div>
+      </footer>
       </div>
     </WishlistProvider>
   );

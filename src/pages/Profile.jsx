@@ -288,66 +288,31 @@ export default function Profile() {
                   <div className="absolute inset-0 bg-gradient-to-br from-purple-500/8 to-pink-500/8 opacity-0 group-hover:opacity-100 transition-opacity" />
                   
                   <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-5">
+                    <div className="flex items-start justify-between mb-4">
                       <motion.div 
-                        whileHover={{ rotate: [0, -10, 10, -5, 0], scale: 1.2 }}
-                        transition={{ duration: 0.5 }}
-                        className={`relative w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl group-hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] transition-all`}
-                        style={{
-                          background: `linear-gradient(135deg, ${item.color.includes('purple') ? '#a855f7' : item.color.includes('blue') ? '#3b82f6' : item.color.includes('pink') ? '#ec4899' : item.color.includes('green') ? '#10b981' : item.color.includes('yellow') ? '#f59e0b' : item.color.includes('red') ? '#ef4444' : '#a855f7'}, ${item.color.includes('purple') ? '#ec4899' : item.color.includes('blue') ? '#06b6d4' : item.color.includes('pink') ? '#f43f5e' : item.color.includes('green') ? '#059669' : item.color.includes('yellow') ? '#d97706' : item.color.includes('red') ? '#dc2626' : '#ec4899'})`
-                        }}
+                        whileHover={{ rotate: 360, scale: 1.15 }}
+                        transition={{ duration: 0.6 }}
+                        className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all`}
                       >
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                          className="absolute inset-0 rounded-3xl opacity-30"
-                          style={{
-                            background: 'conic-gradient(from 0deg, transparent, rgba(255,255,255,0.3), transparent)'
-                          }}
-                        />
-                        <Icon className="relative z-10 w-10 h-10 text-white drop-shadow-2xl" />
+                        <Icon className="w-8 h-8 text-white" />
                       </motion.div>
                       
                       {item.badge ? (
                         <motion.div 
-                          whileHover={{ scale: 1.15, rotate: 5 }}
-                          animate={{
-                            boxShadow: [
-                              '0 0 15px rgba(245, 158, 11, 0.4)',
-                              '0 0 25px rgba(245, 158, 11, 0.6)',
-                              '0 0 15px rgba(245, 158, 11, 0.4)',
-                            ]
-                          }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className={`px-4 py-2 bg-gradient-to-r ${item.color} rounded-full text-xs font-black text-white backdrop-blur-sm`}
+                          whileHover={{ scale: 1.1 }}
+                          className={`px-3.5 py-1.5 bg-gradient-to-r ${item.color} rounded-full text-xs font-black shadow-lg text-white`}
                         >
                           {item.badge}
                         </motion.div>
                       ) : item.stat !== null && item.stat > 0 ? (
                         <motion.div 
-                          whileHover={{ scale: 1.2, rotate: -5 }}
-                          animate={{ scale: [1, 1.05, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className="px-4 py-2 rounded-full text-xs font-black shadow-xl"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(236, 72, 153, 0.25))',
-                            border: '2px solid rgba(168, 85, 247, 0.5)',
-                            color: 'var(--gold)'
-                          }}
+                          whileHover={{ scale: 1.15 }}
+                          className="px-3.5 py-1.5 bg-purple-500/30 border-2 border-purple-500/50 rounded-full text-xs font-black text-purple-300 shadow-lg"
                         >
                           {item.stat}
                         </motion.div>
                       ) : (
-                        <motion.div
-                          whileHover={{ x: 5, scale: 1.1 }}
-                          className="w-10 h-10 rounded-xl flex items-center justify-center"
-                          style={{
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                          }}
-                        >
-                          <ArrowRight className="w-5 h-5 text-zinc-500 group-hover:text-purple-400 transition-all" />
-                        </motion.div>
+                        <ArrowRight className="w-6 h-6 text-zinc-600 group-hover:text-purple-400 group-hover:translate-x-2 transition-all" />
                       )}
                     </div>
                     
