@@ -312,7 +312,11 @@ export default function PremiumHeader() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 400 }}
-              className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md bg-gradient-to-br from-zinc-950 via-zinc-900 to-black border-l-2 border-purple-500/30 z-50 overflow-y-auto custom-scrollbar shadow-2xl shadow-purple-500/20"
+              onKeyDown={(e) => e.key === 'Escape' && setIsMenuOpen(false)}
+              className="fixed top-0 right-0 bottom-0 w-[90%] max-w-md md:max-w-lg lg:max-w-xl bg-gradient-to-br from-zinc-950 via-zinc-900 to-black border-l-2 border-purple-500/30 z-50 overflow-y-auto custom-scrollbar shadow-2xl shadow-purple-500/20"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation Menu"
             >
               {/* Header */}
               <div className="relative p-6 border-b border-white/10">
@@ -455,6 +459,7 @@ export default function PremiumHeader() {
                   { icon: Heart, label: 'Merkliste', to: 'Wishlist', badge: wishlistCount, gradient: 'from-pink-500 to-rose-500' },
                   { icon: ShoppingCart, label: 'Warenkorb', to: 'Cart', badge: cartCount, gradient: 'from-green-500 to-emerald-500' },
                   { icon: User, label: 'Profil', to: 'Profile', gradient: 'from-indigo-500 to-purple-500' },
+                  ...(user?.role === 'admin' ? [{ icon: Crown, label: 'Admin Dashboard', to: 'Admin', gradient: 'from-red-500 to-orange-500', admin: true }] : []),
                   { icon: Crown, label: 'VIP werden', to: 'VIP', highlight: true, gradient: 'from-yellow-500 to-amber-500' },
                   { icon: MessageCircle, label: 'Support', to: 'Support', gradient: 'from-orange-500 to-red-500' }
                 ].map((item, index) => (
@@ -551,107 +556,141 @@ export default function PremiumHeader() {
 
               {/* CATEGORIES MODE */}
               {drawerMode === 'categories' && (
-              <div className="flex-1 overflow-hidden">
-              <AnimatePresence mode="wait">
-                {!selectedCategory ? (
-                  /* Main Categories List */
-                  <motion.div
-                    key="main"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    className="px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar"
-                    style={{ maxHeight: 'calc(100vh - 240px)' }}
-                  >
-                    {categories.map((cat, index) => (
-                      <motion.button
-                        key={cat.id}
+                <div className="flex-1 overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    {!selectedCategory ? (
+                      /* Main Categories List - Mobile & Desktop */
+                      <motion.div
+                        key="main"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        whileHover={{ x: 4, scale: 1.01 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => cat.children.length > 0 ? handleCategoryClick(cat) : handleSubcategoryClick(cat.id, cat.label)}
-                        className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-2xl transition-all flex items-center justify-between group"
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.18 }}
+                        className="px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar"
+                        style={{ maxHeight: 'calc(100vh - 240px)' }}
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-2xl">
-                            {cat.icon}
-                          </div>
-                          <span className="font-black text-white text-base">{cat.label}</span>
-                        </div>
-                        {cat.children.length > 0 && (
-                          <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
-                        )}
-                      </motion.button>
-                    ))}
-                  </motion.div>
-                ) : (
-                  /* Subcategories View */
-                  <motion.div
-                    key="sub"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex flex-col h-full"
-                  >
-                    {/* Back Button */}
-                    <div className="px-4 py-3 border-b border-white/10">
-                      <button
-                        onClick={() => setSelectedCategory(null)}
-                        className="flex items-center gap-2 text-white hover:text-purple-400 transition-colors"
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                        <span className="font-black text-sm">Zurück</span>
-                      </button>
-                      <h3 className="text-xl font-black text-white mt-2">{selectedCategory.label}</h3>
-                    </div>
-
-                    {/* Subcategories */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-2">
-                      {selectedCategory.children.map((sub, index) => (
-                        typeof sub === 'string' ? (
+                        {categories.map((cat, index) => (
                           <motion.button
-                            key={sub}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.04 }}
+                            key={cat.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.04, duration: 0.2 }}
                             whileHover={{ x: 4, scale: 1.01 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
-                            className="w-full p-3.5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all text-left"
+                            onClick={() => cat.children.length > 0 ? handleCategoryClick(cat) : handleSubcategoryClick(cat.id, cat.label)}
+                            className="w-full min-h-[56px] p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-2xl transition-all duration-200 flex items-center justify-between group"
+                            aria-label={`${cat.label} ${cat.children.length > 0 ? 'öffnen' : 'anzeigen'}`}
                           >
-                            <span className="font-bold text-white text-sm">{sub}</span>
-                          </motion.button>
-                        ) : (
-                          <div key={sub.id}>
-                            <div className="text-xs font-black text-zinc-500 uppercase tracking-wider mb-2 mt-4">
-                              {sub.label}
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-2xl">
+                                {cat.icon}
+                              </div>
+                              <span className="font-black text-white text-base">{cat.label}</span>
                             </div>
-                            {sub.children.map((item, i) => (
-                              <motion.button
-                                key={item}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: (index + i) * 0.04 }}
-                                whileHover={{ x: 4, scale: 1.01 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => handleSubcategoryClick(selectedCategory.id, item)}
-                                className="w-full p-3.5 mb-2 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all text-left"
+                            {cat.children.length > 0 && (
+                              <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors duration-200" />
+                            )}
+                          </motion.button>
+                        ))}
+                      </motion.div>
+                    ) : (
+                      /* Subcategories View - Mobile: Drilldown, Desktop: 2-Column */
+                      <motion.div
+                        key="sub"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.18 }}
+                        className="flex flex-col lg:flex-row h-full"
+                      >
+                        {/* Desktop: Left Column - Categories */}
+                        <div className="hidden lg:block lg:w-1/3 border-r border-white/10 overflow-y-auto custom-scrollbar">
+                          <div className="p-4 space-y-2">
+                            {categories.map((cat) => (
+                              <button
+                                key={cat.id}
+                                onClick={() => cat.children.length > 0 && handleCategoryClick(cat)}
+                                className={`w-full min-h-[48px] p-3 rounded-xl transition-all duration-200 flex items-center justify-between ${
+                                  selectedCategory?.id === cat.id
+                                    ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-500/50'
+                                    : 'bg-zinc-900/30 hover:bg-zinc-800/50 border border-white/5'
+                                }`}
                               >
-                                <span className="font-bold text-white text-sm">{item}</span>
-                              </motion.button>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xl">{cat.icon}</span>
+                                  <span className="font-bold text-white text-sm">{cat.label}</span>
+                                </div>
+                                {cat.children.length > 0 && <ChevronRight className="w-4 h-4 text-zinc-500" />}
+                              </button>
                             ))}
                           </div>
-                        )
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              </div>
+                        </div>
+
+                        {/* Mobile: Back Button + Title */}
+                        <div className="lg:hidden px-4 py-3 border-b border-white/10">
+                          <button
+                            onClick={() => setSelectedCategory(null)}
+                            className="flex items-center gap-2 min-h-[44px] text-white hover:text-purple-400 transition-colors"
+                            aria-label="Zurück zu allen Kategorien"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                            <span className="font-black text-sm">Zurück</span>
+                          </button>
+                          <h3 className="text-xl font-black text-white mt-2">{selectedCategory.label}</h3>
+                        </div>
+
+                        {/* Subcategories Column */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar">
+                          {/* Desktop: Title */}
+                          <div className="hidden lg:block px-4 py-3 border-b border-white/10">
+                            <h3 className="text-lg font-black text-white">{selectedCategory.label}</h3>
+                          </div>
+
+                          <div className="px-4 py-4 space-y-2">
+                            {selectedCategory.children.map((sub, index) => (
+                              typeof sub === 'string' ? (
+                                <motion.button
+                                  key={sub}
+                                  initial={{ opacity: 0, y: 8 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: index * 0.03, duration: 0.18 }}
+                                  whileHover={{ x: 4, scale: 1.01 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
+                                  className="w-full min-h-[48px] p-3.5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all duration-200 text-left"
+                                  aria-label={`${sub} anzeigen`}
+                                >
+                                  <span className="font-bold text-white text-sm">{sub}</span>
+                                </motion.button>
+                              ) : (
+                                <div key={sub.id}>
+                                  <div className="text-xs font-black text-zinc-500 uppercase tracking-wider mb-2 mt-4">
+                                    {sub.label}
+                                  </div>
+                                  {sub.children.map((item, i) => (
+                                    <motion.button
+                                      key={item}
+                                      initial={{ opacity: 0, y: 8 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: (index + i) * 0.03, duration: 0.18 }}
+                                      whileHover={{ x: 4, scale: 1.01 }}
+                                      whileTap={{ scale: 0.98 }}
+                                      onClick={() => handleSubcategoryClick(selectedCategory.id, item)}
+                                      className="w-full min-h-[48px] p-3.5 mb-2 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all duration-200 text-left"
+                                      aria-label={`${item} anzeigen`}
+                                    >
+                                      <span className="font-bold text-white text-sm">{item}</span>
+                                    </motion.button>
+                                  ))}
+                                </div>
+                              )
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
             </motion.div>
           </>
