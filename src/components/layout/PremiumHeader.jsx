@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { base44 } from '@/api/base44Client';
-import { Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, MessageCircle, MapPin, Clock } from 'lucide-react';
+import { Heart, ShoppingCart, Menu, X, Home, Package, User, Crown, MessageCircle, MapPin, Clock, Store, ChevronRight, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PremiumHeader() {
+  const location = useLocation();
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [drawerMode, setDrawerMode] = useState('menu'); // 'menu' or 'categories'
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoriesOnly, setCategoriesOnly] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -20,6 +24,8 @@ export default function PremiumHeader() {
 
   useEffect(() => {
     loadUserData();
+    const saved = localStorage.getItem('categories_only_mode');
+    if (saved) setCategoriesOnly(JSON.parse(saved));
   }, []);
 
   const loadUserData = async () => {
@@ -44,11 +50,62 @@ export default function PremiumHeader() {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      setDrawerMode(categoriesOnly ? 'categories' : 'menu');
+      setSelectedCategory(null);
     }
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, categoriesOnly]);
+
+  const isShopPage = location.pathname.includes('Product') || location.pathname.includes('Shop');
+
+  const categories = [
+    { 
+      id: 'sneaker', 
+      label: 'SNEAKER', 
+      icon: '👟',
+      children: [
+        { 
+          id: 'nike', 
+          label: 'NIKE', 
+          children: ['AirMax 95', 'AirMax DN', 'SHOX TL', 'AIR FORCE', 'Dunk SB'] 
+        },
+        { 
+          id: 'airjordan', 
+          label: 'AIR JORDAN', 
+          children: ['AIR JORDAN 1 HIGH', 'AIR JORDAN 1 LOW', 'AIR JORDAN 3', 'AIR JORDAN 4', 'AIR JORDAN 5', 'AIR JORDAN 6'] 
+        }
+      ]
+    },
+    { id: 'kleidung', label: 'KLEIDUNG', icon: '👕', children: [] },
+    { id: 'taschen', label: 'TASCHEN', icon: '👜', children: [] },
+    { id: 'muetzen', label: 'MÜTZEN & CAPS', icon: '🧢', children: [] },
+    { id: 'geldboersen', label: 'GELDBÖRSEN', icon: '💰', children: [] },
+    { id: 'guertel', label: 'GÜRTEL', icon: '⭕', children: [] },
+    { id: 'highheels', label: 'HIGH HEELS', icon: '👠', children: [] }
+  ];
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const handleSubcategoryClick = (categoryId, subcategory) => {
+    setIsMenuOpen(false);
+    window.location.href = createPageUrl('Products') + `?category=${categoryId}&subcategory=${encodeURIComponent(subcategory)}`;
+  };
+
+  const toggleCategoriesOnly = () => {
+    const newValue = !categoriesOnly;
+    setCategoriesOnly(newValue);
+    localStorage.setItem('categories_only_mode', JSON.stringify(newValue));
+    if (newValue) setDrawerMode('categories');
+  };
+
+  const openShopCategories = () => {
+    setDrawerMode('categories');
+    setIsMenuOpen(true);
+  };
 
   const IconButton = ({ icon: Icon, label, count, to, onClick }) => (
     <Link to={to} onClick={onClick}>
@@ -104,33 +161,54 @@ export default function PremiumHeader() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">
-            {/* Logo */}
-            <Link to={createPageUrl('Home')}>
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-2 focus-ring rounded-2xl"
-              >
+            {/* Logo + Shop Icon */}
+            <div className="flex items-center gap-2">
+              <Link to={createPageUrl('Home')}>
                 <motion.div
-                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center p-2"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2 focus-ring rounded-2xl"
+                >
+                  <motion.div
+                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center p-2"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(214, 178, 94, 0.35)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)'
+                    }}
+                  >
+                    <img 
+                      src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                      alt="Nebula Supply"
+                      className="w-full h-full object-contain"
+                    />
+                  </motion.div>
+                  <span className="hidden sm:block text-base md:text-lg font-black tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
+                    NEBULA
+                  </span>
+                </motion.div>
+              </Link>
+
+              {/* Shop Categories Icon (nur im Shop) */}
+              {isShopPage && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={openShopCategories}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center focus-ring"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid rgba(214, 178, 94, 0.35)',
+                    background: 'rgba(214, 178, 94, 0.12)',
+                    border: '1px solid rgba(214, 178, 94, 0.30)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)'
                   }}
+                  title="Kategorien"
                 >
-                  <img 
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
-                    alt="Nebula Supply"
-                    className="w-full h-full object-contain"
-                  />
-                </motion.div>
-                <span className="hidden sm:block text-base md:text-lg font-black tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
-                  NEBULA
-                </span>
-              </motion.div>
-            </Link>
+                  <Store className="w-5 h-5" style={{ color: 'rgba(214, 178, 94, 0.9)' }} />
+                </motion.button>
+              )}
+            </div>
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
@@ -240,8 +318,8 @@ export default function PremiumHeader() {
               <div className="relative p-6 border-b border-white/10">
                 {/* Background Glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 blur-2xl" />
-                
-                <div className="relative flex items-center justify-between">
+
+                <div className="relative flex items-center justify-between mb-4">
                   <motion.div 
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -264,7 +342,9 @@ export default function PremiumHeader() {
                         className="w-full h-full object-contain"
                       />
                     </motion.div>
-                    <span className="text-2xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">NEBULA</span>
+                    <span className="text-2xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                      {drawerMode === 'categories' ? 'Kategorien' : 'NEBULA'}
+                    </span>
                   </motion.div>
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: 90 }}
@@ -276,10 +356,39 @@ export default function PremiumHeader() {
                     <X className="w-6 h-6 text-white" />
                   </motion.button>
                 </div>
+
+                {/* Tabs (nur im Shop) */}
+                {isShopPage && !categoriesOnly && (
+                  <div className="relative flex gap-2 p-1 rounded-xl bg-zinc-900/60 border border-white/10">
+                    <button
+                      onClick={() => { setDrawerMode('menu'); setSelectedCategory(null); }}
+                      className={`flex-1 px-4 py-2.5 rounded-lg font-black text-sm transition-all ${
+                        drawerMode === 'menu' 
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Menü
+                    </button>
+                    <button
+                      onClick={() => { setDrawerMode('categories'); setSelectedCategory(null); }}
+                      className={`flex-1 px-4 py-2.5 rounded-lg font-black text-sm transition-all ${
+                        drawerMode === 'categories' 
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' 
+                          : 'text-zinc-400 hover:text-white'
+                      }`}
+                    >
+                      Kategorien
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Delivery Info Bar */}
-              <motion.div
+              {/* MENU MODE */}
+              {drawerMode === 'menu' && (
+                <>
+                  {/* Delivery Info Bar */}
+                  <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
@@ -397,6 +506,28 @@ export default function PremiumHeader() {
                 ))}
               </nav>
 
+              {/* Categories Only Toggle */}
+              {isShopPage && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="px-4 pb-4"
+                >
+                  <button
+                    onClick={toggleCategoriesOnly}
+                    className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/10 rounded-2xl transition-all flex items-center justify-between"
+                  >
+                    <span className="font-black text-white text-sm">Nur Kategorien anzeigen</span>
+                    <div className={`w-12 h-6 rounded-full transition-all ${categoriesOnly ? 'bg-gradient-to-r from-purple-500 to-pink-500' : 'bg-zinc-700'}`}>
+                      <motion.div
+                        animate={{ x: categoriesOnly ? 24 : 2 }}
+                        className="w-5 h-5 mt-0.5 bg-white rounded-full shadow-lg"
+                      />
+                    </div>
+                  </button>
+                </motion.div>
+              )}
+
               {/* Logout */}
               {user && (
                 <motion.div
@@ -414,6 +545,113 @@ export default function PremiumHeader() {
                     Abmelden
                   </motion.button>
                 </motion.div>
+              )}
+              </>
+              )}
+
+              {/* CATEGORIES MODE */}
+              {drawerMode === 'categories' && (
+              <div className="flex-1 overflow-hidden">
+              <AnimatePresence mode="wait">
+                {!selectedCategory ? (
+                  /* Main Categories List */
+                  <motion.div
+                    key="main"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
+                    className="px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar"
+                    style={{ maxHeight: 'calc(100vh - 240px)' }}
+                  >
+                    {categories.map((cat, index) => (
+                      <motion.button
+                        key={cat.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ x: 4, scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => cat.children.length > 0 ? handleCategoryClick(cat) : handleSubcategoryClick(cat.id, cat.label)}
+                        className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-2xl transition-all flex items-center justify-between group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center text-2xl">
+                            {cat.icon}
+                          </div>
+                          <span className="font-black text-white text-base">{cat.label}</span>
+                        </div>
+                        {cat.children.length > 0 && (
+                          <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors" />
+                        )}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                ) : (
+                  /* Subcategories View */
+                  <motion.div
+                    key="sub"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex flex-col h-full"
+                  >
+                    {/* Back Button */}
+                    <div className="px-4 py-3 border-b border-white/10">
+                      <button
+                        onClick={() => setSelectedCategory(null)}
+                        className="flex items-center gap-2 text-white hover:text-purple-400 transition-colors"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                        <span className="font-black text-sm">Zurück</span>
+                      </button>
+                      <h3 className="text-xl font-black text-white mt-2">{selectedCategory.label}</h3>
+                    </div>
+
+                    {/* Subcategories */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-2">
+                      {selectedCategory.children.map((sub, index) => (
+                        typeof sub === 'string' ? (
+                          <motion.button
+                            key={sub}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.04 }}
+                            whileHover={{ x: 4, scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
+                            className="w-full p-3.5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all text-left"
+                          >
+                            <span className="font-bold text-white text-sm">{sub}</span>
+                          </motion.button>
+                        ) : (
+                          <div key={sub.id}>
+                            <div className="text-xs font-black text-zinc-500 uppercase tracking-wider mb-2 mt-4">
+                              {sub.label}
+                            </div>
+                            {sub.children.map((item, i) => (
+                              <motion.button
+                                key={item}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: (index + i) * 0.04 }}
+                                whileHover={{ x: 4, scale: 1.01 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => handleSubcategoryClick(selectedCategory.id, item)}
+                                className="w-full p-3.5 mb-2 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all text-left"
+                              >
+                                <span className="font-bold text-white text-sm">{item}</span>
+                              </motion.button>
+                            ))}
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              </div>
               )}
             </motion.div>
           </>
