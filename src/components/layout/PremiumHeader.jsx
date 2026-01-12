@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { base44 } from '@/api/base44Client';
-import { Heart, ShoppingCart, Menu, Sparkles } from 'lucide-react';
+import { Heart, ShoppingCart, Menu, User, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import MainDrawer from '../drawer/MainDrawer';
 import ShopCategoriesDrawer from '../drawer/ShopCategoriesDrawer';
@@ -74,88 +74,6 @@ export default function PremiumHeader() {
     setIsShopDrawerOpen(false);
     setIsProfileDrawerOpen(false);
   };
-    { 
-      id: 'sneaker', 
-      label: 'SNEAKER', 
-      icon: '👟',
-      gradient: 'from-blue-500 to-cyan-500',
-      children: [
-        { 
-          id: 'nike', 
-          label: 'NIKE', 
-          children: ['AirMax 95', 'AirMax DN', 'SHOX TL', 'AIR FORCE', 'Dunk SB', 'Cortez', 'Blazer'] 
-        },
-        { 
-          id: 'airjordan', 
-          label: 'AIR JORDAN', 
-          children: ['AIR JORDAN 1 HIGH', 'AIR JORDAN 1 LOW', 'AIR JORDAN 3', 'AIR JORDAN 4', 'AIR JORDAN 5', 'AIR JORDAN 6', 'AIR JORDAN 11', 'AIR JORDAN 13'] 
-        },
-        {
-          id: 'adidas',
-          label: 'ADIDAS',
-          children: ['Yeezy Boost 350', 'Yeezy Boost 700', 'Ultraboost', 'Superstar', 'Stan Smith']
-        },
-        {
-          id: 'newbalance',
-          label: 'NEW BALANCE',
-          children: ['550', '574', '990', '2002R', '1906R']
-        }
-      ]
-    },
-    { 
-      id: 'kleidung', 
-      label: 'KLEIDUNG', 
-      icon: '👕',
-      gradient: 'from-purple-500 to-pink-500',
-      children: [
-        { id: 'tshirts', label: 'T-SHIRTS', children: ['Oversize', 'Slim Fit', 'Regular', 'Vintage'] },
-        { id: 'hoodies', label: 'HOODIES & SWEATER', children: ['Hoodies', 'Zip Hoodies', 'Crewneck', 'Sweatshirts'] },
-        { id: 'jacken', label: 'JACKEN', children: ['Bomber', 'Denim', 'Puffer', 'Windbreaker'] },
-        { id: 'hosen', label: 'HOSEN', children: ['Jeans', 'Jogger', 'Cargo', 'Shorts'] }
-      ]
-    },
-    { 
-      id: 'taschen', 
-      label: 'TASCHEN', 
-      icon: '👜',
-      gradient: 'from-amber-500 to-orange-500',
-      children: [
-        { id: 'rucksaecke', label: 'RUCKSÄCKE', children: ['Backpacks', 'Mini Backpacks', 'Laptop Bags'] },
-        { id: 'umhaenge', label: 'UMHÄNGETASCHEN', children: ['Crossbody', 'Messenger', 'Shoulder Bags'] },
-        { id: 'luxus', label: 'LUXUS TASCHEN', children: ['Designer', 'Clutch', 'Tote Bags'] }
-      ]
-    },
-    { 
-      id: 'muetzen', 
-      label: 'MÜTZEN & CAPS', 
-      icon: '🧢',
-      gradient: 'from-green-500 to-emerald-500',
-      children: [
-        { id: 'caps', label: 'CAPS', children: ['Baseball Caps', 'Snapbacks', 'Dad Hats', '5-Panel'] },
-        { id: 'beanies', label: 'BEANIES', children: ['Classic', 'Slouchy', 'Cuffed'] }
-      ]
-    },
-    { 
-      id: 'geldboersen', 
-      label: 'GELDBÖRSEN', 
-      icon: '💰',
-      gradient: 'from-yellow-500 to-amber-500',
-      children: [
-        { id: 'herren', label: 'HERREN', children: ['Bifold', 'Trifold', 'Kartenhalter', 'Geldbörsen'] },
-        { id: 'damen', label: 'DAMEN', children: ['Clutch Wallets', 'Zip Around', 'Kartenhalter'] }
-      ]
-    },
-    { 
-      id: 'guertel', 
-      label: 'GÜRTEL', 
-      icon: '⭕',
-      gradient: 'from-red-500 to-pink-500',
-      children: [
-        { id: 'designer', label: 'DESIGNER', children: ['Gucci', 'Louis Vuitton', 'Hermès', 'Versace'] },
-        { id: 'casual', label: 'CASUAL', children: ['Canvas', 'Leder', 'Textil'] }
-      ]
-    },
-
 
   const IconButton = ({ icon: Icon, label, count, to, onClick }) => (
     <Link to={to} onClick={onClick}>
