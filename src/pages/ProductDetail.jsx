@@ -399,7 +399,7 @@ export default function ProductDetail() {
 
           {/* Title & Status */}
           <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 leading-tight text-white drop-shadow-lg">{product.name}</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-4 leading-tight drop-shadow-lg" style={{ color: 'rgba(255,255,255,0.95)' }}>{product.name}</h1>
             <div className="flex items-center gap-2.5 flex-wrap mb-4">
               <motion.div whileHover={{ scale: 1.08, y: -2 }} whileTap={{ scale: 0.95 }} className="rounded-full">
                 <Badge className="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white font-mono text-sm font-black border border-purple-400/60 shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 transition-all">
