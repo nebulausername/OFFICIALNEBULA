@@ -61,7 +61,7 @@ export default function PremiumHeader() {
     };
   }, [isMenuOpen, categoriesOnly]);
 
-  const isShopPage = location.pathname.includes('Product') || location.pathname.includes('Shop');
+  // Shop categories always available
 
   const categories = [
     { 
@@ -257,18 +257,25 @@ export default function PremiumHeader() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">
             {/* Logo + Shop Icon */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 md:gap-3">
               <Link to={createPageUrl('Home')}>
                 <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   className="flex items-center gap-2 focus-ring rounded-2xl"
                 >
                   <motion.div
-                    className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center p-2"
+                    animate={{
+                      boxShadow: [
+                        '0 0 20px rgba(var(--gold-rgb), 0.2)',
+                        '0 0 30px rgba(var(--gold-rgb), 0.3)',
+                        '0 0 20px rgba(var(--gold-rgb), 0.2)',
+                      ]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center p-2 gold-border"
                     style={{
                       background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(214, 178, 94, 0.35)',
                       backdropFilter: 'blur(12px)',
                       WebkitBackdropFilter: 'blur(12px)'
                     }}
@@ -276,33 +283,42 @@ export default function PremiumHeader() {
                     <img 
                       src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
                       alt="Nebula Supply"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain drop-shadow-lg"
                     />
                   </motion.div>
-                  <span className="hidden sm:block text-base md:text-lg font-black tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
+                  <span className="hidden sm:block text-base md:text-lg font-black tracking-tight text-gradient-gold">
                     NEBULA
                   </span>
                 </motion.div>
               </Link>
 
-              {/* Shop Categories Icon (nur im Shop) */}
-              {isShopPage && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={openShopCategories}
-                  className="w-10 h-10 rounded-xl flex items-center justify-center focus-ring"
-                  style={{
-                    background: 'rgba(214, 178, 94, 0.12)',
-                    border: '1px solid rgba(214, 178, 94, 0.30)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)'
-                  }}
-                  title="Kategorien"
+              {/* Shop Categories Icon - Always Visible */}
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={openShopCategories}
+                className="relative w-11 h-11 rounded-xl flex items-center justify-center focus-ring group"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.12), rgba(var(--gold-rgb), 0.08))',
+                  border: '1px solid rgba(var(--gold-rgb), 0.35)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)'
+                }}
+                title="Shop Kategorien"
+              >
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
                 >
-                  <Store className="w-5 h-5" style={{ color: 'rgba(214, 178, 94, 0.9)' }} />
-                </motion.button>
-              )}
+                  <Store className="w-5 h-5 text-gold drop-shadow-lg" />
+                </motion.div>
+                <motion.div
+                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+                  style={{ background: 'var(--gold)' }}
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </motion.button>
             </div>
 
             {/* Desktop Nav */}
@@ -712,15 +728,16 @@ export default function PremiumHeader() {
                 </motion.div>
               )}
 
-              {/* CATEGORIES MODE */}
+              {/* CATEGORIES MODE - Premium Design */}
               {drawerMode === 'categories' && (
                 <div className="flex-1 overflow-hidden flex flex-col">
-                  {/* Search Bar */}
+                  {/* Premium Search Bar */}
                   {!selectedCategory && (
                     <motion.div
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="px-4 py-3 border-b border-white/10"
+                      className="px-4 py-4 border-b"
+                      style={{ borderColor: 'var(--border)' }}
                     >
                       <div className="relative">
                         <input
@@ -728,18 +745,26 @@ export default function PremiumHeader() {
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           placeholder="Kategorie suchen..."
-                          className="w-full h-12 pl-12 pr-4 rounded-xl bg-zinc-900/60 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-bold text-sm"
+                          className="w-full h-14 pl-14 pr-12 rounded-2xl text-white placeholder-zinc-500 focus:outline-none font-bold text-base transition-all"
+                          style={{
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border)',
+                            boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)'
+                          }}
                           autoComplete="off"
                         />
-                        <Package className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                        <Store className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gold" />
                         {searchQuery && (
-                          <button
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => setSearchQuery('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-zinc-700 hover:bg-zinc-600 flex items-center justify-center transition-colors"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+                            style={{ background: 'var(--surface2)' }}
                             aria-label="Suche löschen"
                           >
                             <X className="w-4 h-4 text-white" />
-                          </button>
+                          </motion.button>
                         )}
                       </div>
                     </motion.div>
@@ -763,28 +788,43 @@ export default function PremiumHeader() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.04, duration: 0.2 }}
-                            whileHover={{ x: 4, scale: 1.01 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={{ x: 6, scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
                             onClick={() => cat.children.length > 0 ? handleCategoryClick(cat) : handleSubcategoryClick(cat.id, cat.label)}
-                            className="w-full min-h-[56px] p-4 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-2xl transition-all duration-200 flex items-center justify-between group relative overflow-hidden"
+                            className="w-full min-h-[64px] p-4 glass-panel-hover rounded-2xl transition-all duration-200 flex items-center justify-between group relative overflow-hidden"
                             aria-label={`${cat.label} ${cat.children.length > 0 ? 'öffnen' : 'anzeigen'}`}
                           >
-                            {/* Gradient Glow */}
-                            <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                            {/* Premium Gradient Glow */}
+                            <motion.div 
+                              className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} opacity-0 group-hover:opacity-[0.15] transition-opacity duration-300`}
+                              whileHover={{ scale: 1.1 }}
+                            />
 
                             <div className="flex items-center gap-4 relative z-10">
-                              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.gradient} bg-opacity-20 flex items-center justify-center text-2xl shadow-lg`}>
-                                {cat.icon}
-                              </div>
+                              <motion.div 
+                                whileHover={{ rotate: [0, -5, 5, 0], scale: 1.1 }}
+                                transition={{ duration: 0.5 }}
+                                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-2xl shadow-xl relative`}
+                              >
+                                <div className="absolute inset-1 bg-black/10 rounded-lg backdrop-blur-sm" />
+                                <span className="relative drop-shadow-lg">{cat.icon}</span>
+                              </motion.div>
                               <div className="text-left">
-                                <span className="font-black text-white text-base block">{cat.label}</span>
+                                <span className="font-black text-white text-lg block group-hover:text-gradient-gold transition-all">{cat.label}</span>
                                 {cat.children.length > 0 && (
-                                  <span className="text-xs text-zinc-500 font-bold">{cat.children.length} Kategorien</span>
+                                  <span className="text-xs font-bold" style={{ color: 'var(--subtle)' }}>
+                                    {cat.children.length} Kategorien
+                                  </span>
                                 )}
                               </div>
                             </div>
                             {cat.children.length > 0 && (
-                              <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition-colors duration-200 relative z-10" />
+                              <motion.div
+                                animate={{ x: [0, 4, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                              >
+                                <ChevronRight className="w-6 h-6 text-gold group-hover:text-gold2 transition-colors duration-200 relative z-10 drop-shadow-lg" />
+                              </motion.div>
                             )}
                           </motion.button>
                               ))
@@ -819,50 +859,68 @@ export default function PremiumHeader() {
                         transition={{ duration: 0.18 }}
                         className="flex flex-col lg:flex-row h-full"
                       >
-                        {/* Desktop: Left Column - Categories */}
-                        <div className="hidden lg:block lg:w-1/3 border-r border-white/10 overflow-y-auto custom-scrollbar">
-                          <div className="p-4 space-y-2">
+                        {/* Desktop: Left Column - Premium Categories */}
+                        <div className="hidden lg:block lg:w-1/3 overflow-y-auto custom-scrollbar" style={{ borderRight: '1px solid var(--border)' }}>
+                          <div className="p-4 space-y-3">
                             {categories.map((cat) => (
-                              <button
+                              <motion.button
                                 key={cat.id}
+                                whileHover={{ x: 4, scale: 1.02 }}
                                 onClick={() => cat.children.length > 0 && handleCategoryClick(cat)}
-                                className={`w-full min-h-[48px] p-3 rounded-xl transition-all duration-200 flex items-center justify-between ${
+                                className={`w-full min-h-[56px] p-4 rounded-xl transition-all duration-200 flex items-center justify-between group ${
                                   selectedCategory?.id === cat.id
-                                    ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 border border-purple-500/50'
-                                    : 'bg-zinc-900/30 hover:bg-zinc-800/50 border border-white/5'
+                                    ? 'glass-panel gold-border'
+                                    : 'glass-panel-hover'
                                 }`}
+                                style={selectedCategory?.id === cat.id ? {
+                                  background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.12), rgba(var(--gold-rgb), 0.08))'
+                                } : {}}
                               >
                                 <div className="flex items-center gap-3">
-                                  <span className="text-xl">{cat.icon}</span>
-                                  <span className="font-bold text-white text-sm">{cat.label}</span>
+                                  <span className="text-2xl drop-shadow-lg">{cat.icon}</span>
+                                  <span className={`font-black text-base transition-colors ${
+                                    selectedCategory?.id === cat.id ? 'text-gold' : 'text-white group-hover:text-gold'
+                                  }`}>{cat.label}</span>
                                 </div>
-                                {cat.children.length > 0 && <ChevronRight className="w-4 h-4 text-zinc-500" />}
-                              </button>
+                                {cat.children.length > 0 && (
+                                  <ChevronRight className={`w-5 h-5 transition-colors ${
+                                    selectedCategory?.id === cat.id ? 'text-gold' : 'text-muted group-hover:text-gold'
+                                  }`} />
+                                )}
+                              </motion.button>
                             ))}
                           </div>
                         </div>
 
-                        {/* Mobile: Back Button + Title */}
-                        <div className="lg:hidden px-4 py-3 border-b border-white/10">
-                          <button
+                        {/* Mobile: Premium Back Button + Title */}
+                        <div className="lg:hidden px-4 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+                          <motion.button
+                            whileHover={{ x: -4 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => setSelectedCategory(null)}
-                            className="flex items-center gap-2 min-h-[44px] text-white hover:text-purple-400 transition-colors"
+                            className="flex items-center gap-2 min-h-[44px] text-gold hover:text-gold2 transition-colors mb-3"
                             aria-label="Zurück zu allen Kategorien"
                           >
                             <ChevronLeft className="w-5 h-5" />
-                            <span className="font-black text-sm">Zurück</span>
-                          </button>
-                          <h3 className="text-xl font-black text-white mt-2">{selectedCategory.label}</h3>
+                            <span className="font-black text-base">Zurück</span>
+                          </motion.button>
+                          <div className="flex items-center gap-3">
+                            <span className="text-3xl drop-shadow-lg">{selectedCategory.icon}</span>
+                            <h3 className="text-2xl font-black text-gradient-gold">{selectedCategory.label}</h3>
+                          </div>
                         </div>
 
                         {/* Subcategories Column */}
                         <div className="flex-1 overflow-y-auto custom-scrollbar">
-                          {/* Desktop: Title */}
-                          <div className="hidden lg:block px-4 py-3 border-b border-white/10">
-                            <h3 className="text-lg font-black text-white">{selectedCategory.label}</h3>
+                          {/* Desktop: Premium Title */}
+                          <div className="hidden lg:block px-4 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+                            <div className="flex items-center gap-3">
+                              <span className="text-3xl drop-shadow-lg">{selectedCategory.icon}</span>
+                              <h3 className="text-xl font-black text-gradient-gold">{selectedCategory.label}</h3>
+                            </div>
                           </div>
 
-                          <div className="px-4 py-4 space-y-2">
+                          <div className="px-4 py-4 space-y-3">
                             {selectedCategory.children.map((sub, index) => (
                               typeof sub === 'string' ? (
                                 <motion.button
@@ -870,17 +928,18 @@ export default function PremiumHeader() {
                                   initial={{ opacity: 0, y: 8 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: index * 0.03, duration: 0.18 }}
-                                  whileHover={{ x: 4, scale: 1.01 }}
-                                  whileTap={{ scale: 0.98 }}
+                                  whileHover={{ x: 6, scale: 1.02 }}
+                                  whileTap={{ scale: 0.96 }}
                                   onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
-                                  className="w-full min-h-[48px] p-3.5 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all duration-200 text-left"
+                                  className="w-full min-h-[52px] p-4 glass-panel-hover rounded-xl transition-all duration-200 text-left group relative overflow-hidden"
                                   aria-label={`${sub} anzeigen`}
                                 >
-                                  <span className="font-bold text-white text-sm">{sub}</span>
+                                  <div className={`absolute inset-0 bg-gradient-to-r ${selectedCategory.gradient} opacity-0 group-hover:opacity-[0.12] transition-opacity duration-300`} />
+                                  <span className="relative font-black text-white text-base group-hover:text-gold transition-colors">{sub}</span>
                                 </motion.button>
                               ) : (
                                 <div key={sub.id}>
-                                  <div className="text-xs font-black text-zinc-500 uppercase tracking-wider mb-2 mt-4">
+                                  <div className="text-xs font-black uppercase tracking-widest mb-3 mt-5 px-2" style={{ color: 'var(--gold)' }}>
                                     {sub.label}
                                   </div>
                                   {sub.children.map((item, i) => (
@@ -889,13 +948,14 @@ export default function PremiumHeader() {
                                       initial={{ opacity: 0, y: 8 }}
                                       animate={{ opacity: 1, y: 0 }}
                                       transition={{ delay: (index + i) * 0.03, duration: 0.18 }}
-                                      whileHover={{ x: 4, scale: 1.01 }}
-                                      whileTap={{ scale: 0.98 }}
+                                      whileHover={{ x: 6, scale: 1.02 }}
+                                      whileTap={{ scale: 0.96 }}
                                       onClick={() => handleSubcategoryClick(selectedCategory.id, item)}
-                                      className="w-full min-h-[48px] p-3.5 mb-2 bg-zinc-900/40 hover:bg-zinc-800/60 border border-white/5 rounded-xl transition-all duration-200 text-left"
+                                      className="w-full min-h-[52px] p-4 mb-2 glass-panel-hover rounded-xl transition-all duration-200 text-left group relative overflow-hidden"
                                       aria-label={`${item} anzeigen`}
                                     >
-                                      <span className="font-bold text-white text-sm">{item}</span>
+                                      <div className={`absolute inset-0 bg-gradient-to-r ${selectedCategory.gradient} opacity-0 group-hover:opacity-[0.12] transition-opacity duration-300`} />
+                                      <span className="relative font-black text-white text-base group-hover:text-gold transition-colors">{item}</span>
                                     </motion.button>
                                   ))}
                                 </div>
