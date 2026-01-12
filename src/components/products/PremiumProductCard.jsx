@@ -91,7 +91,14 @@ export default function PremiumProductCard({ product, onQuickView }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -8, scale: 1.02 }}
-        className="premium-card group smooth-transition relative overflow-hidden"
+        className="group smooth-transition relative overflow-hidden rounded-[var(--radius-lg)]"
+        style={{
+          background: 'rgba(255, 255, 255, 0.06)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+        }}
       >
         {/* Image Container */}
         <div className="relative aspect-[2/3] overflow-hidden rounded-t-[var(--radius-lg)] bg-[hsl(var(--panel))]">
@@ -180,22 +187,28 @@ export default function PremiumProductCard({ product, onQuickView }) {
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-3" style={{ background: 'var(--surface)' }}>
+        <div className="p-5 space-y-3" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
           {/* Product Name */}
-          <h3 className="font-bold text-base line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
+          <h3 className="font-black text-base line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition" style={{ 
+            color: 'rgba(255, 255, 255, 0.95)',
+            textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)'
+          }}>
             {product.name}
           </h3>
           
           {/* Price & SKU Row */}
           <div className="flex items-baseline justify-between gap-3">
-            <div className="text-3xl font-black" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+            <div className="text-3xl font-black" style={{ 
+              color: 'rgba(255, 255, 255, 0.98)',
+              textShadow: '0 2px 12px rgba(0, 0, 0, 0.5)'
+            }}>
               {product.price}€
             </div>
-            <div className="text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg"
+            <div className="text-xs font-mono font-black px-2.5 py-1.5 rounded-lg"
               style={{
-                color: 'rgba(255, 255, 255, 0.75)',
-                background: 'var(--surface2)',
-                border: '1px solid var(--border-subtle)'
+                color: 'rgba(214, 178, 94, 0.9)',
+                background: 'rgba(214, 178, 94, 0.10)',
+                border: '1px solid rgba(214, 178, 94, 0.25)'
               }}
             >
               {product.sku}
@@ -206,19 +219,19 @@ export default function PremiumProductCard({ product, onQuickView }) {
           <div className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2 text-xs">
               <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(var(--gold-rgb), 0.15)' }}
+                style={{ background: 'rgba(214, 178, 94, 0.15)' }}
               >
-                <MapPin className="w-3 h-3 text-gold" />
+                <MapPin className="w-3 h-3" style={{ color: 'rgba(214, 178, 94, 0.9)' }} />
               </div>
-              <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>🇨🇳 Lieferbar aus China</span>
+              <span className="font-black" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>🇨🇳 Lieferbar aus China</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
                 style={{ background: 'var(--surface2)' }}
               >
-                <Clock className="w-3 h-3" style={{ color: 'var(--text)' }} />
+                <Clock className="w-3 h-3" style={{ color: 'rgba(255, 255, 255, 0.85)' }} />
               </div>
-              <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>8–17 Tage Lieferzeit</span>
+              <span className="font-black" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>8–17 Tage Lieferzeit</span>
             </div>
           </div>
         </div>
