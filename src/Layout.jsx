@@ -48,17 +48,38 @@ export default function Layout({ children, currentPageName }) {
         </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-zinc-200 mt-20">
+      <footer className={`border-t mt-20 ${
+        theme === 'light' 
+          ? 'bg-white border-zinc-200' 
+          : 'border-white/10'
+      }`} style={theme === 'dark' ? {
+        background: 'rgba(8, 8, 12, 0.6)',
+        backdropFilter: 'blur(12px)'
+      } : {}}>
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <div className="flex items-center space-x-2">
-              <Star className="w-4 h-4 text-zinc-400" fill="currentColor" />
-              <span className="text-sm text-zinc-600">© 2026 Nebula Supply. Premium Quality.</span>
+              <Star className={`w-4 h-4 ${theme === 'light' ? 'text-zinc-400' : 'text-gold/60'}`} fill="currentColor" />
+              <span className={`text-sm font-semibold ${theme === 'light' ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                © 2026 Nebula Supply. Premium Quality.
+              </span>
             </div>
             <div className="flex space-x-6 text-sm">
-              <a href="#" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">Impressum</a>
-              <a href="#" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">Datenschutz</a>
-              <a href="#" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">AGB</a>
+              <a href="#" className={`font-medium transition-colors ${
+                theme === 'light' 
+                  ? 'text-zinc-600 hover:text-zinc-900' 
+                  : 'text-zinc-400 hover:text-white'
+              }`}>Impressum</a>
+              <a href="#" className={`font-medium transition-colors ${
+                theme === 'light' 
+                  ? 'text-zinc-600 hover:text-zinc-900' 
+                  : 'text-zinc-400 hover:text-white'
+              }`}>Datenschutz</a>
+              <a href="#" className={`font-medium transition-colors ${
+                theme === 'light' 
+                  ? 'text-zinc-600 hover:text-zinc-900' 
+                  : 'text-zinc-400 hover:text-white'
+              }`}>AGB</a>
             </div>
           </div>
         </div>
