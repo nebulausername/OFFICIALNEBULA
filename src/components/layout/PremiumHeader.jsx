@@ -265,7 +265,7 @@ export default function PremiumHeader() {
                     <img 
                       src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
                       alt="Nebula Supply"
-                      className="w-full h-full object-contain"
+                      className="relative z-10 w-full h-full object-contain drop-shadow-lg"
                     />
                   </motion.div>
                   <div className="hidden sm:flex flex-col">
