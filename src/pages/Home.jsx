@@ -73,33 +73,36 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background Grid */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+      {/* Animated Background Effects */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
         <motion.div
           animate={{
             scale: [1, 1.2, 1],
-            rotate: [0, 90, 0],
+            opacity: [0.15, 0.25, 0.15]
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[120px]"
+          className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px]"
+          style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent 70%)' }}
         />
         <motion.div
           animate={{
             scale: [1.2, 1, 1.2],
-            rotate: [90, 0, 90],
+            opacity: [0.2, 0.15, 0.2]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-pink-600/30 rounded-full blur-[120px]"
+          className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[120px]"
+          style={{ background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), transparent 70%)' }}
         />
         <motion.div
           animate={{
             x: [0, 100, 0],
             y: [0, -50, 0],
+            opacity: [0.1, 0.2, 0.1]
           }}
           transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[100px]"
+          className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-[100px]"
+          style={{ background: 'radial-gradient(circle, rgba(var(--gold-rgb), 0.15), transparent 70%)' }}
         />
       </div>
 
@@ -113,47 +116,56 @@ export default function Home() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-center"
           >
-            {/* Floating Logo */}
+            {/* Floating Premium Logo */}
             <motion.div
               animate={{ 
-                y: [0, -20, 0],
-                rotateY: [0, 180, 360],
+                y: [0, -20, 0]
               }}
               transition={{ 
-                y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                rotateY: { duration: 8, repeat: Infinity, ease: "linear" }
+                y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
               }}
-              className="inline-block mb-12 perspective-1000"
+              className="inline-block mb-12"
             >
               <div className="relative">
                 <motion.div
                   animate={{
                     boxShadow: [
-                      '0 0 60px rgba(168, 85, 247, 0.4)',
-                      '0 0 100px rgba(236, 72, 153, 0.6)',
-                      '0 0 60px rgba(168, 85, 247, 0.4)',
+                      '0 0 60px rgba(var(--gold-rgb), 0.4)',
+                      '0 0 100px rgba(var(--gold-rgb), 0.6)',
+                      '0 0 60px rgba(var(--gold-rgb), 0.4)',
                     ]
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="w-28 h-28 md:w-36 md:h-36 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-[2.5rem] flex items-center justify-center mx-auto"
+                  className="w-28 h-28 md:w-36 md:h-36 rounded-[2.5rem] p-3 mx-auto gold-border"
+                  style={{ 
+                    background: 'var(--surface)',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)'
+                  }}
                 >
-                  <Star className="w-14 h-14 md:w-18 md:h-18 text-white drop-shadow-2xl" fill="white" />
+                  <img 
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                    alt="Nebula Supply"
+                    className="w-full h-full object-contain drop-shadow-2xl"
+                  />
                 </motion.div>
                 {/* Orbital Rings */}
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-6 border-2 border-purple-500/30 rounded-full"
+                  className="absolute -inset-6 border-2 rounded-full"
+                  style={{ borderColor: 'rgba(var(--gold-rgb), 0.30)' }}
                 />
                 <motion.div
                   animate={{ rotate: -360 }}
                   transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-10 border-2 border-pink-500/20 rounded-full"
+                  className="absolute -inset-10 border-2 rounded-full"
+                  style={{ borderColor: 'rgba(var(--gold-rgb), 0.20)' }}
                 />
               </div>
             </motion.div>
 
-            {/* Main Headline */}
+            {/* Main Headline - Premium Gold/White */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -161,19 +173,15 @@ export default function Home() {
             >
               <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 leading-none">
                 <motion.span 
-                  className="block bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent"
-                  animate={{ 
-                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-                  }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  style={{ backgroundSize: '200% auto' }}
+                  className="block"
+                  style={{ color: 'var(--text)' }}
                 >
                   NEBULA
                 </motion.span>
                 <motion.span 
-                  className="block bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400 bg-clip-text text-transparent"
+                  className="block bg-gradient-to-r from-[#E8C76A] via-[#F5D98B] to-[#E8C76A] bg-clip-text text-transparent"
                   animate={{ 
-                    backgroundPosition: ['100% 50%', '0% 50%', '100% 50%']
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                   }}
                   transition={{ duration: 5, repeat: Infinity }}
                   style={{ backgroundSize: '200% auto' }}
@@ -188,11 +196,11 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-medium tracking-wide"
-              style={{ color: 'rgba(255, 255, 255, 0.70)' }}
+              className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-bold tracking-wide"
+              style={{ color: 'var(--muted)' }}
             >
-              Wo <span className="text-gold font-bold">Style</span> auf{' '}
-              <span className="text-gold2 font-bold">Premium</span> trifft ✨
+              Premium Lifestyle •{' '}
+              <span className="text-gold2">Exklusiv für dich</span> ✨
             </motion.p>
 
             {/* CTA Buttons */}
@@ -211,17 +219,17 @@ export default function Home() {
                   <motion.div
                     animate={{
                       boxShadow: [
-                        '0 0 40px rgba(168, 85, 247, 0.5)',
-                        '0 0 60px rgba(236, 72, 153, 0.5)',
-                        '0 0 40px rgba(168, 85, 247, 0.5)',
+                        '0 0 40px rgba(var(--gold-rgb), 0.4)',
+                        '0 0 60px rgba(var(--gold-rgb), 0.5)',
+                        '0 0 40px rgba(var(--gold-rgb), 0.4)',
                       ]
                     }}
                     transition={{ duration: 2, repeat: Infinity }}
                     className="absolute inset-0 rounded-2xl blur-xl"
                   />
-                  <Button className="relative h-16 px-12 text-lg font-black bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:via-pink-500 hover:to-purple-500 rounded-2xl text-white border-2 border-white/20 bg-[length:200%_auto] transition-all">
+                  <Button className="btn-gold relative h-16 px-12 text-lg rounded-2xl">
                     <Sparkles className="w-6 h-6 mr-3 group-hover:rotate-180 transition-transform duration-500" />
-                    Shop entdecken
+                    Jetzt shoppen
                   </Button>
                 </motion.div>
               </Link>
@@ -231,8 +239,8 @@ export default function Home() {
                   whileHover={{ scale: 1.05, y: -5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button variant="outline" className="h-16 px-10 text-lg font-black bg-zinc-900/50 backdrop-blur-xl border-2 border-purple-500/40 hover:border-purple-500/80 hover:bg-zinc-800/50 rounded-2xl text-white transition-all">
-                    <Star className="w-6 h-6 mr-2 text-yellow-400" fill="currentColor" />
+                  <Button className="btn-gold-outline h-16 px-10 text-lg rounded-2xl">
+                    <Star className="w-6 h-6 mr-2 text-gold" fill="currentColor" />
                     VIP werden
                   </Button>
                 </motion.div>
@@ -264,12 +272,12 @@ export default function Home() {
                 <motion.div
                   key={i}
                   whileHover={{ scale: 1.1, y: -5 }}
-                  className="text-center p-4 rounded-xl bg-zinc-900/30 backdrop-blur-xl border border-white/10"
+                  className="glass-panel-hover text-center p-4 rounded-xl"
                 >
-                  <div className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  <div className="text-3xl font-black bg-gradient-to-r from-[#E8C76A] to-[#F5D98B] bg-clip-text text-transparent">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-zinc-500 font-semibold mt-1">{stat.label}</div>
+                  <div className="text-sm font-semibold mt-1" style={{ color: 'var(--subtle)' }}>{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
@@ -321,17 +329,17 @@ export default function Home() {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
+              style={{ color: 'var(--text)' }}
             >
-              <span className="bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-                Kategorien
-              </span>
+              Kategorien
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-zinc-400 text-lg md:text-xl font-medium max-w-2xl mx-auto"
+              className="text-lg md:text-xl font-medium max-w-2xl mx-auto"
+              style={{ color: 'var(--muted)' }}
             >
               Tauche ein in unsere Premium-Kollektionen
             </motion.p>
@@ -557,10 +565,9 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tight"
+              style={{ color: 'var(--text)' }}
             >
-              <span className="block bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
-                Brandneu
-              </span>
+              Brandneu
             </motion.h2>
             
             {/* Subtitle */}
@@ -569,11 +576,11 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-xl sm:text-2xl max-w-3xl mx-auto font-medium"
-              style={{ color: 'rgba(255, 255, 255, 0.70)' }}
+              className="text-xl sm:text-2xl max-w-3xl mx-auto font-bold"
+              style={{ color: 'var(--muted)' }}
             >
-              Die <span className="text-gold font-bold">heißesten</span> Drops –{' '}
-              <span className="text-gold2 font-bold">limitiert</span> & exklusiv ✨
+              Die <span className="text-gold">heißesten</span> Drops –{' '}
+              <span className="text-gold2">limitiert</span> & exklusiv ✨
             </motion.p>
           </motion.div>
 
@@ -624,7 +631,7 @@ export default function Home() {
           >
             <Link to={createPageUrl('Products')}>
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
-                <Button className="h-16 px-14 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 hover:from-purple-400 hover:via-pink-400 hover:to-purple-500 text-white font-black text-lg rounded-2xl shadow-2xl shadow-purple-600/40 hover:shadow-purple-600/60 transition-all">
+                <Button className="btn-gold h-16 px-14 text-lg rounded-2xl">
                   Alle Produkte ansehen
                 </Button>
               </motion.div>
@@ -729,8 +736,8 @@ export default function Home() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-medium leading-relaxed"
-              style={{ color: 'rgba(255, 255, 255, 0.75)' }}
+              className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-bold leading-relaxed"
+              style={{ color: 'var(--muted)' }}
             >
               Tritt der <span className="text-gold font-black">Elite</span> bei und erlebe{' '}
               <span className="text-gold2 font-black">Premium Shopping</span> ✨
