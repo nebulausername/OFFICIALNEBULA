@@ -106,6 +106,13 @@ export default function ProductDetail() {
     try {
       const user = await base44.auth.me();
 
+      const cartOptions = {
+        ...selectedOptions,
+        color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : null,
+        size: selectedSize,
+        variant_id: product.variants?.find(v => v.color_id === selectedColor?.id && v.size === selectedSize)?.id
+      };
+
       // Check if item already in cart
       const existing = await base44.entities.StarCartItem.filter({
         user_id: user.id,
@@ -115,20 +122,20 @@ export default function ProductDetail() {
       if (existing.length > 0) {
         await base44.entities.StarCartItem.update(existing[0].id, {
           quantity: existing[0].quantity + quantity,
-          selected_options: selectedOptions
+          selected_options: cartOptions
         });
       } else {
         await base44.entities.StarCartItem.create({
           user_id: user.id,
           product_id: product.id,
           quantity: quantity,
-          selected_options: selectedOptions
+          selected_options: cartOptions
         });
       }
 
       toast({
         title: 'Zum Warenkorb hinzugefügt',
-        description: `${quantity}x ${product.name}`
+        description: `${quantity}x ${product.name}${selectedColor ? ` (${selectedColor.name})` : ''}${selectedSize ? ` - ${selectedSize}` : ''}`
       });
 
       setTimeout(() => {
