@@ -118,7 +118,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-panel border-[var(--glass-border)] max-w-5xl p-0 overflow-hidden">
+      <DialogContent className="glass-panel max-w-5xl p-0 overflow-hidden" style={{ border: '1px solid rgba(var(--gold-rgb), 0.22)' }}>
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -257,7 +257,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
               <Button
                 onClick={handleAddToCart}
                 disabled={!product.in_stock || isAddingToCart}
-                className="w-full h-12 btn-primary text-base relative overflow-hidden"
+                className="w-full h-12 btn-gold text-base relative overflow-hidden"
               >
                 <AnimatePresence mode="wait">
                   {showSuccess ? (
@@ -304,18 +304,19 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                 <button
                   onClick={toggleWishlist}
                   disabled={isPending}
-                  className="h-12 btn-secondary flex items-center justify-center gap-2"
+                  className="h-12 btn-gold-outline flex items-center justify-center gap-2"
                 >
                   <Heart
                     className={`w-5 h-5 smooth-transition ${
-                      isWishlisted ? 'fill-[hsl(var(--error))] text-[hsl(var(--error))]' : ''
+                      isWishlisted ? 'text-gold' : ''
                     }`}
+                    fill={isWishlisted ? 'var(--gold)' : 'none'}
                   />
                   <span>{isWishlisted ? 'Gemerkt' : 'Merken'}</span>
                 </button>
 
                 <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`}>
-                  <button className="h-12 w-full btn-secondary flex items-center justify-center gap-2">
+                  <button className="h-12 w-full btn-gold-outline flex items-center justify-center gap-2">
                     <ExternalLink className="w-5 h-5" />
                     Details
                   </button>

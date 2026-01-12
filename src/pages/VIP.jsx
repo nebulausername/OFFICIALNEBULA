@@ -186,13 +186,17 @@ export default function VIP() {
         <motion.div
           animate={{ rotate: [0, 5, -5, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-6 glow-effect shadow-2xl shadow-yellow-500/50"
+          className="w-20 h-20 md:w-28 md:h-28 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl"
+          style={{
+            background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
+            boxShadow: '0 0 40px rgba(var(--gold-rgb), 0.4)'
+          }}
         >
-          <Crown className="w-10 h-10 md:w-14 md:h-14 text-white" />
+          <Crown className="w-10 h-10 md:w-14 md:h-14 text-black" />
         </motion.div>
         
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-4 px-4">
-          <span className="bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500 bg-clip-text text-transparent animate-gradient">
+          <span className="text-gradient-gold">
             VIP Programm
           </span>
         </h1>
@@ -205,7 +209,7 @@ export default function VIP() {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full font-bold shadow-2xl shadow-yellow-500/50 text-sm md:text-base"
+            className="mt-6 vip-badge px-6 py-3 text-sm md:text-base"
           >
             <Crown className="w-5 h-5" />
             Du bist VIP Member!
@@ -216,7 +220,7 @@ export default function VIP() {
       {/* VIP Benefits */}
       <div className="mb-12 md:mb-20">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black mb-8 md:mb-12 text-center px-4">
-          <span className="bg-gradient-to-r from-yellow-300 to-amber-500 bg-clip-text text-transparent">
+          <span className="text-gradient-gold">
             VIP Vorteile
           </span>
         </h2>
@@ -282,7 +286,7 @@ export default function VIP() {
 
                 <Button 
                   onClick={() => handlePlanClick(vipPlans[0])}
-                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 font-bold"
+                  className="w-full btn-gold font-bold"
                 >
                   Jetzt anfragen
                 </Button>
@@ -310,7 +314,7 @@ export default function VIP() {
 
                 <Button 
                   onClick={() => handlePlanClick(vipPlans[1])}
-                  className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-400 hover:to-cyan-400 font-bold"
+                  className="w-full btn-gold-outline font-bold"
                 >
                   Jetzt anfragen
                 </Button>
@@ -338,7 +342,7 @@ export default function VIP() {
 
                 <Button 
                   onClick={() => handlePlanClick(vipPlans[2])}
-                  className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 font-bold"
+                  className="w-full btn-gold-outline font-bold"
                 >
                   Jetzt anfragen
                 </Button>

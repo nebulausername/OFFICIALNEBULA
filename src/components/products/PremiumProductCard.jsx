@@ -119,13 +119,26 @@ export default function PremiumProductCard({ product, onQuickView }) {
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="px-3 py-1.5 rounded-full bg-green-500/90 backdrop-blur-md text-white text-xs font-black flex items-center gap-1.5 shadow-lg"
+                className="px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-black flex items-center gap-1.5"
+                style={{
+                  background: 'rgba(100, 230, 150, 0.15)',
+                  border: '1px solid rgba(100, 230, 150, 0.3)',
+                  color: 'var(--success)',
+                  boxShadow: 'var(--shadow-subtle)'
+                }}
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[rgba(100,230,150,0.85)] animate-pulse" />
                 Verfügbar
               </motion.div>
             ) : (
-              <div className="px-3 py-1.5 rounded-full bg-red-500/90 backdrop-blur-md text-white text-xs font-black shadow-lg">
+              <div className="px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-black"
+                style={{
+                  background: 'rgba(255, 100, 120, 0.15)',
+                  border: '1px solid rgba(255, 100, 120, 0.3)',
+                  color: 'var(--error)',
+                  boxShadow: 'var(--shadow-subtle)'
+                }}
+              >
                 Ausverkauft
               </div>
             )}
@@ -137,13 +150,20 @@ export default function PremiumProductCard({ product, onQuickView }) {
             whileTap={{ scale: 0.9 }}
             onClick={toggleWishlist}
             disabled={isPending}
-            className="absolute top-3 left-3 w-11 h-11 rounded-full backdrop-blur-xl bg-black/40 flex items-center justify-center focus-ring smooth-transition hover:bg-black/60 shadow-lg"
+            className="absolute top-3 left-3 w-11 h-11 rounded-full backdrop-blur-xl flex items-center justify-center focus-ring smooth-transition"
+            style={{
+              background: 'var(--surface2)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--shadow-subtle)'
+            }}
             aria-label={isWishlisted ? 'Von Merkliste entfernen' : 'Zu Merkliste hinzufügen'}
           >
             <Heart
               className={`w-5 h-5 smooth-transition ${
-                isWishlisted ? 'fill-red-500 text-red-500' : 'text-white'
+                isWishlisted ? 'text-gold' : 'text-white'
               }`}
+              fill={isWishlisted ? 'var(--gold)' : 'none'}
+              style={isWishlisted ? { filter: 'drop-shadow(0 0 8px rgba(var(--gold-rgb), 0.6))' } : {}}
             />
           </motion.button>
           
@@ -152,7 +172,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
             initial={{ opacity: 0, y: 10 }}
             whileHover={{ opacity: 1, y: 0 }}
             onClick={handleQuickView}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-sm py-2.5 px-8 rounded-xl shadow-2xl flex items-center gap-2"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition btn-gold font-black text-sm py-2.5 px-8 flex items-center gap-2"
           >
             <Eye className="w-4 h-4" />
             Quick View
@@ -160,41 +180,54 @@ export default function PremiumProductCard({ product, onQuickView }) {
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-3 bg-gradient-to-b from-zinc-900/50 to-zinc-900/80">
+        <div className="p-5 space-y-3" style={{ background: 'var(--surface)' }}>
           {/* Product Name */}
-          <h3 className="font-bold text-base text-white line-clamp-2 leading-snug min-h-[2.5rem] group-hover:text-gradient-primary smooth-transition">
+          <h3 className="font-bold text-base text-white line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition">
             {product.name}
           </h3>
           
           {/* Price & SKU Row */}
           <div className="flex items-baseline justify-between gap-3">
-            <div className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <div className="text-3xl font-black text-white">
               {product.price}€
             </div>
-            <div className="text-xs font-mono text-zinc-400 bg-zinc-800/50 px-2.5 py-1.5 rounded-lg border border-zinc-700/50">
+            <div className="text-xs font-mono px-2.5 py-1.5 rounded-lg"
+              style={{
+                color: 'var(--muted)',
+                background: 'var(--surface2)',
+                border: '1px solid var(--border-subtle)'
+              }}
+            >
               {product.sku}
             </div>
           </div>
           
           {/* Delivery Info */}
-          <div className="space-y-2 pt-3 border-t border-zinc-800/50">
+          <div className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-2 text-xs">
-              <div className="w-5 h-5 rounded-md bg-red-500/20 flex items-center justify-center flex-shrink-0">
-                <MapPin className="w-3 h-3 text-red-400" />
+              <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(var(--gold-rgb), 0.15)' }}
+              >
+                <MapPin className="w-3 h-3 text-gold" />
               </div>
-              <span className="font-semibold text-zinc-300">🇨🇳 Lieferbar aus China</span>
+              <span className="font-semibold" style={{ color: 'var(--muted)' }}>🇨🇳 Lieferbar aus China</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
-              <div className="w-5 h-5 rounded-md bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                <Clock className="w-3 h-3 text-blue-400" />
+              <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--surface2)' }}
+              >
+                <Clock className="w-3 h-3" style={{ color: 'var(--text)' }} />
               </div>
-              <span className="font-semibold text-zinc-300">8–17 Tage Lieferzeit</span>
+              <span className="font-semibold" style={{ color: 'var(--muted)' }}>8–17 Tage Lieferzeit</span>
             </div>
           </div>
         </div>
 
         {/* Hover Glow Effect */}
-        <div className="absolute inset-0 rounded-[var(--radius-lg)] opacity-0 group-hover:opacity-100 smooth-transition pointer-events-none glow-accent" />
+        <div 
+          className="absolute inset-0 rounded-[var(--radius-lg)] opacity-0 group-hover:opacity-100 smooth-transition pointer-events-none" 
+          style={{ boxShadow: '0 0 40px rgba(var(--gold-rgb), 0.15)' }}
+        />
       </motion.div>
     </Link>
   );
