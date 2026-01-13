@@ -12,7 +12,6 @@ import FAQ from './pages/FAQ';
 import Help from './pages/Help';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ProductDetail from './pages/ProductDetail';
-import Profile from './pages/Profile';
 import ProfileSettings from './pages/ProfileSettings';
 import Requests from './pages/Requests';
 import Support from './pages/Support';
@@ -38,7 +37,6 @@ export const PAGES = {
     "Help": Help,
     "OrderConfirmation": OrderConfirmation,
     "ProductDetail": ProductDetail,
-    "Profile": Profile,
     "ProfileSettings": ProfileSettings,
     "Requests": Requests,
     "Support": Support,
