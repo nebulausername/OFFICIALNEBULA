@@ -18,7 +18,8 @@ import {
   Sparkles,
   Shield,
   Zap,
-  Heart
+  Heart,
+  ChevronRight
 } from 'lucide-react';
 
 export default function Profile() {
@@ -71,14 +72,15 @@ export default function Profile() {
       description: 'Persönliche Daten verwalten',
       icon: User,
       link: createPageUrl('ProfileSettings'),
-      stat: null
+      color: 'from-violet-500 to-purple-600'
     },
     {
       title: 'Meine Bestellungen',
       description: 'Bestellungen & Status verfolgen',
       icon: Package,
       link: createPageUrl('Requests'),
-      stat: stats.requestCount
+      stat: stats.requestCount,
+      color: 'from-blue-500 to-cyan-500'
     },
     {
       title: 'Support Tickets',
@@ -86,35 +88,31 @@ export default function Profile() {
       icon: MessageCircle,
       link: createPageUrl('Support'),
       stat: stats.openTicketCount,
-      badge: stats.openTicketCount > 0 ? `${stats.openTicketCount} offen` : null
+      badge: stats.openTicketCount > 0 ? `${stats.openTicketCount} offen` : null,
+      color: 'from-green-500 to-emerald-500'
     },
     {
       title: 'Merkliste',
       description: 'Deine Favoriten',
       icon: Heart,
       link: createPageUrl('Wishlist'),
-      stat: wishlistCount
+      stat: wishlistCount,
+      color: 'from-pink-500 to-rose-500'
     },
     {
       title: 'VIP Programm',
       description: 'Exklusive Vorteile freischalten',
       icon: Crown,
       link: createPageUrl('VIP'),
-      badge: 'Premium'
+      badge: 'Premium',
+      color: 'from-amber-500 to-yellow-500'
     },
     {
-      title: 'FAQ',
-      description: 'Häufig gestellte Fragen',
-      icon: MessageCircle,
-      link: createPageUrl('FAQ'),
-      stat: null
-    },
-    {
-      title: 'Hilfe & Support',
-      description: 'Wir helfen dir weiter',
+      title: 'Hilfe & FAQ',
+      description: 'Häufige Fragen & Support',
       icon: HelpCircle,
       link: createPageUrl('Help'),
-      stat: null
+      color: 'from-slate-500 to-slate-600'
     }
   ];
 
@@ -124,207 +122,186 @@ export default function Profile() {
       description: 'Verwaltung & Einstellungen',
       icon: Settings,
       link: createPageUrl('Admin'),
-      badge: 'Admin'
+      badge: 'Admin',
+      color: 'from-red-500 to-orange-500'
     });
   }
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8" style={{ background: 'var(--bg)' }}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-12 text-center relative"
-        >
-          <div 
-            className="absolute inset-0 rounded-full blur-3xl -z-10"
-            style={{ background: 'radial-gradient(circle, rgba(var(--gold-rgb), 0.15), transparent 70%)' }}
-          />
-          
-          <motion.div
-            whileHover={{ scale: 1.08, rotate: -5 }}
-            whileTap={{ scale: 0.95 }}
-            className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 inline-block rounded-3xl"
-            style={{ 
-              background: 'var(--surface2)',
-              border: '1px solid rgba(var(--gold-rgb), 0.4)'
-            }}
-          >
-            <div className="relative w-full h-full flex items-center justify-center rounded-3xl">
-              <User className="w-12 h-12 md:w-16 md:h-16" style={{ color: 'var(--gold)' }} />
-            </div>
-            <motion.div
-              animate={{ scale: [1, 1.25, 1], rotate: [0, 360, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="absolute -top-1 -right-1 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg"
-              style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold2))' }}
-            >
-              <Star className="w-4 h-4 md:w-5 md:h-5 text-black" fill="black" />
-            </motion.div>
-          </motion.div>
-          
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-black mb-3"
-            style={{ color: '#FFFFFF' }}
-          >
-            {user?.full_name || 'Mein Profil'}
-          </motion.h1>
-          
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-base md:text-lg flex items-center justify-center gap-2 flex-wrap font-semibold"
-            style={{ color: 'var(--muted)' }}
-          >
-            <Sparkles className="w-5 h-5" style={{ color: 'var(--gold)' }} />
-            {user?.email}
-          </motion.div>
+    <div className="min-h-screen pb-24 md:pb-8">
+      {/* Background with subtle gradient */}
+      <div 
+        className="fixed inset-0 -z-10"
+        style={{
+          background: 'linear-gradient(180deg, #0A0C10 0%, #12151C 50%, #0A0C10 100%)'
+        }}
+      />
+      <div 
+        className="fixed inset-0 -z-10 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 80% 40% at 50% 0%, rgba(var(--gold-rgb), 0.08) 0%, transparent 60%)'
+        }}
+      />
 
-          {user?.role === 'admin' && (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
+        {/* Profile Header Card */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative mb-8 p-6 md:p-8 rounded-3xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.12), rgba(var(--gold-rgb), 0.04))',
+            border: '1px solid rgba(var(--gold-rgb), 0.25)'
+          }}
+        >
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl" style={{ background: 'rgba(var(--gold-rgb), 0.15)' }} />
+          
+          <div className="relative flex flex-col md:flex-row items-center gap-6">
+            {/* Avatar */}
             <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.4, type: 'spring' }}
-              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold"
-              style={{
-                background: 'rgba(var(--gold-rgb), 0.15)',
-                border: '1px solid rgba(var(--gold-rgb), 0.4)',
-                color: 'var(--gold)'
-              }}
+              whileHover={{ scale: 1.05 }}
+              className="relative"
             >
-              <Shield className="w-4 h-4" />
-              Administrator
+              <div 
+                className="w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center"
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
+                  boxShadow: '0 8px 32px rgba(var(--gold-rgb), 0.4)'
+                }}
+              >
+                <User className="w-12 h-12 md:w-14 md:h-14 text-black" />
+              </div>
+              {user?.role === 'admin' && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #8B5CF6, #A855F7)',
+                    boxShadow: '0 4px 16px rgba(139, 92, 246, 0.5)'
+                  }}
+                >
+                  <Shield className="w-5 h-5 text-white" />
+                </motion.div>
+              )}
             </motion.div>
-          )}
+            
+            {/* User Info */}
+            <div className="text-center md:text-left flex-1">
+              <h1 className="text-3xl md:text-4xl font-black text-white mb-2">
+                {user?.full_name || 'Mein Profil'}
+              </h1>
+              <div className="flex items-center justify-center md:justify-start gap-2 text-base font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                <Sparkles className="w-4 h-4 text-gold" />
+                {user?.email}
+              </div>
+              {user?.role === 'admin' && (
+                <div 
+                  className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full text-sm font-bold"
+                  style={{ background: 'rgba(139, 92, 246, 0.2)', color: '#A78BFA' }}
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  Administrator
+                </div>
+              )}
+            </div>
+          </div>
         </motion.div>
 
         {/* Quick Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="grid grid-cols-2 gap-4 mb-12"
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-2 gap-4 mb-8"
         >
-          <motion.div
-            whileHover={{ y: -8, scale: 1.02 }}
-            className="luxury-card p-6 text-center"
-            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
+          <div 
+            className="p-5 rounded-2xl text-center"
+            style={{
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.25)'
+            }}
           >
-            <motion.div
-              whileHover={{ rotate: 360, scale: 1.1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Package className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
-            </motion.div>
-            <div 
-              className="text-4xl font-black mb-1"
-              style={{ color: 'var(--gold2)' }}
-            >
-              {stats.requestCount}
-            </div>
-            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Bestellungen</p>
-          </motion.div>
+            <Package className="w-7 h-7 mx-auto mb-2" style={{ color: '#60A5FA' }} />
+            <div className="text-3xl font-black text-white mb-1">{stats.requestCount}</div>
+            <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Bestellungen</p>
+          </div>
 
-          <motion.div
-            whileHover={{ y: -8, scale: 1.02 }}
-            className="luxury-card p-6 text-center"
-            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
+          <div 
+            className="p-5 rounded-2xl text-center"
+            style={{
+              background: 'rgba(var(--gold-rgb), 0.1)',
+              border: '1px solid rgba(var(--gold-rgb), 0.25)'
+            }}
           >
-            <motion.div
-              whileHover={{ rotate: 360, scale: 1.1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <ShoppingBag className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
-            </motion.div>
-            <div 
-              className="text-4xl font-black mb-1"
-              style={{ color: 'var(--gold2)' }}
-            >
-              {stats.cartCount}
-            </div>
-            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Im Warenkorb</p>
-          </motion.div>
+            <ShoppingBag className="w-7 h-7 mx-auto mb-2 text-gold" />
+            <div className="text-3xl font-black text-gold2 mb-1">{stats.cartCount}</div>
+            <p className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Im Warenkorb</p>
+          </div>
         </motion.div>
 
-        {/* Menu Grid */}
-        <div className="grid sm:grid-cols-2 gap-4 mb-8">
+        {/* Menu Items */}
+        <div className="space-y-3 mb-8">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ y: -8, scale: 1.02 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 * index }}
               >
                 <Link
                   to={item.link}
-                  className="block luxury-card p-6 transition-all group relative overflow-hidden"
-                  style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
+                  className="flex items-center gap-4 p-4 rounded-2xl transition-all group"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                  }}
                 >
+                  {/* Icon */}
                   <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.08), transparent)' }}
-                  />
+                    className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${item.color} group-hover:scale-105 transition-transform`}
+                    style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' }}
+                  >
+                    <Icon className="w-7 h-7 text-white" />
+                  </div>
                   
-                  <div className="relative z-10">
-                    <div className="flex items-start justify-between mb-4">
-                      <motion.div 
-                        whileHover={{ rotate: 360, scale: 1.15 }}
-                        transition={{ duration: 0.6 }}
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl"
-                        style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold2))' }}
-                      >
-                        <Icon className="w-8 h-8 text-black" />
-                      </motion.div>
-                      
-                      {item.badge ? (
-                        <motion.div 
-                          whileHover={{ scale: 1.1 }}
-                          className="px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg"
-                          style={{ 
-                            background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
-                            color: '#000'
-                          }}
-                        >
-                          {item.badge}
-                        </motion.div>
-                      ) : item.stat !== null && item.stat > 0 ? (
-                        <motion.div 
-                          whileHover={{ scale: 1.15 }}
-                          className="px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg"
-                          style={{
-                            background: 'rgba(var(--gold-rgb), 0.2)',
-                            border: '1px solid rgba(var(--gold-rgb), 0.4)',
-                            color: 'var(--gold)'
-                          }}
-                        >
-                          {item.stat}
-                        </motion.div>
-                      ) : (
-                        <ArrowRight 
-                          className="w-6 h-6 group-hover:translate-x-2 transition-all"
-                          style={{ color: 'var(--muted)' }}
-                        />
-                      )}
-                    </div>
-                    
-                    <h3 
-                      className="font-black text-xl mb-2 group-hover:text-gold transition-all"
-                      style={{ color: '#FFFFFF' }}
-                    >
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-lg text-white group-hover:text-gold transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-sm leading-relaxed font-medium" style={{ color: 'var(--muted)' }}>
+                    <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>
                       {item.description}
                     </p>
+                  </div>
+                  
+                  {/* Badge/Stat/Arrow */}
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    {item.badge ? (
+                      <span 
+                        className="px-3 py-1 rounded-full text-xs font-bold"
+                        style={{ 
+                          background: item.badge === 'Admin' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(var(--gold-rgb), 0.2)',
+                          color: item.badge === 'Admin' ? '#F87171' : 'var(--gold)'
+                        }}
+                      >
+                        {item.badge}
+                      </span>
+                    ) : item.stat !== null && item.stat > 0 ? (
+                      <span 
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                        style={{ background: 'rgba(var(--gold-rgb), 0.2)', color: 'var(--gold)' }}
+                      >
+                        {item.stat}
+                      </span>
+                    ) : null}
+                    <ChevronRight 
+                      className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                      style={{ color: 'rgba(255,255,255,0.4)' }}
+                    />
                   </div>
                 </Link>
               </motion.div>
@@ -336,77 +313,40 @@ export default function Profile() {
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          whileHover={{ scale: 1.02, y: -2 }}
-          whileTap={{ scale: 0.98 }}
+          transition={{ delay: 0.4 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           onClick={handleLogout}
-          className="w-full luxury-card p-5 transition-all group flex items-center justify-center gap-3"
-          style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
+          className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl transition-all group"
+          style={{
+            background: 'rgba(239, 68, 68, 0.08)',
+            border: '1px solid rgba(239, 68, 68, 0.2)'
+          }}
         >
-          <motion.div
-            whileHover={{ rotate: 180 }}
-            transition={{ duration: 0.3 }}
-          >
-            <LogOut className="w-6 h-6 group-hover:text-red-400 transition-colors" style={{ color: 'var(--muted)' }} />
-          </motion.div>
-          <span className="font-black text-lg group-hover:text-red-400 transition-colors" style={{ color: 'var(--text-secondary)' }}>
+          <LogOut className="w-5 h-5" style={{ color: '#F87171' }} />
+          <span className="font-bold text-base" style={{ color: '#F87171' }}>
             Abmelden
           </span>
         </motion.button>
 
-        {/* Info Cards */}
-        <div className="mt-12 grid md:grid-cols-3 gap-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            whileHover={{ y: -5, scale: 1.03 }}
-            className="luxury-card p-6 text-center group"
-            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
-          >
-            <motion.div
-              whileHover={{ rotate: 360, scale: 1.2 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Zap className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
-            </motion.div>
-            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Schneller Support</p>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            whileHover={{ y: -5, scale: 1.03 }}
-            className="luxury-card p-6 text-center group"
-            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
-          >
-            <motion.div
-              whileHover={{ rotate: 360, scale: 1.2 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Shield className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
-            </motion.div>
-            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>100% Sicher</p>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            whileHover={{ y: -5, scale: 1.03 }}
-            className="luxury-card p-6 text-center group"
-            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
-          >
-            <motion.div
-              whileHover={{ rotate: 360, scale: 1.2 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Star className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--gold)' }} fill="currentColor" />
-            </motion.div>
-            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Premium Qualität</p>
-          </motion.div>
-        </div>
+        {/* Bottom Info Strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 flex items-center justify-center gap-6 flex-wrap"
+        >
+          {[
+            { icon: Zap, text: '24/7 Support' },
+            { icon: Shield, text: '100% Sicher' },
+            { icon: Star, text: 'Premium' }
+          ].map((item, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <item.icon className="w-4 h-4 text-gold" />
+              <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>{item.text}</span>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </div>
   );
