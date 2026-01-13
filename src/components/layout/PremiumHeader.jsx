@@ -129,29 +129,17 @@ export default function PremiumHeader() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">
-            {/* Logo + Shop Icon */}
-            <div className="flex items-center gap-2 md:gap-3">
-              {/* Brand Logo - Opens Categories */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setIsShopDrawerOpen(true);
-                }}
-                className="flex items-center gap-2 focus-ring rounded-2xl"
-              >
+            {/* Logo + Shop Link */}
+            <div className="flex items-center gap-3 md:gap-4">
+              {/* Brand Logo - Goes to Home */}
+              <Link to={createPageUrl('Home')} className="flex items-center gap-2 focus-ring rounded-2xl">
                 <motion.div
-                  animate={{
-                    boxShadow: [
-                      '0 0 20px rgba(var(--gold-rgb), 0.2)',
-                      '0 0 30px rgba(var(--gold-rgb), 0.3)',
-                      '0 0 20px rgba(var(--gold-rgb), 0.2)',
-                    ]
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center p-2 gold-border"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center p-2"
                   style={{
                     background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(214, 178, 94, 0.3)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)'
                   }}
@@ -162,44 +150,52 @@ export default function PremiumHeader() {
                     className="w-full h-full object-contain drop-shadow-lg"
                   />
                 </motion.div>
-                <span className="hidden sm:block text-base md:text-lg font-black tracking-tight bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
+                <span className="hidden sm:block text-base md:text-lg font-black tracking-tight" style={{ color: '#FFFFFF' }}>
                   NEBULA
                 </span>
-              </motion.button>
+              </Link>
 
-              {/* Premium Shop Icon */}
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={() => {
-                  setIsShopDrawerOpen(true);
-                }}
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center focus-ring"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(214, 178, 94, 0.3)'
-                }}
-                title="Shop durchsuchen"
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="rgba(255, 255, 255, 0.92)" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
+              {/* Shop Link - Goes to Products Page */}
+              <Link to={createPageUrl('Products')}>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl"
+                  style={{
+                    background: location.pathname.includes('Products') 
+                      ? 'rgba(214, 178, 94, 0.15)' 
+                      : 'rgba(255, 255, 255, 0.06)',
+                    border: location.pathname.includes('Products')
+                      ? '1px solid rgba(214, 178, 94, 0.4)'
+                      : '1px solid rgba(255, 255, 255, 0.1)'
+                  }}
                 >
-                  <rect x="3" y="3" width="7" height="7"/>
-                  <rect x="14" y="3" width="7" height="7"/>
-                  <rect x="14" y="14" width="7" height="7"/>
-                  <rect x="3" y="14" width="7" height="7"/>
-                </svg>
-              </motion.button>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke={location.pathname.includes('Products') ? '#D6B25E' : 'rgba(255, 255, 255, 0.85)'}
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                  </svg>
+                  <span 
+                    className="text-sm font-bold hidden md:block"
+                    style={{ 
+                      color: location.pathname.includes('Products') ? '#D6B25E' : 'rgba(255, 255, 255, 0.85)'
+                    }}
+                  >
+                    SHOP
+                  </span>
+                </motion.div>
+              </Link>
             </div>
 
             {/* Desktop Nav */}
