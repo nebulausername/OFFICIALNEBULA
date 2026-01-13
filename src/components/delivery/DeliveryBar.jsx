@@ -55,8 +55,8 @@ export default function DeliveryBar() {
               <MapPin className="w-5 h-5 text-gold" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>Versand aus</div>
-              <div className="text-base font-black text-white flex items-center gap-2">
+              <div className="text-xs font-bold" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Versand aus</div>
+              <div className="text-base font-black flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
                 🇨🇳 China
               </div>
             </div>
@@ -72,8 +72,8 @@ export default function DeliveryBar() {
               <Clock className="w-5 h-5" style={{ color: 'var(--text)' }} />
             </div>
             <div>
-              <div className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>Lieferzeit</div>
-              <div className="text-base font-black text-white">{getEtaText()}</div>
+              <div className="text-xs font-bold" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Lieferzeit</div>
+              <div className="text-base font-black" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>{getEtaText()}</div>
             </div>
           </div>
 
@@ -87,8 +87,8 @@ export default function DeliveryBar() {
               <Truck className="w-5 h-5 text-[rgba(100,230,150,0.85)]" />
             </div>
             <div>
-              <div className="text-xs font-semibold" style={{ color: 'var(--muted)' }}>Versand</div>
-              <div className="text-base font-black text-[rgba(100,230,150,0.85)]">
+              <div className="text-xs font-bold" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Versand</div>
+              <div className="text-base font-black" style={{ color: '#4ade80' }}>
                 Kostenloser Versand
               </div>
             </div>
