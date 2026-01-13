@@ -12,13 +12,13 @@ import FAQ from './pages/FAQ';
 import Help from './pages/Help';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ProductDetail from './pages/ProductDetail';
+import Products from './pages/Products';
 import ProfileSettings from './pages/ProfileSettings';
 import Requests from './pages/Requests';
 import Support from './pages/Support';
 import SupportTicketDetail from './pages/SupportTicketDetail';
 import VIP from './pages/VIP';
 import Wishlist from './pages/Wishlist';
-import Products from './pages/Products';
 import __Layout from './Layout.jsx';
 
 
@@ -37,13 +37,13 @@ export const PAGES = {
     "Help": Help,
     "OrderConfirmation": OrderConfirmation,
     "ProductDetail": ProductDetail,
+    "Products": Products,
     "ProfileSettings": ProfileSettings,
     "Requests": Requests,
     "Support": Support,
     "SupportTicketDetail": SupportTicketDetail,
     "VIP": VIP,
     "Wishlist": Wishlist,
-    "Products": Products,
 }
 
 export const pagesConfig = {

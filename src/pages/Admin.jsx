@@ -158,8 +158,13 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+    <div className="min-h-screen relative">
+      {/* Premium Background */}
+      <div className="fixed inset-0 -z-10" style={{ background: 'linear-gradient(180deg, #0A0C10 0%, #12151C 50%, #0A0C10 100%)' }} />
+      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(var(--gold-rgb), 0.1) 0%, transparent 50%)' }} />
+      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)' }} />
+      
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
