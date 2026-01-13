@@ -298,9 +298,9 @@ export default function Admin() {
           transition={{ delay: 0.4 }}
           className="rounded-2xl p-6 md:p-8 relative overflow-hidden mb-12 md:mb-16"
           style={{
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.1), rgba(var(--gold-rgb), 0.03))',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(214, 178, 94, 0.2)'
+            border: '1px solid rgba(var(--gold-rgb), 0.25)'
           }}
         >
           <div className="relative z-10">
