@@ -13,7 +13,6 @@ import Help from './pages/Help';
 import Home from './pages/Home';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ProductDetail from './pages/ProductDetail';
-import Products from './pages/Products';
 import Profile from './pages/Profile';
 import ProfileSettings from './pages/ProfileSettings';
 import Requests from './pages/Requests';
@@ -40,7 +39,6 @@ export const PAGES = {
     "Home": Home,
     "OrderConfirmation": OrderConfirmation,
     "ProductDetail": ProductDetail,
-    "Products": Products,
     "Profile": Profile,
     "ProfileSettings": ProfileSettings,
     "Requests": Requests,
