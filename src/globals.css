@@ -4,23 +4,23 @@
 
 @layer base {
   :root {
-    /* Premium Dark Luxury Design System - High Contrast */
-    --bg: #0B0D12;
-    --bg2: #0F1117;
-    --bg3: #141720;
+    /* Premium Dark Luxury Design System - Maximum Contrast */
+    --bg: #0A0C10;
+    --bg2: #12151C;
+    --bg3: #1A1E28;
     
-    --surface: rgba(255, 255, 255, 0.06);
-    --surface2: rgba(255, 255, 255, 0.09);
-    --surface-hover: rgba(255, 255, 255, 0.12);
+    --surface: rgba(255, 255, 255, 0.08);
+    --surface2: rgba(255, 255, 255, 0.12);
+    --surface-hover: rgba(255, 255, 255, 0.15);
     
-    --border: rgba(255, 255, 255, 0.12);
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.18);
+    --border: rgba(255, 255, 255, 0.15);
+    --border-subtle: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.22);
     
-    --text: rgba(255, 255, 255, 0.95);
-    --text-secondary: rgba(255, 255, 255, 0.78);
-    --muted: rgba(255, 255, 255, 0.65);
-    --subtle: rgba(255, 255, 255, 0.50);
+    --text: #FFFFFF;
+    --text-secondary: rgba(255, 255, 255, 0.88);
+    --muted: rgba(255, 255, 255, 0.72);
+    --subtle: rgba(255, 255, 255, 0.55);
     
     --gold: #D6B25E;
     --gold2: #F2D27C;

@@ -502,18 +502,11 @@ export default function Home() {
       </section>
 
       {/* Featured Products - Ultra Premium */}
-      <section className="py-32 relative overflow-hidden z-10">
-        {/* Dynamic Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black" />
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_20%_30%,rgba(139,92,246,0.15),transparent_60%)]"
-        />
-        <motion.div
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.3, 0.5] }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_80%_70%,rgba(236,72,153,0.15),transparent_60%)]"
+      <section className="py-24 relative overflow-hidden z-10">
+        {/* Clean Background */}
+        <div className="absolute inset-0" style={{ background: 'var(--bg)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full blur-[200px] pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(214, 178, 94, 0.06), transparent 70%)' }}
         />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -522,34 +515,24 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-20"
+            className="text-center mb-16"
           >
             {/* Badge */}
             <motion.div
-              initial={{ scale: 0.8, rotate: -10 }}
-              whileInView={{ scale: 1, rotate: 0 }}
+              initial={{ scale: 0.9, y: 10 }}
+              whileInView={{ scale: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ type: "spring", bounce: 0.5 }}
-              className="inline-flex items-center gap-3 px-8 py-4 mb-10 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-2xl border-2 border-purple-500/40 rounded-full shadow-2xl shadow-purple-500/30"
+              className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full"
+              style={{
+                background: 'rgba(214, 178, 94, 0.1)',
+                border: '1px solid rgba(214, 178, 94, 0.3)'
+              }}
             >
-              <motion.div
-                animate={{ 
-                  rotate: 360,
-                  scale: [1, 1.2, 1]
-                }}
-                transition={{ 
-                  rotate: { duration: 4, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 2, repeat: Infinity }
-                }}
-              >
-                <Sparkles className="w-6 h-6 text-purple-400" />
-              </motion.div>
-              <span className="text-base font-black text-white uppercase tracking-widest">Fresh Drops</span>
-              <motion.div
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-500/50"
-              />
+              <Sparkles className="w-5 h-5" style={{ color: 'var(--gold)' }} />
+              <span className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--gold)' }}>
+                Fresh Drops
+              </span>
+              <div className="w-2 h-2 bg-green-400 rounded-full" />
             </motion.div>
             
             {/* Headline */}
@@ -557,7 +540,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tight"
+              className="text-5xl sm:text-6xl md:text-7xl font-black mb-5 tracking-tight"
               style={{ color: 'var(--text)' }}
             >
               Brandneu
@@ -569,11 +552,11 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-xl sm:text-2xl max-w-3xl mx-auto font-bold"
-              style={{ color: 'var(--muted)' }}
+              className="text-lg sm:text-xl max-w-3xl mx-auto font-medium"
+              style={{ color: 'var(--text-secondary)' }}
             >
-              Die <span className="text-gold">heißesten</span> Drops –{' '}
-              <span className="text-gold2">limitiert</span> & exklusiv ✨
+              Die <span style={{ color: 'var(--gold)' }}>heißesten</span> Drops –{' '}
+              <span style={{ color: 'var(--gold2)' }}>limitiert</span> & exklusiv ✨
             </motion.p>
           </motion.div>
 
@@ -623,8 +606,15 @@ export default function Home() {
             className="text-center"
           >
             <Link to={createPageUrl('Products')}>
-              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }}>
-                <Button className="btn-gold h-16 px-14 text-lg rounded-2xl">
+              <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  className="h-14 px-10 text-base rounded-xl font-bold"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
+                    color: '#0B0D12',
+                    boxShadow: '0 4px 20px rgba(214, 178, 94, 0.3)'
+                  }}
+                >
                   Alle Produkte ansehen
                 </Button>
               </motion.div>

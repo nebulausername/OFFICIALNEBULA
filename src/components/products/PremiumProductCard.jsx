@@ -225,20 +225,20 @@ export default function PremiumProductCard({ product, onQuickView }) {
         <div className="p-5 space-y-3" style={{ background: 'var(--bg2)' }}>
           {/* Product Name */}
           <h3 className="font-bold text-base line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition group-hover:text-gold" 
-            style={{ color: 'var(--text)' }}>
+            style={{ color: '#FFFFFF' }}>
             {product.name}
           </h3>
           
           {/* Price & SKU Row */}
           <div className="flex items-baseline justify-between gap-3">
-            <div className="text-2xl font-black" style={{ color: 'var(--gold)' }}>
+            <div className="text-2xl font-black" style={{ color: '#F2D27C' }}>
               {product.price}€
             </div>
             <div className="text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg"
               style={{
-                color: 'var(--gold)',
-                background: 'rgba(214, 178, 94, 0.1)',
-                border: '1px solid rgba(214, 178, 94, 0.25)'
+                color: '#D6B25E',
+                background: 'rgba(214, 178, 94, 0.15)',
+                border: '1px solid rgba(214, 178, 94, 0.3)'
               }}
             >
               {product.sku}
@@ -246,22 +246,22 @@ export default function PremiumProductCard({ product, onQuickView }) {
           </div>
           
           {/* Delivery Info */}
-          <div className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="space-y-2 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="flex items-center gap-2 text-sm">
               <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
                 style={{ background: 'rgba(214, 178, 94, 0.15)' }}
               >
-                <MapPin className="w-3 h-3" style={{ color: 'var(--gold)' }} />
+                <MapPin className="w-3 h-3" style={{ color: '#D6B25E' }} />
               </div>
-              <span className="font-semibold" style={{ color: 'var(--text-secondary)' }}>🇨🇳 Lieferbar aus China</span>
+              <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>🇨🇳 Lieferbar aus China</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(214, 178, 94, 0.1)' }}
+                style={{ background: 'rgba(255,255,255,0.08)' }}
               >
-                <Clock className="w-3 h-3" style={{ color: 'var(--muted)' }} />
+                <Clock className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.6)' }} />
               </div>
-              <span className="font-medium" style={{ color: 'var(--muted)' }}>8–17 Tage Lieferzeit</span>
+              <span className="font-medium" style={{ color: 'rgba(255,255,255,0.65)' }}>8–17 Tage Lieferzeit</span>
             </div>
           </div>
         </div>
