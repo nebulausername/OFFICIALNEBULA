@@ -120,11 +120,11 @@ export default function PremiumHeader() {
           isScrolled ? 'h-16' : 'h-20'
         }`}
         style={{
-          background: 'linear-gradient(180deg, rgba(8, 8, 12, 0.60) 0%, rgba(8, 8, 12, 0.55) 100%)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.10)',
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
+          background: 'rgba(11, 13, 18, 0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.4)'
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
