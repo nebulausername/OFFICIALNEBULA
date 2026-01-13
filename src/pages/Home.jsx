@@ -280,8 +280,16 @@ export default function Home() {
                   whileHover={{ scale: 1.05, y: -5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button className="btn-gold-outline h-16 px-10 text-lg rounded-2xl">
-                    <Star className="w-6 h-6 mr-2 text-gold" fill="currentColor" />
+                  <Button 
+                    className="h-16 px-10 text-lg rounded-2xl font-black"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(214, 178, 94, 0.15), rgba(214, 178, 94, 0.08))',
+                      border: '2px solid rgba(214, 178, 94, 0.5)',
+                      color: '#F5D98B',
+                      boxShadow: '0 0 30px rgba(214, 178, 94, 0.2)'
+                    }}
+                  >
+                    <Star className="w-6 h-6 mr-2" style={{ color: '#E8C76A' }} fill="currentColor" />
                     VIP werden
                   </Button>
                 </motion.div>
@@ -318,7 +326,7 @@ export default function Home() {
                   <div className="text-3xl font-black bg-gradient-to-r from-[#E8C76A] to-[#F5D98B] bg-clip-text text-transparent">
                     {stat.value}
                   </div>
-                  <div className="text-sm font-semibold mt-1" style={{ color: 'var(--subtle)' }}>{stat.label}</div>
+                  <div className="text-sm font-semibold mt-1" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
