@@ -251,15 +251,15 @@ export default function Admin() {
                   transition={{ delay: index * 0.08 }}
                   whileHover={{ y: -8, scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}
-                  className="group relative overflow-hidden rounded-2xl p-5 md:p-6 cursor-pointer transition-all"
+                  className="group relative overflow-hidden rounded-2xl p-5 md:p-6 cursor-pointer transition-all h-full"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.06)',
+                    background: `linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03))`,
                     backdropFilter: 'blur(24px)',
-                    border: '1px solid rgba(255, 255, 255, 0.10)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
                   }}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-0 group-hover:opacity-[0.12] transition-opacity duration-300`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-300`} />
                   
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-4">
