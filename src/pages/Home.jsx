@@ -311,22 +311,34 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="mt-16 grid grid-cols-3 gap-6 max-w-2xl mx-auto"
+              className="mt-16 grid grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto"
             >
               {[
-                { value: '500+', label: 'Produkte' },
-                { value: '10k+', label: 'Happy Customers' },
-                { value: '24/7', label: 'Support' }
+                { value: '500+', label: 'Produkte', icon: '📦', color: 'from-purple-500 to-pink-500' },
+                { value: '10k+', label: 'Happy Customers', icon: '⭐', color: 'from-amber-500 to-orange-500' },
+                { value: '24/7', label: 'Support', icon: '💬', color: 'from-cyan-500 to-blue-500' }
               ].map((stat, i) => (
                 <motion.div
                   key={i}
-                  whileHover={{ scale: 1.1, y: -5 }}
-                  className="glass-panel-hover text-center p-4 rounded-xl"
+                  whileHover={{ scale: 1.05, y: -8 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="relative text-center p-5 md:p-6 rounded-2xl overflow-hidden group cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03))',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
+                  }}
                 >
-                  <div className="text-3xl font-black bg-gradient-to-r from-[#E8C76A] to-[#F5D98B] bg-clip-text text-transparent">
-                    {stat.value}
+                  <motion.div
+                    className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`}
+                  />
+                  <div className="relative">
+                    <div className="text-2xl mb-2">{stat.icon}</div>
+                    <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-[#E8C76A] to-[#F5D98B] bg-clip-text text-transparent mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-xs md:text-sm font-bold" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>{stat.label}</div>
                   </div>
-                  <div className="text-sm font-semibold mt-1" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{stat.label}</div>
                 </motion.div>
               ))}
             </motion.div>
