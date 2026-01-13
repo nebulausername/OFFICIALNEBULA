@@ -10,7 +10,6 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import FAQ from './pages/FAQ';
 import Help from './pages/Help';
-import Home from './pages/Home';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ProductDetail from './pages/ProductDetail';
 import Profile from './pages/Profile';
@@ -37,7 +36,6 @@ export const PAGES = {
     "Checkout": Checkout,
     "FAQ": FAQ,
     "Help": Help,
-    "Home": Home,
     "OrderConfirmation": OrderConfirmation,
     "ProductDetail": ProductDetail,
     "Profile": Profile,
@@ -51,7 +49,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "Home",
+    mainPage: "Admin",
     Pages: PAGES,
     Layout: __Layout,
 };
