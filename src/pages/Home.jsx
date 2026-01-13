@@ -348,17 +348,10 @@ export default function Home() {
 
       {/* Departments Section */}
       <section className="py-24 relative z-10">
-        {/* Decorative Elements */}
+        {/* Subtle Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            animate={{ x: [0, 50, 0], y: [0, 30, 0] }}
-            transition={{ duration: 20, repeat: Infinity }}
-            className="absolute top-20 left-10 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl"
-          />
-          <motion.div
-            animate={{ x: [0, -50, 0], y: [0, -30, 0] }}
-            transition={{ duration: 25, repeat: Infinity }}
-            className="absolute bottom-20 right-10 w-80 h-80 bg-pink-600/10 rounded-full blur-3xl"
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[150px]"
+            style={{ background: 'radial-gradient(circle, rgba(214, 178, 94, 0.08), transparent 70%)' }}
           />
         </div>
 
@@ -369,24 +362,26 @@ export default function Home() {
             viewport={{ once: true }}
             className="mb-16 text-center"
           >
+            {/* Premium Badge */}
             <motion.div
-              initial={{ scale: 0.8, rotate: -5 }}
-              whileInView={{ scale: 1, rotate: 0 }}
+              initial={{ scale: 0.9, y: 10 }}
+              whileInView={{ scale: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ type: "spring", bounce: 0.4 }}
-              className="inline-flex items-center gap-3 px-8 py-4 mb-8 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-2xl border-2 border-purple-500/40 rounded-full shadow-2xl shadow-purple-500/30"
+              className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full"
+              style={{
+                background: 'rgba(214, 178, 94, 0.1)',
+                border: '1px solid rgba(214, 178, 94, 0.3)'
+              }}
             >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-6 h-6 text-purple-400" />
-              </motion.div>
-              <span className="text-base font-black text-white uppercase tracking-widest">Unsere Welten</span>
+              <Sparkles className="w-5 h-5" style={{ color: 'var(--gold)' }} />
+              <span className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--gold)' }}>
+                Unsere Welten
+              </span>
             </motion.div>
 
             <motion.h2 
-              className="text-5xl md:text-7xl font-black mb-6 tracking-tight"
+              className="text-5xl md:text-6xl lg:text-7xl font-black mb-5 tracking-tight"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -400,154 +395,84 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
               className="text-lg md:text-xl font-medium max-w-2xl mx-auto"
-              style={{ color: 'var(--muted)' }}
+              style={{ color: 'var(--text-secondary)' }}
             >
               Tauche ein in unsere Premium-Kollektionen
             </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-7">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {loadingDepts ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <motion.div 
                   key={i}
                   animate={{ opacity: [0.5, 0.8, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
-                  className="aspect-square rounded-3xl bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 backdrop-blur-xl border border-zinc-700/50" 
+                  className="aspect-square rounded-2xl"
+                  style={{ background: 'var(--surface)' }}
                 />
               ))
             ) : (
-              departments.map((dept, index) => {
-                const gradients = [
-                  { 
-                    from: 'from-purple-600', via: 'via-pink-600', to: 'to-purple-700', 
-                    glow: 'shadow-purple-500/50', border: 'border-purple-500/40',
-                    ring: 'ring-purple-500/30', bg: 'bg-purple-500/10'
-                  },
-                  { 
-                    from: 'from-pink-600', via: 'via-rose-600', to: 'to-pink-700', 
-                    glow: 'shadow-pink-500/50', border: 'border-pink-500/40',
-                    ring: 'ring-pink-500/30', bg: 'bg-pink-500/10'
-                  },
-                  { 
-                    from: 'from-blue-600', via: 'via-cyan-600', to: 'to-blue-700', 
-                    glow: 'shadow-blue-500/50', border: 'border-blue-500/40',
-                    ring: 'ring-blue-500/30', bg: 'bg-blue-500/10'
-                  },
-                  { 
-                    from: 'from-amber-600', via: 'via-orange-600', to: 'to-amber-700', 
-                    glow: 'shadow-amber-500/50', border: 'border-amber-500/40',
-                    ring: 'ring-amber-500/30', bg: 'bg-amber-500/10'
-                  }
-                ];
-                const gradient = gradients[index % gradients.length];
-
-                return (
-                  <motion.div
-                    key={dept.id}
-                    initial={{ opacity: 0, scale: 0.8, y: 30 }}
-                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ 
-                      delay: index * 0.1, 
-                      type: 'spring', 
-                      stiffness: 100,
-                      damping: 15
+              departments.map((dept, index) => (
+                <motion.div
+                  key={dept.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="group relative"
+                >
+                  <Link
+                    to={createPageUrl('Products') + `?department=${dept.id}`}
+                    className="relative block rounded-2xl overflow-hidden transition-all"
+                    style={{
+                      background: 'var(--bg2)',
+                      border: '1px solid var(--border)',
+                      boxShadow: 'var(--shadow-subtle)'
                     }}
-                    whileHover={{ y: -12, scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="group relative"
                   >
-                    {/* Animated Glow */}
-                    <motion.div 
-                      animate={{
-                        boxShadow: [
-                          `0 0 40px rgba(168, 85, 247, 0.3)`,
-                          `0 0 80px rgba(236, 72, 153, 0.5)`,
-                          `0 0 40px rgba(168, 85, 247, 0.3)`,
-                        ]
-                      }}
-                      transition={{ duration: 3, repeat: Infinity }}
-                      className={`absolute -inset-2 bg-gradient-to-r ${gradient.from} ${gradient.via} ${gradient.to} rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-all duration-700`} 
+                    {/* Hover Glow */}
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
+                      style={{ boxShadow: 'inset 0 0 40px rgba(214, 178, 94, 0.1)' }}
                     />
 
-                    {/* Outer Ring */}
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                      className={`absolute -inset-1 border-2 ${gradient.border} rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity`}
-                    />
-
-                    <Link
-                      to={createPageUrl('Products') + `?department=${dept.id}`}
-                      className={`relative block backdrop-blur-2xl border-2 ${gradient.border} rounded-3xl overflow-hidden hover:border-opacity-100 transition-all shadow-2xl ${gradient.glow} bg-gradient-to-br from-zinc-900/80 to-black/80`}
-                    >
-                      {/* Animated Background */}
+                    <div className="relative aspect-square flex flex-col items-center justify-center gap-4 p-6">
+                      {/* Icon */}
                       <motion.div 
-                        animate={{
-                          backgroundPosition: ['0% 0%', '100% 100%']
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(214, 178, 94, 0.15), rgba(214, 178, 94, 0.05))',
+                          border: '1px solid rgba(214, 178, 94, 0.25)'
                         }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                        className={`absolute inset-0 ${gradient.bg} opacity-20 bg-[size:200%_200%]`}
-                      />
+                      >
+                        <Package className="w-10 h-10" style={{ color: 'var(--gold)' }} />
+                      </motion.div>
 
-                      {/* Shimmer Effect */}
-                      <motion.div 
-                        animate={{ x: ['-100%', '200%'] }}
-                        transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" 
-                      />
-
-                      <div className="relative aspect-square flex flex-col items-center justify-center gap-5 p-6">
-                        {/* Icon Container */}
-                        <motion.div 
-                          whileHover={{ 
-                            rotate: [0, -15, 15, -15, 0],
-                            scale: 1.2
-                          }}
-                          transition={{ duration: 0.7 }}
-                          className="relative"
-                        >
-                          {/* Pulsing Ring */}
-                          <motion.div
-                            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className={`absolute inset-0 bg-gradient-to-br ${gradient.from} ${gradient.to} rounded-2xl blur-lg`}
-                          />
-                          
-                          <div className={`relative w-24 h-24 bg-gradient-to-br ${gradient.from} ${gradient.via} ${gradient.to} rounded-2xl flex items-center justify-center shadow-2xl ${gradient.glow}`}>
-                            <div className="absolute inset-2 bg-white/10 rounded-xl backdrop-blur-sm" />
-                            <Package className="relative w-12 h-12 text-white drop-shadow-2xl" />
-                          </div>
-                        </motion.div>
-
-                        {/* Department Name */}
-                        <div className="text-center space-y-2">
-                          <h3 className="text-xl md:text-2xl font-black text-white group-hover:scale-110 transition-transform">
-                            {dept.name}
-                          </h3>
-                          <motion.p 
-                            initial={{ opacity: 0, y: 5 }}
-                            whileHover={{ opacity: 1, y: 0 }}
-                            className="text-xs text-zinc-400 font-semibold uppercase tracking-wider"
-                          >
-                            Entdecken →
-                          </motion.p>
-                        </div>
-
-                        {/* Corner Accent */}
-                        <motion.div
-                          initial={{ scale: 0, rotate: -45 }}
-                          whileHover={{ scale: 1, rotate: 0 }}
-                          className="absolute top-3 right-3 w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center"
-                        >
-                          <span className="text-white text-xl">✨</span>
-                        </motion.div>
+                      {/* Name */}
+                      <div className="text-center">
+                        <h3 className="text-lg md:text-xl font-bold group-hover:text-gold transition-colors"
+                          style={{ color: 'var(--text)' }}>
+                          {dept.name}
+                        </h3>
+                        <p className="text-sm font-medium mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          style={{ color: 'var(--muted)' }}>
+                          Entdecken →
+                        </p>
                       </div>
-                    </Link>
-                  </motion.div>
-                );
-              })
+                    </div>
+
+                    {/* Gold Border on Hover */}
+                    <div 
+                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                      style={{ border: '1px solid rgba(214, 178, 94, 0.4)' }}
+                    />
+                  </Link>
+                </motion.div>
+              ))
             )}
           </div>
 
@@ -557,12 +482,19 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="text-center mt-10"
+            className="text-center mt-12"
           >
             <Link to={createPageUrl('Products')}>
-              <Button variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-bold">
+              <Button 
+                className="h-12 px-8 rounded-xl font-bold"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text)'
+                }}
+              >
                 Alle Produkte durchstöbern
-                <Sparkles className="w-4 h-4 ml-2" />
+                <Sparkles className="w-4 h-4 ml-2" style={{ color: 'var(--gold)' }} />
               </Button>
             </Link>
           </motion.div>
