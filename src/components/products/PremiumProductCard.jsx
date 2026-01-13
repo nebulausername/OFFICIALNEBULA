@@ -101,7 +101,9 @@ export default function PremiumProductCard({ product, onQuickView }) {
         }}
       >
         {/* Image Container */}
-        <div className="relative aspect-[2/3] overflow-hidden rounded-t-[var(--radius-lg)] bg-[hsl(var(--panel))]">
+        <div className="relative aspect-[2/3] overflow-hidden rounded-t-[var(--radius-lg)]"
+          style={{ background: 'linear-gradient(145deg, rgba(40, 40, 50, 0.8), rgba(20, 20, 25, 0.95))' }}
+        >
           {product.cover_image ? (
             <motion.img
               whileHover={{ scale: 1.08 }}
@@ -112,8 +114,17 @@ export default function PremiumProductCard({ product, onQuickView }) {
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="w-20 h-20 rounded-full bg-[hsl(var(--border))] opacity-40" />
+            <div className="w-full h-full flex items-center justify-center"
+              style={{ background: 'linear-gradient(145deg, rgba(60, 60, 70, 0.5), rgba(30, 30, 35, 0.8))' }}
+            >
+              <div className="w-24 h-24 rounded-2xl flex items-center justify-center"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))',
+                  border: '1px solid rgba(255,255,255,0.1)'
+                }}
+              >
+                <span className="text-4xl opacity-60">📦</span>
+              </div>
             </div>
           )}
           
@@ -187,10 +198,10 @@ export default function PremiumProductCard({ product, onQuickView }) {
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-3" style={{ background: 'rgba(255, 255, 255, 0.02)' }}>
+        <div className="p-5 space-y-3" style={{ background: 'linear-gradient(180deg, rgba(30, 30, 40, 0.6), rgba(20, 20, 28, 0.9))' }}>
           {/* Product Name */}
           <h3 className="font-black text-base line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition" style={{ 
-            color: 'rgba(255, 255, 255, 0.95)',
+            color: '#ffffff',
             textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)'
           }}>
             {product.name}
@@ -198,17 +209,14 @@ export default function PremiumProductCard({ product, onQuickView }) {
           
           {/* Price & SKU Row */}
           <div className="flex items-baseline justify-between gap-3">
-            <div className="text-3xl font-black" style={{ 
-              color: 'rgba(255, 255, 255, 0.98)',
-              textShadow: '0 2px 12px rgba(0, 0, 0, 0.5)'
-            }}>
+            <div className="text-3xl font-black bg-gradient-to-r from-white to-zinc-200 bg-clip-text text-transparent">
               {product.price}€
             </div>
-            <div className="text-xs font-mono font-black px-2.5 py-1.5 rounded-lg"
+            <div className="text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg"
               style={{
-                color: 'rgba(214, 178, 94, 0.9)',
-                background: 'rgba(214, 178, 94, 0.10)',
-                border: '1px solid rgba(214, 178, 94, 0.25)'
+                color: '#fbbf24',
+                background: 'rgba(251, 191, 36, 0.15)',
+                border: '1px solid rgba(251, 191, 36, 0.3)'
               }}
             >
               {product.sku}
@@ -216,22 +224,22 @@ export default function PremiumProductCard({ product, onQuickView }) {
           </div>
           
           {/* Delivery Info */}
-          <div className="space-y-2 pt-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
+          <div className="space-y-2 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="flex items-center gap-2 text-xs">
               <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(214, 178, 94, 0.15)' }}
+                style={{ background: 'rgba(251, 191, 36, 0.2)' }}
               >
-                <MapPin className="w-3 h-3" style={{ color: 'rgba(214, 178, 94, 0.9)' }} />
+                <MapPin className="w-3 h-3" style={{ color: '#fbbf24' }} />
               </div>
-              <span className="font-black" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>🇨🇳 Lieferbar aus China</span>
+              <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>🇨🇳 Lieferbar aus China</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                style={{ background: 'var(--surface2)' }}
+                style={{ background: 'rgba(139, 92, 246, 0.2)' }}
               >
-                <Clock className="w-3 h-3" style={{ color: 'rgba(255, 255, 255, 0.85)' }} />
+                <Clock className="w-3 h-3" style={{ color: '#a78bfa' }} />
               </div>
-              <span className="font-black" style={{ color: 'rgba(255, 255, 255, 0.82)' }}>8–17 Tage Lieferzeit</span>
+              <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>8–17 Tage Lieferzeit</span>
             </div>
           </div>
         </div>
