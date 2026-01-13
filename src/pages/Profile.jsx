@@ -40,7 +40,6 @@ export default function Profile() {
       const userData = await base44.auth.me();
       setUser(userData);
       
-      // Load stats
       const [requests, cartItems, tickets] = await Promise.all([
         base44.entities.Request.filter({ user_id: userData.id }),
         base44.entities.StarCartItem.filter({ user_id: userData.id }),
@@ -71,7 +70,6 @@ export default function Profile() {
       title: 'Mein Konto',
       description: 'Persönliche Daten verwalten',
       icon: User,
-      color: 'from-purple-500 to-pink-500',
       link: createPageUrl('ProfileSettings'),
       stat: null
     },
@@ -79,7 +77,6 @@ export default function Profile() {
       title: 'Meine Bestellungen',
       description: 'Bestellungen & Status verfolgen',
       icon: Package,
-      color: 'from-blue-500 to-cyan-500',
       link: createPageUrl('Requests'),
       stat: stats.requestCount
     },
@@ -87,7 +84,6 @@ export default function Profile() {
       title: 'Support Tickets',
       description: 'Deine Anfragen & Chat',
       icon: MessageCircle,
-      color: 'from-cyan-500 to-blue-600',
       link: createPageUrl('Support'),
       stat: stats.openTicketCount,
       badge: stats.openTicketCount > 0 ? `${stats.openTicketCount} offen` : null
@@ -96,7 +92,6 @@ export default function Profile() {
       title: 'Merkliste',
       description: 'Deine Favoriten',
       icon: Heart,
-      color: 'from-red-500 to-pink-500',
       link: createPageUrl('Wishlist'),
       stat: wishlistCount
     },
@@ -104,7 +99,6 @@ export default function Profile() {
       title: 'VIP Programm',
       description: 'Exklusive Vorteile freischalten',
       icon: Crown,
-      color: 'from-yellow-400 to-amber-500',
       link: createPageUrl('VIP'),
       badge: 'Premium'
     },
@@ -112,7 +106,6 @@ export default function Profile() {
       title: 'FAQ',
       description: 'Häufig gestellte Fragen',
       icon: MessageCircle,
-      color: 'from-green-500 to-emerald-500',
       link: createPageUrl('FAQ'),
       stat: null
     },
@@ -120,7 +113,6 @@ export default function Profile() {
       title: 'Hilfe & Support',
       description: 'Wir helfen dir weiter',
       icon: HelpCircle,
-      color: 'from-orange-500 to-red-500',
       link: createPageUrl('Help'),
       stat: null
     }
@@ -131,20 +123,13 @@ export default function Profile() {
       title: 'Admin Dashboard',
       description: 'Verwaltung & Einstellungen',
       icon: Settings,
-      color: 'from-red-500 to-pink-500',
       link: createPageUrl('Admin'),
       badge: 'Admin'
     });
   }
 
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
   return (
-    <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 ${
-      isDark
-        ? 'bg-gradient-to-br from-zinc-950 to-zinc-900'
-        : 'bg-gradient-to-br from-zinc-50 to-white'
-    }`}>
+    <div className="min-h-screen pb-24 md:pb-8" style={{ background: 'var(--bg)' }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Header */}
         <motion.div
@@ -153,29 +138,30 @@ export default function Profile() {
           transition={{ duration: 0.6 }}
           className="mb-12 text-center relative"
         >
-          <div className={`absolute inset-0 rounded-full blur-3xl -z-10 ${
-            isDark 
-              ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/30 to-purple-600/20'
-              : 'bg-gradient-to-br from-purple-200/40 via-pink-200/40 to-purple-200/20'
-          }`} />
+          <div 
+            className="absolute inset-0 rounded-full blur-3xl -z-10"
+            style={{ background: 'radial-gradient(circle, rgba(var(--gold-rgb), 0.15), transparent 70%)' }}
+          />
           
           <motion.div
             whileHover={{ scale: 1.08, rotate: -5 }}
             whileTap={{ scale: 0.95 }}
-            className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 inline-block"
+            className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 inline-block rounded-3xl"
+            style={{ 
+              background: 'var(--surface2)',
+              border: '1px solid rgba(var(--gold-rgb), 0.4)'
+            }}
           >
-            <div className={`absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-3xl shadow-2xl ${
-              isDark ? 'shadow-purple-600/50' : 'shadow-purple-400/40'
-            }`} />
             <div className="relative w-full h-full flex items-center justify-center rounded-3xl">
-              <User className="w-12 h-12 md:w-16 md:h-16 text-white" />
+              <User className="w-12 h-12 md:w-16 md:h-16" style={{ color: 'var(--gold)' }} />
             </div>
             <motion.div
               animate={{ scale: [1, 1.25, 1], rotate: [0, 360, 0] }}
               transition={{ duration: 3, repeat: Infinity }}
-              className="absolute -top-1 -right-1 w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-yellow-300 to-amber-500 rounded-full flex items-center justify-center shadow-lg"
+              className="absolute -top-1 -right-1 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center shadow-lg"
+              style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold2))' }}
             >
-              <Star className="w-4 h-4 md:w-5 md:h-5 text-white" fill="white" />
+              <Star className="w-4 h-4 md:w-5 md:h-5 text-black" fill="black" />
             </motion.div>
           </motion.div>
           
@@ -183,11 +169,8 @@ export default function Profile() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className={`text-4xl sm:text-5xl md:text-6xl font-black mb-3 ${
-              isDark
-                ? 'bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent'
-                : 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent'
-            }`}
+            className="text-4xl sm:text-5xl md:text-6xl font-black mb-3"
+            style={{ color: '#FFFFFF' }}
           >
             {user?.full_name || 'Mein Profil'}
           </motion.h1>
@@ -196,11 +179,10 @@ export default function Profile() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className={`text-base md:text-lg flex items-center justify-center gap-2 flex-wrap font-semibold ${
-              isDark ? 'text-zinc-300' : 'text-zinc-600'
-            }`}
+            className="text-base md:text-lg flex items-center justify-center gap-2 flex-wrap font-semibold"
+            style={{ color: 'var(--muted)' }}
           >
-            <Sparkles className="w-5 h-5 text-purple-500" />
+            <Sparkles className="w-5 h-5" style={{ color: 'var(--gold)' }} />
             {user?.email}
           </motion.div>
 
@@ -209,11 +191,12 @@ export default function Profile() {
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, type: 'spring' }}
-              className={`mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border-2 ${
-                isDark
-                  ? 'bg-red-500/15 border-red-500/40 text-red-300'
-                  : 'bg-red-500/10 border-red-500/30 text-red-600'
-              }`}
+              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold"
+              style={{
+                background: 'rgba(var(--gold-rgb), 0.15)',
+                border: '1px solid rgba(var(--gold-rgb), 0.4)',
+                color: 'var(--gold)'
+              }}
             >
               <Shield className="w-4 h-4" />
               Administrator
@@ -230,42 +213,42 @@ export default function Profile() {
         >
           <motion.div
             whileHover={{ y: -8, scale: 1.02 }}
-            className={`rounded-2xl p-6 text-center border-2 transition-all ${
-              isDark
-                ? 'bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-purple-500/30 hover:border-purple-400/60 hover:shadow-lg hover:shadow-purple-600/20'
-                : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 hover:border-purple-400 hover:shadow-lg hover:shadow-purple-300/30'
-            }`}
+            className="luxury-card p-6 text-center"
+            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
           >
             <motion.div
               whileHover={{ rotate: 360, scale: 1.1 }}
               transition={{ duration: 0.5 }}
             >
-              <Package className={`w-8 h-8 mx-auto mb-3 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+              <Package className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
             </motion.div>
-            <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-purple-400 to-pink-400' : 'bg-gradient-to-r from-purple-600 to-pink-600'} bg-clip-text text-transparent`}>
+            <div 
+              className="text-4xl font-black mb-1"
+              style={{ color: 'var(--gold2)' }}
+            >
               {stats.requestCount}
             </div>
-            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>Bestellungen</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Bestellungen</p>
           </motion.div>
 
           <motion.div
             whileHover={{ y: -8, scale: 1.02 }}
-            className={`rounded-2xl p-6 text-center border-2 transition-all ${
-              isDark
-                ? 'bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-blue-500/30 hover:border-blue-400/60 hover:shadow-lg hover:shadow-blue-600/20'
-                : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-300/30'
-            }`}
+            className="luxury-card p-6 text-center"
+            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
           >
             <motion.div
               whileHover={{ rotate: 360, scale: 1.1 }}
               transition={{ duration: 0.5 }}
             >
-              <ShoppingBag className={`w-8 h-8 mx-auto mb-3 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              <ShoppingBag className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
             </motion.div>
-            <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>
+            <div 
+              className="text-4xl font-black mb-1"
+              style={{ color: 'var(--gold2)' }}
+            >
               {stats.cartCount}
             </div>
-            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>Im Warenkorb</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Im Warenkorb</p>
           </motion.div>
         </motion.div>
 
@@ -283,43 +266,63 @@ export default function Profile() {
               >
                 <Link
                   to={item.link}
-                  className="block glass backdrop-blur-xl border-2 border-zinc-800/50 rounded-2xl p-6 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/30 transition-all group relative overflow-hidden"
+                  className="block luxury-card p-6 transition-all group relative overflow-hidden"
+                  style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/8 to-pink-500/8 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.08), transparent)' }}
+                  />
                   
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-4">
                       <motion.div 
                         whileHover={{ rotate: 360, scale: 1.15 }}
                         transition={{ duration: 0.6 }}
-                        className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all`}
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl"
+                        style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold2))' }}
                       >
-                        <Icon className="w-8 h-8 text-white" />
+                        <Icon className="w-8 h-8 text-black" />
                       </motion.div>
                       
                       {item.badge ? (
                         <motion.div 
                           whileHover={{ scale: 1.1 }}
-                          className={`px-3.5 py-1.5 bg-gradient-to-r ${item.color} rounded-full text-xs font-black shadow-lg text-white`}
+                          className="px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg"
+                          style={{ 
+                            background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
+                            color: '#000'
+                          }}
                         >
                           {item.badge}
                         </motion.div>
                       ) : item.stat !== null && item.stat > 0 ? (
                         <motion.div 
                           whileHover={{ scale: 1.15 }}
-                          className="px-3.5 py-1.5 bg-purple-500/30 border-2 border-purple-500/50 rounded-full text-xs font-black text-purple-300 shadow-lg"
+                          className="px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg"
+                          style={{
+                            background: 'rgba(var(--gold-rgb), 0.2)',
+                            border: '1px solid rgba(var(--gold-rgb), 0.4)',
+                            color: 'var(--gold)'
+                          }}
                         >
                           {item.stat}
                         </motion.div>
                       ) : (
-                        <ArrowRight className="w-6 h-6 text-zinc-600 group-hover:text-purple-400 group-hover:translate-x-2 transition-all" />
+                        <ArrowRight 
+                          className="w-6 h-6 group-hover:translate-x-2 transition-all"
+                          style={{ color: 'var(--muted)' }}
+                        />
                       )}
                     </div>
                     
-                    <h3 className="font-black text-xl mb-2 text-white group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all">
+                    <h3 
+                      className="font-black text-xl mb-2 group-hover:text-gold transition-all"
+                      style={{ color: '#FFFFFF' }}
+                    >
                       {item.title}
                     </h3>
-                    <p className="text-sm text-zinc-300 leading-relaxed font-medium">
+                    <p className="text-sm leading-relaxed font-medium" style={{ color: 'var(--muted)' }}>
                       {item.description}
                     </p>
                   </div>
@@ -337,15 +340,16 @@ export default function Profile() {
           whileHover={{ scale: 1.02, y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleLogout}
-          className="w-full glass backdrop-blur-xl border-2 border-zinc-800/50 rounded-2xl p-5 hover:border-red-500/60 hover:bg-red-500/10 hover:shadow-xl hover:shadow-red-500/20 transition-all group flex items-center justify-center gap-3"
+          className="w-full luxury-card p-5 transition-all group flex items-center justify-center gap-3"
+          style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
         >
           <motion.div
             whileHover={{ rotate: 180 }}
             transition={{ duration: 0.3 }}
           >
-            <LogOut className="w-6 h-6 text-zinc-400 group-hover:text-red-400 transition-colors" />
+            <LogOut className="w-6 h-6 group-hover:text-red-400 transition-colors" style={{ color: 'var(--muted)' }} />
           </motion.div>
-          <span className="font-black text-lg text-zinc-200 group-hover:text-red-400 transition-colors">
+          <span className="font-black text-lg group-hover:text-red-400 transition-colors" style={{ color: 'var(--text-secondary)' }}>
             Abmelden
           </span>
         </motion.button>
@@ -357,15 +361,16 @@ export default function Profile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             whileHover={{ y: -5, scale: 1.03 }}
-            className="glass backdrop-blur border-2 border-zinc-800/50 rounded-2xl p-6 text-center hover:border-purple-500/40 hover:shadow-xl hover:shadow-purple-500/20 transition-all group"
+            className="luxury-card p-6 text-center group"
+            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
           >
             <motion.div
               whileHover={{ rotate: 360, scale: 1.2 }}
               transition={{ duration: 0.5 }}
             >
-              <Zap className="w-10 h-10 text-purple-400 mx-auto mb-3 group-hover:text-purple-300" />
+              <Zap className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
             </motion.div>
-            <p className="text-sm text-zinc-300 font-bold">Schneller Support</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Schneller Support</p>
           </motion.div>
           
           <motion.div
@@ -373,15 +378,16 @@ export default function Profile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
             whileHover={{ y: -5, scale: 1.03 }}
-            className="glass backdrop-blur border-2 border-zinc-800/50 rounded-2xl p-6 text-center hover:border-green-500/40 hover:shadow-xl hover:shadow-green-500/20 transition-all group"
+            className="luxury-card p-6 text-center group"
+            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
           >
             <motion.div
               whileHover={{ rotate: 360, scale: 1.2 }}
               transition={{ duration: 0.5 }}
             >
-              <Shield className="w-10 h-10 text-green-400 mx-auto mb-3 group-hover:text-green-300" />
+              <Shield className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--gold)' }} />
             </motion.div>
-            <p className="text-sm text-zinc-300 font-bold">100% Sicher</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>100% Sicher</p>
           </motion.div>
           
           <motion.div
@@ -389,15 +395,16 @@ export default function Profile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
             whileHover={{ y: -5, scale: 1.03 }}
-            className="glass backdrop-blur border-2 border-zinc-800/50 rounded-2xl p-6 text-center hover:border-yellow-500/40 hover:shadow-xl hover:shadow-yellow-500/20 transition-all group"
+            className="luxury-card p-6 text-center group"
+            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)' }}
           >
             <motion.div
               whileHover={{ rotate: 360, scale: 1.2 }}
               transition={{ duration: 0.5 }}
             >
-              <Star className="w-10 h-10 text-yellow-400 mx-auto mb-3 group-hover:text-yellow-300" fill="currentColor" />
+              <Star className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--gold)' }} fill="currentColor" />
             </motion.div>
-            <p className="text-sm text-zinc-300 font-bold">Premium Qualität</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--muted)' }}>Premium Qualität</p>
           </motion.div>
         </div>
       </div>
