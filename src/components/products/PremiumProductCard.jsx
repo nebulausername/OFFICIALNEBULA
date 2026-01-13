@@ -1,9 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Heart, Eye, MapPin, Clock } from 'lucide-react';
+import { Heart, Eye, MapPin, Clock, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+
+// Separate Image component with proper error handling
+function ProductImage({ src, alt }) {
+  const [imgError, setImgError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  if (!src || imgError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center"
+        style={{ background: 'linear-gradient(145deg, #3a3a45, #25252d)' }}
+      >
+        <div className="w-24 h-24 rounded-2xl flex items-center justify-center"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.25))',
+            border: '1px solid rgba(255,255,255,0.15)'
+          }}
+        >
+          <Package className="w-10 h-10 text-purple-400 opacity-70" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-800/50">
+          <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+      <motion.img
+        whileHover={{ scale: 1.05 }}
+        transition={{ duration: 0.4 }}
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setImgError(true)}
+      />
+    </>
+  );
+}
 
 export default function PremiumProductCard({ product, onQuickView }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -102,36 +145,15 @@ export default function PremiumProductCard({ product, onQuickView }) {
         <div className="relative aspect-square overflow-hidden rounded-t-2xl"
           style={{ background: 'linear-gradient(145deg, #2a2a35, #1a1a22)' }}
         >
-          {product.cover_image ? (
-            <motion.img
-              whileHover={{ scale: 1.08 }}
-              transition={{ duration: 0.4 }}
-              src={product.cover_image}
-              alt={product.name}
-              className="w-full h-full object-contain p-4"
-              loading="lazy"
-              style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.3))' }}
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling?.classList.remove('hidden');
-              }}
-            />
-          ) : null}
-          <div className={`w-full h-full flex items-center justify-center absolute inset-0 ${product.cover_image ? 'hidden' : ''}`}
-            style={{ background: 'linear-gradient(145deg, #3a3a45, #25252d)' }}
-          >
-            <div className="w-24 h-24 rounded-2xl flex items-center justify-center"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.25))',
-                border: '1px solid rgba(255,255,255,0.15)'
-              }}
-            >
-              <span className="text-4xl">📦</span>
-            </div>
-          </div>
+          <ProductImage 
+            src={product.cover_image} 
+            alt={product.name}
+          />
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+          {/* Gradient Overlay - always visible */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+          
+
           
           {/* Availability Badge */}
           <div className="absolute top-3 right-3">
