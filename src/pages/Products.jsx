@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
@@ -6,6 +6,7 @@ import PremiumProductCard from '../components/products/PremiumProductCard';
 import ProductQuickView from '../components/products/ProductQuickView';
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopMegaMenu from '../components/shop/ShopMegaMenu';
+import AdvancedFilters from '../components/shop/AdvancedFilters';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -18,6 +19,15 @@ export default function Products() {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    categories: [],
+    brands: [],
+    priceRange: null,
+    sizes: [],
+    colors: [],
+    inStock: null
+  });
 
   useEffect(() => {
     loadData();
@@ -48,24 +58,102 @@ export default function Products() {
     }
   };
 
-  // Filter and sort products
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = !searchQuery || 
-      product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  }).sort((a, b) => {
-    switch (sortBy) {
-      case 'price_asc': return (a.price || 0) - (b.price || 0);
-      case 'price_desc': return (b.price || 0) - (a.price || 0);
-      case 'popular': return 0; // Would need popularity data
-      default: return new Date(b.created_date) - new Date(a.created_date);
+  // Calculate price range for slider
+  const priceRange = useMemo(() => {
+    const prices = products.map(p => p.price || 0).filter(p => p > 0);
+    return {
+      min: Math.min(...prices, 0),
+      max: Math.max(...prices, 1000)
+    };
+  }, [products]);
+
+  // Initialize price range filter
+  useEffect(() => {
+    if (products.length > 0 && !advancedFilters.priceRange) {
+      setAdvancedFilters(prev => ({
+        ...prev,
+        priceRange: [priceRange.min, priceRange.max]
+      }));
     }
-  });
+  }, [products, priceRange]);
+
+  // Count active filters
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (advancedFilters.categories?.length > 0) count++;
+    if (advancedFilters.brands?.length > 0) count++;
+    if (advancedFilters.priceRange && 
+        (advancedFilters.priceRange[0] > priceRange.min || 
+         advancedFilters.priceRange[1] < priceRange.max)) count++;
+    if (advancedFilters.sizes?.length > 0) count++;
+    if (advancedFilters.colors?.length > 0) count++;
+    if (advancedFilters.inStock !== null) count++;
+    return count;
+  }, [advancedFilters, priceRange]);
+
+  // Filter and sort products
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      // Search filter
+      const matchesSearch = !searchQuery || 
+        product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      // Quick category filter (from chips)
+      const matchesQuickCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
+      
+      // Advanced category filter
+      const matchesAdvancedCategories = advancedFilters.categories.length === 0 || 
+        advancedFilters.categories.includes(product.category_id);
+      
+      // Brand filter
+      const matchesBrand = advancedFilters.brands.length === 0 || 
+        advancedFilters.brands.includes(product.brand_id);
+      
+      // Price filter
+      const matchesPrice = !advancedFilters.priceRange || 
+        ((product.price || 0) >= advancedFilters.priceRange[0] && 
+         (product.price || 0) <= advancedFilters.priceRange[1]);
+      
+      // Size filter
+      const matchesSize = advancedFilters.sizes.length === 0 || 
+        (product.sizes || []).some(size => advancedFilters.sizes.includes(size));
+      
+      // Color filter
+      const matchesColor = advancedFilters.colors.length === 0 || 
+        (product.colors || []).some(color => advancedFilters.colors.includes(color.name));
+      
+      // Stock filter
+      const matchesStock = advancedFilters.inStock === null || 
+        product.in_stock === advancedFilters.inStock;
+      
+      return matchesSearch && matchesQuickCategory && matchesAdvancedCategories && 
+             matchesBrand && matchesPrice && matchesSize && matchesColor && matchesStock;
+    }).sort((a, b) => {
+      switch (sortBy) {
+        case 'price_asc': return (a.price || 0) - (b.price || 0);
+        case 'price_desc': return (b.price || 0) - (a.price || 0);
+        case 'name_asc': return (a.name || '').localeCompare(b.name || '');
+        case 'name_desc': return (b.name || '').localeCompare(a.name || '');
+        case 'popular': return 0;
+        default: return new Date(b.created_date) - new Date(a.created_date);
+      }
+    });
+  }, [products, searchQuery, selectedCategory, advancedFilters, sortBy]);
+
+  const resetFilters = () => {
+    setAdvancedFilters({
+      categories: [],
+      brands: [],
+      priceRange: [priceRange.min, priceRange.max],
+      sizes: [],
+      colors: [],
+      inStock: null
+    });
+    setSelectedCategory('all');
+    setSearchQuery('');
+  };
 
   const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
     try {
@@ -163,6 +251,8 @@ export default function Products() {
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               onCategoriesClick={() => setMegaMenuOpen(true)}
+              onFiltersClick={() => setFiltersOpen(true)}
+              activeFilters={activeFilterCount}
               categories={categories}
               selectedCategory={selectedCategory}
               onCategorySelect={setSelectedCategory}
@@ -243,6 +333,18 @@ export default function Products() {
         isOpen={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
+      />
+
+      {/* Advanced Filters Panel */}
+      <AdvancedFilters
+        isOpen={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        categories={categories}
+        brands={brands}
+        products={products}
+        filters={advancedFilters}
+        onFiltersChange={setAdvancedFilters}
+        onReset={resetFilters}
       />
     </div>
   );

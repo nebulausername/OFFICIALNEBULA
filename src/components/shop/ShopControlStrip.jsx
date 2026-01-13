@@ -8,6 +8,7 @@ export default function ShopControlStrip({
   searchQuery, 
   onSearchChange, 
   onCategoriesClick,
+  onFiltersClick,
   activeFilters = 0,
   categories = [],
   selectedCategory,
@@ -30,7 +31,9 @@ export default function ShopControlStrip({
     { value: 'newest', label: 'Neueste' },
     { value: 'popular', label: 'Beliebt' },
     { value: 'price_asc', label: 'Preis ↑' },
-    { value: 'price_desc', label: 'Preis ↓' }
+    { value: 'price_desc', label: 'Preis ↓' },
+    { value: 'name_asc', label: 'A-Z' },
+    { value: 'name_desc', label: 'Z-A' }
   ];
 
   return (
@@ -86,12 +89,13 @@ export default function ShopControlStrip({
 
           {/* Filter Button */}
           <Button
+            onClick={onFiltersClick}
             variant="outline"
             className="h-14 px-5 rounded-xl font-bold text-sm relative transition-all"
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: '#FFFFFF'
+              background: activeFilters > 0 ? 'rgba(214, 178, 94, 0.1)' : 'rgba(255, 255, 255, 0.06)',
+              border: activeFilters > 0 ? '1px solid rgba(214, 178, 94, 0.4)' : '1px solid rgba(255, 255, 255, 0.15)',
+              color: activeFilters > 0 ? '#F2D27C' : '#FFFFFF'
             }}
           >
             <SlidersHorizontal className="w-5 h-5 mr-2" />
