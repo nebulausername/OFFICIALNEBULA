@@ -4,36 +4,40 @@
 
 @layer base {
   :root {
-    /* Premium Gold/Black/White Luxury Design System */
-    --bg: #050506;
-    --bg2: #0B0B10;
+    /* Premium Dark Luxury Design System - High Contrast */
+    --bg: #0B0D12;
+    --bg2: #0F1117;
+    --bg3: #141720;
     
     --surface: rgba(255, 255, 255, 0.06);
     --surface2: rgba(255, 255, 255, 0.09);
-    --surface-hover: rgba(255, 255, 255, 0.11);
+    --surface-hover: rgba(255, 255, 255, 0.12);
     
     --border: rgba(255, 255, 255, 0.12);
     --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.18);
     
-    --text: rgba(255, 255, 255, 0.92);
-    --muted: rgba(255, 255, 255, 0.62);
-    --subtle: rgba(255, 255, 255, 0.42);
+    --text: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.78);
+    --muted: rgba(255, 255, 255, 0.65);
+    --subtle: rgba(255, 255, 255, 0.50);
     
     --gold: #D6B25E;
     --gold2: #F2D27C;
     --gold-rgb: 214, 178, 94;
     
-    --success: rgba(100, 230, 150, 0.85);
-    --warning: rgba(255, 180, 80, 0.85);
-    --error: rgba(255, 100, 120, 0.85);
+    --success: #4ADE80;
+    --warning: #FBBF24;
+    --error: #F87171;
     
-    --radius-sm: 16px;
-    --radius-md: 20px;
-    --radius-lg: 24px;
-    --radius-xl: 28px;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
     
-    --shadow-base: 0 18px 60px rgba(0, 0, 0, 0.55);
-    --shadow-subtle: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-base: 0 16px 48px rgba(0, 0, 0, 0.5);
+    --shadow-subtle: 0 8px 24px rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 40px rgba(214, 178, 94, 0.15);
   }
 }
 
@@ -43,45 +47,77 @@
   }
   
   body {
-    background: 
-      radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.02), transparent 60%),
-      var(--bg);
+    background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     font-smoothing: antialiased;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: 16px;
+    line-height: 1.6;
   }
   
   /* No white backgrounds */
   .bg-white {
     background: var(--surface) !important;
   }
+
+  /* High Contrast Text Classes */
+  .text-primary {
+    color: var(--text) !important;
+  }
+  .text-secondary {
+    color: var(--text-secondary) !important;
+  }
+  .text-muted-high {
+    color: var(--muted) !important;
+  }
 }
 
 @layer components {
-        /* Luxury Glass System */
+        /* Premium Glass System - High Contrast */
         .glass-panel {
-          background: var(--surface);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid var(--border-subtle);
+          background: rgba(255, 255, 255, 0.06);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid var(--border);
           box-shadow: var(--shadow-subtle);
         }
 
         .glass-panel-hover {
           @apply glass-panel;
-          transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .glass-panel-hover:hover {
-          background: var(--surface-hover);
-          border-color: var(--border);
+          background: rgba(255, 255, 255, 0.09);
+          border-color: var(--border-strong);
           box-shadow: var(--shadow-base);
         }
 
+        .glass-strong {
+          background: rgba(20, 23, 32, 0.95);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid var(--border);
+        }
+
         .gold-border {
-          border: 1px solid rgba(var(--gold-rgb), 0.35);
+          border: 1px solid rgba(var(--gold-rgb), 0.4);
+        }
+
+        /* Surface Cards */
+        .surface-card {
+          background: var(--bg2);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-lg);
+        }
+
+        .surface-card-elevated {
+          background: var(--bg3);
+          border: 1px solid var(--border-strong);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--shadow-subtle);
         }
   
   /* Luxury Cards */

@@ -1,416 +1,242 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '../../utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { X, Search, ChevronRight, Sparkles, Star, Package, Shirt, Watch, ShoppingBag } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
-export default function ShopCategoriesDrawer({ isOpen, onClose, onBack }) {
-  const [selectedCategory, setSelectedCategory] = useState(null);
+const categoryIcons = {
+  'Schuhe': Package,
+  'Kleidung': Shirt,
+  'Accessoires': Watch,
+  'Taschen': ShoppingBag,
+  'default': Star
+};
+
+export default function ShopCategoriesDrawer({ isOpen, onClose, departments = [], categories = [] }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeChip, setActiveChip] = useState(null);
-  const searchInputRef = useRef(null);
+  const [selectedDept, setSelectedDept] = useState(null);
+  const drawerRef = useRef(null);
 
-  useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      setTimeout(() => searchInputRef.current?.focus(), 300);
+  const filteredCategories = categories.filter(cat => {
+    if (searchQuery) {
+      return cat.name?.toLowerCase().includes(searchQuery.toLowerCase());
     }
-  }, [isOpen]);
-
-  const categories = [
-    { 
-      id: 'sneaker', 
-      label: 'SNEAKER', 
-      icon: '👟',
-      gradient: 'from-blue-500 to-cyan-500',
-      children: [
-        { id: 'nike', label: 'NIKE', children: ['AirMax 95', 'AirMax DN', 'SHOX TL', 'AIR FORCE', 'Dunk SB', 'Cortez', 'Blazer'] },
-        { id: 'airjordan', label: 'AIR JORDAN', children: ['AIR JORDAN 1 HIGH', 'AIR JORDAN 1 LOW', 'AIR JORDAN 3', 'AIR JORDAN 4', 'AIR JORDAN 5', 'AIR JORDAN 6', 'AIR JORDAN 11', 'AIR JORDAN 13'] },
-        { id: 'adidas', label: 'ADIDAS', children: ['Yeezy Boost 350', 'Yeezy Boost 700', 'Ultraboost', 'Superstar', 'Stan Smith'] },
-        { id: 'newbalance', label: 'NEW BALANCE', children: ['550', '574', '990', '2002R', '1906R'] }
-      ]
-    },
-    { 
-      id: 'kleidung', 
-      label: 'KLEIDUNG', 
-      icon: '👕',
-      gradient: 'from-purple-500 to-pink-500',
-      children: [
-        { id: 'tshirts', label: 'T-SHIRTS', children: ['Oversize', 'Slim Fit', 'Regular', 'Vintage'] },
-        { id: 'hoodies', label: 'HOODIES & SWEATER', children: ['Hoodies', 'Zip Hoodies', 'Crewneck', 'Sweatshirts'] },
-        { id: 'jacken', label: 'JACKEN', children: ['Bomber', 'Denim', 'Puffer', 'Windbreaker'] },
-        { id: 'hosen', label: 'HOSEN', children: ['Jeans', 'Jogger', 'Cargo', 'Shorts'] }
-      ]
-    },
-    { 
-      id: 'taschen', 
-      label: 'TASCHEN', 
-      icon: '👜',
-      gradient: 'from-amber-500 to-orange-500',
-      children: [
-        { id: 'rucksaecke', label: 'RUCKSÄCKE', children: ['Backpacks', 'Mini Backpacks', 'Laptop Bags'] },
-        { id: 'umhaenge', label: 'UMHÄNGETASCHEN', children: ['Crossbody', 'Messenger', 'Shoulder Bags'] },
-        { id: 'luxus', label: 'LUXUS TASCHEN', children: ['Designer', 'Clutch', 'Tote Bags'] }
-      ]
-    },
-    { 
-      id: 'muetzen', 
-      label: 'MÜTZEN & CAPS', 
-      icon: '🧢',
-      gradient: 'from-green-500 to-emerald-500',
-      children: [
-        { id: 'caps', label: 'CAPS', children: ['Baseball Caps', 'Snapbacks', 'Dad Hats', '5-Panel'] },
-        { id: 'beanies', label: 'BEANIES', children: ['Classic', 'Slouchy', 'Cuffed'] }
-      ]
-    },
-    { 
-      id: 'geldboersen', 
-      label: 'GELDBÖRSEN', 
-      icon: '💰',
-      gradient: 'from-yellow-500 to-amber-500',
-      children: [
-        { id: 'herren', label: 'HERREN', children: ['Bifold', 'Trifold', 'Kartenhalter', 'Geldbörsen'] },
-        { id: 'damen', label: 'DAMEN', children: ['Clutch Wallets', 'Zip Around', 'Kartenhalter'] }
-      ]
-    },
-    { 
-      id: 'guertel', 
-      label: 'GÜRTEL', 
-      icon: '⭕',
-      gradient: 'from-red-500 to-pink-500',
-      children: [
-        { id: 'designer', label: 'DESIGNER', children: ['Gucci', 'Louis Vuitton', 'Hermès', 'Versace'] },
-        { id: 'casual', label: 'CASUAL', children: ['Canvas', 'Leder', 'Textil'] }
-      ]
-    },
-    { 
-      id: 'highheels', 
-      label: 'HIGH HEELS', 
-      icon: '👠',
-      gradient: 'from-pink-500 to-rose-500',
-      children: [
-        { id: 'pumps', label: 'PUMPS', children: ['Classic Pumps', 'Pointed Toe', 'Peep Toe'] },
-        { id: 'stiefel', label: 'STIEFEL', children: ['Ankle Boots', 'Knee High', 'Thigh High'] },
-        { id: 'sandalen', label: 'SANDALEN', children: ['Heeled Sandals', 'Strappy', 'Platform'] }
-      ]
+    if (selectedDept) {
+      return cat.department_id === selectedDept;
     }
-  ];
+    return true;
+  });
 
-  const filteredCategories = categories.filter(cat => 
-    cat.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleSubcategoryClick = (categoryId, subcategory) => {
-    onClose();
-    window.location.href = `/Products?category=${categoryId}&subcategory=${encodeURIComponent(subcategory)}`;
+  const getCategoryCount = (deptId) => {
+    return categories.filter(c => c.department_id === deptId).length;
   };
 
-  const quickChips = [
-    { id: 'sneaker', label: 'Sneaker', icon: '👟' },
-    { id: 'kleidung', label: 'Kleidung', icon: '👕' },
-    { id: 'taschen', label: 'Taschen', icon: '👜' },
-    { id: 'jordan', label: 'Air Jordan', icon: '🏀' },
-    { id: 'nike', label: 'Nike', icon: '✓' },
-    { id: 'neu', label: 'Neu', icon: '✨' }
-  ];
-
-  const handleChipClick = (chipId) => {
-    setActiveChip(chipId);
-    const cat = categories.find(c => c.id === chipId);
-    if (cat) {
-      setSelectedCategory(cat);
-    }
+  const handleClose = () => {
+    setSearchQuery('');
+    setSelectedDept(null);
+    onClose();
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay */}
+          {/* Backdrop */}
           <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[60]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleClose}
+            className="fixed inset-0 z-50"
+            style={{ background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(4px)' }}
           />
 
-          {/* Premium Sheet Drawer */}
+          {/* Drawer - Desktop: Right Side, Mobile: Bottom Sheet */}
           <motion.div
+            ref={drawerRef}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed top-0 right-0 bottom-0 w-full sm:w-[85%] md:w-[520px] z-[61] overflow-hidden shadow-2xl flex flex-col"
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed right-0 top-0 bottom-0 w-full sm:w-[480px] z-50 flex flex-col"
             style={{
-              background: 'linear-gradient(180deg, rgba(10, 10, 15, 0.98), rgba(5, 5, 8, 0.98))',
-              backdropFilter: 'blur(50px)',
-              WebkitBackdropFilter: 'blur(50px)',
-              borderLeft: '1px solid rgba(214, 178, 94, 0.25)',
-              boxShadow: '-8px 0 40px rgba(0, 0, 0, 0.6)'
+              background: 'var(--bg)',
+              borderLeft: '1px solid var(--border)'
             }}
           >
-            {/* Premium Header */}
-            <div className="relative px-5 py-4 border-b border-white/10">
-              <div className="flex items-center justify-between mb-4">
+            {/* Header - Sticky */}
+            <div className="flex-shrink-0 p-6 pb-4" style={{ borderBottom: '1px solid var(--border)' }}>
+              {/* Top Row */}
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <motion.div
-                    animate={{
-                      filter: [
-                        'drop-shadow(0 0 12px rgba(214, 178, 94, 0.4))',
-                        'drop-shadow(0 0 20px rgba(214, 178, 94, 0.6))',
-                        'drop-shadow(0 0 12px rgba(214, 178, 94, 0.4))',
-                      ]
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="w-9 h-9 rounded-xl bg-white/5 backdrop-blur-sm border border-gold/20 flex items-center justify-center p-1.5"
-                  >
-                    <img 
-                      src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
-                      alt="Shop"
-                      className="w-full h-full object-contain"
-                    />
-                  </motion.div>
-                  <h2 className="text-2xl font-black text-gradient-gold">Kategorien</h2>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" 
+                    style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold2))' }}>
+                    <Sparkles className="w-5 h-5" style={{ color: '#0B0D12' }} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black" style={{ color: 'var(--text)' }}>Kategorien</h2>
+                    <p className="text-sm font-medium" style={{ color: 'var(--muted)' }}>Durchsuche unser Sortiment</p>
+                  </div>
                 </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.1, rotate: 90 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={onClose}
-                  className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
+                <button
+                  onClick={handleClose}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center transition-all hover:scale-105"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    backdropFilter: 'blur(12px)'
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text)'
                   }}
                 >
-                  <X className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.92)' }} />
-                </motion.button>
+                  <X className="w-6 h-6" />
+                </button>
               </div>
 
-              {/* Premium Search Bar */}
-              {!selectedCategory && (
-                <>
-                  <div className="relative mb-4">
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gold z-10" strokeWidth={2.5} />
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Kategorie oder Marke suchen…"
-                      className="w-full h-14 md:h-16 pl-14 pr-14 rounded-2xl text-white placeholder:text-zinc-500 font-bold text-base md:text-lg transition-all focus:outline-none focus:ring-2 focus:ring-gold/40"
-                      style={{
-                        background: 'rgba(255, 255, 255, 0.08)',
-                        backdropFilter: 'blur(16px)',
-                        border: '1px solid rgba(214, 178, 94, 0.2)',
-                        boxShadow: 'inset 0 2px 12px rgba(0, 0, 0, 0.3)'
-                      }}
-                    />
-                    {searchQuery && (
-                      <motion.button
-                        initial={{ scale: 0, rotate: -90 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => setSearchQuery('')}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all"
-                        style={{ background: 'rgba(255, 255, 255, 0.12)' }}
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </motion.button>
-                    )}
-                  </div>
+              {/* Search */}
+              <div className="relative mb-4">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--muted)' }} />
+                <Input
+                  type="text"
+                  placeholder="Kategorie oder Marke suchen…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 h-12 text-base font-medium rounded-xl"
+                  style={{
+                    background: 'var(--bg2)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text)'
+                  }}
+                />
+              </div>
 
-                  {/* Quick Chips */}
-                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    {quickChips.map((chip) => (
+              {/* Department Chips - Horizontal Scroll */}
+              <div className="relative">
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" style={{ scrollSnapType: 'x mandatory' }}>
+                  <button
+                    onClick={() => setSelectedDept(null)}
+                    className="px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0"
+                    style={{
+                      scrollSnapAlign: 'start',
+                      background: !selectedDept ? 'rgba(214, 178, 94, 0.15)' : 'var(--surface)',
+                      border: !selectedDept ? '1px solid var(--gold)' : '1px solid var(--border)',
+                      color: !selectedDept ? 'var(--gold)' : 'var(--text-secondary)'
+                    }}
+                  >
+                    Alle
+                  </button>
+                  {departments.map((dept) => (
+                    <button
+                      key={dept.id}
+                      onClick={() => setSelectedDept(dept.id)}
+                      className="px-4 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition-all flex-shrink-0"
+                      style={{
+                        scrollSnapAlign: 'start',
+                        background: selectedDept === dept.id ? 'rgba(214, 178, 94, 0.15)' : 'var(--surface)',
+                        border: selectedDept === dept.id ? '1px solid var(--gold)' : '1px solid var(--border)',
+                        color: selectedDept === dept.id ? 'var(--gold)' : 'var(--text-secondary)'
+                      }}
+                    >
+                      {dept.name}
+                    </button>
+                  ))}
+                </div>
+                {/* Fade edges */}
+                <div className="absolute right-0 top-0 bottom-1 w-8 pointer-events-none" 
+                  style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
+              </div>
+            </div>
+
+            {/* Categories List - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 pt-4 custom-scrollbar">
+              {filteredCategories.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style={{ background: 'var(--surface)' }}>
+                    <Search className="w-7 h-7" style={{ color: 'var(--muted)' }} />
+                  </div>
+                  <p className="text-lg font-bold" style={{ color: 'var(--text)' }}>Keine Kategorien gefunden</p>
+                  <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>Versuche einen anderen Suchbegriff</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Show Departments if no filter */}
+                  {!selectedDept && !searchQuery && departments.map((dept) => {
+                    const Icon = categoryIcons[dept.name] || categoryIcons.default;
+                    const count = getCategoryCount(dept.id);
+                    
+                    return (
                       <motion.button
-                        key={chip.id}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => handleChipClick(chip.id)}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl whitespace-nowrap font-bold text-sm transition-all flex-shrink-0"
+                        key={dept.id}
+                        whileHover={{ scale: 0.99 }}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setSelectedDept(dept.id)}
+                        className="w-full p-4 rounded-2xl flex items-center gap-4 transition-all text-left"
                         style={{
-                          background: activeChip === chip.id 
-                            ? 'rgba(214, 178, 94, 0.15)' 
-                            : 'rgba(255, 255, 255, 0.06)',
-                          border: activeChip === chip.id 
-                            ? '1px solid rgba(214, 178, 94, 0.4)' 
-                            : '1px solid rgba(255, 255, 255, 0.1)',
-                          color: activeChip === chip.id ? 'var(--gold)' : 'rgba(255, 255, 255, 0.85)'
+                          background: 'var(--bg2)',
+                          border: '1px solid var(--border)'
                         }}
                       >
-                        <span className="text-base">{chip.icon}</span>
-                        <span>{chip.label}</span>
+                        <div className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: 'linear-gradient(135deg, rgba(214, 178, 94, 0.15), rgba(214, 178, 94, 0.05))' }}>
+                          <Icon className="w-6 h-6" style={{ color: 'var(--gold)' }} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-bold truncate" style={{ color: 'var(--text)' }}>{dept.name}</h3>
+                          <p className="text-sm font-medium" style={{ color: 'var(--muted)' }}>{count} Kategorien</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--muted)' }} />
                       </motion.button>
-                    ))}
-                  </div>
-                </>
+                    );
+                  })}
+
+                  {/* Show Categories if filtered */}
+                  {(selectedDept || searchQuery) && filteredCategories.map((cat) => {
+                    const Icon = categoryIcons[cat.name] || categoryIcons.default;
+                    
+                    return (
+                      <Link
+                        key={cat.id}
+                        to={createPageUrl('Products') + `?category=${cat.id}`}
+                        onClick={handleClose}
+                      >
+                        <motion.div
+                          whileHover={{ scale: 0.99 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="w-full p-4 rounded-2xl flex items-center gap-4 transition-all"
+                          style={{
+                            background: 'var(--bg2)',
+                            border: '1px solid var(--border)'
+                          }}
+                        >
+                          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                            style={{ background: 'var(--surface)' }}>
+                            <Icon className="w-5 h-5" style={{ color: 'var(--gold)' }} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-bold truncate" style={{ color: 'var(--text)' }}>{cat.name}</h3>
+                          </div>
+                          <ChevronRight className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--muted)' }} />
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              <AnimatePresence mode="wait">
-                {!selectedCategory ? (
-                  /* Main Categories */
-                  <motion.div
-                    key="main"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="p-5 space-y-4"
-                  >
-                    {/* Premium Hero Section */}
-                    <div className="mb-6 text-center px-2">
-                      <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.1 }}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full mb-4"
-                        style={{
-                          background: 'rgba(214, 178, 94, 0.12)',
-                          border: '1px solid rgba(214, 178, 94, 0.3)'
-                        }}
-                      >
-                        <motion.span
-                          animate={{ rotate: [0, 360] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                          className="text-lg"
-                        >
-                          ✨
-                        </motion.span>
-                        <span className="font-black text-sm uppercase tracking-wider text-gold">UNSERE WELTEN</span>
-                      </motion.div>
-                      
-                      <h3 className="text-4xl md:text-5xl font-black mb-4 tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.98)' }}>
-                        Kategorien
-                      </h3>
-                      <p className="text-lg md:text-xl font-bold leading-relaxed" style={{ color: 'rgba(255, 255, 255, 0.75)' }}>
-                        Tauche ein in unsere Premium-Kollektionen
-                      </p>
-                    </div>
-                    {filteredCategories.map((cat, index) => (
-                      <motion.button
-                        key={cat.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.04 }}
-                        whileHover={{ x: 6, scale: 1.02 }}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => setSelectedCategory(cat)}
-                        className="w-full min-h-[100px] p-6 rounded-2xl transition-all flex items-center justify-between group relative overflow-hidden"
-                        style={{
-                          background: 'rgba(255, 255, 255, 0.07)',
-                          backdropFilter: 'blur(24px)',
-                          border: '1px solid rgba(214, 178, 94, 0.25)',
-                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
-                        }}
-                      >
-                        <div className={`absolute inset-0 bg-gradient-to-r ${cat.gradient} opacity-0 group-hover:opacity-[0.15] transition-all duration-300`} />
-                        
-                        <div className="flex items-center gap-5 relative z-10">
-                          <motion.div 
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            className={`w-18 h-18 rounded-xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center text-4xl shadow-2xl`}
-                          >
-                            <span className="drop-shadow-lg">{cat.icon}</span>
-                          </motion.div>
-                          <div className="text-left">
-                            <div className="font-black text-xl md:text-2xl mb-1.5 group-hover:text-gold2 transition-colors tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
-                              {cat.label}
-                            </div>
-                            <div className="text-sm md:text-base font-bold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
-                              {cat.children.length} Kategorien
-                            </div>
-                          </div>
-                        </div>
-
-                        <ChevronRight className="w-7 h-7 text-gold group-hover:text-gold2 transition-colors relative z-10" strokeWidth={2.5} />
-                      </motion.button>
-                    ))}
-                  </motion.div>
-                ) : (
-                  /* Subcategories */
-                  <motion.div
-                    key="sub"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="flex flex-col h-full"
-                  >
-                    {/* Back Button & Title */}
-                    <div className="px-5 py-5 border-b border-white/10">
-                      <motion.button
-                        whileHover={{ x: -4 }}
-                        onClick={() => setSelectedCategory(null)}
-                        className="flex items-center gap-2 text-gold hover:text-gold2 font-black mb-4 text-base"
-                      >
-                        <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
-                        Kategorien
-                      </motion.button>
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-2xl shadow-lg">
-                          {selectedCategory.icon}
-                        </div>
-                        <h3 className="text-2xl md:text-3xl font-black text-gradient-gold">{selectedCategory.label}</h3>
-                      </div>
-                    </div>
-
-                    {/* Subcategory List */}
-                    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-                      {selectedCategory.children.map((sub, index) => (
-                        typeof sub === 'string' ? (
-                          <motion.button
-                            key={sub}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.03 }}
-                            whileHover={{ x: 8, scale: 1.03 }}
-                            whileTap={{ scale: 0.96 }}
-                            onClick={() => handleSubcategoryClick(selectedCategory.id, sub)}
-                            className="w-full min-h-[72px] p-5 rounded-xl text-left group relative overflow-hidden"
-                            style={{
-                              background: 'rgba(255, 255, 255, 0.06)',
-                              backdropFilter: 'blur(16px)',
-                              border: '1px solid rgba(214, 178, 94, 0.2)'
-                            }}
-                          >
-                            <div className={`absolute inset-0 bg-gradient-to-r ${selectedCategory.gradient} opacity-0 group-hover:opacity-[0.15] transition-opacity`} />
-                            <span className="relative font-black text-lg md:text-xl group-hover:text-gold2 transition-colors" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>{sub}</span>
-                          </motion.button>
-                        ) : (
-                          <div key={sub.id}>
-                            <div className="text-sm md:text-base font-black uppercase tracking-widest mb-4 mt-6 px-2" style={{ color: 'rgba(214, 178, 94, 0.9)' }}>
-                              {sub.label}
-                            </div>
-                            {sub.children.map((item, i) => (
-                              <motion.button
-                                key={item}
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.02 }}
-                                whileHover={{ x: 6, scale: 1.02 }}
-                                whileTap={{ scale: 0.96 }}
-                                onClick={() => handleSubcategoryClick(selectedCategory.id, item)}
-                                className="w-full min-h-[68px] p-5 mb-2 rounded-xl text-left group relative overflow-hidden"
-                                style={{
-                                  background: 'rgba(255, 255, 255, 0.05)',
-                                  backdropFilter: 'blur(16px)',
-                                  border: '1px solid rgba(214, 178, 94, 0.15)'
-                                }}
-                              >
-                                <div className={`absolute inset-0 bg-gradient-to-r ${selectedCategory.gradient} opacity-0 group-hover:opacity-[0.1] transition-opacity`} />
-                                <span className="relative font-black text-lg md:text-xl group-hover:text-gold2 transition-colors tracking-tight" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
-                                  {item}
-                                </span>
-                              </motion.button>
-                            ))}
-                          </div>
-                        )
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            {/* Footer */}
+            <div className="flex-shrink-0 p-6 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+              <Link to={createPageUrl('Products')} onClick={handleClose}>
+                <button
+                  className="w-full h-14 rounded-xl font-bold text-base transition-all hover:scale-[1.02]"
+                  style={{
+                    background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
+                    color: '#0B0D12',
+                    boxShadow: '0 4px 20px rgba(214, 178, 94, 0.3)'
+                  }}
+                >
+                  Alle Produkte anzeigen
+                </button>
+              </Link>
             </div>
           </motion.div>
         </>
