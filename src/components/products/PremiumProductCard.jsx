@@ -91,18 +91,16 @@ export default function PremiumProductCard({ product, onQuickView }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         whileHover={{ y: -8, scale: 1.02 }}
-        className="group smooth-transition relative overflow-hidden rounded-[var(--radius-lg)]"
+        className="group smooth-transition relative overflow-hidden rounded-2xl"
         style={{
-          background: 'rgba(255, 255, 255, 0.06)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
+          background: 'linear-gradient(145deg, rgba(45, 45, 55, 0.95), rgba(25, 25, 32, 0.98))',
+          border: '1px solid rgba(255, 255, 255, 0.12)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05)'
         }}
       >
         {/* Image Container */}
-        <div className="relative aspect-[2/3] overflow-hidden rounded-t-[var(--radius-lg)]"
-          style={{ background: 'linear-gradient(145deg, rgba(40, 40, 50, 0.8), rgba(20, 20, 25, 0.95))' }}
+        <div className="relative aspect-square overflow-hidden rounded-t-2xl"
+          style={{ background: 'linear-gradient(145deg, #2a2a35, #1a1a22)' }}
         >
           {product.cover_image ? (
             <motion.img
@@ -110,26 +108,30 @@ export default function PremiumProductCard({ product, onQuickView }) {
               transition={{ duration: 0.4 }}
               src={product.cover_image}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain p-4"
               loading="lazy"
+              style={{ filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.3))' }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling?.classList.remove('hidden');
+              }}
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center"
-              style={{ background: 'linear-gradient(145deg, rgba(60, 60, 70, 0.5), rgba(30, 30, 35, 0.8))' }}
+          ) : null}
+          <div className={`w-full h-full flex items-center justify-center absolute inset-0 ${product.cover_image ? 'hidden' : ''}`}
+            style={{ background: 'linear-gradient(145deg, #3a3a45, #25252d)' }}
+          >
+            <div className="w-24 h-24 rounded-2xl flex items-center justify-center"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.25))',
+                border: '1px solid rgba(255,255,255,0.15)'
+              }}
             >
-              <div className="w-24 h-24 rounded-2xl flex items-center justify-center"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))',
-                  border: '1px solid rgba(255,255,255,0.1)'
-                }}
-              >
-                <span className="text-4xl opacity-60">📦</span>
-              </div>
+              <span className="text-4xl">📦</span>
             </div>
-          )}
+          </div>
           
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 smooth-transition" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           
           {/* Availability Badge */}
           <div className="absolute top-3 right-3">
