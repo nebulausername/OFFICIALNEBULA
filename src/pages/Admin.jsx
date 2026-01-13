@@ -361,9 +361,9 @@ export default function Admin() {
           transition={{ delay: 0.5 }}
           className="rounded-2xl p-6 md:p-8 relative overflow-hidden"
           style={{
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(255, 255, 255, 0.10)'
+            border: '1px solid rgba(59, 130, 246, 0.2)'
           }}
         >
           <div className="relative z-10">
