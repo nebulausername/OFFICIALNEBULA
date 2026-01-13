@@ -158,13 +158,8 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen relative">
-      {/* Premium Background */}
-      <div className="fixed inset-0 -z-10" style={{ background: 'linear-gradient(180deg, #0A0C10 0%, #12151C 50%, #0A0C10 100%)' }} />
-      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(var(--gold-rgb), 0.1) 0%, transparent 50%)' }} />
-      <div className="fixed inset-0 -z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)' }} />
-      
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 relative">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
@@ -251,15 +246,15 @@ export default function Admin() {
                   transition={{ delay: index * 0.08 }}
                   whileHover={{ y: -8, scale: 1.02 }}
                   whileTap={{ scale: 0.96 }}
-                  className="group relative overflow-hidden rounded-2xl p-5 md:p-6 cursor-pointer transition-all h-full"
+                  className="group relative overflow-hidden rounded-2xl p-5 md:p-6 cursor-pointer transition-all"
                   style={{
-                    background: `linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03))`,
+                    background: 'rgba(255, 255, 255, 0.06)',
                     backdropFilter: 'blur(24px)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+                    border: '1px solid rgba(255, 255, 255, 0.10)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
                   }}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-300`} />
+                  <div className={`absolute inset-0 bg-gradient-to-br ${section.color} opacity-0 group-hover:opacity-[0.12] transition-opacity duration-300`} />
                   
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-4">
@@ -298,9 +293,9 @@ export default function Admin() {
           transition={{ delay: 0.4 }}
           className="rounded-2xl p-6 md:p-8 relative overflow-hidden mb-12 md:mb-16"
           style={{
-            background: 'linear-gradient(135deg, rgba(var(--gold-rgb), 0.1), rgba(var(--gold-rgb), 0.03))',
+            background: 'rgba(255, 255, 255, 0.06)',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(var(--gold-rgb), 0.25)'
+            border: '1px solid rgba(214, 178, 94, 0.2)'
           }}
         >
           <div className="relative z-10">
@@ -361,9 +356,9 @@ export default function Admin() {
           transition={{ delay: 0.5 }}
           className="rounded-2xl p-6 md:p-8 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.02))',
+            background: 'rgba(255, 255, 255, 0.06)',
             backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(59, 130, 246, 0.2)'
+            border: '1px solid rgba(255, 255, 255, 0.10)'
           }}
         >
           <div className="relative z-10">
