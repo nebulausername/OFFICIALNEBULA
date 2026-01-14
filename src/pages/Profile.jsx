@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import { useWishlist } from '../components/wishlist/WishlistContext';
+import { useI18n } from '../components/i18n/I18nProvider';
 import { 
   User, 
   ShoppingBag, 
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 
 export default function Profile() {
+  const { t } = useI18n();
   const { count: wishlistCount } = useWishlist();
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
@@ -68,57 +70,57 @@ export default function Profile() {
 
   const menuItems = [
     {
-      title: 'Mein Konto',
-      description: 'Persönliche Daten verwalten',
+      title: t('profile.myAccount'),
+      description: t('profile.accountDescription'),
       icon: User,
       color: 'from-purple-500 to-pink-500',
       link: createPageUrl('ProfileSettings'),
       stat: null
     },
     {
-      title: 'Meine Bestellungen',
-      description: 'Bestellungen & Status verfolgen',
+      title: t('profile.orders'),
+      description: t('profile.ordersDescription'),
       icon: Package,
       color: 'from-blue-500 to-cyan-500',
       link: createPageUrl('Requests'),
       stat: stats.requestCount
     },
     {
-      title: 'Support Tickets',
-      description: 'Deine Anfragen & Chat',
+      title: t('profile.supportTickets'),
+      description: t('profile.supportTicketsDescription'),
       icon: MessageCircle,
       color: 'from-cyan-500 to-blue-600',
       link: createPageUrl('Support'),
       stat: stats.openTicketCount,
-      badge: stats.openTicketCount > 0 ? `${stats.openTicketCount} offen` : null
+      badge: stats.openTicketCount > 0 ? `${stats.openTicketCount} ${t('profile.open')}` : null
     },
     {
-      title: 'Merkliste',
-      description: 'Deine Favoriten',
+      title: t('nav.wishlist'),
+      description: t('profile.wishlistDescription'),
       icon: Heart,
       color: 'from-red-500 to-pink-500',
       link: createPageUrl('Wishlist'),
       stat: wishlistCount
     },
     {
-      title: 'VIP Programm',
-      description: 'Exklusive Vorteile freischalten',
+      title: t('profile.vipProgram'),
+      description: t('profile.vipDescription'),
       icon: Crown,
       color: 'from-yellow-400 to-amber-500',
       link: createPageUrl('VIP'),
       badge: 'Premium'
     },
     {
-      title: 'FAQ',
-      description: 'Häufig gestellte Fragen',
+      title: t('profile.faq'),
+      description: t('profile.faqDescription'),
       icon: MessageCircle,
       color: 'from-green-500 to-emerald-500',
       link: createPageUrl('FAQ'),
       stat: null
     },
     {
-      title: 'Hilfe & Support',
-      description: 'Wir helfen dir weiter',
+      title: t('profile.helpSupport'),
+      description: t('profile.helpDescription'),
       icon: HelpCircle,
       color: 'from-orange-500 to-red-500',
       link: createPageUrl('Help'),
@@ -128,8 +130,8 @@ export default function Profile() {
 
   if (user?.role === 'admin') {
     menuItems.push({
-      title: 'Admin Dashboard',
-      description: 'Verwaltung & Einstellungen',
+      title: t('profile.adminDashboard'),
+      description: t('profile.adminDescription'),
       icon: Settings,
       color: 'from-red-500 to-pink-500',
       link: createPageUrl('Admin'),
@@ -189,7 +191,7 @@ export default function Profile() {
                 : 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent'
             }`}
           >
-            {user?.full_name || 'Mein Profil'}
+            {user?.full_name || t('profile.title')}
           </motion.h1>
           
           <motion.div
@@ -216,7 +218,7 @@ export default function Profile() {
               }`}
             >
               <Shield className="w-4 h-4" />
-              Administrator
+              {t('profile.administrator')}
             </motion.div>
           )}
         </motion.div>
@@ -245,7 +247,7 @@ export default function Profile() {
             <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-purple-400 to-pink-400' : 'bg-gradient-to-r from-purple-600 to-pink-600'} bg-clip-text text-transparent`}>
               {stats.requestCount}
             </div>
-            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>Bestellungen</p>
+            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>{t('profile.orders')}</p>
           </motion.div>
 
           <motion.div
@@ -265,7 +267,7 @@ export default function Profile() {
             <div className={`text-4xl font-black mb-1 ${isDark ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}>
               {stats.cartCount}
             </div>
-            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>Im Warenkorb</p>
+            <p className={`text-sm font-bold ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>{t('profile.inCart')}</p>
           </motion.div>
         </motion.div>
 
@@ -346,7 +348,7 @@ export default function Profile() {
             <LogOut className="w-6 h-6 text-zinc-400 group-hover:text-red-400 transition-colors" />
           </motion.div>
           <span className="font-black text-lg text-zinc-200 group-hover:text-red-400 transition-colors">
-            Abmelden
+            {t('auth.logout')}
           </span>
         </motion.button>
 
@@ -365,7 +367,7 @@ export default function Profile() {
             >
               <Zap className="w-10 h-10 text-purple-400 mx-auto mb-3 group-hover:text-purple-300" />
             </motion.div>
-            <p className="text-sm text-zinc-300 font-bold">Schneller Support</p>
+            <p className="text-sm text-zinc-300 font-bold">{t('profile.fastSupport')}</p>
           </motion.div>
           
           <motion.div
@@ -381,7 +383,7 @@ export default function Profile() {
             >
               <Shield className="w-10 h-10 text-green-400 mx-auto mb-3 group-hover:text-green-300" />
             </motion.div>
-            <p className="text-sm text-zinc-300 font-bold">100% Sicher</p>
+            <p className="text-sm text-zinc-300 font-bold">{t('profile.secure')}</p>
           </motion.div>
           
           <motion.div
@@ -397,7 +399,7 @@ export default function Profile() {
             >
               <Star className="w-10 h-10 text-yellow-400 mx-auto mb-3 group-hover:text-yellow-300" fill="currentColor" />
             </motion.div>
-            <p className="text-sm text-zinc-300 font-bold">Premium Qualität</p>
+            <p className="text-sm text-zinc-300 font-bold">{t('profile.premiumQuality')}</p>
           </motion.div>
         </div>
       </div>
