@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PremiumHeader from './components/layout/PremiumHeader';
 import { WishlistProvider } from './components/wishlist/WishlistContext';
+import { I18nProvider, useI18n } from './components/i18n/I18nProvider';
 import { Star } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
@@ -20,6 +21,7 @@ export default function Layout({ children, currentPageName }) {
   };
 
   return (
+    <I18nProvider>
     <WishlistProvider>
       <div className={`min-h-screen transition-colors duration-300 ${
         theme === 'light' 
@@ -86,5 +88,6 @@ export default function Layout({ children, currentPageName }) {
       </footer>
       </div>
     </WishlistProvider>
+    </I18nProvider>
   );
 }

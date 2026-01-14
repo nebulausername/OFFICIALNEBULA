@@ -17,8 +17,11 @@ import {
   Sparkles,
   Grid3x3,
   UserCircle2,
-  Shield
+  Shield,
+  Globe
 } from 'lucide-react';
+import { LanguageSwitcherPanel } from '../i18n/LanguageSwitcher';
+import { useI18n } from '../i18n/I18nProvider';
 
 export default function MainDrawer({ 
   isOpen, 
@@ -29,6 +32,7 @@ export default function MainDrawer({
   onOpenShopCategories,
   onOpenProfile 
 }) {
+  const { t, isRTL } = useI18n();
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
 
@@ -54,9 +58,9 @@ export default function MainDrawer({
   const mainActions = [
     { 
       id: 'shop',
-      label: 'Shop Kategorien', 
+      label: t('shop.categories'), 
       icon: Grid3x3, 
-      subtitle: 'Alle Produkte durchsuchen',
+      subtitle: t('shop.allProducts'),
       gradient: 'from-purple-500 to-pink-500',
       onClick: () => {
         onOpenShopCategories();
@@ -64,9 +68,9 @@ export default function MainDrawer({
     },
     { 
       id: 'profile',
-      label: 'Profil & Einstellungen', 
+      label: t('profile.settings'), 
       icon: UserCircle2, 
-      subtitle: 'Konto verwalten',
+      subtitle: t('profile.title'),
       gradient: 'from-blue-500 to-cyan-500',
       onClick: () => {
         onOpenProfile();
@@ -75,10 +79,10 @@ export default function MainDrawer({
   ];
 
   const navItems = [
-    { label: 'Home', icon: Home, to: 'Home', gradient: 'from-purple-500 to-pink-500' },
-    { label: 'Shop', icon: Package, to: 'Products', gradient: 'from-blue-500 to-cyan-500' },
-    { label: 'Merkliste', icon: Heart, to: 'Wishlist', count: wishlistCount, gradient: 'from-red-500 to-pink-500' },
-    { label: 'Warenkorb', icon: ShoppingBag, to: 'Cart', count: cartCount, gradient: 'from-green-500 to-emerald-500' }
+    { label: t('nav.home'), icon: Home, to: 'Home', gradient: 'from-purple-500 to-pink-500' },
+    { label: t('nav.shop'), icon: Package, to: 'Products', gradient: 'from-blue-500 to-cyan-500' },
+    { label: t('nav.wishlist'), icon: Heart, to: 'Wishlist', count: wishlistCount, gradient: 'from-red-500 to-pink-500' },
+    { label: t('nav.cart'), icon: ShoppingBag, to: 'Cart', count: cartCount, gradient: 'from-green-500 to-emerald-500' }
   ];
 
   return (
@@ -169,6 +173,17 @@ export default function MainDrawer({
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               <div className="p-5 space-y-6">
+                {/* Language Switcher - Top Sticky */}
+                <div 
+                  className="rounded-xl p-4 border"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)'
+                  }}
+                >
+                  <LanguageSwitcherPanel />
+                </div>
+
                 {/* ACTION LAUNCHER - Top Priority */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-4">
@@ -212,7 +227,7 @@ export default function MainDrawer({
                                 {action.subtitle}
                               </p>
                             </div>
-                            <ChevronRight className="w-6 h-6 text-gold group-hover:text-gold2 transition-colors flex-shrink-0 mt-2" strokeWidth={2.5} />
+                            <ChevronRight className={`w-6 h-6 text-gold group-hover:text-gold2 transition-colors flex-shrink-0 mt-2 ${isRTL ? 'rotate-180' : ''}`} strokeWidth={2.5} />
                           </div>
                         </motion.button>
                       );
