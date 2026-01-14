@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import ProductQuickView from '../components/products/ProductQuickView';
+import ProductVariantModal from '../components/products/ProductVariantModal';
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
 import AdvancedFilters from '../components/shop/AdvancedFilters';
@@ -180,27 +181,26 @@ export default function Products() {
     setSearchQuery('');
   };
 
-  const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
+  const handleAddToCart = async (variantData) => {
     try {
       const user = await base44.auth.me();
-      const existing = await base44.entities.StarCartItem.filter({
+      
+      await base44.entities.StarCartItem.create({
         user_id: user.id,
-        product_id: product.id
+        product_id: variantData.product_id,
+        quantity: variantData.quantity,
+        selected_options: {
+          variant_id: variantData.variant_id,
+          color_id: variantData.color_id,
+          color_name: variantData.color_name,
+          color_hex: variantData.color_hex,
+          size: variantData.size,
+          image: variantData.image,
+          price: variantData.price,
+          sku: variantData.sku
+        }
       });
-
-      if (existing.length > 0) {
-        await base44.entities.StarCartItem.update(existing[0].id, {
-          quantity: existing[0].quantity + quantity,
-          selected_options: selectedOptions
-        });
-      } else {
-        await base44.entities.StarCartItem.create({
-          user_id: user.id,
-          product_id: product.id,
-          quantity: quantity,
-          selected_options: selectedOptions
-        });
-      }
+      
       setIsQuickViewOpen(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -356,8 +356,8 @@ export default function Products() {
         selectedCategory={selectedCategory}
       />
 
-      {/* Quick View Modal */}
-      <ProductQuickView
+      {/* Variant Modal */}
+      <ProductVariantModal
         product={quickViewProduct}
         isOpen={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}

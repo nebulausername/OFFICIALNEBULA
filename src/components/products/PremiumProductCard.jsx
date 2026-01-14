@@ -51,6 +51,7 @@ function ProductImage({ src, alt }) {
 }
 
 export default function PremiumProductCard({ product, onQuickView }) {
+  const navigate = useNavigate();
   const { t, formatCurrency } = useI18n();
   
   const handleQuickView = (e) => {

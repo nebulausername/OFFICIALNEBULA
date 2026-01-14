@@ -251,7 +251,7 @@ export default function AdminProducts() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleEdit(product)}
+                        onClick={() => window.location.href = createPageUrl('AdminProductEditor') + `?id=${product.id}`}
                         className="hover:bg-purple-500/20 hover:text-purple-400 transition-colors"
                       >
                         <Pencil className="w-4 h-4" />

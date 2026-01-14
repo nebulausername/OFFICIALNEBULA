@@ -100,8 +100,8 @@ export default function Cart() {
 
   const calculateTotal = () => {
     return cartItems.reduce((sum, item) => {
-      const product = products[item.product_id];
-      return sum + (product ? product.price * item.quantity : 0);
+      const price = item.selected_options?.price || products[item.product_id]?.price || 0;
+      return sum + (price * item.quantity);
     }, 0);
   };
 
@@ -365,9 +365,9 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                         whileHover={{ scale: 1.05 }}
                         className="relative w-32 h-32 bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl overflow-hidden flex-shrink-0 shadow-lg"
                       >
-                        {product.cover_image ? (
+                        {(item.selected_options?.image || product.cover_image) ? (
                           <img
-                            src={product.cover_image}
+                            src={item.selected_options?.image || product.cover_image}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
@@ -377,7 +377,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                           </div>
                         )}
                         <div className="absolute top-2 right-2 px-2 py-1 bg-black/80 backdrop-blur rounded-lg text-xs font-mono text-purple-300 font-bold">
-                          {product.sku}
+                          {item.selected_options?.sku || product.sku}
                         </div>
                       </motion.div>
 
@@ -388,8 +388,17 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                             <h3 className="font-black text-xl mb-2 truncate group-hover:text-purple-400 transition-colors">{product.name}</h3>
                             <p className="text-sm text-zinc-500 flex items-center gap-2">
                               <Star className="w-3 h-3 text-purple-400" />
-                              Einzelpreis: <span className="font-bold text-purple-400">{product.price.toFixed(2)}€</span>
+                              Einzelpreis: <span className="font-bold text-purple-400">{(item.selected_options?.price || product.price).toFixed(2)}€</span>
                             </p>
+                            {item.selected_options?.color_name && (
+                              <div className="flex items-center gap-2 mt-1">
+                                <div className="w-4 h-4 rounded" style={{ background: item.selected_options.color_hex }} />
+                                <span className="text-xs font-bold text-white">{item.selected_options.color_name}</span>
+                                {item.selected_options.size && (
+                                  <span className="text-xs font-bold text-zinc-400">• {item.selected_options.size}</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <motion.button
                             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -445,7 +454,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                               animate={{ scale: 1 }}
                               className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient"
                             >
-                              {(product.price * item.quantity).toFixed(2)}€
+                              {((item.selected_options?.price || product.price) * item.quantity).toFixed(2)}€
                             </motion.div>
                           </div>
                         </div>
