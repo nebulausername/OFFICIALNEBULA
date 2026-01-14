@@ -1,20 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Paperclip, ArrowLeft, CheckCircle, XCircle, User, Shield, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, ArrowLeft, CheckCircle, XCircle, User, Shield, Loader2, Image as ImageIcon, ThumbsUp, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { base44 } from '@/api/base44Client';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
-
-const statusConfig = {
-  open: { label: 'Offen', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-  in_progress: { label: 'In Bearbeitung', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-  solved: { label: 'Gelöst', color: 'bg-green-500/20 text-green-400 border-green-500/30' },
-  closed: { label: 'Geschlossen', color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' }
-};
+import { de, enUS, sk, ar } from 'date-fns/locale';
+import { useI18n } from '../i18n/I18nProvider';
 
 export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
   const [messages, setMessages] = useState([]);
