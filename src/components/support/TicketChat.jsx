@@ -96,7 +96,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
       // Replace temp message
       setMessages(prev => prev.map(m => m.id === tempMessage.id ? msg : m));
     } catch (error) {
-      toast({ title: 'Senden fehlgeschlagen', variant: 'destructive' });
+      toast.error(t('support.chat.sendFailed'));
       setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
       setNewMessage(messageText);
     } finally {
@@ -107,20 +107,30 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
   const handleCloseTicket = async () => {
     try {
       await base44.entities.Ticket.update(ticket.id, { status: 'closed' });
-      toast({ title: 'Ticket geschlossen' });
+      toast.success(t('support.chat.ticketClosed'));
       onStatusChange?.();
     } catch (error) {
-      toast({ title: 'Fehler', variant: 'destructive' });
+      toast.error(t('support.chat.sendFailed'));
+    }
+  };
+
+  const handleMarkSolved = async () => {
+    try {
+      await base44.entities.Ticket.update(ticket.id, { status: 'solved' });
+      toast.success(t('support.chat.problemSolved'));
+      onStatusChange?.();
+    } catch (error) {
+      toast.error(t('support.chat.sendFailed'));
     }
   };
 
   const handleReopenTicket = async () => {
     try {
       await base44.entities.Ticket.update(ticket.id, { status: 'open' });
-      toast({ title: 'Ticket wieder geöffnet' });
+      toast.success(t('support.chat.ticketReopened'));
       onStatusChange?.();
     } catch (error) {
-      toast({ title: 'Fehler', variant: 'destructive' });
+      toast.error(t('support.chat.sendFailed'));
     }
   };
 
