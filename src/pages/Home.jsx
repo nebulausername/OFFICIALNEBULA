@@ -599,38 +599,53 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
               className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-bold leading-relaxed"
-              style={{ color: 'var(--muted)' }}
+              style={{ color: 'rgba(255, 255, 255, 0.9)' }}
             >
-              Tritt der <span className="text-gold font-black">Elite</span> bei und erlebe{' '}
-              <span className="text-gold2 font-black">Premium Shopping</span> ✨
+              Tritt der <span className="bg-gradient-to-r from-yellow-300 to-amber-400 bg-clip-text text-transparent font-black">Elite</span> bei und erlebe{' '}
+              <span className="bg-gradient-to-r from-yellow-300 to-amber-400 bg-clip-text text-transparent font-black">Premium Shopping</span> ✨
             </motion.p>
 
-            <div className="grid md:grid-cols-3 gap-6 mb-10">
+            <div className="grid md:grid-cols-3 gap-5 mb-10">
               <motion.div 
                 whileHover={{ y: -5, scale: 1.03 }}
-                className="glass backdrop-blur-xl border-2 border-yellow-500/20 rounded-2xl p-6"
+                className="rounded-2xl p-6 text-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  backdropFilter: 'blur(12px)'
+                }}
               >
-                <div className="text-3xl mb-3">⚡</div>
-                <h3 className="font-black text-white mb-2">Early Access</h3>
-                <p className="text-sm text-zinc-300">Erster Zugriff auf neue Produkte</p>
+                <div className="text-4xl mb-4">⚡</div>
+                <h3 className="font-black text-lg mb-2" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>Early Access</h3>
+                <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Erster Zugriff auf neue Produkte</p>
               </motion.div>
 
               <motion.div 
                 whileHover={{ y: -5, scale: 1.03 }}
-                className="glass backdrop-blur-xl border-2 border-yellow-500/20 rounded-2xl p-6"
+                className="rounded-2xl p-6 text-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  backdropFilter: 'blur(12px)'
+                }}
               >
-                <div className="text-3xl mb-3">💎</div>
-                <h3 className="font-black text-white mb-2">Exklusive Deals</h3>
-                <p className="text-sm text-zinc-300">Spezielle VIP-Rabatte & Angebote</p>
+                <div className="text-4xl mb-4">💎</div>
+                <h3 className="font-black text-lg mb-2" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>Exklusive Deals</h3>
+                <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Spezielle VIP-Rabatte & Angebote</p>
               </motion.div>
 
               <motion.div 
                 whileHover={{ y: -5, scale: 1.03 }}
-                className="glass backdrop-blur-xl border-2 border-yellow-500/20 rounded-2xl p-6"
+                className="rounded-2xl p-6 text-center"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  backdropFilter: 'blur(12px)'
+                }}
               >
-                <div className="text-3xl mb-3">🎁</div>
-                <h3 className="font-black text-white mb-2">Priority Support</h3>
-                <p className="text-sm text-zinc-300">Bevorzugter Kundenservice</p>
+                <div className="text-4xl mb-4">🎁</div>
+                <h3 className="font-black text-lg mb-2" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>Priority Support</h3>
+                <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Bevorzugter Kundenservice</p>
               </motion.div>
             </div>
 
