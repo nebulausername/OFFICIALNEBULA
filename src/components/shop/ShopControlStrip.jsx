@@ -18,10 +18,11 @@ export default function ShopControlStrip({
   onSortChange,
   productCount = 0
 }) {
+  const { t } = useI18n();
   const [isFocused, setIsFocused] = useState(false);
 
   const quickCategories = [
-    { id: 'all', name: 'Alle' },
+    { id: 'all', name: t('common.all') },
     { id: 'sneaker', name: 'Sneaker' },
     { id: 'kleidung', name: 'Kleidung' },
     { id: 'taschen', name: 'Taschen' },
@@ -49,7 +50,7 @@ export default function ShopControlStrip({
           />
           <Input
             type="text"
-            placeholder="Suche nach Produkt, Marke, ID…"
+            placeholder={t('shop.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={() => setIsFocused(true)}
@@ -91,7 +92,7 @@ export default function ShopControlStrip({
               }}
             >
               <Store className="w-5 h-5" />
-              <span>Kategorien</span>
+              <span>{t('shop.categories')}</span>
             </motion.button>
 
           {/* Filter Button */}
@@ -105,8 +106,8 @@ export default function ShopControlStrip({
               color: activeFilters > 0 ? '#F2D27C' : '#FFFFFF'
             }}
           >
-            <SlidersHorizontal className="w-5 h-5 mr-2" />
-            Filter
+            <SlidersHorizontal className="w-5 h-5 me-2" />
+            {t('shop.filters')}
             {activeFilters > 0 && (
               <span 
                 className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black"
@@ -148,7 +149,7 @@ export default function ShopControlStrip({
         style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}
       >
         <span className="text-base font-semibold" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-          <span className="font-black" style={{ color: '#F2D27C' }}>{productCount}</span> Produkte gefunden
+          <span className="font-black" style={{ color: '#F2D27C' }}>{productCount}</span> {t('shop.products')}
         </span>
 
         <div className="flex items-center gap-4">
