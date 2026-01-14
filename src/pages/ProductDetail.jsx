@@ -65,12 +65,18 @@ export default function ProductDetail() {
       setProduct(prod);
       setImages(productImages.sort((a, b) => a.sort_order - b.sort_order));
       
+      // Set initial image
+      const initialImage = prod.cover_image || productImages?.[0]?.url || null;
+      setSelectedImage(initialImage);
+      
       // Auto-select first color if available
       if (prod.colors && prod.colors.length > 0) {
-        setSelectedColor(prod.colors[0]);
-        setSelectedImage(prod.colors[0].images?.[0] || prod.cover_image || (productImages[0]?.url));
-      } else {
-        setSelectedImage(prod.cover_image || (productImages[0]?.url));
+        const firstColor = prod.colors[0];
+        setSelectedColor(firstColor);
+        // If color has images, use those
+        if (firstColor.images && firstColor.images.length > 0) {
+          setSelectedImage(firstColor.images[0]);
+        }
       }
 
       // Load related data
@@ -255,7 +261,16 @@ export default function ProductDetail() {
     );
   }
 
-  const allImages = [product.cover_image, ...images.map(img => img.url)].filter(Boolean);
+  // Build image gallery - color images first, then product images
+  const getGalleryImages = () => {
+    if (selectedColor?.images?.length > 0) {
+      return selectedColor.images;
+    }
+    const productImgs = [product.cover_image, ...images.map(img => img.url)].filter(Boolean);
+    return productImgs.length > 0 ? productImgs : [];
+  };
+  
+  const allImages = getGalleryImages();
   const currentPrice = calculatePrice();
 
   return (
@@ -290,24 +305,23 @@ export default function ProductDetail() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="w-full h-full"
+                className="w-full h-full relative"
               >
                 {selectedImage ? (
-                  <img
-                    src={selectedImage}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      e.target.parentElement.classList.add('fallback-active');
-                    }}
-                  />
-                ) : null}
-                <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900 ${selectedImage ? 'hidden' : ''}`}>
-                  <Package className="w-20 h-20 mb-4" style={{ color: 'rgba(214, 178, 94, 0.4)' }} />
-                  <span className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>Kein Bild verfügbar</span>
-                </div>
+                  <>
+                    <img
+                      src={selectedImage}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                    />
+                  </>
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
+                    <Package className="w-20 h-20 mb-4" style={{ color: 'rgba(214, 178, 94, 0.4)' }} />
+                    <span className="text-lg font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>Kein Bild verfügbar</span>
+                  </div>
+                )}
               </motion.div>
             </AnimatePresence>
 
@@ -665,8 +679,11 @@ export default function ProductDetail() {
                     onClick={() => {
                       setSelectedColor(color);
                       setSelectedSize(null);
-                      if (color.images?.[0]) {
+                      // Switch to color's images or fallback to cover
+                      if (color.images?.length > 0) {
                         setSelectedImage(color.images[0]);
+                      } else {
+                        setSelectedImage(product.cover_image || images[0]?.url);
                       }
                     }}
                     className={`relative w-14 h-14 rounded-xl transition-all ${
