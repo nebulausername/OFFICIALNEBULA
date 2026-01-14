@@ -3,6 +3,7 @@ import { Search, X, Grid3X3, SlidersHorizontal, ChevronDown, Store } from 'lucid
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { useI18n } from '../i18n/I18nProvider';
 
 export default function ShopControlStrip({ 
   searchQuery, 
