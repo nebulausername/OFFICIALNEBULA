@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { base44 } from '@/api/base44Client';
-import { Star, Sparkles, Package } from 'lucide-react';
+import { Star, Sparkles, Package, ChevronRight, Shirt, ShoppingBag, Watch, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import ProductQuickView from '../components/products/ProductQuickView';
@@ -346,46 +346,52 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Departments Section */}
-      <section className="py-24 relative z-10">
-        {/* Subtle Background */}
+      {/* Departments Section - Premium Redesign */}
+      <section className="py-24 relative z-10" style={{ background: '#0B0D12' }}>
+        {/* Subtle Corner Glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[150px]"
-            style={{ background: 'radial-gradient(circle, rgba(214, 178, 94, 0.08), transparent 70%)' }}
+          <div className="absolute top-0 left-0 w-[400px] h-[400px] rounded-full blur-[150px]"
+            style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.08), transparent 70%)' }}
+          />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-[150px]"
+            style={{ background: 'radial-gradient(circle, rgba(99, 102, 241, 0.08), transparent 70%)' }}
           />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-16 text-center"
+            className="mb-14 text-center"
           >
-            {/* Premium Badge */}
+            {/* Premium Badge - Smaller & Elegant */}
             <motion.div
               initial={{ scale: 0.9, y: 10 }}
               whileInView={{ scale: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ type: "spring", bounce: 0.4 }}
-              className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full"
+              className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full"
               style={{
-                background: 'rgba(214, 178, 94, 0.1)',
-                border: '1px solid rgba(214, 178, 94, 0.3)'
+                background: 'rgba(214, 178, 94, 0.08)',
+                border: '1px solid rgba(214, 178, 94, 0.25)'
               }}
             >
-              <Sparkles className="w-5 h-5" style={{ color: 'var(--gold)' }} />
-              <span className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--gold)' }}>
+              <Sparkles className="w-4 h-4" style={{ color: '#F2D27C' }} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#F2D27C' }}>
                 Unsere Welten
               </span>
             </motion.div>
 
             <motion.h2 
-              className="text-5xl md:text-6xl lg:text-7xl font-black mb-5 tracking-tight"
+              className="text-4xl sm:text-5xl md:text-6xl font-black mb-4 tracking-tight"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              style={{ color: 'var(--text)' }}
+              style={{ 
+                color: 'rgba(255, 255, 255, 0.92)',
+                textShadow: '0 2px 20px rgba(0, 0, 0, 0.3)'
+              }}
             >
               Kategorien
             </motion.h2>
@@ -394,85 +400,110 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-lg md:text-xl font-medium max-w-2xl mx-auto"
-              style={{ color: 'var(--text-secondary)' }}
+              className="text-base sm:text-lg md:text-xl font-medium max-w-xl mx-auto leading-relaxed"
+              style={{ color: 'rgba(255, 255, 255, 0.72)' }}
             >
               Tauche ein in unsere Premium-Kollektionen
             </motion.p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
             {loadingDepts ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <motion.div 
                   key={i}
-                  animate={{ opacity: [0.5, 0.8, 0.5] }}
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
-                  className="aspect-square rounded-2xl"
-                  style={{ background: 'var(--surface)' }}
+                  className="rounded-[20px] h-44 md:h-52"
+                  style={{ background: 'rgba(255, 255, 255, 0.04)' }}
                 />
               ))
             ) : (
-              departments.map((dept, index) => (
-                <motion.div
-                  key={dept.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="group relative"
-                >
-                  <Link
-                    to={createPageUrl('Products') + `?department=${dept.id}`}
-                    className="relative block rounded-2xl overflow-hidden transition-all"
-                    style={{
-                      background: 'var(--bg2)',
-                      border: '1px solid var(--border)',
-                      boxShadow: 'var(--shadow-subtle)'
-                    }}
+              departments.map((dept, index) => {
+                // Category-specific icons and styling
+                const categoryConfig = {
+                  'Herren': { icon: Shirt, emoji: '👔', gradient: 'from-indigo-500/20 to-purple-500/20' },
+                  'Damen': { icon: ShoppingBag, emoji: '👠', gradient: 'from-pink-500/20 to-rose-500/20' },
+                  'Accessoires': { icon: Watch, emoji: '⌚', gradient: 'from-amber-500/20 to-orange-500/20' },
+                  'Unisex': { icon: Users, emoji: '✨', gradient: 'from-cyan-500/20 to-blue-500/20' }
+                };
+                const config = categoryConfig[dept.name] || { icon: Package, emoji: '📦', gradient: 'from-gray-500/20 to-slate-500/20' };
+                const IconComponent = config.icon;
+
+                return (
+                  <motion.div
+                    key={dept.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.08 }}
+                    whileHover={{ y: -6, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="group relative"
                   >
-                    {/* Hover Glow */}
-                    <div 
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl"
-                      style={{ boxShadow: 'inset 0 0 40px rgba(214, 178, 94, 0.1)' }}
-                    />
+                    <Link
+                      to={createPageUrl('Products') + `?department=${dept.id}`}
+                      className="relative block rounded-[20px] overflow-hidden transition-all duration-300 h-44 md:h-52"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.06)',
+                        border: '1px solid rgba(214, 178, 94, 0.2)'
+                      }}
+                    >
+                      {/* Hover Background Gradient */}
+                      <div 
+                        className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                      />
 
-                    <div className="relative aspect-square flex flex-col items-center justify-center gap-4 p-6">
-                      {/* Icon */}
-                      <motion.div 
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        className="w-20 h-20 rounded-2xl flex items-center justify-center"
-                        style={{
-                          background: 'linear-gradient(135deg, rgba(214, 178, 94, 0.15), rgba(214, 178, 94, 0.05))',
-                          border: '1px solid rgba(214, 178, 94, 0.25)'
+                      {/* Hover Glow Border */}
+                      <div 
+                        className="absolute inset-0 rounded-[20px] opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none"
+                        style={{ 
+                          border: '1px solid rgba(214, 178, 94, 0.5)',
+                          boxShadow: '0 0 30px rgba(214, 178, 94, 0.15), inset 0 0 30px rgba(214, 178, 94, 0.05)'
                         }}
-                      >
-                        <Package className="w-10 h-10" style={{ color: 'var(--gold)' }} />
-                      </motion.div>
+                      />
 
-                      {/* Name */}
-                      <div className="text-center">
-                        <h3 className="text-lg md:text-xl font-bold group-hover:text-gold transition-colors"
-                          style={{ color: 'var(--text)' }}>
+                      {/* Chevron Arrow - Top Right */}
+                      <div className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center opacity-50 group-hover:opacity-100 transition-all duration-300 group-hover:bg-gold/20">
+                        <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" style={{ color: '#D6B25E' }} />
+                      </div>
+
+                      <div className="relative h-full flex flex-col items-center justify-center gap-3 p-5">
+                        {/* Icon Badge */}
+                        <motion.div 
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className="w-16 h-16 md:w-18 md:h-18 rounded-2xl flex items-center justify-center relative"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(30, 27, 45, 0.9), rgba(45, 40, 65, 0.9))',
+                            border: '1px solid rgba(214, 178, 94, 0.3)',
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)'
+                          }}
+                        >
+                          {/* Gold Ring */}
+                          <div className="absolute inset-0 rounded-2xl" 
+                            style={{ 
+                              background: 'radial-gradient(circle at 30% 30%, rgba(214, 178, 94, 0.15), transparent 70%)'
+                            }} 
+                          />
+                          <IconComponent className="w-8 h-8 relative z-10" style={{ color: '#F2D27C' }} />
+                        </motion.div>
+
+                        {/* Title */}
+                        <h3 className="text-lg md:text-xl font-bold text-center group-hover:text-gold transition-colors duration-300"
+                          style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
                           {dept.name}
                         </h3>
-                        <p className="text-sm font-medium mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          style={{ color: 'var(--muted)' }}>
+
+                        {/* Info Line */}
+                        <p className="text-xs md:text-sm font-medium opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                          style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                           Entdecken →
                         </p>
                       </div>
-                    </div>
-
-                    {/* Gold Border on Hover */}
-                    <div 
-                      className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                      style={{ border: '1px solid rgba(214, 178, 94, 0.4)' }}
-                    />
-                  </Link>
-                </motion.div>
-              ))
+                    </Link>
+                  </motion.div>
+                );
+              })
             )}
           </div>
 
@@ -485,17 +516,19 @@ export default function Home() {
             className="text-center mt-12"
           >
             <Link to={createPageUrl('Products')}>
-              <Button 
-                className="h-12 px-8 rounded-xl font-bold"
-                style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text)'
-                }}
-              >
-                Alle Produkte durchstöbern
-                <Sparkles className="w-4 h-4 ml-2" style={{ color: 'var(--gold)' }} />
-              </Button>
+              <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  className="h-12 px-8 rounded-xl font-bold"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(214, 178, 94, 0.3)',
+                    color: 'rgba(255, 255, 255, 0.9)'
+                  }}
+                >
+                  Alle Produkte durchstöbern
+                  <Sparkles className="w-4 h-4 ml-2" style={{ color: '#F2D27C' }} />
+                </Button>
+              </motion.div>
             </Link>
           </motion.div>
         </div>
