@@ -7,8 +7,10 @@ import ProductQuickView from '../components/products/ProductQuickView';
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
 import AdvancedFilters from '../components/shop/AdvancedFilters';
+import { useI18n } from '../components/i18n/I18nProvider';
 
 export default function Products() {
+  const { t } = useI18n();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -233,7 +235,7 @@ export default function Products() {
             >
               <Sparkles className="w-4 h-4" style={{ color: '#D6B25E' }} />
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#D6B25E' }}>
-                Premium Drops • Authentisch • Limitiert
+                {t('misc.premiumDrops')}
               </span>
             </div>
           </motion.div>
@@ -249,7 +251,7 @@ export default function Products() {
               className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight"
               style={{ color: '#FFFFFF' }}
             >
-              Shop
+              {t('shop.title')}
             </h1>
           </motion.div>
 
@@ -261,7 +263,7 @@ export default function Products() {
             className="text-center text-lg md:text-xl font-medium mb-10"
             style={{ color: 'rgba(255, 255, 255, 0.75)' }}
           >
-            Entdecke unsere Premium-Auswahl
+            {t('misc.discoverPremium')}
           </motion.p>
 
           {/* Shop Control Strip */}
@@ -313,10 +315,10 @@ export default function Products() {
                 <Sparkles className="w-10 h-10" style={{ color: '#D6B25E' }} />
               </div>
               <h3 className="text-2xl font-bold mb-3" style={{ color: '#FFFFFF' }}>
-                Keine Produkte gefunden
+                {t('shop.noProducts')}
               </h3>
               <p className="text-base" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-                Versuche einen anderen Suchbegriff oder Filter
+                {t('shop.resetFilters')}
               </p>
             </motion.div>
           ) : (
