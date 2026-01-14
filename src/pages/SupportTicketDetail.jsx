@@ -287,21 +287,28 @@ export default function SupportTicketDetail() {
           <AnimatePresence>
             {messages.map((msg, index) => {
               const isAdmin = msg.sender_role === 'admin';
+              const isUserMessage = !isAdmin;
               return (
                 <motion.div
                   key={msg.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className={`flex ${isAdmin ? 'justify-start' : 'justify-end'}`}
+                  className={`flex ${isUserMessage ? (isRTL ? 'justify-start' : 'justify-end') : (isRTL ? 'justify-end' : 'justify-start')}`}
                 >
-                  <div className={`max-w-[80%] ${isAdmin ? 'bg-blue-500/15 border-blue-400/30' : 'bg-purple-500/15 border-purple-400/30'} border rounded-2xl p-4 backdrop-blur-sm transition-all hover:border-opacity-50`}>
-                    <div className="flex items-center gap-2 mb-2">
+                  <div 
+                    className="max-w-[80%] border rounded-2xl p-4 backdrop-blur-sm transition-all"
+                    style={{
+                      background: isAdmin ? 'rgba(59, 130, 246, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                      borderColor: isAdmin ? 'rgba(59, 130, 246, 0.3)' : 'rgba(139, 92, 246, 0.3)'
+                    }}
+                  >
+                    <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <span className="text-xs font-bold text-white">
                         {isAdmin ? '🎧 Support Team' : '👤 Du'}
                       </span>
-                      <span className="text-xs text-zinc-500">
-                        {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm', { locale: de })}
+                      <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.45)' }}>
+                        {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm', { locale: dateLocale })}
                       </span>
                     </div>
                     <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{msg.body}</p>
@@ -313,7 +320,8 @@ export default function SupportTicketDetail() {
                             href={att.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-xs text-purple-400 hover:text-purple-300"
+                            className="flex items-center gap-2 text-xs transition-colors"
+                            style={{ color: '#A78BFA' }}
                           >
                             <FileText className="w-4 h-4" />
                             {att.name}
@@ -330,25 +338,41 @@ export default function SupportTicketDetail() {
         </div>
 
         {/* Input */}
-        {ticket.status !== 'closed' && (
-          <div className="sticky bottom-0 bg-black/40 backdrop-blur-xl border-t border-white/[0.06] px-4 py-4">
+        {!isClosed && (
+          <div 
+            className="sticky bottom-0 px-4 py-4"
+            style={{
+              background: 'rgba(0, 0, 0, 0.4)',
+              backdropFilter: 'blur(20px)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.06)'
+            }}
+          >
             <form onSubmit={handleSendMessage} className="flex gap-3">
               <Textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Nachricht schreiben..."
+                placeholder={t('support.chat.writeMessage')}
                 rows={2}
-                className="flex-1 bg-white/[0.03] border-white/[0.1] text-white resize-none"
+                className="flex-1 resize-none"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#FFFFFF'
+                }}
               />
               <Button
                 type="submit"
                 disabled={!newMessage.trim() || sending}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 px-6"
+                className="px-6"
+                style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
               >
                 {sending ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div 
+                    className="w-5 h-5 border-2 rounded-full animate-spin"
+                    style={{ borderColor: 'rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF' }}
+                  />
                 ) : (
-                  <Send className="w-5 h-5" />
+                  <Send className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 )}
               </Button>
             </form>
@@ -357,15 +381,4 @@ export default function SupportTicketDetail() {
       </div>
     </div>
   );
-}
-
-function getCategoryLabel(category) {
-  const labels = {
-    order: 'Bestellung',
-    payment: 'Zahlung',
-    product: 'Produkt',
-    return: 'Retoure',
-    other: 'Sonstiges'
-  };
-  return labels[category] || category;
 }
