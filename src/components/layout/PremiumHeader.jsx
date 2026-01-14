@@ -7,12 +7,13 @@ import { motion } from 'framer-motion';
 import MainDrawer from '../drawer/MainDrawer';
 import ShopCategoriesDrawer from '../drawer/ShopCategoriesDrawer';
 import ProfileDrawer from '../drawer/ProfileDrawer';
+import { useWishlist } from '../wishlist/WishlistContext';
 
 export default function PremiumHeader() {
   const location = useLocation();
+  const { count: wishlistCount } = useWishlist();
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
   const [isMainDrawerOpen, setIsMainDrawerOpen] = useState(false);
   const [isShopDrawerOpen, setIsShopDrawerOpen] = useState(false);
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
@@ -33,13 +34,8 @@ export default function PremiumHeader() {
       const userData = await base44.auth.me();
       setUser(userData);
       
-      const [cartItems, wishlistItems] = await Promise.all([
-        base44.entities.StarCartItem.filter({ user_id: userData.id }),
-        base44.entities.WishlistItem.filter({ user_id: userData.id })
-      ]);
-      
+      const cartItems = await base44.entities.StarCartItem.filter({ user_id: userData.id });
       setCartCount(cartItems.length);
-      setWishlistCount(wishlistItems.length);
     } catch (error) {
       // User not logged in
     }
