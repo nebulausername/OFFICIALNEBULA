@@ -189,35 +189,71 @@ export default function SupportTicketDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0a12] via-[#14141f] to-[#0a0a12] flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-purple-500/30 border-t-purple-500 rounded-full" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+        <div 
+          className="animate-spin w-12 h-12 border-4 rounded-full"
+          style={{ borderColor: 'rgba(139, 92, 246, 0.3)', borderTopColor: '#8B5CF6' }}
+        />
       </div>
     );
   }
 
+  const isClosed = ticket.status === 'closed' || ticket.status === 'solved';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a12] via-[#14141f] to-[#0a0a12]">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-black/40 backdrop-blur-xl border-b border-white/[0.06] px-4 py-4">
-          <div className="flex items-center justify-between">
+        <div 
+          className="sticky top-0 z-10 px-4 py-4"
+          style={{
+            background: 'rgba(0, 0, 0, 0.4)',
+            backdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.06)'
+          }}
+        >
+          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <button
               onClick={() => navigate(createPageUrl('Support'))}
-              className="flex items-center gap-2 text-zinc-300 hover:text-white transition-colors"
+              className="flex items-center gap-2 transition-colors"
+              style={{ color: 'rgba(255, 255, 255, 0.7)' }}
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-semibold">Zurück</span>
+              <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+              <span className="font-semibold">{t('common.back')}</span>
             </button>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <StatusChip status={ticket.status} />
+              {!isClosed && (
+                <Button 
+                  onClick={handleMarkSolved} 
+                  size="sm"
+                  style={{
+                    background: 'rgba(52, 211, 153, 0.15)',
+                    border: '1px solid rgba(52, 211, 153, 0.3)',
+                    color: '#4ADE80'
+                  }}
+                >
+                  <ThumbsUp className="w-4 h-4 me-1" />
+                  {t('support.chat.problemSolved')}
+                </Button>
+              )}
               {ticket.status === 'solved' && (
-                <Button onClick={handleCloseTicket} size="sm" variant="outline" className="bg-white/5">
-                  Schließen
+                <Button 
+                  onClick={handleCloseTicket} 
+                  size="sm" 
+                  variant="outline"
+                  style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+                >
+                  {t('support.chat.closeTicket')}
                 </Button>
               )}
               {ticket.status === 'closed' && (
-                <Button onClick={handleReopenTicket} size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500">
-                  Erneut öffnen
+                <Button 
+                  onClick={handleReopenTicket} 
+                  size="sm" 
+                  style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
+                >
+                  {t('support.chat.reopenTicket')}
                 </Button>
               )}
             </div>
@@ -225,16 +261,22 @@ export default function SupportTicketDetail() {
         </div>
 
         {/* Ticket Info */}
-        <div className="px-4 py-6 border-b border-white/[0.06]">
+        <div 
+          className="px-4 py-6"
+          style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}
+        >
           <h1 className="text-2xl font-black text-white mb-2">{ticket.subject}</h1>
-          <div className="flex items-center gap-4 text-sm text-zinc-400">
-            <span>Kategorie: {getCategoryLabel(ticket.category)}</span>
+          <div 
+            className={`flex items-center gap-4 text-sm flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}
+            style={{ color: 'rgba(255, 255, 255, 0.5)' }}
+          >
+            <span>{t('support.form.category')}: {getCategoryLabel(ticket.category)}</span>
             <span>•</span>
             <span>#{ticket.id.slice(0, 8)}</span>
             {ticket.order_id && (
               <>
                 <span>•</span>
-                <span>Bestellung: {ticket.order_id}</span>
+                <span>{t('support.form.orderNumber')}: {ticket.order_id}</span>
               </>
             )}
           </div>
