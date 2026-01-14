@@ -83,7 +83,7 @@ export default function SupportTicketDetail() {
       await loadMessages();
     } catch (error) {
       console.error('Error loading ticket:', error);
-      toast({ title: 'Fehler', description: 'Laden fehlgeschlagen', variant: 'destructive' });
+      toast.error(t('support.chat.sendFailed'));
     } finally {
       setLoading(false);
     }
