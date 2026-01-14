@@ -9,9 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Upload, X, Plus, GripVertical, Palette, Ruler, Grid3x3 } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X, Plus, GripVertical, Palette, Ruler, Grid3x3, Package } from 'lucide-react';
 import { motion, Reorder } from 'framer-motion';
 import { createPageUrl } from '../utils';
+import ProductVariantManager from '../components/admin/ProductVariantManager';
 
 export default function AdminProductEditor() {
   const [searchParams] = useSearchParams();
@@ -510,114 +511,24 @@ export default function AdminProductEditor() {
             </div>
           </TabsContent>
 
-          {/* Variants Tab */}
+          {/* Variants Tab - Using ProductVariantManager */}
           <TabsContent value="variants">
-            <div className="glass-panel rounded-2xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <Grid3x3 className="w-6 h-6" style={{ color: '#D6B25E' }} />
-                  <h3 className="text-xl font-black text-white">Varianten</h3>
-                </div>
-                <Button onClick={generateVariants} className="btn-gold">
-                  <Grid3x3 className="w-5 h-5 me-2" />
-                  Varianten generieren ({colors.length} × {sizes.length} = {colors.length * sizes.length})
-                </Button>
+            {productId ? (
+              <ProductVariantManager
+                product={{ id: productId, sku: formData.sku, price: formData.price, colors, sizes, variants }}
+                onUpdate={(data) => {
+                  setColors(data.colors);
+                  setSizes(data.sizes);
+                  setVariants(data.variants);
+                }}
+              />
+            ) : (
+              <div className="glass-panel rounded-2xl p-12 text-center">
+                <Package className="w-16 h-16 mx-auto mb-4 text-zinc-600" />
+                <h3 className="text-xl font-bold text-white mb-2">Produkt zuerst speichern</h3>
+                <p className="text-zinc-400">Speichere das Produkt zuerst, um Varianten verwalten zu können.</p>
               </div>
-
-              {variants.length > 0 && (
-                <>
-                  {/* Bulk Actions */}
-                  <div className="mb-4 p-4 rounded-xl" style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-                    <p className="text-sm font-bold text-white mb-2">Bulk-Aktionen ({selectedVariants.length} ausgewählt)</p>
-                    <div className="flex gap-3">
-                      <Input
-                        type="number"
-                        placeholder="Preis"
-                        className="h-10 w-32"
-                        style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF' }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.target.value) {
-                            bulkUpdateVariants('price_override', parseFloat(e.target.value));
-                            e.target.value = '';
-                          }
-                        }}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="Bestand"
-                        className="h-10 w-32"
-                        style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF' }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.target.value) {
-                            bulkUpdateVariants('stock', parseInt(e.target.value));
-                            e.target.value = '';
-                          }
-                        }}
-                      />
-                      <Button onClick={() => bulkUpdateVariants('active', true)} variant="outline" className="btn-gold-outline h-10">
-                        Aktivieren
-                      </Button>
-                      <Button onClick={() => bulkUpdateVariants('active', false)} variant="outline" className="btn-gold-outline h-10">
-                        Deaktivieren
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Variants Table */}
-                  <div className="space-y-2">
-                    {variants.map((variant) => {
-                      const color = colors.find(c => c.id === variant.color_id);
-                      return (
-                        <div key={variant.id} className="flex items-center gap-4 p-4 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                          <Checkbox
-                            checked={selectedVariants.includes(variant.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setSelectedVariants([...selectedVariants, variant.id]);
-                              } else {
-                                setSelectedVariants(selectedVariants.filter(id => id !== variant.id));
-                              }
-                            }}
-                          />
-                          <div className="w-8 h-8 rounded-lg" style={{ background: color?.hex || '#888', border: '1px solid rgba(255, 255, 255, 0.2)' }} />
-                          <div className="flex-1 grid grid-cols-5 gap-4 items-center">
-                            <div>
-                              <p className="text-sm font-bold text-white">{color?.name}</p>
-                              <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{variant.size}</p>
-                            </div>
-                            <Input
-                              value={variant.sku}
-                              onChange={(e) => updateVariant(variant.id, 'sku', e.target.value)}
-                              className="h-10 text-sm"
-                              style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF' }}
-                            />
-                            <Input
-                              type="number"
-                              value={variant.price_override || ''}
-                              onChange={(e) => updateVariant(variant.id, 'price_override', e.target.value ? parseFloat(e.target.value) : null)}
-                              placeholder={`${formData.price}€`}
-                              className="h-10 text-sm"
-                              style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF' }}
-                            />
-                            <Input
-                              type="number"
-                              value={variant.stock}
-                              onChange={(e) => updateVariant(variant.id, 'stock', parseInt(e.target.value))}
-                              className="h-10 text-sm"
-                              style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF' }}
-                            />
-                            <Checkbox
-                              checked={variant.active}
-                              onCheckedChange={(checked) => updateVariant(variant.id, 'active', checked)}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
