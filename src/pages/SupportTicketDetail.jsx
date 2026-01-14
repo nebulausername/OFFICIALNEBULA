@@ -13,6 +13,7 @@ import StatusChip from '../components/support/StatusChip';
 import { useI18n } from '../components/i18n/I18nProvider';
 
 export default function SupportTicketDetail() {
+  const { t, locale, isRTL } = useI18n();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const ticketId = searchParams.get('id');
@@ -23,7 +24,23 @@ export default function SupportTicketDetail() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
-  const { toast } = useToast();
+  
+  const localeMap = { de, en: enUS, sk, ar };
+  const dateLocale = localeMap[locale] || de;
+  
+  const getCategoryLabel = (category) => {
+    const labels = {
+      order: t('support.category.order'),
+      payment: t('support.category.payment'),
+      product: t('support.category.product'),
+      return: t('support.category.return'),
+      delivery: t('support.category.delivery'),
+      technical: t('support.category.technical'),
+      language_request: t('support.category.languageRequest'),
+      other: t('support.category.other')
+    };
+    return labels[category] || category;
+  };
 
   useEffect(() => {
     if (ticketId) {
