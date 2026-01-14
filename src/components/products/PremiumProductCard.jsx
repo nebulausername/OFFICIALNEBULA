@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { Eye, MapPin, Clock, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -56,7 +56,12 @@ export default function PremiumProductCard({ product, onQuickView }) {
   
   const handleQuickView = (e) => {
     e.preventDefault();
-    onQuickView?.(product);
+    e.stopPropagation();
+    if (product.colors?.length > 0 || product.sizes?.length > 0) {
+      onQuickView?.(product);
+    } else {
+      navigate(createPageUrl('ProductDetail') + `?id=${product.id}`);
+    }
   };
 
   return (
