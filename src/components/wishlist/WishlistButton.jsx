@@ -52,8 +52,8 @@ export default function WishlistButton({ productId, size = 'md', variant = 'defa
   };
 
   const sizeClasses = {
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
+    sm: 'w-9 h-9',
+    md: 'w-11 h-11',
     lg: 'w-12 h-12'
   };
 
@@ -61,6 +61,35 @@ export default function WishlistButton({ productId, size = 'md', variant = 'defa
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
     lg: 'w-6 h-6'
+  };
+
+  const getButtonStyle = () => {
+    if (isSaved) {
+      return {
+        background: 'rgba(255, 255, 255, 0.95)',
+        border: '1px solid rgba(214, 178, 94, 0.5)',
+        boxShadow: '0 0 20px rgba(214, 178, 94, 0.4), 0 4px 12px rgba(0, 0, 0, 0.2)'
+      };
+    }
+    if (variant === 'glass') {
+      return {
+        background: 'rgba(255, 255, 255, 0.12)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05) inset'
+      };
+    }
+    if (variant === 'ghost') {
+      return {
+        background: 'rgba(0, 0, 0, 0.4)',
+        border: '1px solid rgba(255, 255, 255, 0.15)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+      };
+    }
+    return {
+      background: 'rgba(255, 255, 255, 0.9)',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+    };
   };
 
   return (
@@ -71,18 +100,9 @@ export default function WishlistButton({ productId, size = 'md', variant = 'defa
       disabled={pending}
       className={`${sizeClasses[size]} relative rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
       style={{
-        background: isSaved 
-          ? 'rgba(239, 68, 68, 0.9)' 
-          : variant === 'ghost' 
-            ? 'rgba(0, 0, 0, 0.4)' 
-            : 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(8px)',
-        border: isSaved 
-          ? '1px solid rgba(239, 68, 68, 0.5)' 
-          : '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: isSaved 
-          ? '0 0 16px rgba(239, 68, 68, 0.4)' 
-          : '0 2px 8px rgba(0, 0, 0, 0.2)'
+        ...getButtonStyle(),
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)'
       }}
       aria-label={isSaved ? 'Von Merkliste entfernen' : 'Zur Merkliste hinzufügen'}
     >
@@ -111,13 +131,14 @@ export default function WishlistButton({ productId, size = 'md', variant = 'defa
           className={`${iconSizes[size]} transition-all`}
           style={{ 
             color: isSaved 
-              ? '#FFFFFF' 
-              : variant === 'ghost' 
-                ? 'rgba(255, 255, 255, 0.9)' 
-                : 'rgba(100, 100, 100, 0.9)'
+              ? '#D6B25E'
+              : variant === 'glass' || variant === 'ghost'
+                ? 'rgba(255, 255, 255, 0.95)' 
+                : 'rgba(80, 80, 80, 0.9)',
+            filter: isSaved ? 'drop-shadow(0 0 6px rgba(214, 178, 94, 0.6))' : 'none'
           }}
           fill={isSaved ? 'currentColor' : 'none'}
-          strokeWidth={2}
+          strokeWidth={2.5}
         />
       </motion.div>
     </motion.button>

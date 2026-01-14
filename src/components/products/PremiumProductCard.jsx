@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Heart, Eye, MapPin, Clock, Package } from 'lucide-react';
+import { Eye, MapPin, Clock, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
+import WishlistButton from '../wishlist/WishlistButton';
 
 // Separate Image component with proper error handling
 function ProductImage({ src, alt }) {
@@ -49,83 +50,9 @@ function ProductImage({ src, alt }) {
 }
 
 export default function PremiumProductCard({ product, onQuickView }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const [isPending, setIsPending] = useState(false);
-  const [deliveryInfo, setDeliveryInfo] = useState(null);
-
-  useEffect(() => {
-    checkWishlist();
-    loadDeliveryInfo();
-  }, [product.id]);
-
-  const checkWishlist = async () => {
-    try {
-      const user = await base44.auth.me();
-      const items = await base44.entities.WishlistItem.filter({
-        user_id: user.id,
-        product_id: product.id
-      });
-      setIsWishlisted(items.length > 0);
-    } catch (error) {
-      // User not logged in or error
-    }
-  };
-
-  const loadDeliveryInfo = () => {
-    const saved = localStorage.getItem('delivery_location');
-    if (saved) {
-      setDeliveryInfo(JSON.parse(saved));
-    } else {
-      setDeliveryInfo({ city: 'Berlin', eta_min: 1, eta_max: 3 });
-    }
-  };
-
-  const toggleWishlist = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (isPending) return;
-    
-    setIsPending(true);
-    const previousState = isWishlisted;
-    setIsWishlisted(!isWishlisted);
-
-    try {
-      const user = await base44.auth.me();
-      
-      if (previousState) {
-        const items = await base44.entities.WishlistItem.filter({
-          user_id: user.id,
-          product_id: product.id
-        });
-        if (items.length > 0) {
-          await base44.entities.WishlistItem.delete(items[0].id);
-        }
-      } else {
-        await base44.entities.WishlistItem.create({
-          user_id: user.id,
-          product_id: product.id
-        });
-      }
-    } catch (error) {
-      setIsWishlisted(previousState);
-      console.error('Wishlist error:', error);
-    } finally {
-      setIsPending(false);
-    }
-  };
-
   const handleQuickView = (e) => {
     e.preventDefault();
     onQuickView?.(product);
-  };
-
-  const getEtaText = () => {
-    if (!deliveryInfo) return '';
-    if (deliveryInfo.eta_min >= 8) {
-      return `${deliveryInfo.eta_min}–${deliveryInfo.eta_max} Tage`;
-    }
-    return `${deliveryInfo.eta_min}–${deliveryInfo.eta_max} Werktage`;
   };
 
   return (
@@ -155,59 +82,41 @@ export default function PremiumProductCard({ product, onQuickView }) {
           
 
           
-          {/* Availability Badge */}
-          <div className="absolute top-3 right-3">
-            {product.in_stock ? (
+          {/* Availability Badge - HIGH CONTRAST */}
+          <div className="absolute top-3 right-3 z-10">
+            {product.in_stock !== false ? (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-black flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-full backdrop-blur-xl text-xs font-bold flex items-center gap-2"
                 style={{
-                  background: 'rgba(100, 230, 150, 0.15)',
-                  border: '1px solid rgba(100, 230, 150, 0.3)',
-                  color: 'var(--success)',
-                  boxShadow: 'var(--shadow-subtle)'
+                  background: 'rgba(52, 211, 153, 0.18)',
+                  border: '1px solid rgba(52, 211, 153, 0.35)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
                 }}
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-[rgba(100,230,150,0.85)] animate-pulse" />
-                Verfügbar
+                <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'rgb(52, 211, 153)' }} />
+                <span style={{ color: '#FFFFFF', fontWeight: 600 }}>Verfügbar</span>
               </motion.div>
             ) : (
-              <div className="px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-black"
+              <div 
+                className="px-3.5 py-2 rounded-full backdrop-blur-xl text-xs font-bold flex items-center gap-2"
                 style={{
-                  background: 'rgba(255, 100, 120, 0.15)',
-                  border: '1px solid rgba(255, 100, 120, 0.3)',
-                  color: 'var(--error)',
-                  boxShadow: 'var(--shadow-subtle)'
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
                 }}
               >
-                Ausverkauft
+                <div className="w-2 h-2 rounded-full" style={{ background: 'rgb(239, 68, 68)' }} />
+                <span style={{ color: '#FFFFFF', fontWeight: 600 }}>Ausverkauft</span>
               </div>
             )}
           </div>
           
-          {/* Wishlist Button */}
-          <motion.button
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={toggleWishlist}
-            disabled={isPending}
-            className="absolute top-3 left-3 w-11 h-11 rounded-full backdrop-blur-xl flex items-center justify-center focus-ring smooth-transition"
-            style={{
-              background: 'var(--surface2)',
-              border: '1px solid var(--border)',
-              boxShadow: 'var(--shadow-subtle)'
-            }}
-            aria-label={isWishlisted ? 'Von Merkliste entfernen' : 'Zu Merkliste hinzufügen'}
-          >
-            <Heart
-              className={`w-5 h-5 smooth-transition ${
-                isWishlisted ? 'text-gold' : 'text-white'
-              }`}
-              fill={isWishlisted ? 'var(--gold)' : 'none'}
-              style={isWishlisted ? { filter: 'drop-shadow(0 0 8px rgba(var(--gold-rgb), 0.6))' } : {}}
-            />
-          </motion.button>
+          {/* Wishlist Button - FLOATING GLASS PREMIUM */}
+          <div className="absolute top-3 left-3 z-10">
+            <WishlistButton productId={product.id} size="md" variant="glass" />
+          </div>
           
           {/* Quick View Button */}
           <motion.button
