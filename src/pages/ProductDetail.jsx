@@ -65,17 +65,24 @@ export default function ProductDetail() {
       setProduct(prod);
       setImages(productImages.sort((a, b) => a.sort_order - b.sort_order));
       
-      // Set initial image
-      const initialImage = prod.cover_image || productImages?.[0]?.url || null;
-      setSelectedImage(initialImage);
-      
-      // Auto-select first color if available
+      // Auto-select first color if available and set initial image
       if (prod.colors && prod.colors.length > 0) {
         const firstColor = prod.colors[0];
         setSelectedColor(firstColor);
-        // If color has images, use those
+        // If color has images, use those, otherwise use cover or product images
         if (firstColor.images && firstColor.images.length > 0) {
           setSelectedImage(firstColor.images[0]);
+        } else if (prod.cover_image) {
+          setSelectedImage(prod.cover_image);
+        } else if (productImages.length > 0) {
+          setSelectedImage(productImages[0].url);
+        }
+      } else {
+        // No colors - use cover or first product image
+        if (prod.cover_image) {
+          setSelectedImage(prod.cover_image);
+        } else if (productImages.length > 0) {
+          setSelectedImage(productImages[0].url);
         }
       }
 
@@ -111,33 +118,28 @@ export default function ProductDetail() {
   const handleAddToCart = async () => {
     try {
       const user = await base44.auth.me();
+      
+      // Find variant for price
+      const variant = product.variants?.find(v => v.color_id === selectedColor?.id && v.size === selectedSize);
+      const price = variant?.price_override || product.price;
 
       const cartOptions = {
-        ...selectedOptions,
-        color: selectedColor ? { id: selectedColor.id, name: selectedColor.name, hex: selectedColor.hex } : null,
-        size: selectedSize,
-        variant_id: product.variants?.find(v => v.color_id === selectedColor?.id && v.size === selectedSize)?.id
+        variant_id: variant?.id || null,
+        color_id: selectedColor?.id || null,
+        color_name: selectedColor?.name || null,
+        color_hex: selectedColor?.hex || null,
+        size: selectedSize || null,
+        image: selectedImage || product.cover_image,
+        price: price,
+        sku: variant?.sku || product.sku
       };
 
-      // Check if item already in cart
-      const existing = await base44.entities.StarCartItem.filter({
+      await base44.entities.StarCartItem.create({
         user_id: user.id,
-        product_id: product.id
+        product_id: product.id,
+        quantity: quantity,
+        selected_options: cartOptions
       });
-
-      if (existing.length > 0) {
-        await base44.entities.StarCartItem.update(existing[0].id, {
-          quantity: existing[0].quantity + quantity,
-          selected_options: cartOptions
-        });
-      } else {
-        await base44.entities.StarCartItem.create({
-          user_id: user.id,
-          product_id: product.id,
-          quantity: quantity,
-          selected_options: cartOptions
-        });
-      }
 
       toast({
         title: 'Zum Warenkorb hinzugefügt',
@@ -263,14 +265,32 @@ export default function ProductDetail() {
 
   // Build image gallery - color images first, then product images
   const getGalleryImages = () => {
+    const result = [];
+    
+    // If selected color has images, use those
     if (selectedColor?.images?.length > 0) {
-      return selectedColor.images;
+      result.push(...selectedColor.images);
+    } else {
+      // Otherwise use product cover and product images
+      if (product.cover_image) {
+        result.push(product.cover_image);
+      }
+      images.forEach(img => {
+        if (img.url && !result.includes(img.url)) {
+          result.push(img.url);
+        }
+      });
     }
-    const productImgs = [product.cover_image, ...images.map(img => img.url)].filter(Boolean);
-    return productImgs.length > 0 ? productImgs : [];
+    
+    return result.filter(Boolean);
   };
   
   const allImages = getGalleryImages();
+  
+  // Ensure selected image is in the gallery
+  if (selectedImage && !allImages.includes(selectedImage) && allImages.length > 0) {
+    setSelectedImage(allImages[0]);
+  }
   const currentPrice = calculatePrice();
 
   return (
@@ -300,7 +320,7 @@ export default function ProductDetail() {
           >
             <AnimatePresence mode="wait">
               <motion.div
-                key={selectedImage}
+                key={selectedImage || 'no-image'}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -308,14 +328,16 @@ export default function ProductDetail() {
                 className="w-full h-full relative"
               >
                 {selectedImage ? (
-                  <>
-                    <img
-                      src={selectedImage}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      loading="eager"
-                    />
-                  </>
+                  <img
+                    src={selectedImage}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                    onError={(e) => {
+                      console.log('Image load error:', selectedImage);
+                      e.target.style.display = 'none';
+                    }}
+                  />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
                     <Package className="w-20 h-20 mb-4" style={{ color: 'rgba(214, 178, 94, 0.4)' }} />
