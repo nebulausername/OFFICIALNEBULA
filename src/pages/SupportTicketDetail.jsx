@@ -4,12 +4,13 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Send, Paperclip, FileText, Image as ImageIcon, X, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Send, Paperclip, FileText, Image as ImageIcon, X, CheckCircle, ThumbsUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enUS, sk, ar } from 'date-fns/locale';
 import StatusChip from '../components/support/StatusChip';
+import { useI18n } from '../components/i18n/I18nProvider';
 
 export default function SupportTicketDetail() {
   const [searchParams] = useSearchParams();
