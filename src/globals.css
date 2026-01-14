@@ -321,6 +321,27 @@
   outline: none;
 }
 
+/* RTL Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .rtl\:rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Use logical properties for RTL-safe spacing */
+.ps-4 { padding-inline-start: 1rem; }
+.pe-4 { padding-inline-end: 1rem; }
+.ms-2 { margin-inline-start: 0.5rem; }
+.me-2 { margin-inline-end: 0.5rem; }
+.ms-auto { margin-inline-start: auto; }
+.me-auto { margin-inline-end: auto; }
+
+/* RTL-safe text alignment */
+.text-start { text-align: start; }
+.text-end { text-align: end; }
+
 /* Ensure images are never pixelated */
 img {
   image-rendering: -webkit-optimize-contrast;
