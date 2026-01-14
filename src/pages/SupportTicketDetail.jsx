@@ -61,14 +61,14 @@ export default function SupportTicketDetail() {
 
       const tickets = await base44.entities.Ticket.filter({ id: ticketId });
       if (tickets.length === 0) {
-        toast({ title: 'Fehler', description: 'Ticket nicht gefunden', variant: 'destructive' });
+        toast.error('Ticket nicht gefunden');
         navigate(createPageUrl('Support'));
         return;
       }
 
       const ticketData = tickets[0];
       if (ticketData.user_id !== userData.id && userData.role !== 'admin') {
-        toast({ title: 'Fehler', description: 'Keine Berechtigung', variant: 'destructive' });
+        toast.error('Keine Berechtigung');
         navigate(createPageUrl('Support'));
         return;
       }
