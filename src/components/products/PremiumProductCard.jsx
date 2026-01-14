@@ -5,6 +5,7 @@ import { Eye, MapPin, Clock, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import WishlistButton from '../wishlist/WishlistButton';
+import { useI18n } from '../i18n/I18nProvider';
 
 // Separate Image component with proper error handling
 function ProductImage({ src, alt }) {
@@ -50,6 +51,8 @@ function ProductImage({ src, alt }) {
 }
 
 export default function PremiumProductCard({ product, onQuickView }) {
+  const { t, formatCurrency } = useI18n();
+  
   const handleQuickView = (e) => {
     e.preventDefault();
     onQuickView?.(product);
@@ -83,7 +86,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
 
           
           {/* Availability Badge - HIGH CONTRAST */}
-          <div className="absolute top-3 right-3 z-10">
+          <div className="absolute top-3 end-3 z-10">
             {product.in_stock !== false ? (
               <motion.div
                 initial={{ scale: 0 }}
@@ -96,7 +99,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
                 }}
               >
                 <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'rgb(52, 211, 153)' }} />
-                <span style={{ color: '#FFFFFF', fontWeight: 600 }}>Verfügbar</span>
+                <span style={{ color: '#FFFFFF', fontWeight: 600 }}>{t('shop.available')}</span>
               </motion.div>
             ) : (
               <div 
@@ -108,13 +111,13 @@ export default function PremiumProductCard({ product, onQuickView }) {
                 }}
               >
                 <div className="w-2 h-2 rounded-full" style={{ background: 'rgb(239, 68, 68)' }} />
-                <span style={{ color: '#FFFFFF', fontWeight: 600 }}>Ausverkauft</span>
+                <span style={{ color: '#FFFFFF', fontWeight: 600 }}>{t('shop.soldOut')}</span>
               </div>
             )}
           </div>
           
           {/* Wishlist Button - FLOATING GLASS PREMIUM */}
-          <div className="absolute top-3 left-3 z-10">
+          <div className="absolute top-3 start-3 z-10">
             <WishlistButton productId={product.id} size="md" variant="glass" />
           </div>
           
@@ -123,10 +126,10 @@ export default function PremiumProductCard({ product, onQuickView }) {
             initial={{ opacity: 0, y: 10 }}
             whileHover={{ opacity: 1, y: 0 }}
             onClick={handleQuickView}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition btn-gold font-black text-sm py-2.5 px-8 flex items-center gap-2"
+            className="absolute bottom-4 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition btn-gold font-black text-sm py-2.5 px-8 flex items-center gap-2"
           >
             <Eye className="w-4 h-4" />
-            Quick View
+            {t('shop.quickView')}
           </motion.button>
         </div>
 
@@ -141,7 +144,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
           {/* Price & SKU Row */}
           <div className="flex items-baseline justify-between gap-3">
             <div className="text-2xl font-black" style={{ color: '#F2D27C' }}>
-              {product.price}€
+              {formatCurrency(product.price)}
             </div>
             <div className="text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg"
               style={{
