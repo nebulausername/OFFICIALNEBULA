@@ -275,20 +275,36 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
 
       {/* Input */}
       {!isClosed && (
-        <form onSubmit={handleSend} className="flex-shrink-0 p-4 border-t border-white/[0.06] bg-white/[0.02]">
+        <form 
+          onSubmit={handleSend} 
+          className="flex-shrink-0 p-4 border-t"
+          style={{
+            borderColor: 'rgba(255, 255, 255, 0.06)',
+            background: 'rgba(255, 255, 255, 0.02)'
+          }}
+        >
           <div className="flex gap-2">
             <Input
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Nachricht schreiben..."
-              className="flex-1 h-12 bg-white/[0.03] border-white/[0.1] text-white placeholder:text-zinc-500 rounded-xl"
+              placeholder={t('support.chat.writeMessage')}
+              className="flex-1 h-12 rounded-xl"
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#FFFFFF'
+              }}
             />
             <Button
               type="submit"
               disabled={!newMessage.trim() || sending}
-              className="h-12 w-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/30 rounded-xl p-0"
+              className="h-12 w-12 rounded-xl p-0"
+              style={{
+                background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                boxShadow: '0 4px 20px rgba(139, 92, 246, 0.3)'
+              }}
             >
-              {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />}
             </Button>
           </div>
         </form>
