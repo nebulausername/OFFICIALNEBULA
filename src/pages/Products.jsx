@@ -5,7 +5,7 @@ import { Sparkles } from 'lucide-react';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import ProductQuickView from '../components/products/ProductQuickView';
 import ShopControlStrip from '../components/shop/ShopControlStrip';
-import ShopMegaMenu from '../components/shop/ShopMegaMenu';
+import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
 import AdvancedFilters from '../components/shop/AdvancedFilters';
 
 export default function Products() {
@@ -41,21 +41,44 @@ export default function Products() {
     if (categoryParam) setSelectedCategory(categoryParam);
   }, []);
 
+  const [departments, setDepartments] = useState([]);
+
   const loadData = async () => {
     try {
-      const [prods, cats, brds] = await Promise.all([
+      const [prods, cats, brds, depts] = await Promise.all([
         base44.entities.Product.list('-created_date'),
         base44.entities.Category.list('sort_order'),
-        base44.entities.Brand.list('sort_order')
+        base44.entities.Brand.list('sort_order'),
+        base44.entities.Department.list('sort_order')
       ]);
       setProducts(prods);
       setCategories(cats);
       setBrands(brds);
+      setDepartments(depts);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCategoryFromDrawer = (categoryId, categoryName) => {
+    setSelectedCategory(categoryId);
+    // Update URL
+    const url = new URL(window.location);
+    if (categoryId === 'all') {
+      url.searchParams.delete('category');
+    } else {
+      url.searchParams.set('category', categoryId);
+    }
+    window.history.pushState({}, '', url);
+  };
+
+  const handleBrandFromDrawer = (brandId) => {
+    setAdvancedFilters(prev => ({
+      ...prev,
+      brands: [brandId]
+    }));
   };
 
   // Calculate price range for slider
@@ -319,12 +342,16 @@ export default function Products() {
         </div>
       </section>
 
-      {/* Mega Menu */}
-      <ShopMegaMenu
+      {/* Category Drawer */}
+      <ShopCategoryDrawer
         isOpen={megaMenuOpen}
         onClose={() => setMegaMenuOpen(false)}
         categories={categories}
         brands={brands}
+        departments={departments}
+        onSelectCategory={handleCategoryFromDrawer}
+        onSelectBrand={handleBrandFromDrawer}
+        selectedCategory={selectedCategory}
       />
 
       {/* Quick View Modal */}

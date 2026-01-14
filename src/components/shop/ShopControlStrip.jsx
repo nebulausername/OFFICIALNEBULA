@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, Grid3X3, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Search, X, Grid3X3, SlidersHorizontal, ChevronDown, Store } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -74,18 +74,24 @@ export default function ShopControlStrip({
 
         {/* Action Buttons */}
         <div className="flex gap-3">
-          {/* Categories Button */}
-          <Button
-            onClick={onCategoriesClick}
-            className="h-14 px-6 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]"
-            style={{
-              background: 'linear-gradient(135deg, #D6B25E, #F2D27C)',
-              color: '#0B0D12'
-            }}
-          >
-            <Grid3X3 className="w-5 h-5 mr-2" />
-            Kategorien
-          </Button>
+          {/* Categories Button - PREMIUM DARK GLASS */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onCategoriesClick}
+              className="h-14 px-6 rounded-[16px] font-bold text-sm flex items-center gap-2.5 transition-all"
+              style={{
+                background: 'rgba(20, 22, 28, 0.85)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(214, 178, 94, 0.35)',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
+                color: '#F2D27C'
+              }}
+            >
+              <Store className="w-5 h-5" />
+              <span>Kategorien</span>
+            </motion.button>
 
           {/* Filter Button */}
           <Button
