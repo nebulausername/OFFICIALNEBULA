@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import ProductQuickView from '../components/products/ProductQuickView';
+import PremiumProductModal from '../components/products/PremiumProductModal';
 import ProductVariantModal from '../components/products/ProductVariantModal';
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
