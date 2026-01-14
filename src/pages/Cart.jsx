@@ -98,9 +98,25 @@ export default function Cart() {
     }
   };
 
+  const getItemPrice = (item, product) => {
+    // First check for price stored in selected_options
+    if (item.selected_options?.price && item.selected_options.price > 0) {
+      return item.selected_options.price;
+    }
+    // Then check for variant price override in product variants
+    if (item.selected_options?.variant_id && product?.variants) {
+      const variant = product.variants.find(v => v.id === item.selected_options.variant_id);
+      if (variant?.price_override) {
+        return variant.price_override;
+      }
+    }
+    return product?.price || 0;
+  };
+
   const calculateTotal = () => {
     return cartItems.reduce((sum, item) => {
-      const price = item.selected_options?.price || products[item.product_id]?.price || 0;
+      const product = products[item.product_id];
+      const price = getItemPrice(item, product);
       return sum + (price * item.quantity);
     }, 0);
   };
@@ -388,7 +404,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                             <h3 className="font-black text-xl mb-2 truncate group-hover:text-purple-400 transition-colors">{product.name}</h3>
                             <p className="text-sm text-zinc-500 flex items-center gap-2">
                               <Star className="w-3 h-3 text-purple-400" />
-                              Einzelpreis: <span className="font-bold text-purple-400">{(item.selected_options?.price || product.price).toFixed(2)}€</span>
+                              Einzelpreis: <span className="font-bold text-purple-400">{getItemPrice(item, product).toFixed(2)}€</span>
                             </p>
                             {item.selected_options?.color_name && (
                               <div className="flex items-center gap-2 mt-1">
@@ -454,7 +470,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                               animate={{ scale: 1 }}
                               className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient"
                             >
-                              {((item.selected_options?.price || product.price) * item.quantity).toFixed(2)}€
+                              {(getItemPrice(item, product) * item.quantity).toFixed(2)}€
                             </motion.div>
                           </div>
                         </div>
