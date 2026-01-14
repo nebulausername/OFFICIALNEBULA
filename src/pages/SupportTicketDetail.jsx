@@ -144,10 +144,10 @@ export default function SupportTicketDetail() {
       });
 
       await loadMessages();
-      toast({ title: '✓ Gesendet', duration: 1500 });
+      toast.success('✓ Gesendet');
     } catch (error) {
       console.error('Error sending message:', error);
-      toast({ title: 'Fehler', description: 'Nachricht konnte nicht gesendet werden', variant: 'destructive' });
+      toast.error(t('support.chat.sendFailed'));
       setNewMessage(tempMessage);
       setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     } finally {
@@ -155,14 +155,25 @@ export default function SupportTicketDetail() {
     }
   };
 
+  const handleMarkSolved = async () => {
+    try {
+      setTicket({ ...ticket, status: 'solved' });
+      await base44.entities.Ticket.update(ticketId, { status: 'solved' });
+      toast.success(t('support.chat.problemSolved'));
+    } catch (error) {
+      setTicket({ ...ticket, status: ticket.status });
+      toast.error(t('support.chat.sendFailed'));
+    }
+  };
+
   const handleCloseTicket = async () => {
     try {
       setTicket({ ...ticket, status: 'closed' });
       await base44.entities.Ticket.update(ticketId, { status: 'closed' });
-      toast({ title: '✓ Ticket geschlossen', description: 'Du kannst es jederzeit wieder öffnen', duration: 2000 });
+      toast.success(t('support.chat.ticketClosed'));
     } catch (error) {
       setTicket({ ...ticket, status: ticket.status });
-      toast({ title: 'Fehler', description: 'Aktion fehlgeschlagen', variant: 'destructive' });
+      toast.error(t('support.chat.sendFailed'));
     }
   };
 
@@ -170,9 +181,9 @@ export default function SupportTicketDetail() {
     try {
       await base44.entities.Ticket.update(ticketId, { status: 'open' });
       setTicket({ ...ticket, status: 'open' });
-      toast({ title: '✓ Ticket wiedereröffnet' });
+      toast.success(t('support.chat.ticketReopened'));
     } catch (error) {
-      toast({ title: 'Fehler', description: 'Aktion fehlgeschlagen', variant: 'destructive' });
+      toast.error(t('support.chat.sendFailed'));
     }
   };
 
