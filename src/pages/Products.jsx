@@ -5,7 +5,7 @@ import { Sparkles } from 'lucide-react';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import ProductQuickView from '../components/products/ProductQuickView';
 import PremiumProductModal from '../components/products/PremiumProductModal';
-import ProductVariantModal from '../components/products/ProductVariantModal';
+
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
 import AdvancedFilters from '../components/shop/AdvancedFilters';
@@ -357,10 +357,10 @@ export default function Products() {
         selectedCategory={selectedCategory}
       />
 
-      {/* Variant Modal */}
-      <ProductVariantModal
+      {/* Premium Product Modal */}
+      <PremiumProductModal
         product={quickViewProduct}
-        isOpen={isQuickViewOpen}
+        open={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
       />
