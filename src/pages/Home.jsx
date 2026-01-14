@@ -9,6 +9,7 @@ import ProductQuickView from '../components/products/ProductQuickView';
 import DeliveryBar from '../components/delivery/DeliveryBar';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import CategoryCard from '../components/home/CategoryCard';
+import FreshDropsSection from '../components/home/FreshDropsSection';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
@@ -484,127 +485,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Products - Ultra Premium */}
-      <section className="py-24 relative overflow-hidden z-10">
-        {/* Clean Background */}
-        <div className="absolute inset-0" style={{ background: 'var(--bg)' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] rounded-full blur-[200px] pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(214, 178, 94, 0.06), transparent 70%)' }}
-        />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            {/* Badge */}
-            <motion.div
-              initial={{ scale: 0.9, y: 10 }}
-              whileInView={{ scale: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-3 px-6 py-3 mb-8 rounded-full"
-              style={{
-                background: 'rgba(214, 178, 94, 0.1)',
-                border: '1px solid rgba(214, 178, 94, 0.3)'
-              }}
-            >
-              <Sparkles className="w-5 h-5" style={{ color: 'var(--gold)' }} />
-              <span className="text-sm font-bold uppercase tracking-widest" style={{ color: 'var(--gold)' }}>
-                Fresh Drops
-              </span>
-              <div className="w-2 h-2 bg-green-400 rounded-full" />
-            </motion.div>
-            
-            {/* Headline */}
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-5xl sm:text-6xl md:text-7xl font-black mb-5 tracking-tight"
-              style={{ color: 'var(--text)' }}
-            >
-              Brandneu
-            </motion.h2>
-            
-            {/* Subtitle */}
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="text-lg sm:text-xl max-w-3xl mx-auto font-medium"
-              style={{ color: 'var(--text-secondary)' }}
-            >
-              Die <span style={{ color: 'var(--gold)' }}>heißesten</span> Drops –{' '}
-              <span style={{ color: 'var(--gold2)' }}>limitiert</span> & exklusiv ✨
-            </motion.p>
-          </motion.div>
+      {/* Featured Products - Fresh Drops Slider */}
+      <FreshDropsSection 
+        products={products} 
+        loading={loadingProducts}
+        onQuickView={(p) => {
+          setQuickViewProduct(p);
+          setIsQuickViewOpen(true);
+        }}
+      />
 
-          {/* Premium Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {loadingProducts ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-4">
-                  <div className="skeleton aspect-[3/4] rounded-2xl" />
-                  <div className="skeleton h-5 w-3/4 rounded" />
-                  <div className="skeleton h-7 w-1/2 rounded" />
-                </div>
-              ))
-            ) : (
-              products.slice(0, 4).map((product, index) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.08, type: "spring", stiffness: 100 }}
-                >
-                  <PremiumProductCard
-                    product={product}
-                    onQuickView={(p) => {
-                      setQuickViewProduct(p);
-                      setIsQuickViewOpen(true);
-                    }}
-                  />
-                </motion.div>
-              ))
-            )}
-          </div>
-
-          <ProductQuickView
-            product={quickViewProduct}
-            isOpen={isQuickViewOpen}
-            onClose={() => setIsQuickViewOpen(false)}
-            onAddToCart={handleAddToCart}
-          />
-
-          {/* View All CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <Link to={createPageUrl('Products')}>
-              <motion.div whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
-                <Button 
-                  className="h-14 px-10 text-base rounded-xl font-bold"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
-                    color: '#0B0D12',
-                    boxShadow: '0 4px 20px rgba(214, 178, 94, 0.3)'
-                  }}
-                >
-                  Alle Produkte ansehen
-                </Button>
-              </motion.div>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+      <ProductQuickView
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+        onAddToCart={handleAddToCart}
+      />
 
       {/* VIP Section - Ultra Premium */}
       <section className="py-32 relative overflow-hidden z-10">
