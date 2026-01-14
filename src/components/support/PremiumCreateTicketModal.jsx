@@ -121,7 +121,12 @@ export default function PremiumCreateTicketModal({ isOpen, onClose, onSuccess, p
 
   const handleSubmit = async () => {
     if (!formData.subject || (!formData.body && formData.category !== 'language_request')) {
-      toast.error('Bitte alle Pflichtfelder ausfüllen');
+      toast.error(t('support.form.fillRequired'));
+      return;
+    }
+    
+    if (formData.category === 'language_request' && !formData.requestedLanguage) {
+      toast.error(t('support.form.fillRequired'));
       return;
     }
 

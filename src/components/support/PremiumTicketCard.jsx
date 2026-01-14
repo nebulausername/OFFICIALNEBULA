@@ -138,7 +138,7 @@ export default function PremiumTicketCard({ ticket, index = 0 }) {
               {ticket.unread_by_user && (
                 <div className="flex items-center gap-1" style={{ color: '#A78BFA' }}>
                   <MessageSquare className="w-3.5 h-3.5" />
-                  <span className="font-semibold">Neu</span>
+                  <span className="font-semibold">{t('support.new')}</span>
                 </div>
               )}
               <span style={{ color: 'rgba(255, 255, 255, 0.35)' }}>

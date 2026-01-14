@@ -305,7 +305,7 @@ export default function SupportTicketDetail() {
                   >
                     <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <span className="text-xs font-bold text-white">
-                        {isAdmin ? '🎧 Support Team' : '👤 Du'}
+                        {isAdmin ? `🎧 ${t('support.chat.supportTeam')}` : `👤 ${t('support.chat.you')}`}
                       </span>
                       <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.45)' }}>
                         {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm', { locale: dateLocale })}
