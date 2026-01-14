@@ -6,8 +6,10 @@ import { X, Heart, ShoppingCart, ExternalLink, MapPin, Clock, Truck, Plus, Minus
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
+import { useI18n } from '../i18n/I18nProvider';
 
 export default function ProductQuickView({ product, isOpen, onClose, onAddToCart }) {
+  const { t, formatCurrency, isRTL } = useI18n();
   const [selectedImage, setSelectedImage] = useState(0);
   const [images, setImages] = useState([]);
   const [quantity, setQuantity] = useState(1);
@@ -197,12 +199,12 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all"
+          className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 w-11 h-11 rounded-full flex items-center justify-center transition-all`}
           style={{
             background: 'rgba(255, 255, 255, 0.08)',
             backdropFilter: 'blur(12px)'
           }}
-          aria-label="Schließen"
+          aria-label={t('common.close')}
         >
           <X className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.92)' }} />
         </button>
@@ -267,7 +269,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                       color: 'rgba(134, 239, 172, 1)'
                     }}
                   >
-                    <Check className="w-4 h-4" /> Verfügbar
+                    <Check className="w-4 h-4" /> {t('shop.available')}
                   </div>
                 ) : (
                   <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold"
@@ -277,7 +279,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                       color: 'rgba(252, 165, 165, 1)'
                     }}
                   >
-                    <AlertCircle className="w-4 h-4" /> Ausverkauft
+                    <AlertCircle className="w-4 h-4" /> {t('shop.soldOut')}
                   </div>
                 )}
               </div>
@@ -289,14 +291,14 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
 
               {/* Price & SKU */}
               <div className="flex items-baseline justify-between flex-wrap gap-3">
-                <div className="text-3xl md:text-4xl font-black text-gold">{product.price}€</div>
+                <div className="text-3xl md:text-4xl font-black text-gold">{formatCurrency(product.price)}</div>
                 <div className="text-sm font-mono px-3 py-1.5 rounded-lg"
                   style={{
                     background: 'rgba(255, 255, 255, 0.06)',
                     color: 'rgba(255, 255, 255, 0.65)'
                   }}
                 >
-                  ID: {product.sku}
+                  {t('product.sku')}: {product.sku}
                 </div>
               </div>
             </div>
@@ -305,7 +307,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
             {product.colors && product.colors.length > 0 && (
               <div className="mb-6">
                 <label className="text-base font-bold mb-3 block" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
-                  Farbe: <span className="text-gold">{selectedColor?.name}</span>
+                  {t('product.selectColor')}: <span className="text-gold">{selectedColor?.name}</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {product.colors.map((color) => (
@@ -338,8 +340,8 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
             {product.sizes && product.sizes.length > 0 && (
               <div className="mb-6">
                 <label className="text-base font-bold mb-3 block" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>
-                  Größe: {selectedSize && <span className="text-gold">{selectedSize}</span>}
-                  {!selectedSize && <span style={{ color: 'rgba(255, 255, 255, 0.50)' }}> – Bitte wählen</span>}
+                  {t('product.selectSize')}: {selectedSize && <span className="text-gold">{selectedSize}</span>}
+                  {!selectedSize && <span style={{ color: 'rgba(255, 255, 255, 0.50)' }}> – {t('product.pleaseSelect')}</span>}
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {getSizeOptions().map((size) => {
@@ -389,18 +391,18 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
               >
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="w-4 h-4 text-gold flex-shrink-0" />
-                  <span className="font-semibold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>Lieferung nach</span>
+                  <span className="font-semibold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>{t('product.deliveryTo')}</span>
                   <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>{deliveryInfo.city}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="w-4 h-4 text-gold flex-shrink-0" />
-                  <span className="font-semibold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>Lieferzeit</span>
+                  <span className="font-semibold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>{t('product.delivery')}</span>
                   <span className="font-bold" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>{getEtaText()}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Truck className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(34, 197, 94, 0.8)' }} />
                   <span className="font-semibold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
-                    Gratis Versand ab {deliveryInfo.free_shipping_threshold}€
+                    {t('product.freeShippingFrom')} {formatCurrency(deliveryInfo.free_shipping_threshold)}
                   </span>
                 </div>
               </div>
@@ -408,7 +410,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
 
             {/* Quantity Selector */}
             <div className="mb-6">
-              <label className="text-base font-bold mb-3 block" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>Anzahl</label>
+              <label className="text-base font-bold mb-3 block" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>{t('product.quantity')}</label>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -455,7 +457,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                   }}
                 >
                   <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm font-bold">Bitte wähle eine Größe aus</span>
+                  <span className="text-sm font-bold">{t('product.pleaseSelectSize')}</span>
                 </div>
               )}
 
@@ -481,7 +483,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                       className="flex items-center gap-2"
                     >
                       <Check className="w-5 h-5" />
-                      Hinzugefügt!
+                      {t('product.added')}
                     </motion.div>
                   ) : isAddingToCart ? (
                     <motion.div
@@ -495,7 +497,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                         className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full"
                       />
-                      Wird hinzugefügt...
+                      {t('product.adding')}
                     </motion.div>
                   ) : (
                     <motion.div
@@ -505,7 +507,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                       className="flex items-center gap-2"
                     >
                       <ShoppingCart className="w-5 h-5" />
-                      In den Warenkorb
+                      {t('shop.addToCart')}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -527,7 +529,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                     className={`w-5 h-5 transition-colors ${isWishlisted ? 'text-gold' : ''}`}
                     fill={isWishlisted ? 'var(--gold)' : 'none'}
                   />
-                  <span>{isWishlisted ? 'Gemerkt' : 'Merken'}</span>
+                  <span>{isWishlisted ? t('product.saved') : t('product.save')}</span>
                 </button>
 
                 <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`}>
@@ -539,7 +541,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                     }}
                   >
                     <ExternalLink className="w-5 h-5" />
-                    Details
+                    {t('product.viewDetails')}
                   </button>
                 </Link>
               </div>
