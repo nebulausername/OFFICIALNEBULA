@@ -4,15 +4,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Crown, MessageSquare, HelpCircle, ChevronDown, Package, CreditCard, Truck, RotateCcw, Shield, Zap, ArrowLeft } from 'lucide-react';
+import { 
+  Plus, Search, Crown, MessageSquare, HelpCircle, ChevronDown, 
+  Package, CreditCard, Truck, RotateCcw, Shield, Zap, ArrowLeft,
+  Inbox, Clock, CheckCircle, Globe
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import TicketList from '../components/support/TicketList';
-import CreateTicketModal from '../components/support/CreateTicketModal';
+import PremiumTicketCard from '../components/support/PremiumTicketCard';
+import PremiumCreateTicketModal from '../components/support/PremiumCreateTicketModal';
 import VipUpgradeModal from '../components/support/VipUpgradeModal';
+import { useI18n } from '../components/i18n/I18nProvider';
 
 export default function Support() {
+  const { t, isRTL } = useI18n();
   const [user, setUser] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [filteredTickets, setFilteredTickets] = useState([]);
@@ -23,6 +29,8 @@ export default function Support() {
   const [openTicketCount, setOpenTicketCount] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showVipModal, setShowVipModal] = useState(false);
+  const [preselectedCategory, setPreselectedCategory] = useState(null);
+  const [activeTab, setActiveTab] = useState('all');
   const [faqSearch, setFaqSearch] = useState('');
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [faqCategory, setFaqCategory] = useState('all');
@@ -30,13 +38,13 @@ export default function Support() {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 10000); // Poll every 10s
+    const interval = setInterval(loadData, 10000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     applyFilters();
-  }, [tickets, searchQuery, statusFilter, categoryFilter]);
+  }, [tickets, searchQuery, statusFilter, categoryFilter, activeTab]);
 
   const loadData = async () => {
     try {
@@ -63,6 +71,15 @@ export default function Support() {
   const applyFilters = () => {
     let filtered = [...tickets];
 
+    // Tab filter
+    if (activeTab === 'open') {
+      filtered = filtered.filter(t => t.status === 'open' || t.status === 'in_progress');
+    } else if (activeTab === 'waiting') {
+      filtered = filtered.filter(t => t.unread_by_user);
+    } else if (activeTab === 'solved') {
+      filtered = filtered.filter(t => t.status === 'solved' || t.status === 'closed');
+    }
+
     if (searchQuery) {
       filtered = filtered.filter(t => 
         t.subject.toLowerCase().includes(searchQuery.toLowerCase())
@@ -80,10 +97,11 @@ export default function Support() {
     setFilteredTickets(filtered);
   };
 
-  const handleCreateTicket = () => {
+  const handleCreateTicket = (category = null) => {
     if (openTicketCount >= 2 && !user?.is_vip) {
       setShowVipModal(true);
     } else {
+      setPreselectedCategory(category);
       setShowCreateModal(true);
     }
   };
@@ -91,7 +109,7 @@ export default function Support() {
   const handleTicketCreated = (result) => {
     if (result === 'LIMIT_REACHED') {
       setTimeout(() => setShowVipModal(true), 300);
-    } else {
+    } else if (result?.id) {
       loadData();
       setTimeout(() => {
         navigate(createPageUrl('SupportTicketDetail') + `?id=${result.id}`);
@@ -99,126 +117,88 @@ export default function Support() {
     }
   };
 
-  const getFaqItems = () => [
-    {
-      category: 'orders',
-      question: 'Wie lange dauert die Bearbeitung meiner Bestellung?',
-      answer: 'Bestellungen werden in der Regel innerhalb von 24-48 Stunden bearbeitet. Nach Bestätigung erhältst du eine E-Mail mit Tracking-Informationen. VIP-Mitglieder erhalten Prioritätsbearbeitung.'
-    },
-    {
-      category: 'orders',
-      question: 'Kann ich meine Bestellung noch ändern?',
-      answer: 'Solange deine Bestellung noch nicht versendet wurde, können wir Änderungen vornehmen. Erstelle dafür bitte ein Support-Ticket mit deiner Bestellnummer und den gewünschten Änderungen.'
-    },
-    {
-      category: 'payment',
-      question: 'Welche Zahlungsmethoden akzeptiert ihr?',
-      answer: 'Wir akzeptieren Kreditkarten, PayPal, Sofortüberweisung und Klarna. Alle Zahlungen werden sicher über verschlüsselte Verbindungen abgewickelt.'
-    },
-    {
-      category: 'payment',
-      question: 'Ist meine Zahlung sicher?',
-      answer: 'Ja, alle Zahlungen werden über sichere SSL-verschlüsselte Verbindungen abgewickelt. Wir speichern keine Kreditkartendaten auf unseren Servern.'
-    },
-    {
-      category: 'shipping',
-      question: 'Wie hoch sind die Versandkosten?',
-      answer: 'Der Versand ist für alle Bestellungen kostenlos. Je nach Versandort (Deutschland oder China) variiert die Lieferzeit zwischen 1-5 bzw. 8-15 Werktagen.'
-    },
-    {
-      category: 'shipping',
-      question: 'Wie kann ich meine Bestellung verfolgen?',
-      answer: 'Nach dem Versand erhältst du eine E-Mail mit der Tracking-Nummer. Du kannst deine Bestellung auch jederzeit unter "Meine Bestellungen" in deinem Profil verfolgen.'
-    },
-    {
-      category: 'shipping',
-      question: 'Versendet ihr international?',
-      answer: 'Derzeit versenden wir hauptsächlich innerhalb Deutschlands und der EU. Für internationale Bestellungen kontaktiere bitte unser Support-Team.'
-    },
-    {
-      category: 'returns',
-      question: 'Wie funktioniert die Rückgabe?',
-      answer: 'Du hast 14 Tage Rückgaberecht. Erstelle ein Support-Ticket mit deiner Bestellnummer und dem Rückgabegrund. Wir senden dir dann ein Retourenlabel zu.'
-    },
-    {
-      category: 'returns',
-      question: 'Wann erhalte ich meine Rückerstattung?',
-      answer: 'Nach Erhalt und Prüfung der Rücksendung erfolgt die Rückerstattung innerhalb von 5-7 Werktagen auf deine ursprüngliche Zahlungsmethode.'
-    },
-    {
-      category: 'account',
-      question: 'Wie werde ich VIP-Mitglied?',
-      answer: 'Du kannst VIP-Status durch Einladungen erreichen: Lade entweder 10 Personen ein oder 5 Premium-Käufer. VIP-Mitglieder erhalten unbegrenzte Tickets, Priority Support und exklusive Angebote.'
-    },
-    {
-      category: 'account',
-      question: 'Was ist das Ticket-Limit?',
-      answer: 'Normale User können maximal 2 offene Support-Tickets gleichzeitig haben. VIP-Mitglieder haben unbegrenzten Zugang zu Support-Tickets und erhalten schnellere Antworten.'
-    },
-    {
-      category: 'account',
-      question: 'Wie ändere ich meine Profildaten?',
-      answer: 'Gehe zu "Profil" → "Einstellungen" und bearbeite dort deine persönlichen Daten. Änderungen werden sofort gespeichert.'
-    },
-    {
-      category: 'orders',
-      question: 'Was bedeutet "Versand aus Deutschland" vs "Versand aus China"?',
-      answer: 'Produkte aus Deutschland werden schneller geliefert (1-5 Tage) zum regulären Preis. China-Versand dauert länger (8-15 Tage), ist aber 15% günstiger.'
-    },
-    {
-      category: 'account',
-      question: 'Wie kontaktiere ich den Support am schnellsten?',
-      answer: 'Erstelle ein Support-Ticket über "Neues Ticket". VIP-Mitglieder erhalten zusätzlich Zugang zu unserem exklusiven WhatsApp-Support für sofortige Hilfe.'
-    }
+  const getTabCounts = () => {
+    const all = tickets.length;
+    const open = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+    const waiting = tickets.filter(t => t.unread_by_user).length;
+    const solved = tickets.filter(t => t.status === 'solved' || t.status === 'closed').length;
+    return { all, open, waiting, solved };
+  };
+
+  const tabCounts = getTabCounts();
+
+  const faqItems = [
+    { category: 'orders', question: 'Wie lange dauert die Bearbeitung meiner Bestellung?', answer: 'Bestellungen werden in der Regel innerhalb von 24-48 Stunden bearbeitet.' },
+    { category: 'payment', question: 'Welche Zahlungsmethoden akzeptiert ihr?', answer: 'Wir akzeptieren Kreditkarten, PayPal und Sofortüberweisung.' },
+    { category: 'shipping', question: 'Wie hoch sind die Versandkosten?', answer: 'Der Versand ist für alle Bestellungen kostenlos.' },
+    { category: 'returns', question: 'Wie funktioniert die Rückgabe?', answer: 'Du hast 14 Tage Rückgaberecht. Erstelle ein Support-Ticket.' },
+    { category: 'account', question: 'Wie werde ich VIP-Mitglied?', answer: 'Lade 10 Freunde ein oder 5 Premium-Käufer.' }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a12] via-[#14141f] to-[#0a0a12]">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          transition={{ duration: 0.4 }}
           className="mb-8"
         >
           <Button
             onClick={() => navigate(createPageUrl('Profile'))}
             variant="outline"
-            className="mb-4 bg-white/[0.02] border-white/[0.08] text-white hover:bg-white/[0.05]"
+            className="mb-4"
+            style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.08)'
+            }}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Zurück zum Profil
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ms-2 rotate-180' : 'me-2'}`} />
+            {t('support.backToProfile')}
           </Button>
           
           <div className="flex items-start gap-4 mb-6">
             <motion.div
               animate={{ rotate: [0, 5, -5, 0] }}
               transition={{ duration: 4, repeat: Infinity }}
-              className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-[20px] flex items-center justify-center shadow-xl shadow-blue-500/40"
+              className="w-16 h-16 rounded-[20px] flex items-center justify-center shadow-xl"
+              style={{
+                background: 'linear-gradient(135deg, #3B82F6, #06B6D4)',
+                boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)'
+              }}
             >
               <MessageSquare className="w-8 h-8 text-white" />
             </motion.div>
             <div className="flex-1">
-              <h1 className="text-4xl font-black text-white mb-2">Support Center</h1>
-              <p className="text-zinc-400 font-medium">Wir helfen dir weiter</p>
+              <h1 className="text-4xl font-black text-white mb-2">{t('support.center')}</h1>
+              <p style={{ color: 'rgba(255, 255, 255, 0.6)' }} className="font-medium">
+                {t('support.helpText')}
+              </p>
             </div>
           </div>
 
-          {/* Ticket Counter */}
+          {/* Ticket Counter Card */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, duration: 0.3 }}
-            className="flex items-center justify-between bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-xl p-4 hover:border-white/[0.12] transition-all"
+            transition={{ delay: 0.1 }}
+            className="flex items-center justify-between p-5 rounded-2xl"
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255, 255, 255, 0.08)'
+            }}
           >
             <div>
-              <p className="text-zinc-400 text-sm font-medium mb-1">Offene Tickets</p>
+              <p className="text-sm font-medium mb-1" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                {t('support.openTickets')}
+              </p>
               {user?.is_vip ? (
                 <div className="flex items-center gap-2">
-                  <Crown className="w-5 h-5 text-yellow-400" />
-                  <span className="text-xl font-black bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">
-                    VIP: Unbegrenzt
+                  <Crown className="w-5 h-5" style={{ color: '#FBBF24' }} />
+                  <span className="text-xl font-black" style={{ color: '#F2D27C' }}>
+                    {t('support.vipUnlimited')}
                   </span>
                 </div>
               ) : (
@@ -227,129 +207,269 @@ export default function Support() {
                     {openTicketCount} / 2
                   </p>
                   {openTicketCount >= 2 && (
-                    <motion.span
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/30 rounded-full px-2 py-0.5"
+                    <span 
+                      className="text-xs font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.15)',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        color: '#F87171'
+                      }}
                     >
-                      Limit erreicht
-                    </motion.span>
+                      {t('support.limitReached')}
+                    </span>
                   )}
                 </div>
               )}
             </div>
             <Button
-              onClick={handleCreateTicket}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/40 hover:scale-105 font-black transition-all"
+              onClick={() => handleCreateTicket()}
+              className="btn-gold font-black"
             >
-              <Plus className="w-5 h-5 mr-2" />
-              Neues Ticket
+              <Plus className={`w-5 h-5 ${isRTL ? 'ms-2' : 'me-2'}`} />
+              {t('support.newTicket')}
             </Button>
           </motion.div>
         </motion.div>
 
-        {/* Tabs */}
+        {/* Main Tabs */}
         <Tabs defaultValue="tickets" className="w-full">
-          <TabsList className="mb-6 bg-white/[0.02] border-2 border-white/[0.08]">
-            <TabsTrigger value="tickets" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold">
-              Meine Tickets
+          <TabsList 
+            className="mb-6 p-1 rounded-xl"
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)'
+            }}
+          >
+            <TabsTrigger 
+              value="tickets" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold rounded-lg"
+            >
+              {t('support.myTickets')}
             </TabsTrigger>
-            <TabsTrigger value="faq" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold">
-              FAQ
+            <TabsTrigger 
+              value="faq" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white font-bold rounded-lg"
+            >
+              {t('support.faq')}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="tickets">
-            {/* Filters */}
+            {/* Ticket Status Tabs */}
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+              {[
+                { key: 'all', label: t('common.all'), icon: Inbox, count: tabCounts.all },
+                { key: 'open', label: t('support.status.open'), icon: MessageSquare, count: tabCounts.open },
+                { key: 'waiting', label: t('support.status.waitingForYou'), icon: Clock, count: tabCounts.waiting },
+                { key: 'solved', label: t('support.status.solved'), icon: CheckCircle, count: tabCounts.solved }
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2"
+                    style={{
+                      background: isActive ? 'rgba(139, 92, 246, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+                      border: isActive ? '1px solid rgba(139, 92, 246, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+                      color: isActive ? '#A78BFA' : 'rgba(255, 255, 255, 0.7)'
+                    }}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {tab.label}
+                    {tab.count > 0 && (
+                      <span 
+                        className="px-1.5 py-0.5 rounded-full text-xs font-bold"
+                        style={{
+                          background: isActive ? 'rgba(139, 92, 246, 0.3)' : 'rgba(255, 255, 255, 0.1)',
+                          color: isActive ? '#C4B5FD' : 'rgba(255, 255, 255, 0.6)'
+                        }}
+                      >
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search & Filters */}
             <div className="mb-6 space-y-3">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                <Search 
+                  className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 ${isRTL ? 'right-4' : 'left-4'}`}
+                  style={{ color: 'rgba(255, 255, 255, 0.4)' }}
+                />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tickets durchsuchen..."
-                  className="pl-12 bg-white/[0.02] border-white/[0.08] text-white h-12"
+                  placeholder={t('support.searchTickets')}
+                  className={`h-12 ${isRTL ? 'pr-12' : 'pl-12'}`}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    color: '#FFFFFF'
+                  }}
                 />
               </div>
 
               <div className="flex gap-3">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="flex-1 bg-white/[0.02] border-white/[0.08] text-white">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle Status</SelectItem>
-                    <SelectItem value="open">Offen</SelectItem>
-                    <SelectItem value="in_progress">In Bearbeitung</SelectItem>
-                    <SelectItem value="solved">Gelöst</SelectItem>
-                    <SelectItem value="closed">Geschlossen</SelectItem>
-                  </SelectContent>
-                </Select>
-
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="flex-1 bg-white/[0.02] border-white/[0.08] text-white">
-                    <SelectValue placeholder="Kategorie" />
+                  <SelectTrigger 
+                    className="flex-1 h-11"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.04)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      color: '#FFFFFF'
+                    }}
+                  >
+                    <SelectValue placeholder={t('support.allCategories')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Alle Kategorien</SelectItem>
-                    <SelectItem value="order">Bestellung</SelectItem>
-                    <SelectItem value="payment">Zahlung</SelectItem>
-                    <SelectItem value="product">Produkt</SelectItem>
-                    <SelectItem value="return">Retoure</SelectItem>
-                    <SelectItem value="other">Sonstiges</SelectItem>
+                    <SelectItem value="all">{t('support.allCategories')}</SelectItem>
+                    <SelectItem value="order">{t('support.category.order')}</SelectItem>
+                    <SelectItem value="payment">{t('support.category.payment')}</SelectItem>
+                    <SelectItem value="delivery">{t('support.category.delivery')}</SelectItem>
+                    <SelectItem value="product">{t('support.category.product')}</SelectItem>
+                    <SelectItem value="return">{t('support.category.return')}</SelectItem>
+                    <SelectItem value="technical">{t('support.category.technical')}</SelectItem>
+                    <SelectItem value="language_request">{t('support.category.languageRequest')}</SelectItem>
+                    <SelectItem value="other">{t('support.category.other')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             {/* Ticket List */}
-            <TicketList tickets={filteredTickets} loading={loading} />
-          </TabsContent>
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div 
+                    key={i} 
+                    className="h-24 rounded-2xl animate-pulse"
+                    style={{ background: 'rgba(255, 255, 255, 0.04)' }}
+                  />
+                ))}
+              </div>
+            ) : filteredTickets.length === 0 ? (
+              <div className="text-center py-20">
+                <div 
+                  className="w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+                  style={{
+                    background: 'rgba(139, 92, 246, 0.1)',
+                    border: '1px solid rgba(139, 92, 246, 0.2)'
+                  }}
+                >
+                  <MessageSquare className="w-10 h-10" style={{ color: '#A78BFA' }} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">{t('support.noTickets')}</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.5)' }} className="mb-6">
+                  {t('support.createFirst')}
+                </p>
+                <Button onClick={() => handleCreateTicket()} className="btn-gold">
+                  <Plus className="w-5 h-5 me-2" />
+                  {t('support.newTicket')}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredTickets.map((ticket, index) => (
+                  <PremiumTicketCard key={ticket.id} ticket={ticket} index={index} />
+                ))}
+              </div>
+            )}
 
-          <TabsContent value="faq">
-            {/* FAQ Header */}
+            {/* Language Request Quick Action */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+              transition={{ delay: 0.3 }}
+              className="mt-8 p-5 rounded-2xl"
+              style={{
+                background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(139, 92, 246, 0.1))',
+                border: '1px solid rgba(236, 72, 153, 0.2)'
+              }}
             >
-              <h2 className="text-2xl font-black text-white mb-2">Häufige Fragen</h2>
-              <p className="text-zinc-400">Schnelle Antworten auf die wichtigsten Fragen</p>
+              <div className="flex items-center gap-4">
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(236, 72, 153, 0.2)' }}
+                >
+                  <Globe className="w-6 h-6" style={{ color: '#F472B6' }} />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-white mb-1">{t('language.missing')}</h3>
+                  <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                    {t('language.missingSubtitle')}
+                  </p>
+                </div>
+                <Button
+                  onClick={() => handleCreateTicket('language_request')}
+                  variant="outline"
+                  className="font-bold"
+                  style={{
+                    background: 'rgba(236, 72, 153, 0.15)',
+                    border: '1px solid rgba(236, 72, 153, 0.4)',
+                    color: '#F472B6'
+                  }}
+                >
+                  {t('language.request')}
+                </Button>
+              </div>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="faq">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+              <h2 className="text-2xl font-black text-white mb-2">{t('support.frequentQuestions')}</h2>
+              <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{t('support.quickAnswers')}</p>
             </motion.div>
 
-            {/* FAQ Search */}
             <div className="mb-6">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                <Search 
+                  className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 ${isRTL ? 'right-4' : 'left-4'}`}
+                  style={{ color: 'rgba(255, 255, 255, 0.4)' }}
+                />
                 <Input
                   value={faqSearch}
                   onChange={(e) => setFaqSearch(e.target.value)}
-                  placeholder="Frage durchsuchen..."
-                  className="pl-12 bg-white/[0.02] border-white/[0.08] text-white h-12"
+                  placeholder={t('support.searchQuestions')}
+                  className={`h-12 ${isRTL ? 'pr-12' : 'pl-12'}`}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    color: '#FFFFFF'
+                  }}
                 />
               </div>
             </div>
 
-            {/* FAQ Categories */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
               {[
-                { key: 'all', label: 'Alle', icon: HelpCircle },
-                { key: 'orders', label: 'Bestellungen', icon: Package },
-                { key: 'payment', label: 'Zahlung', icon: CreditCard },
-                { key: 'shipping', label: 'Versand', icon: Truck },
-                { key: 'returns', label: 'Retouren', icon: RotateCcw },
-                { key: 'account', label: 'Konto', icon: Shield }
+                { key: 'all', label: t('support.faqCategory.all'), icon: HelpCircle },
+                { key: 'orders', label: t('support.faqCategory.orders'), icon: Package },
+                { key: 'payment', label: t('support.faqCategory.payment'), icon: CreditCard },
+                { key: 'shipping', label: t('support.faqCategory.shipping'), icon: Truck },
+                { key: 'returns', label: t('support.faqCategory.returns'), icon: RotateCcw },
+                { key: 'account', label: t('support.faqCategory.account'), icon: Shield }
               ].map((cat) => {
                 const Icon = cat.icon;
                 return (
                   <button
                     key={cat.key}
                     onClick={() => setFaqCategory(cat.key)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 ${
-                      faqCategory === cat.key
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                        : 'bg-white/[0.02] text-zinc-400 hover:bg-white/[0.05] border border-white/[0.08]'
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2`}
+                    style={{
+                      background: faqCategory === cat.key 
+                        ? 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3))'
+                        : 'rgba(255, 255, 255, 0.04)',
+                      border: faqCategory === cat.key
+                        ? '1px solid rgba(139, 92, 246, 0.5)'
+                        : '1px solid rgba(255, 255, 255, 0.08)',
+                      color: faqCategory === cat.key ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)'
+                    }}
                   >
                     <Icon className="w-4 h-4" />
                     {cat.label}
@@ -358,9 +478,8 @@ export default function Support() {
               })}
             </div>
 
-            {/* FAQ Items */}
             <div className="space-y-3">
-              {getFaqItems()
+              {faqItems
                 .filter(item => 
                   (faqCategory === 'all' || item.category === faqCategory) &&
                   (faqSearch === '' || 
@@ -376,7 +495,11 @@ export default function Support() {
                   >
                     <button
                       onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                      className="w-full text-left bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-xl p-4 hover:border-white/[0.15] transition-all"
+                      className="w-full text-start p-4 rounded-xl transition-all"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)'
+                      }}
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
@@ -387,21 +510,23 @@ export default function Support() {
                                 initial={{ height: 0, opacity: 0 }}
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
                                 className="overflow-hidden"
                               >
-                                <p className="text-zinc-400 text-sm leading-relaxed mt-3 pt-3 border-t border-white/[0.08]">
+                                <p 
+                                  className="text-sm leading-relaxed mt-3 pt-3"
+                                  style={{ 
+                                    color: 'rgba(255, 255, 255, 0.6)',
+                                    borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                                  }}
+                                >
                                   {item.answer}
                                 </p>
                               </motion.div>
                             )}
                           </AnimatePresence>
                         </div>
-                        <motion.div
-                          animate={{ rotate: expandedFaq === index ? 180 : 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <ChevronDown className="w-5 h-5 text-zinc-400 flex-shrink-0" />
+                        <motion.div animate={{ rotate: expandedFaq === index ? 180 : 0 }}>
+                          <ChevronDown className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} />
                         </motion.div>
                       </div>
                     </button>
@@ -409,36 +534,22 @@ export default function Support() {
                 ))}
             </div>
 
-            {/* No Results */}
-            {getFaqItems().filter(item => 
-              (faqCategory === 'all' || item.category === faqCategory) &&
-              (faqSearch === '' || 
-               item.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
-               item.answer.toLowerCase().includes(faqSearch.toLowerCase()))
-            ).length === 0 && (
-              <div className="text-center py-16">
-                <HelpCircle className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">Keine Ergebnisse</h3>
-                <p className="text-zinc-400 mb-6">Versuche einen anderen Suchbegriff oder erstelle ein Ticket</p>
-                <Button onClick={handleCreateTicket} className="bg-gradient-to-r from-purple-500 to-pink-500">
-                  Ticket erstellen
-                </Button>
-              </div>
-            )}
-
-            {/* Quick Contact CTA */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-8 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-6 text-center"
+              className="mt-8 p-6 rounded-2xl text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1))',
+                border: '1px solid rgba(139, 92, 246, 0.2)'
+              }}
             >
-              <Zap className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-              <h3 className="text-xl font-black text-white mb-2">Nicht gefunden?</h3>
-              <p className="text-zinc-400 mb-4">Erstelle ein Ticket und wir helfen dir weiter</p>
-              <Button onClick={handleCreateTicket} className="bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/40">
-                <Plus className="w-5 h-5 mr-2" />
-                Neues Ticket
+              <Zap className="w-12 h-12 mx-auto mb-4" style={{ color: '#A78BFA' }} />
+              <h3 className="text-xl font-black text-white mb-2">{t('support.notFound')}</h3>
+              <p className="mb-4" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{t('support.weHelpYou')}</p>
+              <Button onClick={() => handleCreateTicket()} className="btn-gold">
+                <Plus className="w-5 h-5 me-2" />
+                {t('support.newTicket')}
               </Button>
             </motion.div>
           </TabsContent>
@@ -446,10 +557,14 @@ export default function Support() {
       </div>
 
       {/* Modals */}
-      <CreateTicketModal
+      <PremiumCreateTicketModal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setPreselectedCategory(null);
+        }}
         onSuccess={handleTicketCreated}
+        preselectedCategory={preselectedCategory}
       />
 
       <VipUpgradeModal
