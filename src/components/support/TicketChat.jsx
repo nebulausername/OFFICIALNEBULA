@@ -11,12 +11,22 @@ import { de, enUS, sk, ar } from 'date-fns/locale';
 import { useI18n } from '../i18n/I18nProvider';
 
 export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
+  const { t, locale, isRTL } = useI18n();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef(null);
-  const { toast } = useToast();
+  
+  const localeMap = { de, en: enUS, sk, ar };
+  const dateLocale = localeMap[locale] || de;
+  
+  const getStatusConfig = () => ({
+    open: { label: t('support.status.open'), color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+    in_progress: { label: t('support.status.inProgress'), color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+    solved: { label: t('support.status.solved'), color: 'bg-green-500/20 text-green-400 border-green-500/30' },
+    closed: { label: t('support.status.closed'), color: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30' }
+  });
 
   useEffect(() => {
     if (ticket) {
