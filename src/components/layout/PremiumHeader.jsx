@@ -8,10 +8,13 @@ import MainDrawer from '../drawer/MainDrawer';
 import ShopCategoriesDrawer from '../drawer/ShopCategoriesDrawer';
 import ProfileDrawer from '../drawer/ProfileDrawer';
 import { useWishlist } from '../wishlist/WishlistContext';
+import { LanguageSwitcherPopover } from '../i18n/LanguageSwitcher';
+import { useI18n } from '../i18n/I18nProvider';
 
 export default function PremiumHeader() {
   const location = useLocation();
   const { count: wishlistCount } = useWishlist();
+  const { t } = useI18n();
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const [isMainDrawerOpen, setIsMainDrawerOpen] = useState(false);
@@ -197,9 +200,9 @@ export default function PremiumHeader() {
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
               {[
-                { label: 'Home', to: 'Home' },
-                { label: 'Shop', to: 'Products' },
-                { label: 'Profil', to: 'Profile' }
+                { label: t('nav.home'), to: 'Home' },
+                { label: t('nav.shop'), to: 'Products' },
+                { label: t('nav.profile'), to: 'Profile' }
               ].map(item => (
                 <Link key={item.to} to={createPageUrl(item.to)} className="relative group">
                   <span className="text-sm font-bold text-muted group-hover:text-white transition-colors">
@@ -217,6 +220,11 @@ export default function PremiumHeader() {
 
             {/* Right Icons */}
             <div className="flex items-center gap-2 md:gap-3">
+              {/* Language Switcher - Desktop */}
+              <div className="hidden md:block">
+                <LanguageSwitcherPopover />
+              </div>
+
               {user?.is_vip && (
                 <motion.div
                   animate={{ 
@@ -236,21 +244,21 @@ export default function PremiumHeader() {
               
               <IconButton 
                 icon={Heart} 
-                label="Merkliste" 
+                label={t('nav.wishlist')} 
                 count={wishlistCount} 
                 to={createPageUrl('Wishlist')} 
               />
               
               <IconButton 
                 icon={User} 
-                label="Profil" 
+                label={t('nav.profile')} 
                 count={0} 
                 to={createPageUrl('Profile')} 
               />
               
               <IconButton 
                 icon={ShoppingCart} 
-                label="Warenkorb" 
+                label={t('nav.cart')} 
                 count={cartCount} 
                 to={createPageUrl('Cart')} 
               />
