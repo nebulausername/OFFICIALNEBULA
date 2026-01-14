@@ -261,8 +261,8 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
                         )}
                       </div>
                     </div>
-                    <p className={`text-xs text-zinc-600 mt-1 ${isUser ? 'text-right mr-10' : 'ml-10'}`}>
-                      {format(new Date(msg.created_date), 'dd.MM. HH:mm', { locale: de })}
+                    <p className={`text-xs mt-1 ${isUser ? (isRTL ? 'text-start ms-10' : 'text-end me-10') : (isRTL ? 'me-10' : 'ms-10')}`} style={{ color: 'rgba(255, 255, 255, 0.35)' }}>
+                      {format(new Date(msg.created_date), 'dd.MM. HH:mm', { locale: dateLocale })}
                     </p>
                   </div>
                 </motion.div>
