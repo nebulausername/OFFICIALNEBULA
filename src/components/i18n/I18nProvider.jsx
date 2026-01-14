@@ -122,8 +122,94 @@ const translations = {
     
     // Support
     'support.title': 'Support',
+    'support.center': 'Support Center',
+    'support.helpText': 'Wir helfen dir weiter',
     'support.newTicket': 'Neues Ticket',
+    'support.createTicket': 'Ticket erstellen',
     'support.myTickets': 'Meine Tickets',
+    'support.openTickets': 'Offene Tickets',
+    'support.vipUnlimited': 'VIP: Unbegrenzt',
+    'support.limitReached': 'Limit erreicht',
+    'support.backToProfile': 'Zurück zum Profil',
+    'support.faq': 'FAQ',
+    'support.frequentQuestions': 'Häufige Fragen',
+    'support.quickAnswers': 'Schnelle Antworten auf die wichtigsten Fragen',
+    'support.noResults': 'Keine Ergebnisse',
+    'support.tryOtherSearch': 'Versuche einen anderen Suchbegriff oder erstelle ein Ticket',
+    'support.notFound': 'Nicht gefunden?',
+    'support.weHelpYou': 'Erstelle ein Ticket und wir helfen dir weiter',
+    'support.searchTickets': 'Tickets durchsuchen...',
+    'support.searchQuestions': 'Frage durchsuchen...',
+    'support.allStatus': 'Alle Status',
+    'support.allCategories': 'Alle Kategorien',
+    'support.noTickets': 'Noch keine Tickets',
+    'support.createFirst': 'Erstelle dein erstes Support-Ticket',
+    
+    // Ticket Status
+    'support.status.open': 'Offen',
+    'support.status.inProgress': 'In Bearbeitung',
+    'support.status.waitingForYou': 'Wartet auf dich',
+    'support.status.solved': 'Gelöst',
+    'support.status.closed': 'Geschlossen',
+    
+    // Ticket Categories
+    'support.category.order': 'Bestellung',
+    'support.category.payment': 'Zahlung',
+    'support.category.product': 'Produkt',
+    'support.category.return': 'Retoure',
+    'support.category.delivery': 'Lieferung',
+    'support.category.technical': 'Technik',
+    'support.category.languageRequest': 'Sprache anfragen',
+    'support.category.other': 'Sonstiges',
+    
+    // Ticket Form
+    'support.form.category': 'Kategorie',
+    'support.form.subject': 'Betreff',
+    'support.form.subjectPlaceholder': 'Worum geht es?',
+    'support.form.message': 'Nachricht',
+    'support.form.messagePlaceholder': 'Beschreibe dein Anliegen...',
+    'support.form.orderNumber': 'Bestellnummer',
+    'support.form.orderPlaceholder': 'z.B. #12345',
+    'support.form.sku': 'Artikelnummer (SKU)',
+    'support.form.attachments': 'Anhänge',
+    'support.form.uploadFiles': 'Dateien hochladen',
+    'support.form.optional': '(optional)',
+    'support.form.required': '*',
+    'support.form.creating': 'Erstellen...',
+    
+    // Ticket Chat
+    'support.chat.writeMessage': 'Nachricht schreiben...',
+    'support.chat.closeTicket': 'Ticket schließen',
+    'support.chat.reopenTicket': 'Erneut öffnen',
+    'support.chat.problemSolved': 'Problem gelöst',
+    'support.chat.needMoreInfo': 'Weitere Infos',
+    'support.chat.ticketClosed': 'Ticket geschlossen',
+    'support.chat.ticketReopened': 'Ticket wieder geöffnet',
+    'support.chat.sendFailed': 'Senden fehlgeschlagen',
+    
+    // Language Request (special ticket type)
+    'support.languageRequest.title': 'Neue Sprache anfragen',
+    'support.languageRequest.whichLanguage': 'Welche Sprache möchtest du?',
+    'support.languageRequest.selectLanguage': 'Sprache auswählen',
+    'support.languageRequest.otherLanguage': 'Andere Sprache',
+    'support.languageRequest.scope': 'Wo benötigst du sie?',
+    'support.languageRequest.scopeShop': 'Nur im Shop',
+    'support.languageRequest.scopeFullApp': 'Komplette App',
+    'support.languageRequest.reason': 'Warum brauchst du diese Sprache?',
+    
+    // Success State
+    'support.success.ticketCreated': 'Ticket erstellt',
+    'support.success.weContactYou': 'Wir melden uns in Kürze bei dir',
+    'support.success.ticketId': 'Ticket-ID',
+    'support.success.viewTicket': 'Ticket ansehen',
+    
+    // FAQ Categories
+    'support.faqCategory.all': 'Alle',
+    'support.faqCategory.orders': 'Bestellungen',
+    'support.faqCategory.payment': 'Zahlung',
+    'support.faqCategory.shipping': 'Versand',
+    'support.faqCategory.returns': 'Retouren',
+    'support.faqCategory.account': 'Konto',
     
     // Profile
     'profile.title': 'Mein Profil',
