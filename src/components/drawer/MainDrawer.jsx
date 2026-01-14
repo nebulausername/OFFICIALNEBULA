@@ -189,7 +189,7 @@ export default function MainDrawer({
                   <div className="flex items-center gap-2 mb-4">
                     <Sparkles className="w-5 h-5 text-gold" />
                     <h3 className="text-base font-black uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-                      Schnellzugriff
+                      {t('profile.quickAccess')}
                     </h3>
                   </div>
                   
@@ -252,14 +252,14 @@ export default function MainDrawer({
                       <MapPin className="w-4 h-4 text-gold flex-shrink-0" />
                       <div>
                         <p className="text-sm font-bold" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>DE • CN</p>
-                        <p className="text-xs font-semibold" style={{ color: 'rgba(255, 255, 255, 0.60)' }}>Versand aus</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-1">
-                      <Clock className="w-4 h-4 text-gold flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-bold" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>1-15 Tage</p>
-                        <p className="text-xs font-semibold" style={{ color: 'rgba(255, 255, 255, 0.60)' }}>Lieferzeit</p>
+                        <p className="text-xs font-semibold" style={{ color: 'rgba(255, 255, 255, 0.60)' }}>{t('misc.shippingFrom')}</p>
+                        </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-1">
+                        <Clock className="w-4 h-4 text-gold flex-shrink-0" />
+                        <div>
+                        <p className="text-sm font-bold" style={{ color: 'rgba(255, 255, 255, 0.92)' }}>1-15 {t('misc.days')}</p>
+                        <p className="text-xs font-semibold" style={{ color: 'rgba(255, 255, 255, 0.60)' }}>{t('misc.deliveryTime')}</p>
                       </div>
                     </div>
                   </div>
@@ -268,7 +268,7 @@ export default function MainDrawer({
                 {/* Quick Navigation */}
                 <div className="space-y-2">
                   <h3 className="text-sm font-black uppercase tracking-wider px-2 mb-3" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
-                    Navigation
+                    {t('profile.navigation')}
                   </h3>
                   {navItems.map((item, index) => {
                     const Icon = item.icon;
@@ -325,8 +325,8 @@ export default function MainDrawer({
                         <Crown className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <p className="text-base font-black text-gold mb-1">VIP MITGLIED</p>
-                        <p className="text-sm font-semibold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>Exklusive Vorteile aktiv</p>
+                        <p className="text-base font-black text-gold mb-1">{t('profile.vipMember')}</p>
+                        <p className="text-sm font-semibold" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>{t('profile.vipBenefitsActive')}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -335,7 +335,7 @@ export default function MainDrawer({
                 {/* Secondary Actions */}
                 <div className="space-y-2 pt-4 border-t border-white/10">
                   <h3 className="text-sm font-black uppercase tracking-wider px-2 mb-3" style={{ color: 'rgba(255, 255, 255, 0.65)' }}>
-                    Mehr
+                    {t('profile.more')}
                   </h3>
 
                   <Link to={createPageUrl('Support')} onClick={onClose}>
@@ -353,7 +353,7 @@ export default function MainDrawer({
                     >
                       <HelpCircle className="w-5 h-5 text-green-400 flex-shrink-0" strokeWidth={2.5} />
                       <span className="text-base font-bold group-hover:text-green-300 transition-colors" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-                        Support & Tickets
+                        {t('support.title')}
                       </span>
                     </motion.div>
                   </Link>
@@ -374,7 +374,7 @@ export default function MainDrawer({
                       >
                         <Shield className="w-5 h-5 text-red-400 flex-shrink-0" strokeWidth={2.5} />
                         <span className="text-base font-bold group-hover:text-red-300 transition-colors" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-                          Admin Dashboard
+                          {t('profile.adminDashboard')}
                         </span>
                       </motion.div>
                     </Link>
@@ -399,7 +399,7 @@ export default function MainDrawer({
                   >
                     <LogOut className="w-5 h-5 group-hover:text-red-400 transition-colors" style={{ color: 'rgba(255, 255, 255, 0.65)' }} strokeWidth={2.5} />
                     <span className="text-base font-bold group-hover:text-red-400 transition-colors" style={{ color: 'rgba(255, 255, 255, 0.85)' }}>
-                      Abmelden
+                      {t('auth.logout')}
                     </span>
                   </motion.button>
                 </div>
