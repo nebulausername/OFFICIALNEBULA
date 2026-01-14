@@ -13,7 +13,7 @@ export const SUPPORTED_LOCALES = {
   ar: { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', dir: 'rtl', isRTL: true }
 };
 
-export const DEFAULT_LOCALE = 'en';
+export const DEFAULT_LOCALE = 'de';
 const STORAGE_KEY = 'app_locale';
 
 // Translations store
