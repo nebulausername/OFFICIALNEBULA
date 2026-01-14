@@ -136,34 +136,82 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
 
   if (!ticket) return null;
 
+  const statusConfig = getStatusConfig();
   const status = statusConfig[ticket.status];
   const isClosed = ticket.status === 'closed' || ticket.status === 'solved';
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-white/[0.06] bg-white/[0.02]">
+      <div 
+        className="flex-shrink-0 p-4 border-b"
+        style={{ 
+          borderColor: 'rgba(255, 255, 255, 0.06)',
+          background: 'rgba(255, 255, 255, 0.02)'
+        }}
+      >
         <div className="flex items-center gap-3 mb-3">
-          <button onClick={onBack} className="lg:hidden w-9 h-9 bg-white/[0.05] rounded-xl flex items-center justify-center">
-            <ArrowLeft className="w-5 h-5 text-zinc-400" />
+          <button 
+            onClick={onBack} 
+            className="lg:hidden w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+          >
+            <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} style={{ color: 'rgba(255, 255, 255, 0.6)' }} />
           </button>
           <div className="flex-1 min-w-0">
             <h3 className="text-white font-bold truncate">{ticket.subject}</h3>
-            <p className="text-zinc-500 text-xs">Ticket #{ticket.id.slice(0, 8)}</p>
+            <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+              Ticket #{ticket.id.slice(0, 8)}
+            </p>
           </div>
           <Badge className={`${status.color} border`}>{status.label}</Badge>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {isClosed ? (
-            <Button size="sm" variant="outline" onClick={handleReopenTicket} className="text-xs bg-transparent border-white/10 text-zinc-300 hover:bg-white/5">
-              Erneut öffnen
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={handleReopenTicket} 
+              className="text-xs"
+              style={{
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.7)'
+              }}
+            >
+              {t('support.chat.reopenTicket')}
             </Button>
           ) : (
-            <Button size="sm" variant="outline" onClick={handleCloseTicket} className="text-xs bg-transparent border-white/10 text-zinc-300 hover:bg-white/5">
-              Ticket schließen
-            </Button>
+            <>
+              <Button 
+                size="sm" 
+                onClick={handleMarkSolved} 
+                className="text-xs"
+                style={{
+                  background: 'rgba(52, 211, 153, 0.15)',
+                  border: '1px solid rgba(52, 211, 153, 0.3)',
+                  color: '#4ADE80'
+                }}
+              >
+                <ThumbsUp className="w-3.5 h-3.5 me-1" />
+                {t('support.chat.problemSolved')}
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={handleCloseTicket} 
+                className="text-xs"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }}
+              >
+                {t('support.chat.closeTicket')}
+              </Button>
+            </>
           )}
         </div>
       </div>
