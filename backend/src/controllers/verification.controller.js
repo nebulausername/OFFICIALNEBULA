@@ -2,6 +2,7 @@ import prisma from '../config/database.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { validatePhoto } from '../utils/photoValidator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -381,11 +382,10 @@ export const createVerificationRequest = async (telegramId) => {
 
 // Download photo from Telegram and save locally
 export const downloadTelegramPhoto = async (bot, fileId) => {
+  const TIMEOUT_MS = 30000; // 30 seconds
+  let timeoutId;
+  
   try {
-    // Get file info from Telegram
-    const file = await bot.getFile(fileId);
-    const filePath = file.file_path;
-    
     // Create uploads directory if it doesn't exist
     const uploadsDir = path.join(__dirname, '../../uploads/verifications');
     if (!fs.existsSync(uploadsDir)) {
@@ -396,21 +396,83 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
     const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
     const localPath = path.join(uploadsDir, filename);
 
-    // Download file from Telegram
+    // Get file info from Telegram with timeout
+    const filePromise = bot.getFile(fileId);
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error('File download timeout')), TIMEOUT_MS);
+    });
+    
+    const file = await Promise.race([filePromise, timeoutPromise]);
+    clearTimeout(timeoutId);
+    
+    const filePath = file.file_path;
+    console.log(`[PHOTO] Downloading file: ${filePath}`);
+
+    // Download file from Telegram with timeout
     const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${filePath}`;
-    const response = await fetch(fileUrl);
+    
+    const downloadPromise = fetch(fileUrl);
+    const downloadTimeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error('Download timeout')), TIMEOUT_MS);
+    });
+    
+    const response = await Promise.race([downloadPromise, downloadTimeoutPromise]);
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       throw new Error(`Failed to download photo: ${response.statusText}`);
     }
 
-    const buffer = await response.arrayBuffer();
-    fs.writeFileSync(localPath, Buffer.from(buffer));
+    // Stream-based download with progress tracking
+    const contentLength = parseInt(response.headers.get('content-length') || '0');
+    let downloadedBytes = 0;
+    
+    const reader = response.body.getReader();
+    const chunks = [];
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      chunks.push(value);
+      downloadedBytes += value.length;
+      
+      // Log progress every 10%
+      if (contentLength > 0) {
+        const progress = Math.floor((downloadedBytes / contentLength) * 100);
+        if (progress % 10 === 0) {
+          console.log(`[PHOTO] Download progress: ${progress}%`);
+        }
+      }
+    }
+    
+    // Combine chunks into buffer
+    const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+    const buffer = Buffer.concat(chunks, totalLength);
+    const fileSize = buffer.length;
+    
+    console.log(`[PHOTO] Downloaded ${(fileSize / 1024).toFixed(2)}KB`);
+    
+    // Write file
+    fs.writeFileSync(localPath, buffer);
+    
+    // Validate photo
+    const validation = validatePhoto(localPath, fileSize);
+    if (!validation.valid) {
+      // Delete invalid file
+      fs.unlinkSync(localPath);
+      throw new Error(validation.error || 'Foto-Validierung fehlgeschlagen');
+    }
 
+    console.log(`[PHOTO] Photo validated and saved: ${filename}`);
+    
     // Return relative path for URL
     const relativePath = `/uploads/verifications/${filename}`;
     return relativePath;
   } catch (error) {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
     console.error('Error downloading Telegram photo:', error);
     throw error;
   }

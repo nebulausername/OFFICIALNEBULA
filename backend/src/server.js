@@ -13,6 +13,18 @@ import { performanceMiddleware } from './middleware/performance.middleware.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables
+dotenv.config();
+
+// Validate environment variables
+try {
+  const { validateEnv } = await import('./config/env.js');
+  validateEnv();
+} catch (err) {
+  console.error('❌ Error validating environment variables:', err);
+  process.exit(1);
+}
+
 // Import routes
 import authRoutes from './routes/auth.routes.js';
 import productRoutes from './routes/product.routes.js';
@@ -27,9 +39,6 @@ import uploadRoutes from './routes/upload.routes.js';
 import emailRoutes from './routes/email.routes.js';
 import wishlistRoutes from './routes/wishlist.routes.js';
 import verificationRoutes from './routes/verification.routes.js';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -109,6 +118,13 @@ import('./services/telegram-bot.service.js').then(({ initializeBot }) => {
 }).catch(err => {
   console.error('❌ Error initializing Telegram Bot:', err);
   console.error('Stack:', err.stack);
+});
+
+// Initialize Cleanup Service
+import('./services/cleanup.service.js').then(({ initializeCleanupService }) => {
+  initializeCleanupService();
+}).catch(err => {
+  console.error('❌ Error initializing Cleanup Service:', err);
 });
 
 // Start server

@@ -3,40 +3,161 @@ import prisma from '../config/database.js';
 import { generateToken } from '../config/jwt.js';
 import { createVerificationRequest, downloadTelegramPhoto } from '../controllers/verification.controller.js';
 import { sendTelegramMessage } from './telegram.service.js';
+import { botLogger } from '../utils/botLogger.js';
+import { checkRateLimit, getRemainingCommands } from '../middleware/botRateLimit.js';
+import { sendMessageWithRetry, editMessageTextWithRetry, answerCallbackQueryWithRetry } from '../utils/telegramRetry.js';
 
 let bot = null;
+
+// State management for admin rejection
+const adminRejectionStates = new Map(); // adminId -> { verificationId, timestamp, chatId }
+
+// Admin list cache (5 minutes TTL)
+let adminListCache = {
+  data: null,
+  timestamp: 0,
+  ttl: 5 * 60 * 1000, // 5 minutes
+};
+
+// Get cached admin list or fetch from database
+const getAdminList = async () => {
+  const now = Date.now();
+  
+  // Return cached data if still valid
+  if (adminListCache.data && (now - adminListCache.timestamp) < adminListCache.ttl) {
+    botLogger.debug('Using cached admin list');
+    return adminListCache.data;
+  }
+  
+  // Fetch from database
+  botLogger.debug('Fetching admin list from database');
+  const admins = await prisma.user.findMany({
+    where: {
+      role: { in: ['admin', 'staff'] },
+      telegram_id: { not: null },
+    },
+    select: {
+      id: true,
+      telegram_id: true,
+      username: true,
+      full_name: true,
+      role: true,
+    },
+  });
+  
+  // Update cache
+  adminListCache.data = admins;
+  adminListCache.timestamp = now;
+  
+  return admins;
+};
+
+// Cleanup old rejection states (older than 5 minutes)
+const cleanupRejectionStates = () => {
+  const now = Date.now();
+  const timeout = 5 * 60 * 1000; // 5 minutes
+  
+  for (const [adminId, state] of adminRejectionStates.entries()) {
+    if (now - state.timestamp > timeout) {
+      adminRejectionStates.delete(adminId);
+      botLogger.debug(`Cleaned up expired rejection state for admin ${adminId}`);
+    }
+  }
+};
+
+// Run cleanup every minute
+setInterval(cleanupRejectionStates, 60 * 1000);
+
+// Validation functions for Telegram messages
+const validateTelegramMessage = (msg) => {
+  if (!msg || !msg.from || !msg.chat) {
+    botLogger.warn('Invalid message: missing required fields');
+    return false;
+  }
+
+  if (!msg.from.id || typeof msg.from.id !== 'number') {
+    botLogger.warn('Invalid message: invalid user ID');
+    return false;
+  }
+
+  if (!msg.chat.id || typeof msg.chat.id !== 'number') {
+    botLogger.warn('Invalid message: invalid chat ID');
+    return false;
+  }
+
+  return true;
+};
+
+const validateCallbackQuery = (query) => {
+  if (!query || !query.from || !query.message) {
+    botLogger.warn('Invalid callback query: missing required fields');
+    return false;
+  }
+
+  if (!query.from.id || typeof query.from.id !== 'number') {
+    botLogger.warn('Invalid callback query: invalid user ID');
+    return false;
+  }
+
+  if (!query.data || typeof query.data !== 'string') {
+    botLogger.warn('Invalid callback query: missing or invalid data');
+    return false;
+  }
+
+  // Validate callback data length (Telegram limit is 64 bytes)
+  if (query.data.length > 64) {
+    botLogger.warn('Invalid callback query: data too long');
+    return false;
+  }
+
+  return true;
+};
+
+const validateTextMessage = (msg) => {
+  if (!validateTelegramMessage(msg)) {
+    return false;
+  }
+
+  if (!msg.text || typeof msg.text !== 'string') {
+    return false; // Not a text message, but that's okay
+  }
+
+  // Validate text length (Telegram limit is 4096 characters)
+  if (msg.text.length > 4096) {
+    botLogger.warn('Invalid text message: text too long');
+    return false;
+  }
+
+  return true;
+};
 
 // Initialize bot
 export const initializeBot = () => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   
   if (!token) {
-    console.warn('⚠️ TELEGRAM_BOT_TOKEN not set - Bot will not be initialized');
+    botLogger.warn('TELEGRAM_BOT_TOKEN not set - Bot will not be initialized');
     return null;
   }
 
   try {
-    console.log('🤖 Creating Telegram Bot instance...');
+    botLogger.info('Creating Telegram Bot instance...');
     bot = new TelegramBot(token, { polling: true });
-    console.log('✅ Telegram Bot instance created');
+    botLogger.info('Telegram Bot instance created');
     
     setupBotHandlers();
-    console.log('✅ Telegram Bot handlers setup complete');
+    botLogger.info('Telegram Bot handlers setup complete');
     
     // Test bot connection
     bot.getMe().then((botInfo) => {
-      console.log(`✅ Bot connected as @${botInfo.username} (${botInfo.first_name})`);
+      botLogger.info(`Bot connected as @${botInfo.username} (${botInfo.first_name})`);
     }).catch((err) => {
-      console.error('❌ Error getting bot info:', err.message);
+      botLogger.error('Error getting bot info:', err);
     });
     
     return bot;
   } catch (error) {
-    console.error('❌ Error initializing Telegram Bot:', error);
-    console.error('Error details:', error.message);
-    if (error.stack) {
-      console.error('Stack:', error.stack);
-    }
+    botLogger.error('Error initializing Telegram Bot:', error);
     return null;
   }
 };
@@ -47,16 +168,35 @@ const setupBotHandlers = () => {
 
   // /start command
   bot.onText(/\/start/, async (msg) => {
+    // Validate message
+    if (!validateTelegramMessage(msg)) {
+      return;
+    }
+
     const chatId = msg.chat.id;
     const telegramId = msg.from.id.toString();
     const username = msg.from.username || msg.from.first_name || 'User';
 
-    console.log(`📨 /start command received from ${username} (${telegramId})`);
+    // Check rate limit
+    if (checkRateLimit(telegramId, 5)) {
+      const remaining = getRemainingCommands(telegramId, 5);
+      await sendMessageWithRetry(
+        bot,
+        chatId,
+        `⏱️ *Rate Limit erreicht*\n\n` +
+        `Du hast zu viele Anfragen gesendet. Bitte warte einen Moment.\n\n` +
+        `Verbleibende Anfragen: ${remaining}`,
+        { parse_mode: 'Markdown' }
+      );
+      return;
+    }
+
+    botLogger.info(`/start command received from ${username} (${telegramId})`);
 
     try {
       // Create or get verification request
       const { user, request, isNew } = await createVerificationRequest(telegramId);
-      console.log(`✅ Verification request processed for ${username}: isNew=${isNew}, status=${user.verification_status}`);
+      botLogger.info(`Verification request processed for ${username}: isNew=${isNew}, status=${user.verification_status}`);
 
       if (!isNew && user.verification_status === 'verified') {
         // User already verified - show WebView button
@@ -69,20 +209,24 @@ const setupBotHandlers = () => {
         await sendWelcomeMessage(chatId, request, username);
       }
     } catch (error) {
-      console.error('❌ Error handling /start command:', error);
-      console.error('Stack:', error.stack);
+      botLogger.error('Error handling /start command:', error);
       try {
-        await bot.sendMessage(chatId, '❌ Es ist ein Fehler aufgetreten. Bitte versuche es später erneut.');
+        await sendMessageWithRetry(bot, chatId, '❌ Es ist ein Fehler aufgetreten. Bitte versuche es später erneut.');
       } catch (sendError) {
-        console.error('❌ Error sending error message:', sendError);
+        botLogger.error('Error sending error message:', sendError);
       }
     }
   });
   
-  console.log('✅ /start command handler registered');
+  botLogger.info('/start command handler registered');
 
   // Handle photo messages for verification
   bot.on('photo', async (msg) => {
+    // Validate message
+    if (!validateTelegramMessage(msg)) {
+      return;
+    }
+
     const chatId = msg.chat.id;
     const telegramId = msg.from.id.toString();
     const photo = msg.photo;
@@ -97,7 +241,7 @@ const setupBotHandlers = () => {
     }
 
     try {
-      console.log(`📸 Photo received from ${telegramId}`);
+      botLogger.info(`Photo received from ${telegramId}`);
 
       // Find user
       const user = await prisma.user.findUnique({
@@ -112,7 +256,8 @@ const setupBotHandlers = () => {
       });
 
       if (!user || user.verification_requests.length === 0) {
-        await bot.sendMessage(
+        await sendMessageWithRetry(
+          bot,
           chatId,
           '⚠️ *Keine offene Verifizierung gefunden*\n\nBitte starte mit /start um eine neue Verifizierung zu beginnen.',
           { parse_mode: 'Markdown' }
@@ -130,10 +275,11 @@ const setupBotHandlers = () => {
       let photoUrl;
       try {
         photoUrl = await downloadTelegramPhoto(bot, fileId);
-        console.log(`✅ Photo downloaded and saved: ${photoUrl}`);
+        botLogger.info(`Photo downloaded and saved: ${photoUrl}`);
       } catch (downloadError) {
-        console.error('❌ Error downloading photo:', downloadError);
-        await bot.sendMessage(
+        botLogger.error('Error downloading photo:', downloadError);
+        await sendMessageWithRetry(
+          bot,
           chatId,
           '❌ Fehler beim Speichern des Fotos. Bitte versuche es erneut.',
           { parse_mode: 'Markdown' }
@@ -164,7 +310,8 @@ const setupBotHandlers = () => {
       await notifyAdminsOfNewVerification(user, updatedRequest);
 
       // Send confirmation to user
-      await bot.sendMessage(
+      await sendMessageWithRetry(
+        bot,
         chatId,
         `✅ *Foto erfolgreich erhalten!*\n\n` +
         `📋 *Status:* Warte auf Admin-Approval\n` +
@@ -174,39 +321,51 @@ const setupBotHandlers = () => {
         { parse_mode: 'Markdown' }
       );
     } catch (error) {
-      console.error('❌ Error handling photo:', error);
-      console.error('Stack:', error.stack);
+      botLogger.error('Error handling photo:', error);
       try {
-        await bot.sendMessage(
+        await sendMessageWithRetry(
+          bot,
           chatId,
           '❌ Es ist ein Fehler aufgetreten. Bitte versuche es später erneut.',
           { parse_mode: 'Markdown' }
         );
       } catch (sendError) {
-        console.error('❌ Error sending error message:', sendError);
+        botLogger.error('Error sending error message:', sendError);
       }
     }
   });
 
-  console.log('✅ Photo handler registered');
+  botLogger.info('Photo handler registered');
 
   // Handle callback queries (for admin actions)
   bot.on('callback_query', async (query) => {
+    // Validate callback query
+    if (!validateCallbackQuery(query)) {
+      return;
+    }
+
     const chatId = query.message.chat.id;
     const data = query.data;
     const adminId = query.from.id.toString();
 
     try {
-      // Check if user is admin
+      // Check if user is admin (optimized query with select)
       const admin = await prisma.user.findFirst({
         where: {
           telegram_id: BigInt(adminId),
           role: { in: ['admin', 'staff'] },
         },
+        select: {
+          id: true,
+          telegram_id: true,
+          username: true,
+          full_name: true,
+          role: true,
+        },
       });
 
       if (!admin) {
-        await bot.answerCallbackQuery(query.id, {
+        await answerCallbackQueryWithRetry(bot, query.id, {
           text: '❌ Du hast keine Berechtigung für diese Aktion',
           show_alert: true,
         });
@@ -230,17 +389,100 @@ const setupBotHandlers = () => {
         await handleViewSupport(query, admin);
       }
 
-      await bot.answerCallbackQuery(query.id);
+      await answerCallbackQueryWithRetry(bot, query.id);
     } catch (error) {
-      console.error('Error handling callback query:', error);
-      await bot.answerCallbackQuery(query.id, {
+      botLogger.error('Error handling callback query:', error);
+      await answerCallbackQueryWithRetry(bot, query.id, {
         text: '❌ Fehler beim Verarbeiten',
         show_alert: true,
       });
     }
   });
+
+  // Handle text messages (for admin rejection reasons and /cancel command)
+  bot.on('message', async (msg) => {
+    // Skip if it's a photo, command, or callback query
+    if (msg.photo || msg.text?.startsWith('/') || !msg.text) {
+      return;
+    }
+
+    // Validate text message
+    if (!validateTextMessage(msg)) {
+      return;
+    }
+
+    const chatId = msg.chat.id;
+    const telegramId = msg.from.id.toString();
+    const text = msg.text.trim();
+
+    try {
+      // Check if user is admin
+      const admin = await prisma.user.findFirst({
+        where: {
+          telegram_id: BigInt(telegramId),
+          role: { in: ['admin', 'staff'] },
+        },
+        select: {
+          id: true,
+          telegram_id: true,
+          role: true,
+        },
+      });
+
+      if (!admin) {
+        // Not an admin, ignore text messages
+        return;
+      }
+
+      // Handle /cancel command
+      if (text === '/cancel') {
+        const adminId = admin.id;
+        const state = adminRejectionStates.get(adminId);
+        
+        if (state) {
+          adminRejectionStates.delete(adminId);
+          await sendMessageWithRetry(
+            bot,
+            chatId,
+            '✅ *Abgebrochen*\n\nDer Ablehnungsprozess wurde abgebrochen.',
+            { parse_mode: 'Markdown' }
+          );
+          botLogger.info(`Admin ${adminId} cancelled rejection process`);
+        } else {
+          await sendMessageWithRetry(
+            bot,
+            chatId,
+            'ℹ️ Es gibt keinen aktiven Ablehnungsprozess zum Abbrechen.',
+            { parse_mode: 'Markdown' }
+          );
+        }
+        return;
+      }
+
+      // Try to process as rejection reason
+      const processed = await processRejectionReason(msg, admin);
+      if (!processed) {
+        // Not a rejection reason, ignore
+        return;
+      }
+    } catch (error) {
+      botLogger.error('Error handling text message:', error);
+      try {
+        await sendMessageWithRetry(
+          bot,
+          chatId,
+          '❌ Es ist ein Fehler aufgetreten. Bitte versuche es erneut.',
+          { parse_mode: 'Markdown' }
+        );
+      } catch (sendError) {
+        botLogger.error('Error sending error message:', sendError);
+      }
+    }
+  });
+
+  botLogger.info('Text message handler registered');
   
-  console.log('✅ All bot handlers registered');
+  botLogger.info('✅ All bot handlers registered');
 };
 
 // Send welcome message with hand gesture challenge
@@ -283,7 +525,7 @@ Wir prüfen deine Verifizierung schnellstmöglich.
 
 *Sende jetzt dein Foto mit dem Handzeichen ${handGesture}* 📸`;
 
-  await bot.sendMessage(chatId, message, {
+  await sendMessageWithRetry(bot, chatId, message, {
     parse_mode: 'Markdown',
   });
 };
@@ -306,7 +548,7 @@ ${hasPhoto
   : 'Bitte sende noch dein Foto mit dem Handzeichen ' + handGesture + ' 📸'
 }`;
 
-  await bot.sendMessage(chatId, message, {
+  await sendMessageWithRetry(bot, chatId, message, {
     parse_mode: 'Markdown',
   });
 };
@@ -326,7 +568,7 @@ Du bist bereits verifiziert und kannst jetzt den vollständigen Shop nutzen! �
 
 *Was möchtest du tun?*`;
 
-  await bot.sendMessage(chatId, message, {
+  await sendMessageWithRetry(bot, chatId, message, {
     parse_mode: 'Markdown',
     reply_markup: {
       inline_keyboard: [
@@ -364,14 +606,18 @@ Du bist bereits verifiziert und kannst jetzt den vollständigen Shop nutzen! �
 // Notify admins of new verification request
 const notifyAdminsOfNewVerification = async (user, verificationRequest) => {
   try {
-    const admins = await prisma.user.findMany({
-      where: {
-        role: { in: ['admin', 'staff'] },
-        telegram_id: { not: null },
-      },
-    });
+    // Use cached admin list for better performance
+    const admins = await getAdminList();
 
-    const message = `🔔 *Neue Verifizierungsanfrage*
+    if (admins.length === 0) {
+      botLogger.warn('No admins found to notify about verification request');
+      return;
+    }
+
+    const webAppUrl = process.env.WEBAPP_URL || 'http://localhost:3000';
+    const adminPanelUrl = `${webAppUrl}/AdminVerifications`;
+
+    let message = `🔔 *Neue Verifizierungsanfrage*
 
 👤 *User:*
 • Name: ${user.full_name || user.username || 'Unbekannt'}
@@ -385,33 +631,67 @@ const notifyAdminsOfNewVerification = async (user, verificationRequest) => {
 
 ${verificationRequest.photo_url ? '📋 Bitte prüfe das Foto:\n• Gesicht klar erkennbar?\n• Handzeichen sichtbar?' : '⏳ Warte auf Foto...'}`;
 
-    for (const admin of admins) {
-      if (admin.telegram_id) {
-        try {
-          await bot.sendMessage(admin.telegram_id.toString(), message, {
-            parse_mode: 'Markdown',
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: '✅ Approve',
-                    callback_data: `approve_${verificationRequest.id}`,
-                  },
-                  {
-                    text: '❌ Reject',
-                    callback_data: `reject_${verificationRequest.id}`,
-                  },
-                ],
-              ],
-            },
-          });
-        } catch (error) {
-          console.error(`Error notifying admin ${admin.id}:`, error);
-        }
-      }
+    // Build inline keyboard
+    const inlineKeyboard = [
+      [
+        {
+          text: '✅ Approve',
+          callback_data: `approve_${verificationRequest.id}`,
+        },
+        {
+          text: '❌ Reject',
+          callback_data: `reject_${verificationRequest.id}`,
+        },
+      ],
+    ];
+
+    // Add photo preview link if photo exists
+    if (verificationRequest.photo_url) {
+      const photoUrl = `${webAppUrl}${verificationRequest.photo_url}`;
+      inlineKeyboard.push([
+        {
+          text: '📸 Foto anzeigen',
+          url: photoUrl,
+        },
+      ]);
     }
+
+    // Add admin panel link
+    inlineKeyboard.push([
+      {
+        text: '📋 Admin Panel',
+        url: adminPanelUrl,
+      },
+    ]);
+
+    // Send notifications to all admins with retry
+    const notificationPromises = admins
+      .filter(admin => admin.telegram_id)
+      .map(async (admin) => {
+        try {
+          await sendMessageWithRetry(
+            bot,
+            admin.telegram_id.toString(),
+            message,
+            {
+              parse_mode: 'Markdown',
+              reply_markup: {
+                inline_keyboard: inlineKeyboard,
+              },
+            }
+          );
+          botLogger.info(`Notification sent to admin ${admin.id}`);
+        } catch (error) {
+          botLogger.error(`Failed to notify admin ${admin.id}:`, error);
+        }
+      });
+
+    // Wait for all notifications (don't fail if some fail)
+    await Promise.allSettled(notificationPromises);
+    
+    botLogger.info(`Sent verification notification to ${admins.length} admin(s)`);
   } catch (error) {
-    console.error('Error notifying admins:', error);
+    botLogger.error('Error notifying admins:', error);
   }
 };
 
@@ -424,7 +704,7 @@ const handleAdminApproval = async (query, verificationId, admin) => {
     });
 
     if (!verificationRequest || verificationRequest.status !== 'pending') {
-      await bot.answerCallbackQuery(query.id, {
+      await answerCallbackQueryWithRetry(bot, query.id, {
         text: '❌ Verifizierung nicht gefunden oder bereits bearbeitet',
         show_alert: true,
       });
@@ -463,7 +743,8 @@ const handleAdminApproval = async (query, verificationId, admin) => {
 
     // Notify user
     if (verificationRequest.user.telegram_id) {
-      await bot.sendMessage(
+      await sendMessageWithRetry(
+        bot,
         verificationRequest.user.telegram_id.toString(),
         `🎉 *Verifizierung erfolgreich!*\n\n` +
         `✅ Deine Verifizierung wurde bestätigt.\n\n` +
@@ -485,20 +766,21 @@ const handleAdminApproval = async (query, verificationId, admin) => {
     }
 
     // Update admin message
-    await bot.editMessageText(
+    await editMessageTextWithRetry(
+      bot,
+      query.message.chat.id,
+      query.message.message_id,
       `✅ *Verifizierung genehmigt*\n\n` +
       `👤 User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n` +
       `✋ Handzeichen: ${verificationRequest.hand_gesture}\n` +
       `👨‍💼 Genehmigt von: ${admin.full_name || admin.username || 'Admin'}\n` +
       `⏰ ${new Date().toLocaleString('de-DE')}`,
       {
-        chat_id: query.message.chat.id,
-        message_id: query.message.message_id,
         parse_mode: 'Markdown',
       }
     );
   } catch (error) {
-    console.error('Error handling admin approval:', error);
+    botLogger.error('Error handling admin approval:', error);
     throw error;
   }
 };
@@ -512,21 +794,31 @@ const handleAdminRejection = async (query, verificationId, admin) => {
     });
 
     if (!verificationRequest || verificationRequest.status !== 'pending') {
-      await bot.answerCallbackQuery(query.id, {
+      await answerCallbackQueryWithRetry(bot, query.id, {
         text: '❌ Verifizierung nicht gefunden oder bereits bearbeitet',
         show_alert: true,
       });
       return;
     }
 
+    // Store admin state for rejection reason
+    const adminId = admin.id;
+    adminRejectionStates.set(adminId, {
+      verificationId,
+      timestamp: Date.now(),
+      chatId: query.message.chat.id,
+      user: verificationRequest.user,
+    });
+
     // Ask admin for rejection reason
-    await bot.answerCallbackQuery(query.id, {
+    await answerCallbackQueryWithRetry(bot, query.id, {
       text: 'Bitte gib einen Ablehnungsgrund ein',
       show_alert: false,
     });
 
     // Send message asking for reason
-    await bot.sendMessage(
+    await sendMessageWithRetry(
+      bot,
       query.message.chat.id,
       `❌ *Verifizierung ablehnen*\n\n` +
       `User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n\n` +
@@ -540,61 +832,83 @@ const handleAdminRejection = async (query, verificationId, admin) => {
         },
       }
     );
-
-    // Store admin state for rejection reason
-    // In production, use a proper state management system
-    bot.once('message', async (msg) => {
-      if (msg.reply_to_message && msg.reply_to_message.text?.includes('Verifizierung ablehnen')) {
-        const rejectionReason = msg.text || 'Kein Grund angegeben';
-
-        // Update verification request
-        await prisma.verificationRequest.update({
-          where: { id: verificationId },
-          data: {
-            status: 'rejected',
-            reviewed_at: new Date(),
-            reviewed_by: admin.id,
-            rejection_reason: rejectionReason,
-          },
-        });
-
-        // Update user
-        await prisma.user.update({
-          where: { id: verificationRequest.user_id },
-          data: {
-            verification_status: 'rejected',
-            rejection_reason: rejectionReason,
-          },
-        });
-
-        // Notify user
-        if (verificationRequest.user.telegram_id) {
-          await bot.sendMessage(
-            verificationRequest.user.telegram_id.toString(),
-            `❌ *Verifizierung abgelehnt*\n\n` +
-            `Deine Verifizierung wurde leider abgelehnt.\n\n` +
-            `*Grund:* ${rejectionReason}\n\n` +
-            `Du kannst es mit /start erneut versuchen.`,
-            {
-              parse_mode: 'Markdown',
-            }
-          );
-        }
-
-        // Confirm to admin
-        await bot.sendMessage(
-          query.message.chat.id,
-          `✅ *Verifizierung abgelehnt*\n\n` +
-          `User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n` +
-          `Grund: ${rejectionReason}`,
-          {
-            parse_mode: 'Markdown',
-          }
-        );
-      }
-    });
   } catch (error) {
-    console.error('Error handling admin rejection:', error);
+    botLogger.error('Error handling admin rejection:', error);
+    throw error;
+  }
+};
+
+// Handle rejection reason message (called from message handler)
+const processRejectionReason = async (msg, admin) => {
+  const adminId = admin.id;
+  const state = adminRejectionStates.get(adminId);
+  
+  if (!state) {
+    return false; // Not a rejection reason message
+  }
+
+  // Check if message is a reply to rejection request
+  if (!msg.reply_to_message || !msg.reply_to_message.text?.includes('Verifizierung ablehnen')) {
+    return false;
+  }
+
+  const rejectionReason = msg.text || 'Kein Grund angegeben';
+  const { verificationId, user } = state;
+
+  try {
+    // Update verification request
+    await prisma.verificationRequest.update({
+      where: { id: verificationId },
+      data: {
+        status: 'rejected',
+        reviewed_at: new Date(),
+        reviewed_by: adminId,
+        rejection_reason: rejectionReason,
+      },
+    });
+
+    // Update user
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verification_status: 'rejected',
+        rejection_reason: rejectionReason,
+      },
+    });
+
+    // Notify user
+    if (user.telegram_id) {
+      await sendMessageWithRetry(
+        bot,
+        user.telegram_id.toString(),
+        `❌ *Verifizierung abgelehnt*\n\n` +
+        `Deine Verifizierung wurde leider abgelehnt.\n\n` +
+        `*Grund:* ${rejectionReason}\n\n` +
+        `Du kannst es mit /start erneut versuchen.`,
+        {
+          parse_mode: 'Markdown',
+        }
+      );
+    }
+
+    // Confirm to admin
+    await sendMessageWithRetry(
+      bot,
+      state.chatId,
+      `✅ *Verifizierung abgelehnt*\n\n` +
+      `User: ${user.full_name || user.username || 'Unbekannt'}\n` +
+      `Grund: ${rejectionReason}`,
+      {
+        parse_mode: 'Markdown',
+      }
+    );
+
+    // Clean up state
+    adminRejectionStates.delete(adminId);
+    return true;
+  } catch (error) {
+    botLogger.error('Error processing rejection reason:', error);
+    adminRejectionStates.delete(adminId);
     throw error;
   }
 };
@@ -611,7 +925,8 @@ const handleViewCart = async (query, user) => {
     });
 
     if (cartItems.length === 0) {
-      await bot.sendMessage(
+      await sendMessageWithRetry(
+        bot,
         query.message.chat.id,
         '🛒 *Dein Warenkorb ist leer*\n\nFüge Produkte hinzu, um zu bestellen!',
         {
@@ -650,7 +965,7 @@ const handleViewCart = async (query, user) => {
       role: user.role,
     });
 
-    await bot.sendMessage(query.message.chat.id, message, {
+    await sendMessageWithRetry(bot, query.message.chat.id, message, {
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [
@@ -670,8 +985,8 @@ const handleViewCart = async (query, user) => {
       },
     });
   } catch (error) {
-    console.error('Error handling view cart:', error);
-    await bot.sendMessage(query.message.chat.id, '❌ Fehler beim Laden des Warenkorbs');
+    botLogger.error('Error handling view cart:', error);
+    await sendMessageWithRetry(bot, query.message.chat.id, '❌ Fehler beim Laden des Warenkorbs');
   }
 };
 
@@ -685,7 +1000,8 @@ const handleViewOrders = async (query, user) => {
     });
 
     if (orders.length === 0) {
-      await bot.sendMessage(
+      await sendMessageWithRetry(
+        bot,
         query.message.chat.id,
         '📦 *Keine Bestellungen*\n\nDu hast noch keine Bestellungen aufgegeben.',
         { parse_mode: 'Markdown' }
@@ -708,7 +1024,7 @@ const handleViewOrders = async (query, user) => {
       role: user.role,
     });
 
-    await bot.sendMessage(query.message.chat.id, message, {
+    await sendMessageWithRetry(bot, query.message.chat.id, message, {
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [
@@ -722,8 +1038,8 @@ const handleViewOrders = async (query, user) => {
       },
     });
   } catch (error) {
-    console.error('Error handling view orders:', error);
-    await bot.sendMessage(query.message.chat.id, '❌ Fehler beim Laden der Bestellungen');
+    botLogger.error('Error handling view orders:', error);
+    await sendMessageWithRetry(bot, query.message.chat.id, '❌ Fehler beim Laden der Bestellungen');
   }
 };
 
@@ -736,7 +1052,8 @@ const handleViewVIP = async (query, user) => {
       role: user.role,
     });
 
-    await bot.sendMessage(
+    await sendMessageWithRetry(
+      bot,
       query.message.chat.id,
       `👑 *VIP Mitgliedschaft*\n\n` +
       `Werde VIP und erhalte exklusive Vorteile!\n\n` +
@@ -759,7 +1076,7 @@ const handleViewVIP = async (query, user) => {
       }
     );
   } catch (error) {
-    console.error('Error handling view VIP:', error);
+    botLogger.error('Error handling view VIP:', error);
   }
 };
 
@@ -772,7 +1089,8 @@ const handleViewSupport = async (query, user) => {
       role: user.role,
     });
 
-    await bot.sendMessage(
+    await sendMessageWithRetry(
+      bot,
       query.message.chat.id,
       `💬 *Support*\n\n` +
       `Wir helfen dir gerne weiter!\n\n` +
@@ -793,7 +1111,7 @@ const handleViewSupport = async (query, user) => {
       }
     );
   } catch (error) {
-    console.error('Error handling view support:', error);
+    botLogger.error('Error handling view support:', error);
   }
 };
 
@@ -816,7 +1134,7 @@ export const sendOrderNotificationViaBot = async (order, user) => {
 
 Vielen Dank für deine Bestellung! 🎉`;
 
-    await bot.sendMessage(user.telegram_id.toString(), message, {
+    await sendMessageWithRetry(bot, user.telegram_id.toString(), message, {
       parse_mode: 'Markdown',
       reply_markup: {
         inline_keyboard: [
@@ -830,6 +1148,6 @@ Vielen Dank für deine Bestellung! 🎉`;
       },
     });
   } catch (error) {
-    console.error('Error sending order notification via bot:', error);
+    botLogger.error('Error sending order notification via bot:', error);
   }
 };

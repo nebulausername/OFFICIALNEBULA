@@ -1,12 +1,9 @@
-import TelegramBot from 'node-telegram-bot-api';
+import { getBot } from './telegram-bot.service.js';
 
-let bot = null;
-
-if (process.env.TELEGRAM_BOT_TOKEN) {
-  bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
-}
-
+// Use centralized bot instance from telegram-bot.service.js
 export const sendTelegramMessage = async (chatId, message, options = {}) => {
+  const bot = getBot();
+  
   if (!bot) {
     console.warn('Telegram bot not configured');
     return { success: false, message: 'Telegram bot not configured' };
