@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -62,10 +62,10 @@ export default function AdminProducts() {
   const loadData = async () => {
     try {
       const [prods, depts, cats, brds] = await Promise.all([
-        base44.entities.Product.list('-created_date'),
-        base44.entities.Department.list('sort_order'),
-        base44.entities.Category.list('sort_order'),
-        base44.entities.Brand.list('sort_order')
+        api.entities.Product.list('-created_date'),
+        api.entities.Department.list('sort_order'),
+        api.entities.Category.list('sort_order'),
+        api.entities.Brand.list('sort_order')
       ]);
       setProducts(prods);
       setDepartments(depts);
@@ -115,10 +115,10 @@ export default function AdminProducts() {
   const handleSave = async () => {
     try {
       if (editingProduct) {
-        await base44.entities.Product.update(editingProduct.id, formData);
+        await api.entities.Product.update(editingProduct.id, formData);
         toast({ title: 'Gespeichert', description: 'Produkt wurde aktualisiert' });
       } else {
-        await base44.entities.Product.create(formData);
+        await api.entities.Product.create(formData);
         toast({ title: 'Erstellt', description: 'Neues Produkt wurde erstellt' });
       }
       setDialogOpen(false);
@@ -132,7 +132,7 @@ export default function AdminProducts() {
   const handleDelete = async (id) => {
     if (!confirm('Wirklich löschen?')) return;
     try {
-      await base44.entities.Product.delete(id);
+      await api.entities.Product.delete(id);
       toast({ title: 'Gelöscht', description: 'Produkt wurde gelöscht' });
       loadData();
     } catch (error) {
@@ -154,7 +154,7 @@ export default function AdminProducts() {
 
   const handleInlineUpdate = async (productId, field, value) => {
     try {
-      await base44.entities.Product.update(productId, { [field]: value });
+      await api.entities.Product.update(productId, { [field]: value });
       setProducts(products.map(p => p.id === productId ? { ...p, [field]: value } : p));
       toast({
         title: '✨ Gespeichert',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,7 @@ export default function StatusChangeDialog({
 
   const loadTemplate = async () => {
     try {
-      const templates = await base44.entities.NotificationTemplate.filter({
+      const templates = await api.entities.NotificationTemplate.filter({
         trigger_status: newStatus,
         is_active: true
       });
@@ -73,14 +73,14 @@ export default function StatusChangeDialog({
     setLoading(true);
     try {
       // Update status
-      await base44.entities.Request.update(request.id, { status: newStatus });
+      await api.entities.Request.update(request.id, { status: newStatus });
 
       // Send notification via email (simulating Telegram)
       if (message.trim()) {
         const finalMessage = replacePlaceholders(message);
         
         try {
-          await base44.integrations.Core.SendEmail({
+          await api.integrations.sendEmail({
             to: request.contact_info?.telegram || 'noreply@nebulasupply.com',
             subject: `📦 Status Update - Bestellung #${request.id.slice(0, 8)}`,
             body: finalMessage

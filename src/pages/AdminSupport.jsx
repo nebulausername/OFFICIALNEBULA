@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Input } from '@/components/ui/input';
@@ -39,7 +39,7 @@ export default function AdminSupport() {
 
   const checkAdmin = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       if (userData.role !== 'admin') {
         navigate(createPageUrl('Home'));
         return;
@@ -52,7 +52,7 @@ export default function AdminSupport() {
 
   const loadTickets = async () => {
     try {
-      const allTickets = await base44.entities.Ticket.list('-last_message_at', 100);
+      const allTickets = await api.entities.Ticket.list('-last_message_at', 100);
       setTickets(allTickets);
 
       // Calculate metrics

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { ArrowLeft, User, Moon, Sun, Mail, Shield, Calendar, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -30,7 +30,7 @@ export default function ProfileSettings() {
 
   const loadUser = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       setUser(userData);
     } catch (error) {
       console.error('Error loading user:', error);
@@ -47,7 +47,7 @@ export default function ProfileSettings() {
   const handleSave = async (newName) => {
     setSaving(true);
     try {
-      await base44.auth.updateMe({ full_name: newName });
+      await api.auth.updateMe({ full_name: newName });
       setUser({ ...user, full_name: newName });
       toast({
         title: '✓ Gespeichert',

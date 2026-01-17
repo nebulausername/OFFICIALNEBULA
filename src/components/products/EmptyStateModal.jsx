@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { X, Upload, CheckCircle2, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,7 @@ export default function EmptyStateModal({ isOpen, onClose, searchQuery }) {
     if (!file) return;
 
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.integrations.uploadFile({ file });
       setUploadedImage(file_url);
       toast({
         title: 'Bild hochgeladen',
@@ -65,7 +65,7 @@ export default function EmptyStateModal({ isOpen, onClose, searchQuery }) {
     setIsSubmitting(true);
 
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
       const requestData = {
         user_id: user.id,
@@ -80,10 +80,10 @@ export default function EmptyStateModal({ isOpen, onClose, searchQuery }) {
         }
       };
 
-      await base44.entities.Request.create(requestData);
+      await api.entities.Request.create(requestData);
 
       try {
-        await base44.integrations.Core.SendEmail({
+        await api.integrations.sendEmail({
           to: user.email,
           subject: 'Wir suchen dein Produkt für dich',
           body: `Hallo ${user.full_name},\n\nwir haben deine Suchanfrage erhalten und suchen jetzt nach dem perfekten Produkt für dich.\n\nDeine Suche: ${formData.product}\n\nWir melden uns schnellstmöglich!\n\nViele Grüße,\nDein Nebula Supply Team`

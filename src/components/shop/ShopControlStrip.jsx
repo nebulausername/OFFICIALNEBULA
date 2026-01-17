@@ -14,6 +14,9 @@ export default function ShopControlStrip({
   categories = [],
   selectedCategory,
   onCategorySelect,
+  departments = [],
+  selectedDepartment = 'all',
+  onDepartmentSelect,
   sortBy,
   onSortChange,
   productCount = 0
@@ -122,6 +125,41 @@ export default function ShopControlStrip({
           </Button>
         </div>
       </div>
+
+      {/* Department Chips - Premium */}
+      {departments.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onDepartmentSelect?.('all')}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0"
+            style={{
+              background: selectedDepartment === 'all' ? 'rgba(214, 178, 94, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+              border: selectedDepartment === 'all' ? '1px solid rgba(214, 178, 94, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+              color: selectedDepartment === 'all' ? '#F2D27C' : 'rgba(255, 255, 255, 0.85)'
+            }}
+          >
+            Alle
+          </motion.button>
+          {departments.map((dept) => (
+            <motion.button
+              key={dept.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onDepartmentSelect?.(dept.id)}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0"
+              style={{
+                background: selectedDepartment === dept.id ? 'rgba(214, 178, 94, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+                border: selectedDepartment === dept.id ? '1px solid rgba(214, 178, 94, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: selectedDepartment === dept.id ? '#F2D27C' : 'rgba(255, 255, 255, 0.85)'
+              }}
+            >
+              {dept.name}
+            </motion.button>
+          ))}
+        </div>
+      )}
 
       {/* Quick Category Chips */}
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">

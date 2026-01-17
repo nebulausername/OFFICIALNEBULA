@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,10 +48,10 @@ export default function Support() {
 
   const loadData = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       setUser(userData);
 
-      const userTickets = await base44.entities.Ticket.filter(
+      const userTickets = await api.entities.Ticket.filter(
         { user_id: userData.id },
         '-last_message_at'
       );

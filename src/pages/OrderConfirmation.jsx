@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -54,7 +54,7 @@ export default function OrderConfirmation() {
 
   const loadOrder = async (orderId) => {
     try {
-      const requests = await base44.entities.Request.filter({ id: orderId });
+      const requests = await api.entities.Request.filter({ id: orderId });
       if (requests.length > 0) {
         setOrder(requests[0]);
       }

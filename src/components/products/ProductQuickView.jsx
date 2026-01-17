@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Heart, ShoppingCart, ExternalLink, MapPin, Clock, Truck, Plus, Minus, Check, AlertCircle } from 'lucide-react';
@@ -49,7 +49,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
     try {
       // Load images if no colors defined
       if (!product.colors || product.colors.length === 0) {
-        const productImages = await base44.entities.ProductImage.filter({ product_id: product.id });
+        const productImages = await api.entities.ProductImage.filter({ product_id: product.id });
         const sortedImages = productImages.sort((a, b) => a.sort_order - b.sort_order);
         
         if (sortedImages.length > 0) {
@@ -60,8 +60,8 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
       }
 
       // Check wishlist
-      const user = await base44.auth.me();
-      const wishlistItems = await base44.entities.WishlistItem.filter({
+      const user = await api.auth.me();
+      const wishlistItems = await api.entities.WishlistItem.filter({
         user_id: user.id,
         product_id: product.id
       });
@@ -121,18 +121,18 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
     setIsWishlisted(!isWishlisted);
 
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
       if (previousState) {
-        const items = await base44.entities.WishlistItem.filter({
+        const items = await api.entities.WishlistItem.filter({
           user_id: user.id,
           product_id: product.id
         });
         if (items.length > 0) {
-          await base44.entities.WishlistItem.delete(items[0].id);
+          await api.entities.WishlistItem.delete(items[0].id);
         }
       } else {
-        await base44.entities.WishlistItem.create({
+        await api.entities.WishlistItem.create({
           user_id: user.id,
           product_id: product.id
         });

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 
 // Supported locales configuration
 export const SUPPORTED_LOCALES = {
@@ -1064,12 +1064,13 @@ export function I18nProvider({ children }) {
     // Try to get user preference
     const loadUserPreference = async () => {
       try {
-        const user = await base44.auth.me();
+        const user = await api.auth.me();
         if (user?.language && SUPPORTED_LOCALES[user.language]) {
           setLocaleState(user.language);
         }
       } catch (e) {
-        // Not logged in
+        // Not logged in or network error - use detected locale
+        // Silently fail to prevent console errors
       }
     };
     loadUserPreference();
@@ -1095,7 +1096,7 @@ export function I18nProvider({ children }) {
     
     // Save to user profile if logged in
     try {
-      await base44.auth.updateMe({ language: newLocale });
+      await api.auth.updateMe({ language: newLocale });
     } catch (e) {
       // Not logged in or error
     }

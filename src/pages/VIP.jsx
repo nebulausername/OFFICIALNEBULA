@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Crown, Star, Users, ShoppingBag, Sparkles, CheckCircle2, ArrowRight, Gift, Zap, MessageCircle, Send, CreditCard, Calendar } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -27,7 +27,7 @@ export default function VIP() {
 
   const loadUserData = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       setUser(userData);
       
       // TODO: Load actual invite stats from your database
@@ -140,7 +140,7 @@ export default function VIP() {
 
     try {
       // Create a special VIP cart item
-      await base44.entities.StarCartItem.create({
+      await api.entities.StarCartItem.create({
         user_id: user.id,
         product_id: 'vip-plan', // Special identifier
         quantity: 1,

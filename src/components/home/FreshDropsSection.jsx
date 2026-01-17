@@ -312,9 +312,20 @@ export default function FreshDropsSection({ products = [], loading = false, onQu
               ))
             ) : products.length > 0 ? (
               products.slice(0, 6).map((product, index) => (
-                <div key={product.id} className="snap-start">
+                <motion.div 
+                  key={product.id} 
+                  className="snap-start"
+                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ 
+                    delay: index * 0.1,
+                    duration: 0.5,
+                    ease: "easeOut"
+                  }}
+                >
                   <DropProductCard product={product} onQuickView={onQuickView} />
-                </div>
+                </motion.div>
               ))
             ) : (
               <div className="w-full py-12 text-center">

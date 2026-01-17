@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Heart, ShoppingCart, Menu, User, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import MainDrawer from '../drawer/MainDrawer';
@@ -34,10 +34,10 @@ export default function PremiumHeader() {
 
   const loadUserData = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       setUser(userData);
       
-      const cartItems = await base44.entities.StarCartItem.filter({ user_id: userData.id });
+      const cartItems = await api.entities.StarCartItem.filter({ user_id: userData.id });
       setCartCount(cartItems.length);
     } catch (error) {
       // User not logged in

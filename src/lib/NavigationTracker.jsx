@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { base44 } from '@/api/base44Client';
 import { pagesConfig } from '@/pages.config';
 
 export default function NavigationTracker() {
@@ -10,7 +9,7 @@ export default function NavigationTracker() {
     const { Pages, mainPage } = pagesConfig;
     const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 
-    // Log user activity when navigating to a page
+    // Track user navigation (can be extended with analytics later)
     useEffect(() => {
         // Extract page name from pathname
         const pathname = location.pathname;
@@ -31,10 +30,10 @@ export default function NavigationTracker() {
             pageName = matchedKey || null;
         }
 
+        // Log navigation (can be extended with analytics service)
         if (isAuthenticated && pageName) {
-            base44.appLogs.logUserInApp(pageName).catch(() => {
-                // Silently fail - logging shouldn't break the app
-            });
+            // Navigation tracking can be added here if needed
+            // For now, we just track silently
         }
     }, [location, isAuthenticated, Pages, mainPageKey]);
 

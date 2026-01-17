@@ -387,8 +387,8 @@ export default function MainDrawer({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      const { base44 } = require('@/api/base44Client');
-                      base44.auth.logout();
+                      const { api } = require('@/api');
+                      api.auth.logout();
                     }}
                     className="w-full flex items-center justify-center gap-3 min-h-[56px] px-5 rounded-xl transition-all group"
                     style={{

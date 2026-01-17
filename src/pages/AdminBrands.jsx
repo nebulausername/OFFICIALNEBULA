@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,7 +33,7 @@ export default function AdminBrands() {
 
   const loadData = async () => {
     try {
-      const brds = await base44.entities.Brand.list('sort_order');
+      const brds = await api.entities.Brand.list('sort_order');
       setBrands(brds);
     } catch (error) {
       console.error('Error loading brands:', error);
@@ -59,10 +59,10 @@ export default function AdminBrands() {
   const handleSave = async () => {
     try {
       if (editing) {
-        await base44.entities.Brand.update(editing.id, formData);
+        await api.entities.Brand.update(editing.id, formData);
         toast({ title: 'Gespeichert', description: 'Marke aktualisiert' });
       } else {
-        await base44.entities.Brand.create(formData);
+        await api.entities.Brand.create(formData);
         toast({ title: 'Erstellt', description: 'Neue Marke erstellt' });
       }
       setDialogOpen(false);
@@ -76,7 +76,7 @@ export default function AdminBrands() {
   const handleDelete = async (id) => {
     if (!confirm('Wirklich löschen?')) return;
     try {
-      await base44.entities.Brand.delete(id);
+      await api.entities.Brand.delete(id);
       toast({ title: 'Gelöscht' });
       loadData();
     } catch (error) {

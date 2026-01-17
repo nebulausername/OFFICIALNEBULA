@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { 
   Package, 
   ShoppingBag, 
@@ -15,11 +15,13 @@ import {
   Mail,
   Users,
   Crown,
-  TrendingUp
+  TrendingUp,
+  Shield
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import QuickActions from '../components/admin/QuickActions';
 
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -41,7 +43,7 @@ export default function Admin() {
 
   const checkAdmin = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       if (userData.role !== 'admin') {
         window.location.href = createPageUrl('Home');
         return;
@@ -55,12 +57,12 @@ export default function Admin() {
   const loadStats = async () => {
     try {
       const [products, requests, categories, brands, tickets, users] = await Promise.all([
-        base44.entities.Product.list(),
-        base44.entities.Request.list('-created_date', 100),
-        base44.entities.Category.list(),
-        base44.entities.Brand.list(),
-        base44.entities.Ticket.list(),
-        base44.entities.User.list()
+        api.entities.Product.list(),
+        api.entities.Request.list('-created_date', 100),
+        api.entities.Category.list(),
+        api.entities.Brand.list(),
+        api.entities.Ticket.list(),
+        api.entities.User.list()
       ]);
 
       const vipUsers = users.filter(u => u.is_vip).length;
@@ -108,6 +110,14 @@ export default function Admin() {
 
   const adminSections = [
     {
+      title: 'Analytics',
+      icon: TrendingUp,
+      count: '📊',
+      description: 'Statistiken & Charts',
+      color: 'from-indigo-500 to-purple-500',
+      link: 'AdminAnalytics'
+    },
+    {
       title: 'Produkte',
       icon: Package,
       count: stats.products,
@@ -146,6 +156,14 @@ export default function Admin() {
       description: 'Offene Tickets',
       color: 'from-cyan-500 to-blue-500',
       link: 'AdminSupport'
+    },
+    {
+      title: 'Verifizierungen',
+      icon: Shield,
+      count: '🔐',
+      description: 'User-Verifizierungen',
+      color: 'from-emerald-500 to-teal-500',
+      link: 'AdminVerifications'
     },
     {
       title: 'VIP User',

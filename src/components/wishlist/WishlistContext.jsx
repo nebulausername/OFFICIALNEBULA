@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 
 const WishlistContext = createContext();
 
@@ -14,10 +14,10 @@ export function WishlistProvider({ children }) {
 
   const loadWishlist = async () => {
     try {
-      const currentUser = await base44.auth.me();
+      const currentUser = await api.auth.me();
       setUser(currentUser);
       
-      const items = await base44.entities.WishlistItem.filter({ user_id: currentUser.id });
+      const items = await api.entities.WishlistItem.filter({ user_id: currentUser.id });
       setWishlistIds(new Set(items.map(item => item.product_id)));
       
       // Merge localStorage items if any
@@ -25,7 +25,7 @@ export function WishlistProvider({ children }) {
       if (localItems.length > 0) {
         await Promise.all(
           localItems.map(productId => 
-            base44.entities.WishlistItem.create({ 
+            api.entities.WishlistItem.create({ 
               user_id: currentUser.id, 
               product_id: productId 
             }).catch(() => {})
@@ -33,7 +33,7 @@ export function WishlistProvider({ children }) {
         );
         localStorage.removeItem('nebula_wishlist');
         // Reload after merge
-        const updatedItems = await base44.entities.WishlistItem.filter({ user_id: currentUser.id });
+        const updatedItems = await api.entities.WishlistItem.filter({ user_id: currentUser.id });
         setWishlistIds(new Set(updatedItems.map(item => item.product_id)));
       }
     } catch (error) {
@@ -75,15 +75,15 @@ export function WishlistProvider({ children }) {
       if (user) {
         // Authenticated user
         if (isCurrentlySaved) {
-          const items = await base44.entities.WishlistItem.filter({ 
+          const items = await api.entities.WishlistItem.filter({ 
             user_id: user.id, 
             product_id: productId 
           });
           if (items.length > 0) {
-            await base44.entities.WishlistItem.delete(items[0].id);
+            await api.entities.WishlistItem.delete(items[0].id);
           }
         } else {
-          await base44.entities.WishlistItem.create({ 
+          await api.entities.WishlistItem.create({ 
             user_id: user.id, 
             product_id: productId 
           });

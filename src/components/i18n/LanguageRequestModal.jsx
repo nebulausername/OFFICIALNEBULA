@@ -4,7 +4,7 @@ import { X, Globe, Send, Loader2, Check, Crown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { useI18n } from './I18nProvider';
 import { toast } from 'sonner';
 
@@ -62,7 +62,7 @@ export default function LanguageRequestModal({ isOpen, onClose, suggestedLanguag
 
   const loadUser = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       setUser(userData);
       if (userData?.email) {
         setFormData(prev => ({ ...prev, email: userData.email }));
@@ -81,7 +81,7 @@ export default function LanguageRequestModal({ isOpen, onClose, suggestedLanguag
     setIsSubmitting(true);
     
     try {
-      await base44.entities.LanguageRequest.create({
+      await api.entities.LanguageRequest.create({
         user_id: user?.id || null,
         email: formData.email || null,
         requested_language: formData.language,

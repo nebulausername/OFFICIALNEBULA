@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, FileText, Loader2 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function CreateTicketModal({ isOpen, onClose, onSuccess }) {
@@ -32,7 +32,7 @@ export default function CreateTicketModal({ isOpen, onClose, onSuccess }) {
     const files = Array.from(e.target.files);
     for (const file of files) {
       try {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const { file_url } = await api.integrations.uploadFile({ file });
         setAttachments(prev => [...prev, { url: file_url, name: file.name, type: file.type }]);
       } catch (error) {
         toast({ title: 'Fehler', description: 'Upload fehlgeschlagen', variant: 'destructive' });
@@ -49,10 +49,10 @@ export default function CreateTicketModal({ isOpen, onClose, onSuccess }) {
 
     setLoading(true);
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
       // Check limit
-      const openTickets = await base44.entities.Ticket.filter({
+      const openTickets = await api.entities.Ticket.filter({
         user_id: user.id,
         status: { $in: ['open', 'in_progress'] }
       });
@@ -69,7 +69,7 @@ export default function CreateTicketModal({ isOpen, onClose, onSuccess }) {
       }
 
       // Create ticket
-      const ticket = await base44.entities.Ticket.create({
+      const ticket = await api.entities.Ticket.create({
         user_id: user.id,
         subject: formData.subject,
         category: formData.category,
@@ -81,7 +81,7 @@ export default function CreateTicketModal({ isOpen, onClose, onSuccess }) {
       });
 
       // Create first message
-      await base44.entities.TicketMessage.create({
+      await api.entities.TicketMessage.create({
         ticket_id: ticket.id,
         sender_id: user.id,
         sender_role: 'user',

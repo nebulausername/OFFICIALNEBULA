@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -63,9 +63,9 @@ export default function AdminProductEditor() {
   const loadData = async () => {
     try {
       const [cats, brds, depts] = await Promise.all([
-        base44.entities.Category.list('sort_order'),
-        base44.entities.Brand.list('sort_order'),
-        base44.entities.Department.list('sort_order')
+        api.entities.Category.list('sort_order'),
+        api.entities.Brand.list('sort_order'),
+        api.entities.Department.list('sort_order')
       ]);
       setCategories(cats);
       setBrands(brds);
@@ -73,8 +73,8 @@ export default function AdminProductEditor() {
 
       if (productId) {
         const [prods, images] = await Promise.all([
-          base44.entities.Product.filter({ id: productId }),
-          base44.entities.ProductImage.filter({ product_id: productId })
+          api.entities.Product.filter({ id: productId }),
+          api.entities.ProductImage.filter({ product_id: productId })
         ]);
 
         if (prods.length > 0) {
@@ -118,10 +118,10 @@ export default function AdminProductEditor() {
       };
 
       if (productId) {
-        await base44.entities.Product.update(productId, dataToSave);
+        await api.entities.Product.update(productId, dataToSave);
         toast.success('Produkt gespeichert');
       } else {
-        const created = await base44.entities.Product.create(dataToSave);
+        const created = await api.entities.Product.create(dataToSave);
         toast.success('Produkt erstellt');
         navigate(createPageUrl('AdminProductEditor') + `?id=${created.id}`);
       }
@@ -199,7 +199,7 @@ export default function AdminProductEditor() {
     if (!file) return;
 
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.integrations.uploadFile({ file });
       
       if (colorId) {
         setColors(colors.map(c => c.id === colorId ? {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,8 +47,8 @@ export default function ProductDetail() {
       }
 
       const [productData, productImages] = await Promise.all([
-        base44.entities.Product.filter({ id: productId }),
-        base44.entities.ProductImage.filter({ product_id: productId })
+        api.entities.Product.filter({ id: productId }),
+        api.entities.ProductImage.filter({ product_id: productId })
       ]);
 
       if (productData.length === 0) {
@@ -88,18 +88,18 @@ export default function ProductDetail() {
 
       // Load related data
       if (prod.category_id) {
-        const cats = await base44.entities.Category.filter({ id: prod.category_id });
+        const cats = await api.entities.Category.filter({ id: prod.category_id });
         if (cats.length > 0) setCategory(cats[0]);
       }
 
       if (prod.brand_id) {
-        const brands = await base44.entities.Brand.filter({ id: prod.brand_id });
+        const brands = await api.entities.Brand.filter({ id: prod.brand_id });
         if (brands.length > 0) setBrand(brands[0]);
       }
 
       // Load related products (same category)
       if (prod.category_id) {
-        const related = await base44.entities.Product.filter({ category_id: prod.category_id });
+        const related = await api.entities.Product.filter({ category_id: prod.category_id });
         const filteredRelated = related.filter(rp => rp.id !== prod.id).slice(0, 4);
         setRelatedProducts(filteredRelated);
       }
@@ -117,7 +117,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = async () => {
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
       // Find variant for price
       const variant = product.variants?.find(v => v.color_id === selectedColor?.id && v.size === selectedSize);
@@ -134,7 +134,7 @@ export default function ProductDetail() {
         sku: variant?.sku || product.sku
       };
 
-      await base44.entities.StarCartItem.create({
+      await api.entities.StarCartItem.create({
         user_id: user.id,
         product_id: product.id,
         quantity: quantity,

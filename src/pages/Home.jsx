@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { base44 } from '@/api/base44Client';
-import { Star, Sparkles } from 'lucide-react';
+import { api } from '@/api';
+import { API_BASE_URL } from '@/api/config';
+import { Star, Sparkles, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import ProductQuickView from '../components/products/ProductQuickView';
@@ -10,12 +11,16 @@ import DeliveryBar from '../components/delivery/DeliveryBar';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import CategoryCard from '../components/home/CategoryCard';
 import FreshDropsSection from '../components/home/FreshDropsSection';
+import CategoryProductsSection from '../components/home/CategoryProductsSection';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
   const [products, setProducts] = useState([]);
+  const [departmentProductCounts, setDepartmentProductCounts] = useState({});
+  const [departmentProducts, setDepartmentProducts] = useState({});
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [loadingDeptProducts, setLoadingDeptProducts] = useState({});
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
@@ -24,23 +29,335 @@ export default function Home() {
     loadProducts();
   }, []);
 
+  useEffect(() => {
+    // Load product counts for each department
+    if (departments.length > 0) {
+      loadDepartmentProductCounts();
+      loadDepartmentProducts();
+    }
+  }, [departments]);
+
   const loadDepartments = async () => {
     try {
-      const depts = await base44.entities.Department.list('sort_order');
+      console.log('🏢 Loading departments...');
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartments:start',message:'Loading departments',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      // #endregion
+      
+      const depts = await api.entities.Department.list('sort_order');
+      console.log('✅ Departments loaded:', depts.length);
+      depts.forEach(dept => {
+        console.log(`   - ${dept.name} (ID: ${dept.id}, Slug: ${dept.slug})`);
+      });
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartments:loaded',message:'Departments loaded',data:{count:depts.length,departments:depts.map(d=>({id:d.id,name:d.name,slug:d.slug}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      // #endregion
+      
       setDepartments(depts);
     } catch (error) {
-      console.error('Error loading departments:', error);
+      console.error('❌ Error loading departments:', error);
+      console.error('Error details:', error.message, error.stack);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartments:error',message:'Error loading departments',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      // #endregion
     } finally {
       setLoadingDepts(false);
     }
   };
 
+  // Test-Funktion für API-Debugging
+  const testAPI = async () => {
+    console.group('🧪 API Test Suite');
+    try {
+      // Test 1: Alle Produkte
+      console.log('Test 1: Loading all products...');
+      const allProducts = await api.entities.Product.list('-created_at', 20);
+      console.log(`✅ All products: ${allProducts.length}`, allProducts);
+      
+      // Test 2: Mit Department Filter
+      if (departments.length > 0) {
+        const dept = departments[0];
+        console.log(`Test 2: Loading products for ${dept.name} (ID: ${dept.id})...`);
+        const deptProducts = await api.entities.Product.filter({ department_id: dept.id });
+        console.log(`✅ Products for ${dept.name}: ${deptProducts.length}`, deptProducts);
+      }
+      
+      // Test 3: Direkter Fetch
+      console.log('Test 3: Direct fetch test...');
+      console.log('   API Base URL:', API_BASE_URL);
+      const directFetch = await fetch(`${API_BASE_URL}/products?limit=10`);
+      if (directFetch.ok) {
+        const directData = await directFetch.json();
+        console.log('✅ Direct fetch:', directData);
+      } else {
+        console.error('❌ Direct fetch failed:', directFetch.status, directFetch.statusText);
+      }
+      
+      // Test 4: Alle Departments
+      console.log('Test 4: Loading all departments...');
+      const allDepts = await api.entities.Department.list();
+      console.log(`✅ All departments: ${allDepts.length}`, allDepts);
+      
+    } catch (error) {
+      console.error('❌ API Test failed:', error);
+      console.error('Error details:', error.message, error.stack);
+    }
+    console.groupEnd();
+  };
+
+  // Expose test function to window for manual testing
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.testNebulaAPI = testAPI;
+      console.log('💡 API Test function available: window.testNebulaAPI()');
+    }
+  }, [departments]);
+
+  const loadDepartmentProductCounts = async () => {
+    try {
+      console.log('📊 Loading department product counts...');
+      const counts = {};
+      for (const dept of departments) {
+        try {
+          const deptProducts = await api.entities.Product.filter({ department_id: dept.id });
+          counts[dept.id] = Array.isArray(deptProducts) ? deptProducts.length : 0;
+          console.log(`   ${dept.name}: ${counts[dept.id]} products`);
+        } catch (err) {
+          console.warn(`⚠️ Error loading product count for ${dept.name} (${dept.id}):`, err);
+          counts[dept.id] = 0;
+        }
+      }
+      setDepartmentProductCounts(counts);
+      console.log('✅ Product counts loaded:', counts);
+    } catch (error) {
+      console.error('❌ Error loading department product counts:', error);
+    }
+  };
+
+  const loadDepartmentProducts = async () => {
+    try {
+      console.log('🚀 Starting loadDepartmentProducts...');
+      console.log('📋 Departments to load:', departments.length);
+      departments.forEach(dept => {
+        console.log(`  - ${dept.name} (ID: ${dept.id}, Slug: ${dept.slug})`);
+      });
+
+      const loadingStates = {};
+      const productsByDept = {};
+      
+      // Initialize loading states
+      departments.forEach(dept => {
+        loadingStates[dept.id] = true;
+      });
+      setLoadingDeptProducts(loadingStates);
+
+      // Load products in parallel for all departments
+      await Promise.all(
+        departments.map(async (dept) => {
+          console.group(`🔍 Loading products for ${dept.name}`);
+          
+          // #region agent log
+          fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:dept-start',message:'Starting product load for department',data:{deptId:dept.id,deptName:dept.name,deptSlug:dept.slug},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+          // #endregion
+          
+          try {
+            // Entferne in_stock Filter komplett - lade alle Produkte
+            const queryParams = { department_id: dept.id };
+            console.log('📤 API Request:', {
+              endpoint: '/products',
+              params: queryParams,
+              sort: '-created_at',
+              limit: 8
+            });
+
+            // #region agent log
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:before-api',message:'Before API filter call',data:{deptId:dept.id,queryParams,sort:'-created_at',limit:8},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+            // #endregion
+
+            const prods = await api.entities.Product.filter(
+              queryParams,
+              '-created_at',
+              8
+            );
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:after-api',message:'After API filter call',data:{deptId:dept.id,prodsLength:prods?.length||0,prodsType:typeof prods,isArray:Array.isArray(prods),firstProduct:prods&&prods.length>0?{id:prods[0].id,name:prods[0].name,deptId:prods[0].department_id}:null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            // #endregion
+            
+            console.log('📥 Raw API Response:', prods);
+            console.log('📊 Response type:', typeof prods, Array.isArray(prods) ? 'Array' : 'Not Array');
+            console.log('📊 Response length:', prods?.length || 0);
+            
+            if (prods && prods.length > 0) {
+              console.log('✅ Products loaded:', prods.map(p => ({ id: p.id, name: p.name, dept_id: p.department_id })));
+              
+              // #region agent log
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:products-loaded',message:'Products successfully loaded',data:{deptId:dept.id,productCount:prods.length,productDeptIds:prods.map(p=>p.department_id),expectedDeptId:dept.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+              // #endregion
+            }
+            
+            productsByDept[dept.id] = Array.isArray(prods) ? prods : [];
+            
+            if (productsByDept[dept.id].length === 0) {
+              console.warn(`⚠️ No products found for department: ${dept.name} (ID: ${dept.id})`);
+              console.warn('   Checking if products exist in database...');
+              
+              // #region agent log
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:no-products',message:'No products found, testing all products',data:{deptId:dept.id,deptName:dept.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+              // #endregion
+              
+              // Test: Lade alle Produkte ohne Filter
+              try {
+                const allProds = await api.entities.Product.list('-created_at', 50);
+                console.log(`   Total products in database: ${allProds?.length || 0}`);
+                
+                // #region agent log
+                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:all-products-test',message:'All products test result',data:{totalProducts:allProds?.length||0,allProductDeptIds:allProds?.map(p=>p.department_id)||[],expectedDeptId:dept.id,matchingCount:allProds?.filter(p=>p.department_id===dept.id).length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+                // #endregion
+                
+                if (allProds && allProds.length > 0) {
+                  const matchingProds = allProds.filter(p => p.department_id === dept.id);
+                  console.log(`   Products matching department_id ${dept.id}: ${matchingProds.length}`);
+                  if (matchingProds.length > 0) {
+                    console.log('   Matching products:', matchingProds.map(p => ({ id: p.id, name: p.name, dept_id: p.department_id })));
+                  } else {
+                    // #region agent log
+                    fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:no-matching',message:'No matching products found',data:{deptId:dept.id,allProductDeptIds:allProds.map(p=>p.department_id),uniqueDeptIds:[...new Set(allProds.map(p=>p.department_id))]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+                    // #endregion
+                  }
+                } else {
+                  // #region agent log
+                  fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:no-products-in-db',message:'No products in database at all',data:{deptId:dept.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+                  // #endregion
+                }
+              } catch (testErr) {
+                console.error('   Error testing all products:', testErr);
+                // #region agent log
+                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:test-error',message:'Error testing all products',data:{deptId:dept.id,error:testErr.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+                // #endregion
+              }
+            }
+          } catch (err) {
+            console.error(`❌ Error loading products for ${dept.name}:`, err);
+            console.error('Error details:', err.message);
+            console.error('Error stack:', err.stack);
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:error',message:'Error loading products',data:{deptId:dept.id,error:err.message,status:err.status,stack:err.stack?.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+            // #endregion
+            
+            // Fallback: Versuche ohne Filter
+            try {
+              console.log(`🔄 Retrying without department filter for ${dept.name}...`);
+              const fallbackProds = await api.entities.Product.list('-created_at', 8);
+              console.log(`   Fallback loaded ${fallbackProds?.length || 0} products`);
+              productsByDept[dept.id] = Array.isArray(fallbackProds) ? fallbackProds : [];
+              
+              // #region agent log
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:fallback-success',message:'Fallback load successful',data:{deptId:dept.id,fallbackCount:fallbackProds?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+              // #endregion
+            } catch (fallbackErr) {
+              console.error(`❌ Fallback also failed for ${dept.name}:`, fallbackErr);
+              productsByDept[dept.id] = [];
+              
+              // #region agent log
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:fallback-error',message:'Fallback also failed',data:{deptId:dept.id,error:fallbackErr.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+              // #endregion
+            }
+          } finally {
+            loadingStates[dept.id] = false;
+            
+            // #region agent log
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:dept-end',message:'Department product load completed',data:{deptId:dept.id,finalCount:productsByDept[dept.id]?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            // #endregion
+            
+            console.groupEnd();
+          }
+        })
+      );
+
+      setDepartmentProducts(productsByDept);
+      setLoadingDeptProducts(loadingStates);
+      
+      // Log summary
+      const totalProducts = Object.values(productsByDept).reduce((sum, prods) => sum + (prods?.length || 0), 0);
+      console.log(`✅ Total loaded: ${totalProducts} products across ${departments.length} departments`);
+      
+      // Detailed summary per department
+      Object.keys(productsByDept).forEach(deptId => {
+        const dept = departments.find(d => d.id === deptId);
+        const count = productsByDept[deptId]?.length || 0;
+        console.log(`   ${dept?.name || deptId}: ${count} products`);
+      });
+    } catch (error) {
+      console.error('❌ Critical error loading department products:', error);
+      console.error('Error stack:', error.stack);
+      
+      // Set all loading states to false on error
+      const loadingStates = {};
+      departments.forEach(dept => {
+        loadingStates[dept.id] = false;
+      });
+      setLoadingDeptProducts(loadingStates);
+    }
+  };
+
   const loadProducts = async () => {
     try {
-      const prods = await base44.entities.Product.list('-created_date', 4);
+      setLoadingProducts(true);
+      // Try direct API call first
+      let prods = [];
+      try {
+        const response = await api.get('/products', { sort: '-created_at', limit: 16 });
+        prods = Array.isArray(response) ? response : (response.data || []);
+        console.log('✅ Direct API call successful:', prods.length, 'products');
+      } catch (err) {
+        console.warn('Direct API call failed, trying entities API:', err.message);
+        // Fallback to entities API
+        try {
+          prods = await api.entities.Product.list('-created_at', 16);
+          console.log('✅ Entities API call successful:', prods.length, 'products');
+        } catch (err2) {
+          console.error('Entities API also failed:', err2.message);
+          // Last resort: try without authentication
+          try {
+            const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/products?limit=16&sort=-created_at`);
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json();
+              prods = Array.isArray(fallbackData) ? fallbackData : (fallbackData.data || []);
+              console.log('✅ Fallback API call successful:', prods.length, 'products');
+            } else {
+              console.error('Fallback response not OK:', fallbackResponse.status, fallbackResponse.statusText);
+            }
+          } catch (err3) {
+            console.error('All API calls failed:', err3.message);
+            prods = [];
+          }
+        }
+      }
+      
+      // Ensure we have an array
+      if (!Array.isArray(prods)) {
+        console.warn('Products is not an array:', typeof prods, prods);
+        prods = [];
+      }
+      
       setProducts(prods);
+      console.log(`✅ Total loaded: ${prods.length} products for FreshDrops`);
+      if (prods.length === 0) {
+        console.warn('⚠️ No products found for FreshDrops!');
+        console.warn('   Make sure:');
+        console.warn('   1. Backend is running: cd backend && npm run dev');
+        console.warn('   2. Database is seeded: cd backend && npm run db:seed');
+        console.warn('   3. API URL is correct:', import.meta.env.VITE_API_URL || 'http://localhost:8000/api');
+      }
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('❌ Error loading products:', error);
+      console.error('Error stack:', error.stack);
+      setProducts([]);
     } finally {
       setLoadingProducts(false);
     }
@@ -48,19 +365,19 @@ export default function Home() {
 
   const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
     try {
-      const user = await base44.auth.me();
-      const existing = await base44.entities.StarCartItem.filter({
+      const user = await api.auth.me();
+      const existing = await api.entities.StarCartItem.filter({
         user_id: user.id,
         product_id: product.id
       });
 
       if (existing.length > 0) {
-        await base44.entities.StarCartItem.update(existing[0].id, {
+        await api.entities.StarCartItem.update(existing[0].id, {
           quantity: existing[0].quantity + quantity,
           selected_options: selectedOptions
         });
       } else {
-        await base44.entities.StarCartItem.create({
+        await api.entities.StarCartItem.create({
           user_id: user.id,
           product_id: product.id,
           quantity: quantity,
@@ -452,7 +769,7 @@ export default function Home() {
                   key={dept.id} 
                   department={dept} 
                   index={index}
-                  productCount={0}
+                  productCount={departmentProductCounts[dept.id] || 0}
                 />
               ))
             )}
@@ -484,6 +801,35 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* Category Products Sections */}
+      {departments.map((department, index) => (
+        <motion.div
+          key={department.id}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ 
+            delay: index * 0.2,
+            duration: 0.8,
+            ease: "easeOut"
+          }}
+        >
+          <CategoryProductsSection
+            department={department}
+            products={departmentProducts[department.id] || []}
+            loading={loadingDeptProducts[department.id] || false}
+            onQuickView={(p) => {
+              setQuickViewProduct(p);
+              setIsQuickViewOpen(true);
+            }}
+            onRetry={() => {
+              console.log(`🔄 Retrying load for department: ${department.name}`);
+              loadDepartmentProducts();
+            }}
+          />
+        </motion.div>
+      ))}
 
       {/* Featured Products - Fresh Drops Slider */}
       <FreshDropsSection 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, ChevronLeft, User, Package, Heart, MapPin, CreditCard, 
@@ -10,7 +10,7 @@ import {
 
 export default function ProfileDrawer({ isOpen, onClose, onBack, user }) {
   const handleLogout = () => {
-    base44.auth.logout();
+    api.auth.logout();
   };
 
   const profileItems = [

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -45,7 +45,7 @@ export default function AdminRequests() {
 
   const loadData = async () => {
     try {
-      const reqs = await base44.entities.Request.list('-created_date');
+      const reqs = await api.entities.Request.list('-created_date');
       setRequests(reqs);
 
       // Load items and users
@@ -53,11 +53,11 @@ export default function AdminRequests() {
       const usersData = {};
       
       for (const req of reqs) {
-        const items = await base44.entities.RequestItem.filter({ request_id: req.id });
+        const items = await api.entities.RequestItem.filter({ request_id: req.id });
         itemsData[req.id] = items;
 
         if (!usersData[req.user_id]) {
-          const userList = await base44.entities.User.filter({ id: req.user_id });
+          const userList = await api.entities.User.filter({ id: req.user_id });
           if (userList.length > 0) {
             usersData[req.user_id] = userList[0];
           }

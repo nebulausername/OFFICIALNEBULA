@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,13 +43,13 @@ export default function Checkout() {
 
   const loadCheckoutData = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       setUser(userData);
       
-      const items = await base44.entities.StarCartItem.filter({ user_id: userData.id });
+      const items = await api.entities.StarCartItem.filter({ user_id: userData.id });
       setCartItems(items);
 
-      const plans = await base44.entities.VIPPlan.filter({ is_active: true });
+      const plans = await api.entities.VIPPlan.filter({ is_active: true });
       setVipPlans(plans);
 
       setFormData(prev => ({
@@ -66,7 +66,7 @@ export default function Checkout() {
 
   const getItemDetails = async (item) => {
     if (item.product_id) {
-      const products = await base44.entities.Product.filter({ id: item.product_id });
+      const products = await api.entities.Product.filter({ id: item.product_id });
       return products[0];
     }
     return null;
@@ -88,7 +88,7 @@ export default function Checkout() {
     try {
       const total = await calculateTotal();
       
-      const request = await base44.entities.Request.create({
+      const request = await api.entities.Request.create({
         user_id: user.id,
         total_sum: total,
         status: 'pending',
@@ -109,7 +109,7 @@ export default function Checkout() {
       for (const item of cartItems) {
         const details = await getItemDetails(item);
         if (details) {
-          await base44.entities.RequestItem.create({
+          await api.entities.RequestItem.create({
             request_id: request.id,
             product_id: item.product_id,
             sku_snapshot: details.sku,
@@ -122,7 +122,7 @@ export default function Checkout() {
       }
 
       for (const item of cartItems) {
-        await base44.entities.StarCartItem.delete(item.id);
+        await api.entities.StarCartItem.delete(item.id);
       }
 
       confetti({
@@ -590,7 +590,7 @@ function CartItemDisplay({ item, compact = false }) {
 
   const loadItemDetails = async () => {
     if (item.product_id) {
-      const products = await base44.entities.Product.filter({ id: item.product_id });
+      const products = await api.entities.Product.filter({ id: item.product_id });
       setProduct(products[0]);
     }
   };

@@ -6,7 +6,7 @@ import {
   Plus, Trash2, Copy, Upload, X, GripVertical, 
   Palette, Ruler, Package, Image as ImageIcon
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 
 const SIZE_TEMPLATES = {
   shoes: ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'],
@@ -109,7 +109,7 @@ export default function ProductVariantEditor({
   const uploadColorImage = async (colorId, file) => {
     setUploading({ ...uploading, [colorId]: true });
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.integrations.uploadFile({ file });
       setColors(colors.map(c => 
         c.id === colorId 
           ? { ...c, images: [...(c.images || []), file_url] }

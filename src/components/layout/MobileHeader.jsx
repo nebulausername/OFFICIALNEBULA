@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { Menu, ShoppingBag, Globe, Star, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import SideDrawer from './SideDrawer';
 
 export default function MobileHeader({ theme, toggleTheme }) {
@@ -17,8 +17,8 @@ export default function MobileHeader({ theme, toggleTheme }) {
 
   const loadCartCount = async () => {
     try {
-      const userData = await base44.auth.me();
-      const items = await base44.entities.StarCartItem.filter({ user_id: userData.id });
+      const userData = await api.auth.me();
+      const items = await api.entities.StarCartItem.filter({ user_id: userData.id });
       setCartCount(items.length);
     } catch (error) {
       setCartCount(0);

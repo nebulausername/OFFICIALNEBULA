@@ -4,7 +4,7 @@ import { Send, Paperclip, ArrowLeft, CheckCircle, XCircle, User, Shield, Loader2
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { de, enUS, sk, ar } from 'date-fns/locale';
@@ -42,7 +42,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
   const loadMessages = async () => {
     setLoading(true);
     try {
-      const msgs = await base44.entities.TicketMessage.filter({ ticket_id: ticket.id }, 'created_date');
+      const msgs = await api.entities.TicketMessage.filter({ ticket_id: ticket.id }, 'created_date');
       setMessages(msgs);
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -53,7 +53,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
 
   const markAsRead = async () => {
     if (ticket.unread_by_user) {
-      await base44.entities.Ticket.update(ticket.id, { unread_by_user: false });
+      await api.entities.Ticket.update(ticket.id, { unread_by_user: false });
     }
   };
 
@@ -78,7 +78,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
     setMessages([...messages, tempMessage]);
 
     try {
-      const msg = await base44.entities.TicketMessage.create({
+      const msg = await api.entities.TicketMessage.create({
         ticket_id: ticket.id,
         sender_id: userId,
         sender_role: 'user',
@@ -88,7 +88,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
       });
 
       // Update ticket
-      await base44.entities.Ticket.update(ticket.id, {
+      await api.entities.Ticket.update(ticket.id, {
         last_message_at: new Date().toISOString(),
         unread_by_admin: true
       });
@@ -106,7 +106,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
 
   const handleCloseTicket = async () => {
     try {
-      await base44.entities.Ticket.update(ticket.id, { status: 'closed' });
+      await api.entities.Ticket.update(ticket.id, { status: 'closed' });
       toast.success(t('support.chat.ticketClosed'));
       onStatusChange?.();
     } catch (error) {
@@ -116,7 +116,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
 
   const handleMarkSolved = async () => {
     try {
-      await base44.entities.Ticket.update(ticket.id, { status: 'solved' });
+      await api.entities.Ticket.update(ticket.id, { status: 'solved' });
       toast.success(t('support.chat.problemSolved'));
       onStatusChange?.();
     } catch (error) {
@@ -126,7 +126,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
 
   const handleReopenTicket = async () => {
     try {
-      await base44.entities.Ticket.update(ticket.id, { status: 'open' });
+      await api.entities.Ticket.update(ticket.id, { status: 'open' });
       toast.success(t('support.chat.ticketReopened'));
       onStatusChange?.();
     } catch (error) {

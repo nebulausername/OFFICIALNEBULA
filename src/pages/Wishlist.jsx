@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { useWishlist } from '../components/wishlist/WishlistContext';
 import { 
   Heart, ShoppingBag, Sparkles, ArrowLeft, Truck, Clock, 
@@ -33,7 +33,7 @@ export default function Wishlist() {
         return;
       }
 
-      const allProducts = await base44.entities.Product.list();
+      const allProducts = await api.entities.Product.list();
       const wishlistProducts = allProducts.filter(p => wishlistIds.includes(p.id));
       setProducts(wishlistProducts);
     } catch (error) {
@@ -46,18 +46,18 @@ export default function Wishlist() {
   const handleAddToCart = async (product) => {
     setAddingToCart(product.id);
     try {
-      const user = await base44.auth.me();
-      const existing = await base44.entities.StarCartItem.filter({
+      const user = await api.auth.me();
+      const existing = await api.entities.StarCartItem.filter({
         user_id: user.id,
         product_id: product.id
       });
 
       if (existing.length > 0) {
-        await base44.entities.StarCartItem.update(existing[0].id, {
+        await api.entities.StarCartItem.update(existing[0].id, {
           quantity: existing[0].quantity + 1
         });
       } else {
-        await base44.entities.StarCartItem.create({
+        await api.entities.StarCartItem.create({
           user_id: user.id,
           product_id: product.id,
           quantity: 1,

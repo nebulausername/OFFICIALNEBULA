@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
@@ -56,10 +56,10 @@ export default function SupportTicketDetail() {
 
   const loadTicket = async () => {
     try {
-      const userData = await base44.auth.me();
+      const userData = await api.auth.me();
       setUser(userData);
 
-      const tickets = await base44.entities.Ticket.filter({ id: ticketId });
+      const tickets = await api.entities.Ticket.filter({ id: ticketId });
       if (tickets.length === 0) {
         toast.error('Ticket nicht gefunden');
         navigate(createPageUrl('Support'));
@@ -77,7 +77,7 @@ export default function SupportTicketDetail() {
       
       // Mark as read by user
       if (ticketData.unread_by_user) {
-        await base44.entities.Ticket.update(ticketId, { unread_by_user: false });
+        await api.entities.Ticket.update(ticketId, { unread_by_user: false });
       }
 
       await loadMessages();
@@ -91,7 +91,7 @@ export default function SupportTicketDetail() {
 
   const loadMessages = async () => {
     try {
-      const msgs = await base44.entities.TicketMessage.filter(
+      const msgs = await api.entities.TicketMessage.filter(
         { ticket_id: ticketId },
         'created_date'
       );
@@ -100,7 +100,7 @@ export default function SupportTicketDetail() {
       // Mark messages as read
       const unreadMsgs = msgs.filter(m => m.sender_role === 'admin' && !m.read_by_user);
       for (const msg of unreadMsgs) {
-        await base44.entities.TicketMessage.update(msg.id, { read_by_user: true });
+        await api.entities.TicketMessage.update(msg.id, { read_by_user: true });
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -129,7 +129,7 @@ export default function SupportTicketDetail() {
     setMessages(prev => [...prev, optimisticMsg]);
 
     try {
-      await base44.entities.TicketMessage.create({
+      await api.entities.TicketMessage.create({
         ticket_id: ticketId,
         sender_id: user.id,
         sender_role: user.role,
@@ -138,7 +138,7 @@ export default function SupportTicketDetail() {
         read_by_admin: false
       });
 
-      await base44.entities.Ticket.update(ticketId, {
+      await api.entities.Ticket.update(ticketId, {
         last_message_at: new Date().toISOString(),
         unread_by_admin: true
       });
@@ -158,7 +158,7 @@ export default function SupportTicketDetail() {
   const handleMarkSolved = async () => {
     try {
       setTicket({ ...ticket, status: 'solved' });
-      await base44.entities.Ticket.update(ticketId, { status: 'solved' });
+      await api.entities.Ticket.update(ticketId, { status: 'solved' });
       toast.success(t('support.chat.problemSolved'));
     } catch (error) {
       setTicket({ ...ticket, status: ticket.status });
@@ -169,7 +169,7 @@ export default function SupportTicketDetail() {
   const handleCloseTicket = async () => {
     try {
       setTicket({ ...ticket, status: 'closed' });
-      await base44.entities.Ticket.update(ticketId, { status: 'closed' });
+      await api.entities.Ticket.update(ticketId, { status: 'closed' });
       toast.success(t('support.chat.ticketClosed'));
     } catch (error) {
       setTicket({ ...ticket, status: ticket.status });
@@ -179,7 +179,7 @@ export default function SupportTicketDetail() {
 
   const handleReopenTicket = async () => {
     try {
-      await base44.entities.Ticket.update(ticketId, { status: 'open' });
+      await api.entities.Ticket.update(ticketId, { status: 'open' });
       setTicket({ ...ticket, status: 'open' });
       toast.success(t('support.chat.ticketReopened'));
     } catch (error) {

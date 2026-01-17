@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,8 +29,8 @@ export default function Cart() {
 
   const loadCart = async () => {
     try {
-      const user = await base44.auth.me();
-      const items = await base44.entities.StarCartItem.filter({ user_id: user.id });
+      const user = await api.auth.me();
+      const items = await api.entities.StarCartItem.filter({ user_id: user.id });
       setCartItems(items);
 
       // Load product details
@@ -38,7 +38,7 @@ export default function Cart() {
       const productData = {};
       
       for (const id of productIds) {
-        const prods = await base44.entities.Product.filter({ id });
+        const prods = await api.entities.Product.filter({ id });
         if (prods.length > 0) {
           productData[id] = prods[0];
         }
@@ -61,7 +61,7 @@ export default function Cart() {
     if (newQuantity < 1) return;
     
     try {
-      await base44.entities.StarCartItem.update(itemId, { quantity: newQuantity });
+      await api.entities.StarCartItem.update(itemId, { quantity: newQuantity });
       setCartItems(cartItems.map(item => 
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       ));
@@ -82,7 +82,7 @@ export default function Cart() {
 
   const removeItem = async (itemId) => {
     try {
-      await base44.entities.StarCartItem.delete(itemId);
+      await api.entities.StarCartItem.delete(itemId);
       setCartItems(cartItems.filter(item => item.id !== itemId));
       toast({
         title: '🗑️ Entfernt',
@@ -156,11 +156,11 @@ export default function Cart() {
 
     setSubmitting(true);
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       const total = calculateTotal();
 
       // Create request
-      const request = await base44.entities.Request.create({
+      const request = await api.entities.Request.create({
         user_id: user.id,
         username: contactInfo.telegram,
         note: note,
@@ -174,7 +174,7 @@ export default function Cart() {
       for (const item of cartItems) {
         const product = products[item.product_id];
         if (product) {
-          await base44.entities.RequestItem.create({
+          await api.entities.RequestItem.create({
             request_id: request.id,
             product_id: product.id,
             sku_snapshot: product.sku,
@@ -211,13 +211,13 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
 ⚡ Nebula Supply
         `.trim();
 
-        await base44.integrations.Core.SendEmail({
+        await api.integrations.sendEmail({
           to: user.email,
           subject: '✨ Bestellung eingegangen - Nebula Supply',
           body: `Hallo ${contactInfo.name},\n\nDeine Bestellung wurde erfolgreich aufgegeben!\n\nWir melden uns schnellstmöglich bei dir.\n\nGesamtsumme: ${total.toFixed(2)}€\n\nViele Grüße,\nDein Nebula Supply Team`
         });
 
-        await base44.integrations.Core.SendEmail({
+        await api.integrations.sendEmail({
           to: 'admin@nebulasupply.com',
           subject: `🌟 Neue Bestellung #${request.id}`,
           body: telegramMessage
@@ -228,7 +228,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
 
       // Clear cart
       for (const item of cartItems) {
-        await base44.entities.StarCartItem.delete(item.id);
+        await api.entities.StarCartItem.delete(item.id);
       }
 
       toast({

@@ -1,0 +1,177 @@
+import api from './client';
+import { API_BASE_URL } from './config';
+
+// Helper to build query params for list/filter operations
+const buildQueryParams = (filters = {}, sort = null, limit = null) => {
+  const params = {};
+  
+  // Add filters
+  Object.keys(filters).forEach(key => {
+    if (filters[key] !== undefined && filters[key] !== null) {
+      params[key] = filters[key];
+    }
+  });
+  
+  // Add sort
+  if (sort) {
+    params.sort = sort;
+  }
+  
+  // Add limit
+  if (limit) {
+    params.limit = limit;
+  }
+  
+  return params;
+};
+
+// Generic entity factory - optimized
+const createEntity = (entityName) => {
+  const basePath = `/${entityName.toLowerCase()}s`;
+  
+  // Normalize response to always return array for list/filter
+  const normalizeArray = (result) => {
+    // Handle Array directly
+    if (Array.isArray(result)) return result;
+    
+    // Handle Object with data property (most common case for paginated responses)
+    if (result?.data !== undefined) {
+      return Array.isArray(result.data) ? result.data : (result.data ? [result.data] : []);
+    }
+    
+    // Handle Object with products property (fallback)
+    if (result?.products && Array.isArray(result.products)) {
+      return result.products;
+    }
+    
+    // Handle empty/null/undefined
+    if (!result || result === null || result === undefined) {
+      return [];
+    }
+    
+    // Last resort: if it's an object but not an array, wrap it
+    // This handles cases where a single object is returned instead of array
+    if (typeof result === 'object' && !Array.isArray(result)) {
+      // Only wrap if it looks like a product/item object (has id or similar)
+      if (result.id || result.sku || result.name) {
+        return [result];
+      }
+    }
+    
+    return [];
+  };
+  
+  return {
+    // List all items with optional sort and limit
+    list: async (sort = null, limit = null) => {
+      const params = buildQueryParams({}, sort, limit);
+      const fullUrl = `${API_BASE_URL}${basePath}?${new URLSearchParams(params).toString()}`;
+      
+      console.log(`🌐 API List Request:`, {
+        entity: entityName,
+        url: fullUrl,
+        sort,
+        limit,
+        params
+      });
+      
+      try {
+        const result = await api.get(basePath, params);
+        console.log(`📥 API List Response (${entityName}):`, {
+          type: typeof result,
+          isArray: Array.isArray(result),
+          hasData: !!result?.data,
+          length: Array.isArray(result) ? result.length : (result?.data?.length || 0),
+          raw: result
+        });
+        
+        // Handle both array and object with data property
+        if (Array.isArray(result)) {
+          return result;
+        }
+        if (result && Array.isArray(result.data)) {
+          return result.data;
+        }
+        return [];
+      } catch (error) {
+        console.error(`❌ API List Error (${entityName}):`, {
+          url: fullUrl,
+          error: error.message,
+          status: error.status,
+          stack: error.stack
+        });
+        throw error;
+      }
+    },
+    
+    // Filter items with optional sort and limit
+    filter: async (filters = {}, sort = null, limit = null) => {
+      const params = buildQueryParams(filters, sort, limit);
+      const fullUrl = `${API_BASE_URL}${basePath}?${new URLSearchParams(params).toString()}`;
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'entities.js:filter:entry',message:'Filter API call started',data:{entity:entityName,filters,sort,limit,params,fullUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+      // #endregion
+      
+      try {
+        const result = await api.get(basePath, params);
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'entities.js:filter:response',message:'API response received',data:{entity:entityName,resultType:typeof result,isArray:Array.isArray(result),hasData:!!result?.data,resultLength:Array.isArray(result)?result.length:(result?.data?.length||0),rawResult:JSON.stringify(result).substring(0,500)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
+        
+        const normalized = normalizeArray(result);
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'entities.js:filter:normalized',message:'Response normalized',data:{entity:entityName,normalizedLength:normalized.length,normalizedSample:normalized.length>0?normalized[0]:null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H3'})}).catch(()=>{});
+        // #endregion
+        
+        return normalized;
+      } catch (error) {
+        // #region agent log
+        fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'entities.js:filter:error',message:'API filter error',data:{entity:entityName,error:error.message,status:error.status,url:fullUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+        // #endregion
+        throw error;
+      }
+    },
+    
+    // Get single item by ID
+    get: async (id) => {
+      return await api.get(`${basePath}/${id}`);
+    },
+    
+    // Create new item
+    create: async (data) => {
+      return await api.post(basePath, data);
+    },
+    
+    // Update item
+    update: async (id, data) => {
+      return await api.patch(`${basePath}/${id}`, data);
+    },
+    
+    // Delete item
+    delete: async (id) => {
+      return await api.delete(`${basePath}/${id}`);
+    },
+  };
+};
+
+// Create entity instances for all entities used in the app
+export const entities = {
+  Product: createEntity('product'),
+  Category: createEntity('category'),
+  Brand: createEntity('brand'),
+  Department: createEntity('department'),
+  User: createEntity('user'),
+  StarCartItem: createEntity('cart-item'),
+  Request: createEntity('request'),
+  RequestItem: createEntity('request-item'),
+  Ticket: createEntity('ticket'),
+  TicketMessage: createEntity('ticket-message'),
+  VIPPlan: createEntity('vip-plan'),
+  NotificationTemplate: createEntity('notification-template'),
+};
+
+export default entities;
+

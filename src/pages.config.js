@@ -1,4 +1,7 @@
 import Admin from './pages/Admin';
+import AdminAnalytics from './pages/AdminAnalytics';
+import AdminUsers from './pages/AdminUsers';
+import AdminOrders from './pages/AdminOrders';
 import AdminBrands from './pages/AdminBrands';
 import AdminCategories from './pages/AdminCategories';
 import AdminNotificationTemplates from './pages/AdminNotificationTemplates';
@@ -6,6 +9,7 @@ import AdminProductEditor from './pages/AdminProductEditor';
 import AdminProducts from './pages/AdminProducts';
 import AdminRequests from './pages/AdminRequests';
 import AdminSupport from './pages/AdminSupport';
+import AdminVerifications from './pages/AdminVerifications';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import FAQ from './pages/FAQ';
@@ -21,11 +25,15 @@ import Support from './pages/Support';
 import SupportTicketDetail from './pages/SupportTicketDetail';
 import VIP from './pages/VIP';
 import Wishlist from './pages/Wishlist';
+import Login from './pages/Login';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Admin": Admin,
+    "AdminAnalytics": AdminAnalytics,
+    "AdminUsers": AdminUsers,
+    "AdminOrders": AdminOrders,
     "AdminBrands": AdminBrands,
     "AdminCategories": AdminCategories,
     "AdminNotificationTemplates": AdminNotificationTemplates,
@@ -33,6 +41,7 @@ export const PAGES = {
     "AdminProducts": AdminProducts,
     "AdminRequests": AdminRequests,
     "AdminSupport": AdminSupport,
+    "AdminVerifications": AdminVerifications,
     "Cart": Cart,
     "Checkout": Checkout,
     "FAQ": FAQ,
@@ -48,6 +57,7 @@ export const PAGES = {
     "SupportTicketDetail": SupportTicketDetail,
     "VIP": VIP,
     "Wishlist": Wishlist,
+    "Login": Login,
 }
 
 export const pagesConfig = {

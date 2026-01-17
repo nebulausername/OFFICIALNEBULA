@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, Upload, CheckCircle2, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import {
   Dialog,
   DialogContent,
@@ -54,7 +54,7 @@ export default function ProductRequestModal({ product, isOpen, onClose }) {
     if (!file) return;
 
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const { file_url } = await api.integrations.uploadFile({ file });
       setUploadedImage(file_url);
       toast({
         title: 'Bild hochgeladen',
@@ -74,7 +74,7 @@ export default function ProductRequestModal({ product, isOpen, onClose }) {
     setIsSubmitting(true);
 
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
       // Create request with all data
       const requestData = {
@@ -90,11 +90,11 @@ export default function ProductRequestModal({ product, isOpen, onClose }) {
         }
       };
 
-      await base44.entities.Request.create(requestData);
+      await api.entities.Request.create(requestData);
 
       // Send email notification
       try {
-        await base44.integrations.Core.SendEmail({
+        await api.integrations.sendEmail({
           to: user.email,
           subject: 'Deine Produktanfrage wurde erhalten',
           body: `Hallo ${user.full_name},\n\nwir haben deine Anfrage erhalten und werden uns schnellstmöglich bei dir melden.\n\nDetails:\n${formData.productName} (${formData.productId})\n\nViele Grüße,\nDein Nebula Supply Team`

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,8 +44,8 @@ export default function AdminCategories() {
   const loadData = async () => {
     try {
       const [depts, cats] = await Promise.all([
-        base44.entities.Department.list('sort_order'),
-        base44.entities.Category.list('sort_order')
+        api.entities.Department.list('sort_order'),
+        api.entities.Category.list('sort_order')
       ]);
       setDepartments(depts);
       setCategories(cats);
@@ -76,10 +76,10 @@ export default function AdminCategories() {
     try {
       const entity = dialogType === 'department' ? 'Department' : 'Category';
       if (editing) {
-        await base44.entities[entity].update(editing.id, formData);
+        await api.entities[entity].update(editing.id, formData);
         toast({ title: 'Gespeichert', description: `${dialogType === 'department' ? 'Department' : 'Kategorie'} aktualisiert` });
       } else {
-        await base44.entities[entity].create(formData);
+        await api.entities[entity].create(formData);
         toast({ title: 'Erstellt', description: `${dialogType === 'department' ? 'Department' : 'Kategorie'} erstellt` });
       }
       setDialogOpen(false);
@@ -94,7 +94,7 @@ export default function AdminCategories() {
     if (!confirm('Wirklich löschen?')) return;
     try {
       const entity = type === 'department' ? 'Department' : 'Category';
-      await base44.entities[entity].delete(id);
+      await api.entities[entity].delete(id);
       toast({ title: 'Gelöscht' });
       loadData();
     } catch (error) {

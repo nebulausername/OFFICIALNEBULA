@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import PremiumProductCard from '../components/products/PremiumProductCard';
@@ -19,6 +19,7 @@ export default function Products() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
@@ -40,27 +41,50 @@ export default function Products() {
     const urlParams = new URLSearchParams(window.location.search);
     const searchParam = urlParams.get('search');
     const categoryParam = urlParams.get('category');
+    const departmentParam = urlParams.get('department');
     
     if (searchParam) setSearchQuery(searchParam);
     if (categoryParam) setSelectedCategory(categoryParam);
+    if (departmentParam) setSelectedDepartment(departmentParam);
   }, []);
 
   const [departments, setDepartments] = useState([]);
 
   const loadData = async () => {
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Products.jsx:loadData:start',message:'Loading all shop data',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
+      
       const [prods, cats, brds, depts] = await Promise.all([
-        base44.entities.Product.list('-created_date'),
-        base44.entities.Category.list('sort_order'),
-        base44.entities.Brand.list('sort_order'),
-        base44.entities.Department.list('sort_order')
+        api.entities.Product.list('-created_at'), // Fixed: was '-created_date', should be '-created_at'
+        api.entities.Category.list('sort_order'),
+        api.entities.Brand.list('sort_order'),
+        api.entities.Department.list('sort_order')
       ]);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Products.jsx:loadData:loaded',message:'Shop data loaded',data:{productsCount:prods?.length||0,categoriesCount:cats?.length||0,brandsCount:brds?.length||0,departmentsCount:depts?.length||0,productDeptIds:prods?.map(p=>p.department_id)||[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
+      
       setProducts(prods);
       setCategories(cats);
       setBrands(brds);
       setDepartments(depts);
     } catch (error) {
       console.error('Error loading data:', error);
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Products.jsx:loadData:error',message:'Error loading shop data',data:{error:error.message,networkError:error.networkError,apiUrl:import.meta.env.VITE_API_URL||'http://localhost:8000/api'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      // #endregion
+      
+      // Show user-friendly error message
+      if (error.networkError || error.message?.includes('Verbindung zum Server')) {
+        console.error('❌ Backend-Server läuft nicht!');
+        console.error('   Bitte starte das Backend mit:');
+        console.error('   cd backend && npm run dev');
+        console.error('   Oder verwende: .\\start-backend.ps1');
+      }
     } finally {
       setLoading(false);
     }
@@ -127,6 +151,9 @@ export default function Products() {
         product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
       
+      // Department filter
+      const matchesDepartment = selectedDepartment === 'all' || product.department_id === selectedDepartment;
+      
       // Quick category filter (from chips)
       const matchesQuickCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
       
@@ -155,7 +182,7 @@ export default function Products() {
       const matchesStock = advancedFilters.inStock === null || 
         product.in_stock === advancedFilters.inStock;
       
-      return matchesSearch && matchesQuickCategory && matchesAdvancedCategories && 
+      return matchesSearch && matchesDepartment && matchesQuickCategory && matchesAdvancedCategories && 
              matchesBrand && matchesPrice && matchesSize && matchesColor && matchesStock;
     }).sort((a, b) => {
       switch (sortBy) {
@@ -164,10 +191,10 @@ export default function Products() {
         case 'name_asc': return (a.name || '').localeCompare(b.name || '');
         case 'name_desc': return (b.name || '').localeCompare(a.name || '');
         case 'popular': return 0;
-        default: return new Date(b.created_date) - new Date(a.created_date);
+        default: return new Date(b.created_at || b.created_date || 0) - new Date(a.created_at || a.created_date || 0);
       }
     });
-  }, [products, searchQuery, selectedCategory, advancedFilters, sortBy]);
+  }, [products, searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
 
   const resetFilters = () => {
     setAdvancedFilters({
@@ -179,14 +206,34 @@ export default function Products() {
       inStock: null
     });
     setSelectedCategory('all');
+    setSelectedDepartment('all');
     setSearchQuery('');
+    
+    // Update URL
+    const url = new URL(window.location);
+    url.searchParams.delete('department');
+    url.searchParams.delete('category');
+    url.searchParams.delete('search');
+    window.history.pushState({}, '', url);
+  };
+  
+  const handleDepartmentSelect = (departmentId) => {
+    setSelectedDepartment(departmentId);
+    // Update URL
+    const url = new URL(window.location);
+    if (departmentId === 'all') {
+      url.searchParams.delete('department');
+    } else {
+      url.searchParams.set('department', departmentId);
+    }
+    window.history.pushState({}, '', url);
   };
 
   const handleAddToCart = async (variantData) => {
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
-      await base44.entities.StarCartItem.create({
+      await api.entities.StarCartItem.create({
         user_id: user.id,
         product_id: variantData.product_id,
         quantity: variantData.quantity,
@@ -282,6 +329,9 @@ export default function Products() {
               categories={categories}
               selectedCategory={selectedCategory}
               onCategorySelect={setSelectedCategory}
+              departments={departments}
+              selectedDepartment={selectedDepartment}
+              onDepartmentSelect={handleDepartmentSelect}
               sortBy={sortBy}
               onSortChange={setSortBy}
               productCount={filteredProducts.length}

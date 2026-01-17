@@ -1,0 +1,297 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(uuid())
+  telegram_id  BigInt?   @unique
+  username      String?
+  full_name     String?
+  email         String?   @unique
+  phone         String?
+  role          String    @default("user") // user, admin, vip
+  is_vip        Boolean   @default(false)
+  vip_expires_at DateTime?
+  verification_status String @default("pending") // pending, verified, rejected
+  verification_hand_gesture String? // Letztes generiertes Handzeichen
+  verification_submitted_at DateTime?
+  verified_at   DateTime?
+  verified_by   String?
+  rejection_reason String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  cart_items    CartItem[]
+  requests      Request[]
+  tickets       Ticket[]
+  ticket_messages TicketMessage[]
+  wishlist_items WishlistItem[]
+  verification_requests VerificationRequest[]
+
+  @@index([telegram_id])
+  @@index([role, is_vip])
+  @@index([verification_status])
+  @@map("users")
+}
+
+model Product {
+  id            String    @id @default(uuid())
+  sku           String    @unique
+  name          String
+  description   String?
+  price         Float
+  currency      String    @default("EUR")
+  department_id String?
+  category_id   String?
+  brand_id      String?
+  in_stock      Boolean   @default(true)
+  cover_image   String?
+  product_type  String?   @default("other")
+  tags          String?   // JSON string: Array of strings
+  colors        String?   // JSON string: Array of color objects
+  sizes         String?   // JSON string: Array of strings
+  variants      String?   // JSON string: Array of variant objects
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  department    Department? @relation(fields: [department_id], references: [id], onDelete: SetNull)
+  category      Category?   @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  brand         Brand?      @relation(fields: [brand_id], references: [id], onDelete: SetNull)
+  
+  cart_items    CartItem[]
+  request_items RequestItem[]
+  product_images ProductImage[]
+  wishlist_items WishlistItem[]
+
+  @@index([sku])
+  @@index([category_id])
+  @@index([brand_id])
+  @@index([department_id])
+  @@index([created_at])
+  @@index([department_id, in_stock, created_at])
+  @@index([category_id, in_stock])
+  @@map("products")
+}
+
+model ProductImage {
+  id          String   @id @default(uuid())
+  product_id  String
+  url         String
+  sort_order  Int      @default(0)
+  color_id    String?
+  created_at  DateTime @default(now())
+
+  product     Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id])
+  @@map("product_images")
+}
+
+model Category {
+  id            String    @id @default(uuid())
+  name          String
+  slug          String    @unique
+  department_id String?
+  sort_order    Int       @default(0)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  department    Department? @relation(fields: [department_id], references: [id], onDelete: SetNull)
+  products      Product[]
+
+  @@index([department_id])
+  @@map("categories")
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  logo_url    String?
+  sort_order  Int       @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  products    Product[]
+
+  @@map("brands")
+}
+
+model Department {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  sort_order  Int       @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  categories  Category[]
+  products    Product[]
+
+  @@map("departments")
+}
+
+model CartItem {
+  id              String   @id @default(uuid())
+  user_id         String
+  product_id      String
+  quantity        Int      @default(1)
+  selected_options String?   // JSON string: Variant options
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product         Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@index([user_id])
+  @@index([product_id])
+  @@map("cart_items")
+}
+
+model Request {
+  id            String    @id @default(uuid())
+  user_id       String
+  status        String    @default("pending") // pending, confirmed, processing, shipped, completed, cancelled
+  total_sum     Float
+  contact_info  String    // JSON string: Contact information object
+  note          String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  request_items RequestItem[]
+
+  @@index([user_id])
+  @@index([status])
+  @@index([created_at])
+  @@index([status, created_at])
+  @@index([user_id, status])
+  @@map("requests")
+}
+
+model RequestItem {
+  id                      String   @id @default(uuid())
+  request_id              String
+  product_id              String?
+  sku_snapshot            String
+  name_snapshot           String
+  price_snapshot          Float
+  quantity_snapshot       Int
+  selected_options_snapshot String?   // JSON string
+  created_at              DateTime @default(now())
+
+  request                 Request  @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  product                 Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+
+  @@index([request_id])
+  @@map("request_items")
+}
+
+model Ticket {
+  id              String    @id @default(uuid())
+  user_id         String
+  subject         String
+  status          String    @default("open") // open, in_progress, solved, closed
+  priority        String    @default("medium") // low, medium, high
+  unread_by_user  Boolean   @default(false)
+  unread_by_admin Boolean   @default(true)
+  last_message_at DateTime  @default(now())
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  ticket_messages TicketMessage[]
+
+  @@index([user_id])
+  @@index([status])
+  @@index([last_message_at])
+  @@index([status, priority, last_message_at])
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id              String   @id @default(uuid())
+  ticket_id       String
+  user_id         String
+  message         String
+  attachments     String?    // JSON string: Array of file URLs
+  read_by_user    Boolean  @default(false)
+  read_by_admin   Boolean  @default(false)
+  created_at      DateTime @default(now())
+
+  ticket          Ticket   @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([ticket_id])
+  @@index([user_id])
+  @@map("ticket_messages")
+}
+
+model VIPPlan {
+  id            String    @id @default(uuid())
+  name          String
+  price         Float
+  duration_days Int
+  benefits      String?     // JSON string: Array of benefit strings
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  @@map("vip_plans")
+}
+
+model NotificationTemplate {
+  id              String    @id @default(uuid())
+  name            String
+  trigger_status  String
+  message_template String
+  is_active       Boolean   @default(true)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  @@map("notification_templates")
+}
+
+model WishlistItem {
+  id         String   @id @default(uuid())
+  user_id   String
+  product_id String
+  created_at DateTime @default(now())
+
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@index([user_id])
+  @@index([product_id])
+  @@map("wishlist_items")
+}
+
+model VerificationRequest {
+  id              String    @id @default(uuid())
+  user_id         String
+  hand_gesture    String    // Generiertes Handzeichen (z.B. "👍", "✌️", "👌")
+  photo_url       String?   // URL zum Verifizierungsfoto
+  status          String    @default("pending") // pending, approved, rejected
+  submitted_at    DateTime  @default(now())
+  reviewed_at     DateTime?
+  reviewed_by     String?
+  rejection_reason String?
+
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([status])
+  @@index([status, submitted_at])
+  @@map("verification_requests")
+}
+

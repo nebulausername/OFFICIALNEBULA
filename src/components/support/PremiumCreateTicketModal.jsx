@@ -8,7 +8,7 @@ import {
   Truck, RotateCcw, Wrench, Globe, HelpCircle, ChevronRight,
   Image as ImageIcon, ArrowLeft
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '../i18n/I18nProvider';
 import { toast } from 'sonner';
@@ -105,7 +105,7 @@ export default function PremiumCreateTicketModal({ isOpen, onClose, onSuccess, p
     
     for (const file of files) {
       try {
-        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        const { file_url } = await api.integrations.uploadFile({ file });
         setAttachments(prev => [...prev, { 
           url: file_url, 
           name: file.name, 
@@ -132,10 +132,10 @@ export default function PremiumCreateTicketModal({ isOpen, onClose, onSuccess, p
 
     setLoading(true);
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
       // Check limit
-      const openTickets = await base44.entities.Ticket.filter({
+      const openTickets = await api.entities.Ticket.filter({
         user_id: user.id,
         status: { $in: ['open', 'in_progress'] }
       });
@@ -160,7 +160,7 @@ export default function PremiumCreateTicketModal({ isOpen, onClose, onSuccess, p
       }
 
       // Create ticket
-      const ticket = await base44.entities.Ticket.create({
+      const ticket = await api.entities.Ticket.create({
         user_id: user.id,
         subject: formData.subject,
         category: formData.category,
@@ -172,7 +172,7 @@ export default function PremiumCreateTicketModal({ isOpen, onClose, onSuccess, p
       });
 
       // Create first message
-      await base44.entities.TicketMessage.create({
+      await api.entities.TicketMessage.create({
         ticket_id: ticket.id,
         sender_id: user.id,
         sender_role: 'user',

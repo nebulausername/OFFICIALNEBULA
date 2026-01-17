@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, Calendar, Euro, MessageSquare, User, ArrowLeft } from 'lucide-react';
@@ -19,14 +19,14 @@ export default function Requests() {
 
   const loadRequests = async () => {
     try {
-      const user = await base44.auth.me();
-      const reqs = await base44.entities.Request.filter({ user_id: user.id }, '-created_date');
+      const user = await api.auth.me();
+      const reqs = await api.entities.Request.filter({ user_id: user.id }, '-created_date');
       setRequests(reqs);
 
       // Load items for each request
       const itemsData = {};
       for (const req of reqs) {
-        const items = await base44.entities.RequestItem.filter({ request_id: req.id });
+        const items = await api.entities.RequestItem.filter({ request_id: req.id });
         itemsData[req.id] = items;
       }
       setRequestItems(itemsData);

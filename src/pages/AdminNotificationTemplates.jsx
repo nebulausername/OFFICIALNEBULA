@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,7 +42,7 @@ export default function AdminNotificationTemplates() {
 
   const loadTemplates = async () => {
     try {
-      const data = await base44.entities.NotificationTemplate.list();
+      const data = await api.entities.NotificationTemplate.list();
       setTemplates(data);
     } catch (error) {
       console.error('Error loading templates:', error);
@@ -83,10 +83,10 @@ export default function AdminNotificationTemplates() {
   const handleSave = async () => {
     try {
       if (editingTemplate) {
-        await base44.entities.NotificationTemplate.update(editingTemplate.id, formData);
+        await api.entities.NotificationTemplate.update(editingTemplate.id, formData);
         toast({ title: '✓ Vorlage aktualisiert' });
       } else {
-        await base44.entities.NotificationTemplate.create(formData);
+        await api.entities.NotificationTemplate.create(formData);
         toast({ title: '✓ Vorlage erstellt' });
       }
       setDialogOpen(false);
@@ -105,7 +105,7 @@ export default function AdminNotificationTemplates() {
     if (!confirm('Vorlage wirklich löschen?')) return;
     
     try {
-      await base44.entities.NotificationTemplate.delete(id);
+      await api.entities.NotificationTemplate.delete(id);
       toast({ title: '🗑️ Vorlage gelöscht' });
       loadTemplates();
     } catch (error) {
@@ -120,7 +120,7 @@ export default function AdminNotificationTemplates() {
 
   const handleToggleActive = async (template) => {
     try {
-      await base44.entities.NotificationTemplate.update(template.id, {
+      await api.entities.NotificationTemplate.update(template.id, {
         is_active: !template.is_active
       });
       loadTemplates();

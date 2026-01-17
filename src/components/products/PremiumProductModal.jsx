@@ -8,7 +8,7 @@ import {
   Check, AlertCircle, Package, Truck, Clock, Star,
   Plus, Minus, Share2
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
 import { useWishlist } from '../wishlist/WishlistContext';
 import { createPageUrl } from '../../utils';
@@ -135,7 +135,7 @@ export default function PremiumProductModal({ product, open, onClose, onAddToCar
     setIsAdding(true);
     
     try {
-      const user = await base44.auth.me();
+      const user = await api.auth.me();
       
       const cartData = {
         user_id: user.id,
@@ -153,7 +153,7 @@ export default function PremiumProductModal({ product, open, onClose, onAddToCar
         }
       };
 
-      await base44.entities.StarCartItem.create(cartData);
+      await api.entities.StarCartItem.create(cartData);
 
       toast({
         title: 'Hinzugefügt! ✓',

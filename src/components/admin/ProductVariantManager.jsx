@@ -10,7 +10,7 @@ import {
   Palette, Ruler, Package, RefreshCw, Save, ImagePlus,
   ChevronDown, ChevronUp, AlertTriangle
 } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
@@ -62,7 +62,7 @@ export default function ProductVariantManager({ product, onUpdate }) {
   const uploadColorImage = async (colorId, file) => {
     setUploading({ ...uploading, [colorId]: true });
     try {
-      const result = await base44.integrations.Core.UploadFile({ file });
+      const result = await api.integrations.uploadFile({ file });
       const color = colors.find(c => c.id === colorId);
       const newImages = [...(color.images || []), result.file_url];
       updateColor(colorId, 'images', newImages);
@@ -203,7 +203,7 @@ export default function ProductVariantManager({ product, onUpdate }) {
   const saveChanges = async () => {
     setSaving(true);
     try {
-      await base44.entities.Product.update(product.id, {
+      await api.entities.Product.update(product.id, {
         colors,
         sizes,
         variants
