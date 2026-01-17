@@ -5,7 +5,7 @@ import { Sparkles, Shield, CheckCircle2, XCircle, Clock, ArrowRight } from 'luci
 import { Button } from '@/components/ui/button';
 import { api } from '@/api';
 import { setToken } from '@/api/config';
-import { useTelegramWebApp, isTelegramWebApp, getTelegramUser } from '../lib/TelegramWebApp';
+import { useTelegramWebApp, isTelegramWebApp, getTelegramUser, hapticFeedback, openTelegramLink } from '../lib/TelegramWebApp';
 import VerificationStatus from '../components/auth/VerificationStatus';
 import { createPageUrl } from '../utils';
 
@@ -76,6 +76,7 @@ export default function Login() {
             setUser(response.user);
             
             if (response.user.verification_status === 'verified') {
+              hapticFeedback('notification', 'success');
               navigate(createPageUrl('Home'));
               return;
             } else {
@@ -117,26 +118,33 @@ export default function Login() {
   };
 
   const handleRetry = () => {
+    hapticFeedback('impact', 'medium');
+    
     if (isTelegramWebApp()) {
       // Open Telegram bot
-      const tg = window.Telegram?.WebApp;
-      if (tg?.openTelegramLink) {
-        tg.openTelegramLink(`https://t.me/${process.env.VITE_BOT_USERNAME || 'your_bot'}`);
-      }
+      openTelegramLink('https://t.me/NebulaOrderBot');
     } else {
       // For non-Telegram, show instructions
-      alert('Bitte öffne den Bot in Telegram und starte mit /start');
+      window.open('https://t.me/NebulaOrderBot', '_blank');
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ background: 'var(--bg)' }}>
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-transparent border-t-[#D6B25E] rounded-full"
+          className="w-16 h-16 border-4 border-transparent border-t-[#D6B25E] rounded-full mb-4"
         />
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm"
+          style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+        >
+          Wird geladen...
+        </motion.p>
       </div>
     );
   }

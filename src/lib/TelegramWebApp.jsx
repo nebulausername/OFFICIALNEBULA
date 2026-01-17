@@ -12,15 +12,50 @@ export const useTelegramWebApp = () => {
       // Enable closing confirmation
       tg.enableClosingConfirmation();
       
-      // Set theme colors
-      tg.setHeaderColor('#0B0D12');
-      tg.setBackgroundColor('#0B0D12');
+      // Set theme colors based on Telegram theme
+      const themeParams = tg.themeParams;
+      const bgColor = themeParams.bg_color || '#0B0D12';
+      const headerColor = themeParams.bg_color || '#0B0D12';
+      
+      tg.setHeaderColor(headerColor);
+      tg.setBackgroundColor(bgColor);
+      
+      // Enable vibration (haptic feedback)
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('light');
+      }
+      
+      // Set viewport settings
+      tg.viewportStableHeight = window.innerHeight;
+      
+      // Handle back button
+      if (tg.BackButton) {
+        tg.BackButton.onClick(() => {
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            tg.close();
+          }
+        });
+        tg.BackButton.show();
+      }
       
       // Ready
       tg.ready();
       
+      // Log WebApp info for debugging
+      console.log('Telegram WebApp initialized:', {
+        version: tg.version,
+        platform: tg.platform,
+        colorScheme: tg.colorScheme,
+        themeParams: tg.themeParams,
+      });
+      
       return () => {
-        // Cleanup if needed
+        // Cleanup
+        if (tg.BackButton) {
+          tg.BackButton.hide();
+        }
       };
     }
   }, []);
@@ -74,6 +109,113 @@ export const showTelegramAlert = (message) => {
 
 // Show confirm
 export const showTelegramConfirm = (message) => {
+  return new Promise((resolve) => {
+    const tg = getTelegramWebApp();
+    if (tg?.showConfirm) {
+      tg.showConfirm(message, (confirmed) => {
+        resolve(confirmed);
+      });
+    } else {
+      resolve(confirm(message));
+    }
+  });
+};
+
+// Show main button
+export const showMainButton = (text, onClick) => {
+  const tg = getTelegramWebApp();
+  if (tg?.MainButton) {
+    tg.MainButton.setText(text);
+    tg.MainButton.onClick(onClick);
+    tg.MainButton.show();
+    return () => {
+      tg.MainButton.hide();
+      tg.MainButton.offClick(onClick);
+    };
+  }
+  return () => {};
+};
+
+// Hide main button
+export const hideMainButton = () => {
+  const tg = getTelegramWebApp();
+  if (tg?.MainButton) {
+    tg.MainButton.hide();
+  }
+};
+
+// Set main button text
+export const setMainButtonText = (text) => {
+  const tg = getTelegramWebApp();
+  if (tg?.MainButton) {
+    tg.MainButton.setText(text);
+  }
+};
+
+// Enable/disable main button
+export const setMainButtonEnabled = (enabled) => {
+  const tg = getTelegramWebApp();
+  if (tg?.MainButton) {
+    if (enabled) {
+      tg.MainButton.enable();
+    } else {
+      tg.MainButton.disable();
+    }
+  }
+};
+
+// Show back button
+export const showBackButton = (onClick) => {
+  const tg = getTelegramWebApp();
+  if (tg?.BackButton) {
+    tg.BackButton.onClick(onClick);
+    tg.BackButton.show();
+    return () => {
+      tg.BackButton.hide();
+      tg.BackButton.offClick(onClick);
+    };
+  }
+  return () => {};
+};
+
+// Hide back button
+export const hideBackButton = () => {
+  const tg = getTelegramWebApp();
+  if (tg?.BackButton) {
+    tg.BackButton.hide();
+  }
+};
+
+// Open Telegram link
+export const openTelegramLink = (url) => {
+  const tg = getTelegramWebApp();
+  if (tg?.openTelegramLink) {
+    tg.openTelegramLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
+};
+
+// Open link
+export const openLink = (url) => {
+  const tg = getTelegramWebApp();
+  if (tg?.openLink) {
+    tg.openLink(url);
+  } else {
+    window.open(url, '_blank');
+  }
+};
+
+// Close WebApp
+export const closeWebApp = () => {
+  const tg = getTelegramWebApp();
+  if (tg?.close) {
+    tg.close();
+  }
+};
+
+// Show confirm (existing function)
+export const showTelegramConfirmOld = (message) => {
   return new Promise((resolve) => {
     const tg = getTelegramWebApp();
     if (tg?.showConfirm) {

@@ -142,8 +142,21 @@ export const initializeBot = () => {
 
   try {
     botLogger.info('Creating Telegram Bot instance...');
-    bot = new TelegramBot(token, { polling: true });
-    botLogger.info('Telegram Bot instance created');
+    
+    // Determine if we should use webhook or polling
+    const useWebhook = process.env.NODE_ENV === 'production' || process.env.USE_WEBHOOK === 'true';
+    
+    if (useWebhook) {
+      // Webhook mode for production (Vercel)
+      botLogger.info('Initializing bot in webhook mode');
+      bot = new TelegramBot(token, { webHook: false });
+      botLogger.info('Telegram Bot instance created (webhook mode)');
+    } else {
+      // Polling mode for local development
+      botLogger.info('Initializing bot in polling mode');
+      bot = new TelegramBot(token, { polling: true });
+      botLogger.info('Telegram Bot instance created (polling mode)');
+    }
     
     setupBotHandlers();
     botLogger.info('Telegram Bot handlers setup complete');
@@ -159,6 +172,61 @@ export const initializeBot = () => {
   } catch (error) {
     botLogger.error('Error initializing Telegram Bot:', error);
     return null;
+  }
+};
+
+// Setup webhook URL with Telegram
+export const setupWebhook = async (webhookUrl) => {
+  if (!bot) {
+    botLogger.error('Bot not initialized, cannot setup webhook');
+    return false;
+  }
+
+  try {
+    botLogger.info(`Setting up webhook: ${webhookUrl}`);
+    
+    // Set webhook
+    await bot.setWebHook(webhookUrl);
+    
+    // Verify webhook
+    const webhookInfo = await bot.getWebHookInfo();
+    botLogger.info('Webhook info:', {
+      url: webhookInfo.url,
+      has_custom_certificate: webhookInfo.has_custom_certificate,
+      pending_update_count: webhookInfo.pending_update_count,
+    });
+    
+    if (webhookInfo.url === webhookUrl) {
+      botLogger.info('Webhook setup successful');
+      return true;
+    } else {
+      botLogger.warn('Webhook URL mismatch');
+      return false;
+    }
+  } catch (error) {
+    botLogger.error('Error setting up webhook:', error);
+    return false;
+  }
+};
+
+// Handle webhook update from Telegram
+export const handleWebhookUpdate = async (update) => {
+  if (!bot) {
+    botLogger.error('Bot not initialized, cannot handle webhook update');
+    return;
+  }
+
+  try {
+    botLogger.debug('Received webhook update:', update.update_id);
+    
+    // Process update through bot instance
+    // The bot instance will automatically route to registered handlers
+    await bot.processUpdate(update);
+    
+    botLogger.debug(`Processed webhook update ${update.update_id}`);
+  } catch (error) {
+    botLogger.error('Error processing webhook update:', error);
+    throw error;
   }
 };
 
@@ -553,9 +621,14 @@ ${hasPhoto
   });
 };
 
+// Get WebApp URL with fallback
+const getWebAppUrl = () => {
+  return process.env.WEBAPP_URL || 'https://officialnebula.vercel.app';
+};
+
 // Send welcome message for verified users
 const sendWelcomeMessageVerified = async (chatId, user) => {
-  const webAppUrl = process.env.WEBAPP_URL || 'http://localhost:3000';
+  const webAppUrl = getWebAppUrl();
   const token = generateToken({
     id: user.id,
     telegram_id: user.telegram_id?.toString(),
@@ -614,7 +687,7 @@ const notifyAdminsOfNewVerification = async (user, verificationRequest) => {
       return;
     }
 
-    const webAppUrl = process.env.WEBAPP_URL || 'http://localhost:3000';
+    const webAppUrl = getWebAppUrl();
     const adminPanelUrl = `${webAppUrl}/AdminVerifications`;
 
     let message = `🔔 *Neue Verifizierungsanfrage*
@@ -739,7 +812,7 @@ const handleAdminApproval = async (query, verificationId, admin) => {
       role: verificationRequest.user.role,
     });
 
-    const webAppUrl = process.env.WEBAPP_URL || 'http://localhost:3000';
+    const webAppUrl = getWebAppUrl();
 
     // Notify user
     if (verificationRequest.user.telegram_id) {
@@ -936,7 +1009,7 @@ const handleViewCart = async (query, user) => {
               [
                 {
                   text: '🛍️ Shop öffnen',
-                  web_app: { url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/products` },
+                  web_app: { url: `${getWebAppUrl()}/products` },
                 },
               ],
             ],
@@ -972,7 +1045,7 @@ const handleViewCart = async (query, user) => {
           [
             {
               text: '🛍️ Shop öffnen',
-              web_app: { url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/cart?token=${token}` },
+              web_app: { url: `${getWebAppUrl()}/cart?token=${token}` },
             },
           ],
           [
@@ -1031,7 +1104,7 @@ const handleViewOrders = async (query, user) => {
           [
             {
               text: '📋 Alle Bestellungen anzeigen',
-              web_app: { url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/requests?token=${token}` },
+              web_app: { url: `${getWebAppUrl()}/requests?token=${token}` },
             },
           ],
         ],
@@ -1068,7 +1141,7 @@ const handleViewVIP = async (query, user) => {
             [
               {
                 text: '👑 VIP werden',
-                web_app: { url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/vip?token=${token}` },
+                web_app: { url: `${getWebAppUrl()}/vip?token=${token}` },
               },
             ],
           ],
@@ -1103,7 +1176,7 @@ const handleViewSupport = async (query, user) => {
             [
               {
                 text: '💬 Support öffnen',
-                web_app: { url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/support?token=${token}` },
+                web_app: { url: `${getWebAppUrl()}/support?token=${token}` },
               },
             ],
           ],
@@ -1141,7 +1214,7 @@ Vielen Dank für deine Bestellung! 🎉`;
           [
             {
               text: '📦 Bestellung anzeigen',
-              web_app: { url: `${process.env.WEBAPP_URL || 'http://localhost:3000'}/requests?token=${token}` },
+              web_app: { url: `${getWebAppUrl()}/requests?token=${token}` },
             },
           ],
         ],

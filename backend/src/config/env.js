@@ -42,9 +42,22 @@ const optionalEnvVars = {
   
   // WebApp
   WEBAPP_URL: {
-    default: 'http://localhost:3000',
+    default: process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : 'https://officialnebula.vercel.app',
     description: 'Frontend WebApp URL',
     requiredInProduction: true,
+  },
+  
+  // Telegram Webhook
+  USE_WEBHOOK: {
+    default: 'false',
+    description: 'Use webhook mode for Telegram bot (true/false)',
+  },
+  
+  TELEGRAM_WEBHOOK_URL: {
+    default: null,
+    description: 'Telegram webhook URL (auto-generated if not set)',
   },
   
   // Logging

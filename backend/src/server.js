@@ -39,6 +39,7 @@ import uploadRoutes from './routes/upload.routes.js';
 import emailRoutes from './routes/email.routes.js';
 import wishlistRoutes from './routes/wishlist.routes.js';
 import verificationRoutes from './routes/verification.routes.js';
+import telegramRoutes from './routes/telegram.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -82,6 +83,9 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Telegram webhook route (before rate limiting for faster processing)
+app.use('/api/telegram', telegramRoutes);
 
 // API routes
 app.use('/api/auth', authRoutes);
