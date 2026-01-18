@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Menu, ShoppingBag, Globe, Star, Moon, Sun } from 'lucide-react';
+import { Menu, ShoppingBag, Star, Moon, Sun } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '@/api';
 import SideDrawer from './SideDrawer';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Paperclip, ArrowLeft, CheckCircle, XCircle, User, Shield, Loader2, Image as ImageIcon, ThumbsUp, Info } from 'lucide-react';
+import { Send, ArrowLeft, User, Shield, Loader2, Image as ImageIcon, ThumbsUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +42,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
   const loadMessages = async () => {
     setLoading(true);
     try {
-      const msgs = await api.entities.TicketMessage.filter({ ticket_id: ticket.id }, 'created_date');
+      const msgs = await api.entities.TicketMessage.filter({ ticket_id: ticket.id }, 'created_at');
       setMessages(msgs);
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -72,7 +72,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
       sender_id: userId,
       sender_role: 'user',
       body: messageText,
-      created_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       pending: true
     };
     setMessages([...messages, tempMessage]);
@@ -262,7 +262,7 @@ export default function TicketChat({ ticket, onBack, userId, onStatusChange }) {
                       </div>
                     </div>
                     <p className={`text-xs mt-1 ${isUser ? (isRTL ? 'text-start ms-10' : 'text-end me-10') : (isRTL ? 'me-10' : 'ms-10')}`} style={{ color: 'rgba(255, 255, 255, 0.35)' }}>
-                      {format(new Date(msg.created_date), 'dd.MM. HH:mm', { locale: dateLocale })}
+                      {format(new Date(msg.created_at), 'dd.MM. HH:mm', { locale: dateLocale })}
                     </p>
                   </div>
                 </motion.div>

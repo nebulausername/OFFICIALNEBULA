@@ -2,6 +2,11 @@
   "version": 2,
   "builds": [
     {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
       "src": "backend/src/server.js",
       "use": "@vercel/node"
     }
@@ -16,8 +21,15 @@
       "dest": "backend/src/server.js"
     },
     {
+      "src": "/uploads/(.*)",
+      "dest": "backend/src/server.js"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "/index.html"
     }
   ],
   "env": {
@@ -28,5 +40,11 @@
       "maxDuration": 30,
       "memory": 1024
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }

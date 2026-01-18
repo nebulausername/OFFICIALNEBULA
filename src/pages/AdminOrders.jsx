@@ -6,14 +6,9 @@ import { motion } from 'framer-motion';
 import {
   ShoppingBag,
   Search,
-  Filter,
   Download,
-  Package,
   ArrowLeft,
-  CheckCircle,
   XCircle,
-  Clock,
-  Truck,
   Eye,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const statusOptions = [

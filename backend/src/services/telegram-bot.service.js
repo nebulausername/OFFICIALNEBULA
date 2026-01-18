@@ -65,8 +65,10 @@ const cleanupRejectionStates = () => {
   }
 };
 
-// Run cleanup every minute
-setInterval(cleanupRejectionStates, 60 * 1000);
+// NOTE:
+// Avoid background timers (setInterval) because this module also runs on Vercel
+// serverless where long-lived timers can keep the event loop alive.
+// We call cleanup opportunistically in handlers instead.
 
 // Validation functions for Telegram messages
 const validateTelegramMessage = (msg) => {
@@ -236,6 +238,8 @@ const setupBotHandlers = () => {
 
   // /start command
   bot.onText(/\/start/, async (msg) => {
+    cleanupRejectionStates();
+
     // Validate message
     if (!validateTelegramMessage(msg)) {
       return;
@@ -407,6 +411,8 @@ const setupBotHandlers = () => {
 
   // Handle callback queries (for admin actions)
   bot.on('callback_query', async (query) => {
+    cleanupRejectionStates();
+
     // Validate callback query
     if (!validateCallbackQuery(query)) {
       return;

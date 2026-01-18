@@ -12,8 +12,6 @@ import {
   ArrowUpRight,
   Clock,
   MessageCircle,
-  Mail,
-  Users,
   Crown,
   TrendingUp,
   Shield
@@ -21,7 +19,6 @@ import {
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import QuickActions from '../components/admin/QuickActions';
 
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -58,7 +55,7 @@ export default function Admin() {
     try {
       const [products, requests, categories, brands, tickets, users] = await Promise.all([
         api.entities.Product.list(),
-        api.entities.Request.list('-created_date', 100),
+        api.entities.Request.list('-created_at', 100),
         api.entities.Category.list(),
         api.entities.Brand.list(),
         api.entities.Ticket.list(),
@@ -457,7 +454,7 @@ export default function Admin() {
                             <div className="flex items-center gap-3 text-sm md:text-base font-semibold" style={{ color: 'rgba(255, 255, 255, 0.60)' }}>
                               <span className="truncate">{request.contact_info?.name || 'Unbekannt'}</span>
                               <span style={{ color: 'rgba(255, 255, 255, 0.30)' }}>•</span>
-                              <span>{new Date(request.created_date).toLocaleDateString('de-DE')}</span>
+                              <span>{new Date(request.created_at).toLocaleDateString('de-DE')}</span>
                             </div>
                           </div>
                         </div>

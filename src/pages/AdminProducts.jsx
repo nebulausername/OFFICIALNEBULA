@@ -26,8 +26,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger 
+  DialogTitle 
 } from '@/components/ui/dialog';
 import { Plus, Pencil, Trash2, Save, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
@@ -62,7 +61,7 @@ export default function AdminProducts() {
   const loadData = async () => {
     try {
       const [prods, depts, cats, brds] = await Promise.all([
-        api.entities.Product.list('-created_date'),
+        api.entities.Product.list('-created_at'),
         api.entities.Department.list('sort_order'),
         api.entities.Category.list('sort_order'),
         api.entities.Brand.list('sort_order')

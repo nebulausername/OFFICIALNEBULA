@@ -10,6 +10,7 @@ router.use(authenticate);
 router.use(requireAdmin); // All admin routes require admin role
 
 router.get('/stats', adminController.getStats);
+router.get('/diagnostics', adminController.getDiagnostics);
 router.get('/sales-data', adminController.getSalesData);
 router.get('/top-products', adminController.getTopProducts);
 router.get('/category-revenue', adminController.getCategoryRevenue);

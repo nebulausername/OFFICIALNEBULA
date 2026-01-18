@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { ShoppingBag, Star, Heart, Eye, Zap, Flame, Truck, Clock, MapPin } from 'lucide-react';
+import { ShoppingBag, Heart, Eye, Zap, Flame, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProductCard({ product, onAddToCart, onQuickView }) {
@@ -11,7 +11,7 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
   // Determine badge
   const getBadge = () => {
     if (product.tags?.includes('Limited')) return { icon: Flame, text: 'LIMITED', class: 'badge-limited' };
-    if (product.tags?.includes('New') || new Date(product.created_date) > new Date(Date.now() - 7*24*60*60*1000)) {
+    if (product.tags?.includes('New') || new Date(product.created_at) > new Date(Date.now() - 7*24*60*60*1000)) {
       return { icon: Zap, text: 'NEU', class: 'badge-new' };
     }
     return null;

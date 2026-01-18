@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Save, Check, AlertCircle } from 'lucide-react';
+import { User, Save, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

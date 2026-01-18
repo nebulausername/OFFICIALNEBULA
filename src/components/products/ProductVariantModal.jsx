@@ -3,7 +3,6 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Heart, ShoppingBag, Check, ChevronLeft, ChevronRight, AlertCircle, Minus, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { api } from '@/api';
 import { useWishlist } from '../wishlist/WishlistContext';
 import { toast } from 'sonner';
 

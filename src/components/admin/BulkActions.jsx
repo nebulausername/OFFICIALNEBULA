@@ -7,8 +7,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Edit, Archive, Download } from 'lucide-react';
+import { Trash2, Edit, Download } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function BulkActions({ 

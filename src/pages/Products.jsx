@@ -3,7 +3,6 @@ import { api } from '@/api';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import PremiumProductCard from '../components/products/PremiumProductCard';
-import ProductQuickView from '../components/products/ProductQuickView';
 import PremiumProductModal from '../components/products/PremiumProductModal';
 
 import ShopControlStrip from '../components/shop/ShopControlStrip';
@@ -145,11 +144,26 @@ export default function Products() {
   // Filter and sort products
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
+      // Normalize tags to always be an array of strings (supports legacy string/JSON-string)
+      const tagsArray = (() => {
+        const raw = product.tags;
+        if (Array.isArray(raw)) return raw;
+        if (typeof raw === 'string') {
+          try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return [];
+      })();
+
       // Search filter
       const matchesSearch = !searchQuery || 
         product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        tagsArray.some(tag => (tag || '').toLowerCase().includes(searchQuery.toLowerCase()));
       
       // Department filter
       const matchesDepartment = selectedDepartment === 'all' || product.department_id === selectedDepartment;

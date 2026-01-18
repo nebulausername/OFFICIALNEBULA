@@ -7,12 +7,10 @@ import {
   Upload,
   Download,
   Edit,
-  Trash2,
   Settings,
   Package,
   Users,
   ShoppingBag,
-  FileText,
   Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

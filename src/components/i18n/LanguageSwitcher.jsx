@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Globe, Check, Search, ChevronRight, MessageSquarePlus } from 'lucide-react';
 import { useI18n, SUPPORTED_LOCALES } from './I18nProvider';
 import { Input } from '@/components/ui/input';

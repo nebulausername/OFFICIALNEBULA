@@ -4,7 +4,7 @@ import { createPageUrl } from '../../utils';
 import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, ChevronLeft, User, Package, Heart, MapPin, CreditCard, 
+  X, ChevronLeft, User, Package, Heart, 
   MessageCircle, Bell, Shield, LogOut, Crown, Settings, ChevronRight 
 } from 'lucide-react';
 

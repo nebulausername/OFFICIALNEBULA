@@ -17,8 +17,7 @@ import {
   Sparkles,
   Grid3x3,
   UserCircle2,
-  Shield,
-  Globe
+  Shield
 } from 'lucide-react';
 import { LanguageSwitcherPanel } from '../i18n/LanguageSwitcher';
 import { useI18n } from '../i18n/I18nProvider';

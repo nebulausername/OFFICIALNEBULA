@@ -8,6 +8,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { botLogger } from '../utils/botLogger.js';
+import { deleteObject, hasSupabaseStorageConfig } from './supabase-storage.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +16,7 @@ const __dirname = path.dirname(__filename);
 /**
  * Cleanup old verification requests
  */
-const cleanupOldVerifications = async () => {
+export const cleanupOldVerifications = async () => {
   try {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -43,10 +44,18 @@ const cleanupOldVerifications = async () => {
       // Delete photo file if exists
       if (request.photo_url) {
         try {
-          const photoPath = path.join(__dirname, '../../', request.photo_url);
-          if (fs.existsSync(photoPath)) {
-            fs.unlinkSync(photoPath);
+          if (hasSupabaseStorageConfig() && request.photo_url.startsWith('/uploads/verifications/')) {
+            const filename = path.basename(request.photo_url);
+            const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'verifications';
+            const objectPath = `verifications/${filename}`;
+            await deleteObject({ bucket, objectPath });
             photoDeletedCount++;
+          } else {
+            const photoPath = path.join(__dirname, '../../', request.photo_url);
+            if (fs.existsSync(photoPath)) {
+              fs.unlinkSync(photoPath);
+              photoDeletedCount++;
+            }
           }
         } catch (error) {
           botLogger.warn(`Failed to delete photo for request ${request.id}:`, error);
@@ -63,20 +72,23 @@ const cleanupOldVerifications = async () => {
     if (deletedCount > 0) {
       botLogger.info(`Cleanup: Deleted ${deletedCount} old verification requests and ${photoDeletedCount} photos`);
     }
+
+    return { deletedRequests: deletedCount, deletedPhotos: photoDeletedCount };
   } catch (error) {
     botLogger.error('Error during verification cleanup:', error);
+    return { deletedRequests: 0, deletedPhotos: 0, error: error.message };
   }
 };
 
 /**
  * Cleanup orphaned photos (photos without verification requests)
  */
-const cleanupOrphanedPhotos = async () => {
+export const cleanupOrphanedPhotos = async () => {
   try {
     const uploadsDir = path.join(__dirname, '../../uploads/verifications');
     
     if (!fs.existsSync(uploadsDir)) {
-      return;
+      return { deletedOrphanedPhotos: 0 };
     }
 
     // Get all verification requests with photos
@@ -123,15 +135,41 @@ const cleanupOrphanedPhotos = async () => {
     if (deletedCount > 0) {
       botLogger.info(`Cleanup: Deleted ${deletedCount} orphaned photos`);
     }
+
+    return { deletedOrphanedPhotos: deletedCount };
   } catch (error) {
     botLogger.error('Error during orphaned photos cleanup:', error);
+    return { deletedOrphanedPhotos: 0, error: error.message };
   }
+};
+
+/**
+ * Run cleanup once (for Vercel cron / manual invocation)
+ */
+export const runCleanup = async () => {
+  const [verifications, orphaned] = await Promise.all([
+    cleanupOldVerifications(),
+    cleanupOrphanedPhotos(),
+  ]);
+
+  return {
+    verifications,
+    orphaned,
+    timestamp: new Date().toISOString(),
+  };
 };
 
 /**
  * Initialize cleanup service
  */
 export const initializeCleanupService = () => {
+  // In Vercel serverless we must not start background schedulers.
+  // Use Vercel Cron to hit /api/cron/cleanup instead.
+  if (process.env.VERCEL) {
+    botLogger.info('Skipping cleanup scheduler on Vercel (use /api/cron/cleanup)');
+    return;
+  }
+
   botLogger.info('Initializing cleanup service...');
 
   // Run cleanup daily at 3 AM
@@ -142,11 +180,13 @@ export const initializeCleanupService = () => {
   });
 
   // Run cleanup on startup (after 1 minute delay)
-  setTimeout(async () => {
+  const startupTimer = setTimeout(async () => {
     botLogger.info('Running initial cleanup...');
     await cleanupOldVerifications();
     await cleanupOrphanedPhotos();
   }, 60 * 1000);
+  // Don't keep the process alive if nothing else is running
+  startupTimer.unref?.();
 
   botLogger.info('Cleanup service initialized');
 };

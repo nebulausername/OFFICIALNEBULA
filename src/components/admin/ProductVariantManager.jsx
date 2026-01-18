@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,9 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { 
-  Plus, Trash2, GripVertical, Upload, X, Check, 
-  Palette, Ruler, Package, RefreshCw, Save, ImagePlus,
-  ChevronDown, ChevronUp, AlertTriangle
+  Plus, Trash2, X, 
+  Palette, Ruler, Package, RefreshCw, Save, ImagePlus
 } from 'lucide-react';
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, ShoppingBag, MapPin, CreditCard, Package, Sparkles, Truck, Phone, Mail, User, MessageCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ShoppingBag, MapPin, Package, Sparkles, Phone, Mail, User, MessageCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export default function Checkout() {

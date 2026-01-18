@@ -5,8 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   Upload, X, FileText, Loader2, Check, Package, CreditCard, 
-  Truck, RotateCcw, Wrench, Globe, HelpCircle, ChevronRight,
-  Image as ImageIcon, ArrowLeft
+  Truck, RotateCcw, Wrench, Globe, HelpCircle, ChevronRight, ArrowLeft
 } from 'lucide-react';
 import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';

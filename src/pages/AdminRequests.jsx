@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { 
   Select,
   SelectContent,
@@ -25,7 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Eye, Package } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import StatusChangeDialog from '../components/admin/StatusChangeDialog';
 
@@ -45,7 +44,7 @@ export default function AdminRequests() {
 
   const loadData = async () => {
     try {
-      const reqs = await api.entities.Request.list('-created_date');
+      const reqs = await api.entities.Request.list('-created_at');
       setRequests(reqs);
 
       // Load items and users
@@ -132,7 +131,7 @@ export default function AdminRequests() {
                     </div>
                   </TableCell>
                   <TableCell className="text-sm font-medium text-zinc-200">
-                    {format(new Date(request.created_date), 'dd.MM.yyyy HH:mm', { locale: de })}
+                    {format(new Date(request.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
                   </TableCell>
                   <TableCell className="font-bold text-zinc-100">{items.length} Artikel</TableCell>
                   <TableCell className="font-black text-lg bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
@@ -193,7 +192,7 @@ export default function AdminRequests() {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-zinc-300 mb-2">Datum</div>
-                    <div className="font-bold text-lg text-zinc-100">{format(new Date(selectedRequest.created_date), 'dd. MMMM yyyy, HH:mm', { locale: de })} Uhr</div>
+                    <div className="font-bold text-lg text-zinc-100">{format(new Date(selectedRequest.created_at), 'dd. MMMM yyyy, HH:mm', { locale: de })} Uhr</div>
                   </div>
                 </div>
 

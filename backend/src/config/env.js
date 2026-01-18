@@ -65,6 +65,29 @@ const optionalEnvVars = {
     default: 'INFO',
     description: 'Bot logging level (DEBUG/INFO/WARN/ERROR)',
   },
+
+  // Vercel Cron security
+  CRON_SECRET: {
+    default: null,
+    description: 'Secret for Vercel cron Authorization header (Bearer)',
+    requiredInProduction: true,
+  },
+
+  // Supabase Storage (persistent uploads on Vercel)
+  SUPABASE_URL: {
+    default: null,
+    description: 'Supabase project URL (for Storage)',
+    requiredInProduction: true,
+  },
+  SUPABASE_SERVICE_ROLE_KEY: {
+    default: null,
+    description: 'Supabase service role key (server-side only)',
+    requiredInProduction: true,
+  },
+  SUPABASE_STORAGE_BUCKET: {
+    default: 'verifications',
+    description: 'Supabase Storage bucket name for verification photos',
+  },
 };
 
 /**

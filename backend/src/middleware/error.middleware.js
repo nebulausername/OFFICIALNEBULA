@@ -1,14 +1,30 @@
 export const errorHandler = (err, req, res, next) => {
   // Enhanced error logging
+  const isDev = process.env.NODE_ENV === 'development';
+
+  const safeBody =
+    isDev
+      ? req.body
+      : req.body && typeof req.body === 'object'
+        ? Object.keys(req.body)
+        : undefined;
+
+  const safeQuery =
+    isDev
+      ? req.query
+      : req.query && typeof req.query === 'object'
+        ? Object.keys(req.query)
+        : undefined;
+
   const errorDetails = {
     message: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    stack: isDev ? err.stack : undefined,
     path: req.path,
     method: req.method,
     timestamp: new Date().toISOString(),
     user: req.user?.id || 'anonymous',
-    body: req.body,
-    query: req.query,
+    body: safeBody,
+    query: safeQuery,
   };
 
   console.error('Error Details:', JSON.stringify(errorDetails, null, 2));

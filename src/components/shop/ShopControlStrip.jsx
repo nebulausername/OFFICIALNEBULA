@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, X, Grid3X3, SlidersHorizontal, ChevronDown, Store } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ChevronDown, Store } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';

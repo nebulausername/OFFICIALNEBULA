@@ -287,8 +287,19 @@ export default function AdminVerifications() {
                       <span className="text-xs font-semibold block mb-3" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                         Verifizierungsfoto:
                       </span>
+                      {(() => {
+                        const apiUrl = import.meta.env.VITE_API_URL || '/api';
+                        const origin = apiUrl.startsWith('http')
+                          ? apiUrl.replace(/\/api\/?$/, '')
+                          : window.location.origin;
+
+                        const photoSrc = verification.photo_url?.startsWith('http')
+                          ? verification.photo_url
+                          : `${origin}${verification.photo_url}`;
+
+                        return (
                       <img 
-                        src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8000'}${verification.photo_url}`}
+                        src={photoSrc}
                         alt="Verification Photo"
                         className="w-full rounded-lg mb-2"
                         style={{ maxHeight: '300px', objectFit: 'contain' }}
@@ -297,6 +308,8 @@ export default function AdminVerifications() {
                           e.target.nextSibling.style.display = 'block';
                         }}
                       />
+                        );
+                      })()}
                       <p className="text-xs text-center" style={{ color: 'rgba(255, 255, 255, 0.5)', display: 'none' }}>
                         Foto konnte nicht geladen werden
                       </p>

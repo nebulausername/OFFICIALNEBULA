@@ -11,7 +11,6 @@ import {
   HelpCircle, 
   MessageCircle, 
   Crown, 
-  Settings, 
   LogOut,
   ArrowRight,
   Star,

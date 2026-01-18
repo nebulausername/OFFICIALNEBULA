@@ -7,12 +7,8 @@ import {
   Users,
   Crown,
   Search,
-  Filter,
-  Download,
   UserPlus,
   Shield,
-  Mail,
-  Calendar,
   ShoppingBag,
   MessageCircle,
   ArrowLeft,
@@ -26,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminUsers() {

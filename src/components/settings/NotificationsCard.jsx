@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
-import { motion } from 'framer-motion';
 import GlassCard from './GlassCard';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';

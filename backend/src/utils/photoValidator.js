@@ -70,6 +70,57 @@ export const validatePhoto = (filePath, fileSize) => {
 };
 
 /**
+ * Validate an in-memory photo buffer
+ * @param {Buffer} buffer - Photo data
+ * @param {string} filename - Filename (used for extension validation)
+ * @returns {Object} { valid: boolean, error?: string }
+ */
+export const validatePhotoBuffer = (buffer, filename = 'photo.jpg') => {
+  const fileSize = buffer?.length || 0;
+
+  // Check file size
+  if (fileSize < MIN_FILE_SIZE) {
+    return {
+      valid: false,
+      error: `Foto ist zu klein. Mindestgröße: ${(MIN_FILE_SIZE / 1024).toFixed(0)}KB`,
+    };
+  }
+
+  if (fileSize > MAX_FILE_SIZE) {
+    return {
+      valid: false,
+      error: `Foto ist zu groß. Maximale Größe: ${(MAX_FILE_SIZE / 1024 / 1024).toFixed(0)}MB`,
+    };
+  }
+
+  const extension = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+  if (!ALLOWED_EXTENSIONS.includes(extension)) {
+    return {
+      valid: false,
+      error: `Ungültiges Dateiformat. Erlaubt: JPG, PNG, WEBP`,
+    };
+  }
+
+  try {
+    const header = buffer.subarray(0, 12);
+    const isValidImage = checkImageHeader(header);
+    if (!isValidImage) {
+      return {
+        valid: false,
+        error: 'Datei ist kein gültiges Bild',
+      };
+    }
+  } catch {
+    return {
+      valid: false,
+      error: 'Fehler beim Prüfen der Datei',
+    };
+  }
+
+  return { valid: true };
+};
+
+/**
  * Check image file header (magic numbers)
  * @param {Buffer} buffer - First bytes of the file
  * @returns {boolean} True if valid image

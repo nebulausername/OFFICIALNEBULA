@@ -4,7 +4,7 @@ import { api } from '@/api';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Heart, Star, Shield, Zap, Package, Truck, Clock, MapPin, Check, AlertCircle } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Star, Shield, Zap, Package, Truck, Clock, MapPin, Check, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import WishlistButton from '../components/wishlist/WishlistButton';

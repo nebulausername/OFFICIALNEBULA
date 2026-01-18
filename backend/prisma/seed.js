@@ -2,10 +2,19 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Helper to convert arrays/objects to JSON strings for SQLite
-const toJsonString = (value) => {
+// Json columns (Postgres JSONB / Prisma Json) accept arrays/objects directly.
+// Keep this helper minimal and non-destructive for backwards compatibility.
+const toJsonValue = (value) => {
   if (value === null || value === undefined) return null;
-  return JSON.stringify(value);
+  if (typeof value === 'string') {
+    // If someone accidentally provides a JSON string, try to parse it.
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+  return value;
 };
 
 async function main() {
@@ -57,6 +66,7 @@ async function main() {
     { name: 'Accessories', slug: 'accessories', department_slug: 'unisex', sort_order: 3 },
     { name: 'Vapes', slug: 'vapes', department_slug: 'unisex', sort_order: 4 },
     { name: 'Tech', slug: 'tech', department_slug: 'unisex', sort_order: 5 },
+    { name: 'Parfum', slug: 'parfum', department_slug: 'unisex', sort_order: 6 },
     // Damen Kategorien
     { name: 'Schuhe', slug: 'damen-schuhe', department_slug: 'damen', sort_order: 1 },
     { name: 'Fashion', slug: 'damen-fashion', department_slug: 'damen', sort_order: 2 },
@@ -94,6 +104,8 @@ async function main() {
     { name: 'Off-White', slug: 'off-white', sort_order: 4 },
     { name: 'Elf Bar', slug: 'elf-bar', sort_order: 5 },
     { name: 'Apple', slug: 'apple', sort_order: 6 },
+    { name: 'Rolex', slug: 'rolex', sort_order: 7 },
+    { name: 'Dior', slug: 'dior', sort_order: 8 },
   ];
 
   const brands = {};
@@ -221,6 +233,22 @@ async function main() {
       sizes: ['One Size'],
     },
     {
+      sku: 'NS-PARF-001',
+      name: 'Dior Sauvage Eau de Parfum 100ml',
+      description: 'Klassischer Duft mit frischen, würzigen Noten. Premium Parfum für Alltag und Abend.',
+      price: 129.99,
+      currency: 'EUR',
+      department_slug: 'unisex',
+      category_slug: 'parfum',
+      brand_slug: 'dior',
+      in_stock: true,
+      cover_image: 'https://images.unsplash.com/photo-1585386959984-a41552231691?w=800',
+      tags: ['Parfum', 'Dior', 'Sauvage', 'Fragrance'],
+      product_type: 'other',
+      colors: [{ id: 'color_1', name: 'Blue', hex: '#1E3A8A', images: [] }],
+      sizes: ['100ml'],
+    },
+    {
       sku: 'NS-NIKE-007',
       name: 'Nike Tech Fleece Jogger Black',
       description: 'Premium Tech Fleece Material für maximalen Komfort. Moderner Slim Fit.',
@@ -273,10 +301,10 @@ async function main() {
           brand_id: brands[product.brand_slug].id,
           in_stock: product.in_stock,
           cover_image: product.cover_image,
-          tags: toJsonString(product.tags),
+          tags: toJsonValue(product.tags),
           product_type: product.product_type,
-          colors: toJsonString(product.colors),
-          sizes: toJsonString(product.sizes),
+          colors: toJsonValue(product.colors),
+          sizes: toJsonValue(product.sizes),
         },
         create: {
           sku: product.sku,
@@ -289,11 +317,11 @@ async function main() {
           brand_id: brands[product.brand_slug].id,
           in_stock: product.in_stock,
           cover_image: product.cover_image,
-          tags: toJsonString(product.tags),
+          tags: toJsonValue(product.tags),
           product_type: product.product_type,
-          colors: toJsonString(product.colors),
-          sizes: toJsonString(product.sizes),
-          variants: toJsonString(product.variants || []),
+          colors: toJsonValue(product.colors),
+          sizes: toJsonValue(product.sizes),
+          variants: toJsonValue(product.variants || []),
         },
       });
       console.log(`✅ Product created: ${productRecord.name} (${productRecord.sku})`);
@@ -457,10 +485,10 @@ async function main() {
           brand_id: brands[product.brand_slug].id,
           in_stock: product.in_stock,
           cover_image: product.cover_image,
-          tags: toJsonString(product.tags),
+          tags: toJsonValue(product.tags),
           product_type: product.product_type,
-          colors: toJsonString(product.colors),
-          sizes: toJsonString(product.sizes),
+          colors: toJsonValue(product.colors),
+          sizes: toJsonValue(product.sizes),
         },
         create: {
           sku: product.sku,
@@ -473,11 +501,11 @@ async function main() {
           brand_id: brands[product.brand_slug].id,
           in_stock: product.in_stock,
           cover_image: product.cover_image,
-          tags: toJsonString(product.tags),
+          tags: toJsonValue(product.tags),
           product_type: product.product_type,
-          colors: toJsonString(product.colors),
-          sizes: toJsonString(product.sizes),
-          variants: toJsonString(product.variants || []),
+          colors: toJsonValue(product.colors),
+          sizes: toJsonValue(product.sizes),
+          variants: toJsonValue(product.variants || []),
         },
       });
       console.log(`✅ Additional product created: ${productRecord.name} (${productRecord.sku})`);
@@ -833,7 +861,7 @@ async function main() {
       currency: 'EUR',
       department_slug: 'accessoires',
       category_slug: 'uhren',
-      brand_slug: 'jordan', // Placeholder, sollte Rolex sein
+      brand_slug: 'rolex',
       in_stock: true,
       cover_image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800',
       tags: ['Rolex', 'Luxury', 'Watch', 'Premium', 'Automatic'],
@@ -1003,10 +1031,10 @@ async function main() {
           brand_id: brands[product.brand_slug].id,
           in_stock: product.in_stock,
           cover_image: product.cover_image,
-          tags: toJsonString(product.tags),
+          tags: toJsonValue(product.tags),
           product_type: product.product_type,
-          colors: toJsonString(product.colors),
-          sizes: toJsonString(product.sizes),
+          colors: toJsonValue(product.colors),
+          sizes: toJsonValue(product.sizes),
         },
         create: {
           sku: product.sku,
@@ -1019,11 +1047,11 @@ async function main() {
           brand_id: brands[product.brand_slug].id,
           in_stock: product.in_stock,
           cover_image: product.cover_image,
-          tags: toJsonString(product.tags),
+          tags: toJsonValue(product.tags),
           product_type: product.product_type,
-          colors: toJsonString(product.colors),
-          sizes: toJsonString(product.sizes),
-          variants: toJsonString(product.variants || []),
+          colors: toJsonValue(product.colors),
+          sizes: toJsonValue(product.sizes),
+          variants: toJsonValue(product.variants || []),
         },
       });
       console.log(`✅ More product created: ${productRecord.name} (${productRecord.sku})`);
@@ -1041,7 +1069,7 @@ async function main() {
       name: 'Monthly VIP',
       price: 29.99,
       duration_days: 30,
-      benefits: toJsonString([
+      benefits: toJsonValue([
         'Free shipping',
         '10% discount on all products',
         'Early access to new products',
@@ -1056,12 +1084,12 @@ async function main() {
         name: 'Monthly VIP',
         price: 29.99,
         duration_days: 30,
-        benefits: [
+        benefits: toJsonValue([
           'Free shipping',
           '10% discount on all products',
           'Early access to new products',
           'Priority support',
-        ],
+        ]),
         is_active: true,
       },
     });
@@ -1078,7 +1106,7 @@ async function main() {
       name: 'Lifetime VIP',
       price: 50.00,
       duration_days: 9999,
-      benefits: toJsonString([
+      benefits: toJsonValue([
         'Free shipping forever',
         '15% discount on all products',
         'Early access to all new products',
@@ -1094,7 +1122,7 @@ async function main() {
         name: 'Lifetime VIP',
         price: 50.00,
         duration_days: 9999,
-        benefits: toJsonString([
+        benefits: toJsonValue([
           'Free shipping forever',
           '15% discount on all products',
           'Early access to all new products',

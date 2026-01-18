@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   X, Heart, ShoppingBag, ChevronLeft, ChevronRight, 
-  Check, AlertCircle, Package, Truck, Clock, Star,
-  Plus, Minus, Share2
+  Check, AlertCircle, Package, Truck, Clock,
+  Plus, Minus
 } from 'lucide-react';
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';

@@ -47,7 +47,7 @@ model Product {
   sku           String    @unique
   name          String
   description   String?
-  price         Float
+  price         Decimal   @db.Decimal(10, 2)
   currency      String    @default("EUR")
   department_id String?
   category_id   String?
@@ -55,10 +55,10 @@ model Product {
   in_stock      Boolean   @default(true)
   cover_image   String?
   product_type  String?   @default("other")
-  tags          String?   // JSON string: Array of strings
-  colors        String?   // JSON string: Array of color objects
-  sizes         String?   // JSON string: Array of strings
-  variants      String?   // JSON string: Array of variant objects
+  tags          Json?     // JSONB: Array of strings
+  colors        Json?     // JSONB: Array of color objects
+  sizes         Json?     // JSONB: Array of strings
+  variants      Json?     // JSONB: Array of variant objects
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
 
@@ -144,7 +144,7 @@ model CartItem {
   user_id         String
   product_id      String
   quantity        Int      @default(1)
-  selected_options String?   // JSON string: Variant options
+  selected_options Json?   // JSONB: Variant options
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
@@ -161,8 +161,8 @@ model Request {
   id            String    @id @default(uuid())
   user_id       String
   status        String    @default("pending") // pending, confirmed, processing, shipped, completed, cancelled
-  total_sum     Float
-  contact_info  String    // JSON string: Contact information object
+  total_sum     Decimal   @db.Decimal(10, 2)
+  contact_info  Json      // JSONB: Contact information object
   note          String?
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
@@ -184,9 +184,9 @@ model RequestItem {
   product_id              String?
   sku_snapshot            String
   name_snapshot           String
-  price_snapshot          Float
+  price_snapshot          Decimal   @db.Decimal(10, 2)
   quantity_snapshot       Int
-  selected_options_snapshot String?   // JSON string
+  selected_options_snapshot Json?   // JSONB
   created_at              DateTime @default(now())
 
   request                 Request  @relation(fields: [request_id], references: [id], onDelete: Cascade)
@@ -223,7 +223,7 @@ model TicketMessage {
   ticket_id       String
   user_id         String
   message         String
-  attachments     String?    // JSON string: Array of file URLs
+  attachments     Json?    // JSONB: Array of file URLs
   read_by_user    Boolean  @default(false)
   read_by_admin   Boolean  @default(false)
   created_at      DateTime @default(now())
@@ -239,9 +239,9 @@ model TicketMessage {
 model VIPPlan {
   id            String    @id @default(uuid())
   name          String
-  price         Float
+  price         Decimal   @db.Decimal(10, 2)
   duration_days Int
-  benefits      String?     // JSON string: Array of benefit strings
+  benefits      Json?     // JSONB: Array of benefit strings
   is_active     Boolean   @default(true)
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt

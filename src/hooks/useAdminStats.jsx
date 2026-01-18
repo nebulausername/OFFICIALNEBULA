@@ -23,7 +23,7 @@ export const useAdminStats = () => {
         // Fallback to individual calls
         const [products, requests, categories, brands, tickets, users] = await Promise.all([
           api.entities.Product.list(),
-          api.entities.Request.list('-created_date', 100),
+          api.entities.Request.list('-created_at', 100),
           api.entities.Category.list(),
           api.entities.Brand.list(),
           api.entities.Ticket.list(),

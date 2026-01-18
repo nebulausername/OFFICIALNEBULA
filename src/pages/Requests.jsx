@@ -20,7 +20,7 @@ export default function Requests() {
   const loadRequests = async () => {
     try {
       const user = await api.auth.me();
-      const reqs = await api.entities.Request.filter({ user_id: user.id }, '-created_date');
+      const reqs = await api.entities.Request.filter({ user_id: user.id }, '-created_at');
       setRequests(reqs);
 
       // Load items for each request
@@ -100,7 +100,7 @@ export default function Requests() {
                         </CardTitle>
                         <div className="flex items-center gap-2 text-sm text-zinc-300 mt-1">
                           <Calendar className="w-4 h-4" />
-                          {format(new Date(request.created_date), 'dd. MMMM yyyy, HH:mm', { locale: de })} Uhr
+                          {format(new Date(request.created_at), 'dd. MMMM yyyy, HH:mm', { locale: de })} Uhr
                         </div>
                       </div>
                     </div>

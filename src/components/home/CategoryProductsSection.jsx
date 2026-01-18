@@ -301,7 +301,7 @@ export default function CategoryProductsSection({
                 >
                   {loading ? 'Lade Produkte...' : 'Bald verfügbar oder versuche es später erneut'}
                 </p>
-                {process.env.NODE_ENV === 'development' && (
+                {import.meta.env.DEV && (
                   <div 
                     className="text-xs mb-4 p-3 rounded-lg"
                     style={{ 

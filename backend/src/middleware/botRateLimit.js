@@ -21,8 +21,10 @@ const cleanupOldTimestamps = () => {
   }
 };
 
-// Run cleanup every 30 seconds
-setInterval(cleanupOldTimestamps, 30 * 1000);
+// NOTE:
+// We intentionally avoid background timers (setInterval) because this code
+// is also used in serverless environments (Vercel) where long-lived timers
+// can keep the event loop alive and cause timeouts.
 
 /**
  * Check if user has exceeded rate limit
@@ -34,6 +36,9 @@ export const checkRateLimit = (userId, maxCommands = 5) => {
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute
   
+  // Opportunistic cleanup (no background timer)
+  cleanupOldTimestamps();
+
   // Get user's command timestamps
   let timestamps = userCommandTimestamps.get(userId) || [];
   
@@ -62,6 +67,9 @@ export const getRemainingCommands = (userId, maxCommands = 5) => {
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute
   
+  // Opportunistic cleanup (no background timer)
+  cleanupOldTimestamps();
+
   const timestamps = userCommandTimestamps.get(userId) || [];
   const recentTimestamps = timestamps.filter(ts => now - ts < windowMs);
   

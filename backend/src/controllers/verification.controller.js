@@ -2,7 +2,8 @@ import prisma from '../config/database.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { validatePhoto } from '../utils/photoValidator.js';
+import { validatePhoto, validatePhotoBuffer } from '../utils/photoValidator.js';
+import { hasSupabaseStorageConfig, uploadObject } from '../services/supabase-storage.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -386,15 +387,10 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
   let timeoutId;
   
   try {
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(__dirname, '../../uploads/verifications');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
     // Generate unique filename
     const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-    const localPath = path.join(uploadsDir, filename);
+    const relativePath = `/uploads/verifications/${filename}`;
+    const useSupabase = hasSupabaseStorageConfig();
 
     // Get file info from Telegram with timeout
     const filePromise = bot.getFile(fileId);
@@ -452,22 +448,47 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
     const fileSize = buffer.length;
     
     console.log(`[PHOTO] Downloaded ${(fileSize / 1024).toFixed(2)}KB`);
-    
-    // Write file
-    fs.writeFileSync(localPath, buffer);
-    
-    // Validate photo
-    const validation = validatePhoto(localPath, fileSize);
-    if (!validation.valid) {
-      // Delete invalid file
-      fs.unlinkSync(localPath);
-      throw new Error(validation.error || 'Foto-Validierung fehlgeschlagen');
+
+    // Validate photo (buffer-based for Supabase mode, file-based for local mode)
+    if (useSupabase) {
+      const validation = validatePhotoBuffer(buffer, filename);
+      if (!validation.valid) {
+        throw new Error(validation.error || 'Foto-Validierung fehlgeschlagen');
+      }
+    } else {
+      const uploadsDir = path.join(__dirname, '../../uploads/verifications');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const localPath = path.join(uploadsDir, filename);
+      fs.writeFileSync(localPath, buffer);
+
+      const validation = validatePhoto(localPath, fileSize);
+      if (!validation.valid) {
+        try {
+          fs.unlinkSync(localPath);
+        } catch {
+          // ignore
+        }
+        throw new Error(validation.error || 'Foto-Validierung fehlgeschlagen');
+      }
     }
 
-    console.log(`[PHOTO] Photo validated and saved: ${filename}`);
-    
-    // Return relative path for URL
-    const relativePath = `/uploads/verifications/${filename}`;
+    if (useSupabase) {
+      const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'verifications';
+      const objectPath = `verifications/${filename}`;
+      await uploadObject({
+        bucket,
+        objectPath,
+        body: buffer,
+        contentType: 'image/jpeg',
+      });
+
+      console.log(`[PHOTO] Photo uploaded to Supabase Storage: ${bucket}/${objectPath}`);
+    } else {
+      console.log(`[PHOTO] Photo validated and saved locally: ${filename}`);
+    }
+
     return relativePath;
   } catch (error) {
     if (timeoutId) {

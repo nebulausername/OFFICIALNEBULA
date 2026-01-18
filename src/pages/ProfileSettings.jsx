@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import GlassCard from '../components/settings/GlassCard';
 import ProfileFormCard from '../components/settings/ProfileFormCard';
 import InfoRowCard from '../components/settings/InfoRowCard';
 import WishlistCard from '../components/settings/WishlistCard';
@@ -204,7 +203,7 @@ export default function ProfileSettings() {
           <InfoRowCard
             icon={Calendar}
             label="Mitglied seit"
-            value={user?.created_date ? format(new Date(user.created_date), 'dd. MMMM yyyy', { locale: de }) : '-'}
+            value={user?.created_at ? format(new Date(user.created_at), 'dd. MMMM yyyy', { locale: de }) : '-'}
             iconColor="from-green-500 to-emerald-500"
           />
         </div>

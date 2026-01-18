@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api';
-import { Crown, Star, Users, ShoppingBag, Sparkles, CheckCircle2, ArrowRight, Gift, Zap, MessageCircle, Send, CreditCard, Calendar } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Crown, Star, Users, ShoppingBag, Sparkles, CheckCircle2, Gift, Zap, MessageCircle, Send, CreditCard, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import VipPlanModal from '../components/vip/VipPlanModal';
 import { useToast } from '@/components/ui/use-toast';
 

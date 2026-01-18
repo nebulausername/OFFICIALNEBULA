@@ -1,5 +1,5 @@
 import express from 'express';
-import { handleWebhookUpdate, getBot } from '../services/telegram-bot.service.js';
+import { handleWebhookUpdate, getBot, initializeBot } from '../services/telegram-bot.service.js';
 import { botLogger } from '../utils/botLogger.js';
 
 const router = express.Router();
@@ -13,8 +13,12 @@ router.post('/webhook', async (req, res) => {
       return res.status(400).json({ error: 'Invalid request' });
     }
 
-    // Get bot instance
-    const bot = getBot();
+    // Get bot instance (lazy init for serverless)
+    let bot = getBot();
+    if (!bot) {
+      botLogger.info('Bot not initialized yet - initializing lazily for webhook');
+      bot = initializeBot();
+    }
     if (!bot) {
       botLogger.error('Bot instance not available');
       return res.status(503).json({ error: 'Bot not initialized' });
@@ -35,11 +39,14 @@ router.post('/webhook', async (req, res) => {
 // Health check endpoint for webhook status
 router.get('/webhook/status', async (req, res) => {
   try {
-    const bot = getBot();
+    let bot = getBot();
     if (!bot) {
-      return res.status(503).json({ 
-        status: 'error', 
-        message: 'Bot not initialized' 
+      bot = initializeBot();
+    }
+    if (!bot) {
+      return res.status(503).json({
+        status: 'error',
+        message: 'Bot not initialized',
       });
     }
 

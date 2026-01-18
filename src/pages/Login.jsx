@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, Shield, CheckCircle2, XCircle, Clock, ArrowRight } from 'lucide-react';
+import { Sparkles, Shield, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { api } from '@/api';
 import { setToken } from '@/api/config';

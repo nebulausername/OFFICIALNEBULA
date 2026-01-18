@@ -9,8 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Upload, X, Plus, GripVertical, Palette, Ruler, Grid3x3, Package } from 'lucide-react';
-import { motion, Reorder } from 'framer-motion';
+import { ArrowLeft, Save, Upload, X, Plus, Palette, Ruler, Package } from 'lucide-react';
 import { createPageUrl } from '../utils';
 import ProductVariantManager from '../components/admin/ProductVariantManager';
 

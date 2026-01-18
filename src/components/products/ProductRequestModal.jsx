@@ -11,8 +11,6 @@ import { api } from '@/api';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog';
 import {
   Select,

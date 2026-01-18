@@ -1,10 +1,16 @@
 import prisma from '../config/database.js';
 
-// Helper to convert arrays/objects to JSON strings for SQLite
-const toJsonString = (value) => {
+// Helper to normalize JSON inputs (supports both arrays/objects and JSON-strings)
+const toJsonValue = (value) => {
   if (value === null || value === undefined) return null;
-  if (typeof value === 'string') return value; // Already a string
-  return JSON.stringify(value);
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+  return value;
 };
 
 export const getStats = async (req, res, next) => {
@@ -129,6 +135,57 @@ export const getStats = async (req, res, next) => {
       },
       recentOrders,
       topProducts: topProductsData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDiagnostics = async (req, res, next) => {
+  try {
+    const [
+      products,
+      categories,
+      brands,
+      departments,
+      users,
+      requests,
+      tickets,
+      verifications,
+    ] = await Promise.all([
+      prisma.product.count(),
+      prisma.category.count(),
+      prisma.brand.count(),
+      prisma.department.count(),
+      prisma.user.count(),
+      prisma.request.count(),
+      prisma.ticket.count(),
+      prisma.verificationRequest.count().catch(() => 0),
+    ]);
+
+    res.json({
+      ok: true,
+      timestamp: new Date().toISOString(),
+      counts: {
+        products,
+        categories,
+        brands,
+        departments,
+        users,
+        requests,
+        tickets,
+        verificationRequests: verifications,
+      },
+      env: {
+        nodeEnv: process.env.NODE_ENV || 'development',
+        vercel: !!process.env.VERCEL,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+        hasCronSecret: !!process.env.CRON_SECRET,
+        hasTelegramBotToken: !!process.env.TELEGRAM_BOT_TOKEN,
+        hasSupabaseUrl: !!process.env.SUPABASE_URL,
+        hasSupabaseServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+        supabaseBucket: process.env.SUPABASE_STORAGE_BUCKET || null,
+      },
     });
   } catch (error) {
     next(error);
@@ -264,7 +321,7 @@ export const bulkImportProducts = async (req, res, next) => {
             price: productData.price,
             in_stock: productData.in_stock !== false,
             cover_image: productData.cover_image,
-            tags: toJsonString(productData.tags || []),
+            tags: toJsonValue(productData.tags || []),
             ...(productData.department_id && { department_id: productData.department_id }),
             ...(productData.category_id && { category_id: productData.category_id }),
             ...(productData.brand_id && { brand_id: productData.brand_id }),
@@ -280,11 +337,11 @@ export const bulkImportProducts = async (req, res, next) => {
             brand_id: productData.brand_id,
             in_stock: productData.in_stock !== false,
             cover_image: productData.cover_image,
-            tags: toJsonString(productData.tags || []),
+            tags: toJsonValue(productData.tags || []),
             product_type: productData.product_type || 'other',
-            colors: toJsonString(productData.colors || []),
-            sizes: toJsonString(productData.sizes || []),
-            variants: toJsonString(productData.variants || []),
+            colors: toJsonValue(productData.colors || []),
+            sizes: toJsonValue(productData.sizes || []),
+            variants: toJsonValue(productData.variants || []),
           },
         });
         

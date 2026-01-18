@@ -9,6 +9,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 import { performanceMiddleware } from './middleware/performance.middleware.js';
+import { requestLogger } from './middleware/request-logger.middleware.js';
+import { jsonSerializerMiddleware } from './middleware/json-serializer.middleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +24,11 @@ try {
   validateEnv();
 } catch (err) {
   console.error('❌ Error validating environment variables:', err);
-  process.exit(1);
+  // In serverless (Vercel) we must not hard-exit the process
+  if (!process.env.VERCEL) {
+    process.exit(1);
+  }
+  throw err;
 }
 
 // Import routes
@@ -40,6 +46,8 @@ import emailRoutes from './routes/email.routes.js';
 import wishlistRoutes from './routes/wishlist.routes.js';
 import verificationRoutes from './routes/verification.routes.js';
 import telegramRoutes from './routes/telegram.routes.js';
+import cronRoutes from './routes/cron.routes.js';
+import uploadsRoutes from './routes/uploads.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -60,6 +68,12 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Normalize Prisma types (Decimal/BigInt/Date) for JSON responses
+app.use(jsonSerializerMiddleware);
+
+// Request logging (Vercel-friendly JSON logs)
+app.use(requestLogger);
+
 // Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -77,6 +91,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Serve static files (verification photos)
+app.use('/uploads', uploadsRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check
@@ -88,6 +103,7 @@ app.get('/health', (req, res) => {
 app.use('/api/telegram', telegramRoutes);
 
 // API routes
+app.use('/api/cron', cronRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -106,37 +122,45 @@ app.use('/api/verification', verificationRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-// Initialize Telegram Bot (after server setup to avoid circular dependencies)
-import('./services/telegram-bot.service.js').then(({ initializeBot }) => {
-  if (process.env.TELEGRAM_BOT_TOKEN) {
-    console.log('🤖 Initializing Telegram Bot...');
-    const bot = initializeBot();
-    if (bot) {
-      console.log('✅ Telegram Bot initialized successfully!');
-    } else {
-      console.warn('⚠️  Telegram Bot initialization returned null');
-    }
-  } else {
-    console.warn('⚠️  TELEGRAM_BOT_TOKEN not found in environment variables');
-  }
-}).catch(err => {
-  console.error('❌ Error initializing Telegram Bot:', err);
-  console.error('Stack:', err.stack);
-});
+// In serverless (Vercel) we should not run long-lived background processes.
+// Telegram bot and cleanup will be invoked via webhooks/cron routes instead.
+if (!process.env.VERCEL) {
+  // Initialize Telegram Bot (after server setup to avoid circular dependencies)
+  import('./services/telegram-bot.service.js')
+    .then(({ initializeBot }) => {
+      if (process.env.TELEGRAM_BOT_TOKEN) {
+        console.log('🤖 Initializing Telegram Bot...');
+        const bot = initializeBot();
+        if (bot) {
+          console.log('✅ Telegram Bot initialized successfully!');
+        } else {
+          console.warn('⚠️  Telegram Bot initialization returned null');
+        }
+      } else {
+        console.warn('⚠️  TELEGRAM_BOT_TOKEN not found in environment variables');
+      }
+    })
+    .catch((err) => {
+      console.error('❌ Error initializing Telegram Bot:', err);
+      console.error('Stack:', err.stack);
+    });
 
-// Initialize Cleanup Service
-import('./services/cleanup.service.js').then(({ initializeCleanupService }) => {
-  initializeCleanupService();
-}).catch(err => {
-  console.error('❌ Error initializing Cleanup Service:', err);
-});
+  // Initialize Cleanup Service
+  import('./services/cleanup.service.js')
+    .then(({ initializeCleanupService }) => {
+      initializeCleanupService();
+    })
+    .catch((err) => {
+      console.error('❌ Error initializing Cleanup Service:', err);
+    });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}`);
-});
+  // Start server (local / VPS only)
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌐 CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}`);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
@@ -149,3 +173,4 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
+export default app;

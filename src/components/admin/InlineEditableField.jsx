@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Check, X, Edit2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function InlineEditableField({ value, onSave, type = 'text', className = '' }) {
   const [isEditing, setIsEditing] = useState(false);

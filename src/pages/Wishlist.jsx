@@ -5,7 +5,7 @@ import { api } from '@/api';
 import { useWishlist } from '../components/wishlist/WishlistContext';
 import { 
   Heart, ShoppingBag, Sparkles, ArrowLeft, Truck, Clock, 
-  Package, Trash2, ChevronDown, Check 
+  Package, Trash2, ChevronDown 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';

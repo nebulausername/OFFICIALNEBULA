@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { motion } from 'framer-motion';
 import { 
-  Sparkles, Heart, Check, ChevronLeft, ChevronRight, 
+  Sparkles, Heart, ChevronLeft, ChevronRight, 
   ShoppingBag, ArrowRight, Truck, Clock, Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

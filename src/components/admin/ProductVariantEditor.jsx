@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  Plus, Trash2, Copy, Upload, X, GripVertical, 
+  Plus, Trash2, Upload, X, 
   Palette, Ruler, Package, Image as ImageIcon
 } from 'lucide-react';
 import { api } from '@/api';

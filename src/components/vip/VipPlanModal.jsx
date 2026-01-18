@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Crown, Check, ShoppingCart, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 export default function VipPlanModal({ isOpen, onClose, plan, onConfirm }) {
   if (!plan) return null;

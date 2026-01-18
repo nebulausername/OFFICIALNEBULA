@@ -5,21 +5,17 @@ import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
-  TrendingDown,
   DollarSign,
   ShoppingBag,
   Users,
   Package,
   ArrowLeft,
-  Calendar,
   Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   XAxis,
@@ -28,9 +24,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 
 export default function AdminAnalytics() {

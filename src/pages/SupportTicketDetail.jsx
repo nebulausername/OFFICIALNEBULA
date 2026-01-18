@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Send, Paperclip, FileText, Image as ImageIcon, X, CheckCircle, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, Send, FileText, ThumbsUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -93,7 +93,7 @@ export default function SupportTicketDetail() {
     try {
       const msgs = await api.entities.TicketMessage.filter(
         { ticket_id: ticketId },
-        'created_date'
+        'created_at'
       );
       setMessages(msgs);
 
@@ -123,7 +123,7 @@ export default function SupportTicketDetail() {
       sender_role: user.role,
       body: tempMessage,
       attachments: [],
-      created_date: new Date().toISOString(),
+      created_at: new Date().toISOString(),
       read_by_admin: false
     };
     setMessages(prev => [...prev, optimisticMsg]);
@@ -308,7 +308,7 @@ export default function SupportTicketDetail() {
                         {isAdmin ? `🎧 ${t('support.chat.supportTeam')}` : `👤 ${t('support.chat.you')}`}
                       </span>
                       <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.45)' }}>
-                        {format(new Date(msg.created_date), 'dd.MM.yyyy HH:mm', { locale: dateLocale })}
+                        {format(new Date(msg.created_at), 'dd.MM.yyyy HH:mm', { locale: dateLocale })}
                       </span>
                     </div>
                     <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">{msg.body}</p>
