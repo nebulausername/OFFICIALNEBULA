@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Save, Upload, X, Plus, Palette, Ruler, Package } from 'lucide-react';
 import { createPageUrl } from '../utils';
 import ProductVariantManager from '../components/admin/ProductVariantManager';
+import ImageUpload from '../components/admin/ImageUpload';
 
 export default function AdminProductEditor() {
   const [searchParams] = useSearchParams();
@@ -187,33 +188,13 @@ export default function AdminProductEditor() {
       toast.error('Keine Varianten ausgewählt');
       return;
     }
-    setVariants(variants.map(v => 
+    setVariants(variants.map(v =>
       selectedVariants.includes(v.id) ? { ...v, [field]: value } : v
     ));
     toast.success(`${selectedVariants.length} Varianten aktualisiert`);
   };
 
-  const uploadImage = async (e, colorId = null) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    try {
-      const { file_url } = await api.integrations.uploadFile({ file });
-      
-      if (colorId) {
-        setColors(colors.map(c => c.id === colorId ? {
-          ...c,
-          images: [...(c.images || []), file_url]
-        } : c));
-      } else {
-        setFormData({ ...formData, cover_image: file_url });
-      }
-      
-      toast.success('Bild hochgeladen');
-    } catch (error) {
-      toast.error('Upload fehlgeschlagen');
-    }
-  };
 
   const sizeTemplates = {
     shoes: ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45', '46', '47'],
@@ -389,23 +370,10 @@ export default function AdminProductEditor() {
             <div className="glass-panel rounded-2xl p-6">
               <div className="mb-4">
                 <Label className="text-white font-bold mb-2 block">Cover Image</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    value={formData.cover_image}
-                    onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
-                    placeholder="https://..."
-                    className="h-12 flex-1"
-                    style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#FFFFFF' }}
-                  />
-                  <label className="btn-gold-outline h-12 px-6 cursor-pointer flex items-center gap-2">
-                    <Upload className="w-5 h-5" />
-                    Upload
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadImage(e)} />
-                  </label>
-                </div>
-                {formData.cover_image && (
-                  <img src={formData.cover_image} alt="Cover" className="mt-4 w-32 h-32 object-cover rounded-xl" />
-                )}
+                <ImageUpload
+                  value={formData.cover_image}
+                  onChange={(url) => setFormData({ ...formData, cover_image: url })}
+                />
               </div>
             </div>
           </TabsContent>
@@ -441,22 +409,28 @@ export default function AdminProductEditor() {
                   </Button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {colors.map((color) => (
-                    <div key={color.id} className="flex items-center gap-4 p-4 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                      <div className="w-12 h-12 rounded-xl" style={{ background: color.hex, border: '2px solid rgba(255, 255, 255, 0.2)' }} />
-                      <div className="flex-1">
-                        <p className="font-bold text-white">{color.name}</p>
-                        <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{color.hex}</p>
+                    <div key={color.id} className="p-4 rounded-xl" style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-xl" style={{ background: color.hex, border: '2px solid rgba(255, 255, 255, 0.2)' }} />
+                        <div className="flex-1">
+                          <p className="font-bold text-white">{color.name}</p>
+                          <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{color.hex}</p>
+                        </div>
+                        <button onClick={() => removeColor(color.id)} className="w-10 h-10 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-500/20">
+                          <X className="w-5 h-5" />
+                        </button>
                       </div>
-                      <label className="btn-gold-outline h-10 px-4 cursor-pointer flex items-center gap-2">
-                        <Upload className="w-4 h-4" />
-                        Bilder
-                        <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => uploadImage(e, color.id)} />
-                      </label>
-                      <button onClick={() => removeColor(color.id)} className="w-10 h-10 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-500/20">
-                        <X className="w-5 h-5" />
-                      </button>
+
+                      <div className="pl-16">
+                        <Label className="text-xs font-bold text-zinc-400 mb-2 block">Bilder für {color.name}</Label>
+                        <ImageUpload
+                          value={color.images || []}
+                          onChange={(urls) => setColors(colors.map(c => c.id === color.id ? { ...c, images: urls } : c))}
+                          multiple={true}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>

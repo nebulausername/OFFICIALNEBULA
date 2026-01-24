@@ -6,6 +6,7 @@ import { sendTelegramMessage } from './telegram.service.js';
 import { botLogger } from '../utils/botLogger.js';
 import { checkRateLimit, getRemainingCommands } from '../middleware/botRateLimit.js';
 import { sendMessageWithRetry, editMessageTextWithRetry, answerCallbackQueryWithRetry } from '../utils/telegramRetry.js';
+import { notifyUser } from './socket.service.js';
 
 let bot = null;
 
@@ -973,26 +974,33 @@ const handleAdminApproval = async (query, verificationId, admin) => {
           },
         }
       );
+      );
     }
 
-    // Update admin message
-    await editMessageTextWithRetry(
-      bot,
-      query.message.chat.id,
-      query.message.message_id,
-      `✅ *Verifizierung genehmigt*\n\n` +
-      `👤 User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n` +
-      `✋ Handzeichen: ${verificationRequest.hand_gesture}\n` +
-      `👨‍💼 Genehmigt von: ${admin.full_name || admin.username || 'Admin'}\n` +
-      `⏰ ${new Date().toLocaleString('de-DE')}`,
-      {
-        parse_mode: 'Markdown',
-      }
-    );
-  } catch (error) {
-    botLogger.error('Error handling admin approval:', error);
-    throw error;
+// 📡 Emit Realtime Event to Frontend
+notifyUser(verificationRequest.user.id, 'verification_approved', {
+  status: 'verified',
+  userId: verificationRequest.user.id
+});
+
+// Update admin message
+await editMessageTextWithRetry(
+  bot,
+  query.message.chat.id,
+  query.message.message_id,
+  `✅ *Verifizierung genehmigt*\n\n` +
+  `👤 User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n` +
+  `✋ Handzeichen: ${verificationRequest.hand_gesture}\n` +
+  `👨‍💼 Genehmigt von: ${admin.full_name || admin.username || 'Admin'}\n` +
+  `⏰ ${new Date().toLocaleString('de-DE')}`,
+  {
+    parse_mode: 'Markdown',
   }
+);
+  } catch (error) {
+  botLogger.error('Error handling admin approval:', error);
+  throw error;
+}
 };
 
 // Handle admin rejection

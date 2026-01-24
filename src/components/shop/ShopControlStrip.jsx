@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useI18n } from '../i18n/I18nProvider';
 
-export default function ShopControlStrip({ 
-  searchQuery, 
-  onSearchChange, 
+export default function ShopControlStrip({
+  searchQuery,
+  onSearchChange,
   onCategoriesClick,
   onFiltersClick,
   activeFilters = 0,
@@ -24,13 +24,7 @@ export default function ShopControlStrip({
   const { t } = useI18n();
   const [isFocused, setIsFocused] = useState(false);
 
-  const quickCategories = [
-    { id: 'all', name: t('common.all') },
-    { id: 'sneaker', name: 'Sneaker' },
-    { id: 'kleidung', name: 'Kleidung' },
-    { id: 'taschen', name: 'Taschen' },
-    { id: 'accessoires', name: 'Accessoires' }
-  ];
+
 
   const sortOptions = [
     { value: 'newest', label: 'Neueste' },
@@ -47,7 +41,7 @@ export default function ShopControlStrip({
       <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
         {/* Search Bar */}
         <div className="flex-1 relative">
-          <Search 
+          <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors"
             style={{ color: isFocused ? '#D6B25E' : 'rgba(255, 255, 255, 0.5)' }}
           />
@@ -80,23 +74,23 @@ export default function ShopControlStrip({
         {/* Action Buttons */}
         <div className="flex gap-3">
           {/* Categories Button - PREMIUM DARK GLASS */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={onCategoriesClick}
-              className="h-14 px-6 rounded-[16px] font-bold text-sm flex items-center gap-2.5 transition-all"
-              style={{
-                background: 'rgba(20, 22, 28, 0.85)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: '1px solid rgba(214, 178, 94, 0.35)',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
-                color: '#F2D27C'
-              }}
-            >
-              <Store className="w-5 h-5" />
-              <span>{t('shop.categories')}</span>
-            </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onCategoriesClick}
+            className="h-14 px-6 rounded-[16px] font-bold text-sm flex items-center gap-2.5 transition-all"
+            style={{
+              background: 'rgba(20, 22, 28, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(214, 178, 94, 0.35)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',
+              color: '#F2D27C'
+            }}
+          >
+            <Store className="w-5 h-5" />
+            <span>{t('shop.categories')}</span>
+          </motion.button>
 
           {/* Filter Button */}
           <Button
@@ -112,9 +106,9 @@ export default function ShopControlStrip({
             <SlidersHorizontal className="w-5 h-5 me-2" />
             {t('shop.filters')}
             {activeFilters > 0 && (
-              <span 
+              <span
                 className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black"
-                style={{ 
+                style={{
                   background: 'linear-gradient(135deg, #D6B25E, #F2D27C)',
                   color: '#0B0D12'
                 }}
@@ -163,7 +157,20 @@ export default function ShopControlStrip({
 
       {/* Quick Category Chips */}
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-        {quickCategories.map((cat) => (
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onCategorySelect('all')}
+          className="px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0"
+          style={{
+            background: selectedCategory === 'all' ? 'rgba(214, 178, 94, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+            border: selectedCategory === 'all' ? '1px solid rgba(214, 178, 94, 0.5)' : '1px solid rgba(255, 255, 255, 0.1)',
+            color: selectedCategory === 'all' ? '#F2D27C' : 'rgba(255, 255, 255, 0.85)'
+          }}
+        >
+          {t('common.all')}
+        </motion.button>
+        {categories.map((cat) => (
           <motion.button
             key={cat.id}
             whileHover={{ scale: 1.02 }}
@@ -182,7 +189,7 @@ export default function ShopControlStrip({
       </div>
 
       {/* Results Bar */}
-      <div 
+      <div
         className="flex items-center justify-between py-4 px-1"
         style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}
       >
@@ -209,7 +216,7 @@ export default function ShopControlStrip({
                 </option>
               ))}
             </select>
-            <ChevronDown 
+            <ChevronDown
               className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
               style={{ color: 'rgba(255, 255, 255, 0.5)' }}
             />

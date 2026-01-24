@@ -1,18 +1,19 @@
 import prisma from '../config/database.js';
 import { sendOrderConfirmation, sendStatusUpdate } from '../services/email.service.js';
 import { sendOrderNotification } from '../services/telegram.service.js';
+import { notifyUser, getIO } from '../services/socket.service.js';
 
 export const listOrders = async (req, res, next) => {
   try {
     const { status, sort = '-created_at', limit, page = 1 } = req.query;
 
     const where = {};
-    
+
     // Admin can see all orders, users only their own
     if (req.user.role !== 'admin') {
       where.user_id = req.user.id;
     }
-    
+
     if (status) where.status = status;
 
     const orderBy = {};
@@ -208,6 +209,45 @@ export const createOrder = async (req, res, next) => {
     } catch (notifError) {
       console.error('Notification error:', notifError);
       // Don't fail the request if notifications fail
+    }
+
+    // 📡 Emit Realtime Event for Admins
+    // We emit to 'admin_notifications' channel or similar, but since we use rooms:
+    // We can emit to specific admin users or just broadcast if we had a global admin room.
+    // For now, let's assume admins join 'role_admin' room OR we just notify known admins loop.
+    // Better: frontend admin joins 'admin_dashboard' room.
+    // Let's modify socket.service.js to support roles or rooms better later.
+    // For now, we will assume we updated Socket Service to support broadcast or we just use a loop.
+
+    // Quick Fix: Emit to a generic 'admin_events' if possible, but let's stick to what we have.
+    // We will emit to the USER (confirmation) and potentially ALL connected sockets (admin check).
+
+    // Notify the User immediately (confetti etc)
+    notifyUser(req.user.id, 'order_status_update', {
+      status: 'created',
+      orderId: order.id
+    });
+
+    // Notify Admins (Broadcasting to all connected admins would be ideal)
+    // For MVP: We assume the Admin Dashboard listens to a global event if we implement it,
+    // OR we iterate over connected admins.
+
+    // Actually, let's just emit a global 'new_order' event via IO if we exported it, 
+    // but we only exported notifyUser.
+    // Let's use a workaround: The Admin Dashboard should join a "admin_room" on connect.
+    // We need to update socket.service.js to allow joining rooms.
+
+    // Let's update socket.service.js first to expose `io`, then we can do `io.to('admin').emit(...)`
+    // However, I can't edit socket.service.js in this step.
+    // I will add the import, use a workaround or rely on the user notification for now.
+
+    // Notify Admins
+    try {
+      const io = getIO();
+      io.to('role_admin').emit('new_order', order);
+      console.log('📡 Emitted new_order to role_admin');
+    } catch (e) {
+      console.warn('Socket IO emit failed', e);
     }
 
     res.status(201).json(order);

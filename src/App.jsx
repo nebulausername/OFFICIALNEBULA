@@ -19,7 +19,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  
+
   // Initialize Telegram WebApp if available
   useTelegramWebApp();
 
@@ -73,17 +73,23 @@ const AuthenticatedApp = () => {
 };
 
 
+import { SocketProvider } from '@/contexts/SocketContext';
+import TelegramRealtimeListener from '@/components/TelegramRealtimeListener';
+
 function App() {
 
   return (
     <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
+      <SocketProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <NavigationTracker />
+            <TelegramRealtimeListener />
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </QueryClientProvider>
+      </SocketProvider>
     </AuthProvider>
   )
 }

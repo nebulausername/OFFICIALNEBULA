@@ -4,13 +4,14 @@ import { createPageUrl } from '../utils';
 import { api } from '@/api';
 import { API_BASE_URL } from '@/api/config';
 import { Star, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import ProductQuickView from '../components/products/ProductQuickView';
 import DeliveryBar from '../components/delivery/DeliveryBar';
 import CategoryCard from '../components/home/CategoryCard';
 import FreshDropsSection from '../components/home/FreshDropsSection';
 import CategoryProductsSection from '../components/home/CategoryProductsSection';
+import VideoSpotlight from '../components/home/VideoSpotlight';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
@@ -22,6 +23,39 @@ export default function Home() {
   const [loadingDeptProducts, setLoadingDeptProducts] = useState({});
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  // 🖱️ Mouse Parallax System
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Smooth spring physics for mouse movement
+  const springConfig = { damping: 25, stiffness: 150 };
+  const springX = useSpring(mouseX, springConfig);
+  const springY = useSpring(mouseY, springConfig);
+
+  // Parallax transform values
+  // Background moves slightly opposite to mouse
+  const bgX = useTransform(springX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], [20, -20]);
+  const bgY = useTransform(springY, [0, typeof window !== 'undefined' ? window.innerHeight : 1000], [20, -20]);
+
+  // Hero logo moves more creating depth
+  const logoX = useTransform(springX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], [-30, 30]);
+  const logoY = useTransform(springY, [0, typeof window !== 'undefined' ? window.innerHeight : 1000], [-30, 30]);
+
+  // Spotlights follow mouse directly
+  const spotlightX = useTransform(springX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], ['0%', '100%']);
+  const spotlightY = useTransform(springY, [0, typeof window !== 'undefined' ? window.innerHeight : 1000], ['0%', '100%']);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      // Normalize measurement for performance
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   useEffect(() => {
     loadDepartments();
@@ -39,28 +73,28 @@ export default function Home() {
   const loadDepartments = async () => {
     try {
       console.log('🏢 Loading departments...');
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartments:start',message:'Loading departments',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartments:start', message: 'Loading departments', data: {}, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
       // #endregion
-      
+
       const depts = await api.entities.Department.list('sort_order');
       console.log('✅ Departments loaded:', depts.length);
       depts.forEach(dept => {
         console.log(`   - ${dept.name} (ID: ${dept.id}, Slug: ${dept.slug})`);
       });
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartments:loaded',message:'Departments loaded',data:{count:depts.length,departments:depts.map(d=>({id:d.id,name:d.name,slug:d.slug}))},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartments:loaded', message: 'Departments loaded', data: { count: depts.length, departments: depts.map(d => ({ id: d.id, name: d.name, slug: d.slug })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
       // #endregion
-      
+
       setDepartments(depts);
     } catch (error) {
       console.error('❌ Error loading departments:', error);
       console.error('Error details:', error.message, error.stack);
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartments:error',message:'Error loading departments',data:{error:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartments:error', message: 'Error loading departments', data: { error: error.message }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
       // #endregion
     } finally {
       setLoadingDepts(false);
@@ -75,7 +109,7 @@ export default function Home() {
       console.log('Test 1: Loading all products...');
       const allProducts = await api.entities.Product.list('-created_at', 20);
       console.log(`✅ All products: ${allProducts.length}`, allProducts);
-      
+
       // Test 2: Mit Department Filter
       if (departments.length > 0) {
         const dept = departments[0];
@@ -83,7 +117,7 @@ export default function Home() {
         const deptProducts = await api.entities.Product.filter({ department_id: dept.id });
         console.log(`✅ Products for ${dept.name}: ${deptProducts.length}`, deptProducts);
       }
-      
+
       // Test 3: Direkter Fetch
       console.log('Test 3: Direct fetch test...');
       console.log('   API Base URL:', API_BASE_URL);
@@ -94,12 +128,12 @@ export default function Home() {
       } else {
         console.error('❌ Direct fetch failed:', directFetch.status, directFetch.statusText);
       }
-      
+
       // Test 4: Alle Departments
       console.log('Test 4: Loading all departments...');
       const allDepts = await api.entities.Department.list();
       console.log(`✅ All departments: ${allDepts.length}`, allDepts);
-      
+
     } catch (error) {
       console.error('❌ API Test failed:', error);
       console.error('Error details:', error.message, error.stack);
@@ -146,7 +180,7 @@ export default function Home() {
 
       const loadingStates = {};
       const productsByDept = {};
-      
+
       // Initialize loading states
       departments.forEach(dept => {
         loadingStates[dept.id] = true;
@@ -157,11 +191,11 @@ export default function Home() {
       await Promise.all(
         departments.map(async (dept) => {
           console.group(`🔍 Loading products for ${dept.name}`);
-          
+
           // #region agent log
-          fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:dept-start',message:'Starting product load for department',data:{deptId:dept.id,deptName:dept.name,deptSlug:dept.slug},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:dept-start', message: 'Starting product load for department', data: { deptId: dept.id, deptName: dept.name, deptSlug: dept.slug }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
           // #endregion
-          
+
           try {
             // Entferne in_stock Filter komplett - lade alle Produkte
             const queryParams = { department_id: dept.id };
@@ -173,7 +207,7 @@ export default function Home() {
             });
 
             // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:before-api',message:'Before API filter call',data:{deptId:dept.id,queryParams,sort:'-created_at',limit:8},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:before-api', message: 'Before API filter call', data: { deptId: dept.id, queryParams, sort: '-created_at', limit: 8 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
             // #endregion
 
             const prods = await api.entities.Product.filter(
@@ -181,42 +215,42 @@ export default function Home() {
               '-created_at',
               8
             );
-            
+
             // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:after-api',message:'After API filter call',data:{deptId:dept.id,prodsLength:prods?.length||0,prodsType:typeof prods,isArray:Array.isArray(prods),firstProduct:prods&&prods.length>0?{id:prods[0].id,name:prods[0].name,deptId:prods[0].department_id}:null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:after-api', message: 'After API filter call', data: { deptId: dept.id, prodsLength: prods?.length || 0, prodsType: typeof prods, isArray: Array.isArray(prods), firstProduct: prods && prods.length > 0 ? { id: prods[0].id, name: prods[0].name, deptId: prods[0].department_id } : null }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
             // #endregion
-            
+
             console.log('📥 Raw API Response:', prods);
             console.log('📊 Response type:', typeof prods, Array.isArray(prods) ? 'Array' : 'Not Array');
             console.log('📊 Response length:', prods?.length || 0);
-            
+
             if (prods && prods.length > 0) {
               console.log('✅ Products loaded:', prods.map(p => ({ id: p.id, name: p.name, dept_id: p.department_id })));
-              
+
               // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:products-loaded',message:'Products successfully loaded',data:{deptId:dept.id,productCount:prods.length,productDeptIds:prods.map(p=>p.department_id),expectedDeptId:dept.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:products-loaded', message: 'Products successfully loaded', data: { deptId: dept.id, productCount: prods.length, productDeptIds: prods.map(p => p.department_id), expectedDeptId: dept.id }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
               // #endregion
             }
-            
+
             productsByDept[dept.id] = Array.isArray(prods) ? prods : [];
-            
+
             if (productsByDept[dept.id].length === 0) {
               console.warn(`⚠️ No products found for department: ${dept.name} (ID: ${dept.id})`);
               console.warn('   Checking if products exist in database...');
-              
+
               // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:no-products',message:'No products found, testing all products',data:{deptId:dept.id,deptName:dept.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:no-products', message: 'No products found, testing all products', data: { deptId: dept.id, deptName: dept.name }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
               // #endregion
-              
+
               // Test: Lade alle Produkte ohne Filter
               try {
                 const allProds = await api.entities.Product.list('-created_at', 50);
                 console.log(`   Total products in database: ${allProds?.length || 0}`);
-                
+
                 // #region agent log
-                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:all-products-test',message:'All products test result',data:{totalProducts:allProds?.length||0,allProductDeptIds:allProds?.map(p=>p.department_id)||[],expectedDeptId:dept.id,matchingCount:allProds?.filter(p=>p.department_id===dept.id).length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:all-products-test', message: 'All products test result', data: { totalProducts: allProds?.length || 0, allProductDeptIds: allProds?.map(p => p.department_id) || [], expectedDeptId: dept.id, matchingCount: allProds?.filter(p => p.department_id === dept.id).length || 0 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
                 // #endregion
-                
+
                 if (allProds && allProds.length > 0) {
                   const matchingProds = allProds.filter(p => p.department_id === dept.id);
                   console.log(`   Products matching department_id ${dept.id}: ${matchingProds.length}`);
@@ -224,18 +258,18 @@ export default function Home() {
                     console.log('   Matching products:', matchingProds.map(p => ({ id: p.id, name: p.name, dept_id: p.department_id })));
                   } else {
                     // #region agent log
-                    fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:no-matching',message:'No matching products found',data:{deptId:dept.id,allProductDeptIds:allProds.map(p=>p.department_id),uniqueDeptIds:[...new Set(allProds.map(p=>p.department_id))]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
+                    fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:no-matching', message: 'No matching products found', data: { deptId: dept.id, allProductDeptIds: allProds.map(p => p.department_id), uniqueDeptIds: [...new Set(allProds.map(p => p.department_id))] }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
                     // #endregion
                   }
                 } else {
                   // #region agent log
-                  fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:no-products-in-db',message:'No products in database at all',data:{deptId:dept.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+                  fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:no-products-in-db', message: 'No products in database at all', data: { deptId: dept.id }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
                   // #endregion
                 }
               } catch (testErr) {
                 console.error('   Error testing all products:', testErr);
                 // #region agent log
-                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:test-error',message:'Error testing all products',data:{deptId:dept.id,error:testErr.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H5'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:test-error', message: 'Error testing all products', data: { deptId: dept.id, error: testErr.message }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
                 // #endregion
               }
             }
@@ -243,36 +277,36 @@ export default function Home() {
             console.error(`❌ Error loading products for ${dept.name}:`, err);
             console.error('Error details:', err.message);
             console.error('Error stack:', err.stack);
-            
+
             // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:error',message:'Error loading products',data:{deptId:dept.id,error:err.message,status:err.status,stack:err.stack?.substring(0,200)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:error', message: 'Error loading products', data: { deptId: dept.id, error: err.message, status: err.status, stack: err.stack?.substring(0, 200) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
             // #endregion
-            
+
             // Fallback: Versuche ohne Filter
             try {
               console.log(`🔄 Retrying without department filter for ${dept.name}...`);
               const fallbackProds = await api.entities.Product.list('-created_at', 8);
               console.log(`   Fallback loaded ${fallbackProds?.length || 0} products`);
               productsByDept[dept.id] = Array.isArray(fallbackProds) ? fallbackProds : [];
-              
+
               // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:fallback-success',message:'Fallback load successful',data:{deptId:dept.id,fallbackCount:fallbackProds?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:fallback-success', message: 'Fallback load successful', data: { deptId: dept.id, fallbackCount: fallbackProds?.length || 0 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
               // #endregion
             } catch (fallbackErr) {
               console.error(`❌ Fallback also failed for ${dept.name}:`, fallbackErr);
               productsByDept[dept.id] = [];
-              
+
               // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:fallback-error',message:'Fallback also failed',data:{deptId:dept.id,error:fallbackErr.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H4'})}).catch(()=>{});
+              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:fallback-error', message: 'Fallback also failed', data: { deptId: dept.id, error: fallbackErr.message }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
               // #endregion
             }
           } finally {
             loadingStates[dept.id] = false;
-            
+
             // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Home.jsx:loadDepartmentProducts:dept-end',message:'Department product load completed',data:{deptId:dept.id,finalCount:productsByDept[dept.id]?.length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:dept-end', message: 'Department product load completed', data: { deptId: dept.id, finalCount: productsByDept[dept.id]?.length || 0 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
             // #endregion
-            
+
             console.groupEnd();
           }
         })
@@ -280,11 +314,11 @@ export default function Home() {
 
       setDepartmentProducts(productsByDept);
       setLoadingDeptProducts(loadingStates);
-      
+
       // Log summary
       const totalProducts = Object.values(productsByDept).reduce((sum, prods) => sum + (prods?.length || 0), 0);
       console.log(`✅ Total loaded: ${totalProducts} products across ${departments.length} departments`);
-      
+
       // Detailed summary per department
       Object.keys(productsByDept).forEach(deptId => {
         const dept = departments.find(d => d.id === deptId);
@@ -294,7 +328,7 @@ export default function Home() {
     } catch (error) {
       console.error('❌ Critical error loading department products:', error);
       console.error('Error stack:', error.stack);
-      
+
       // Set all loading states to false on error
       const loadingStates = {};
       departments.forEach(dept => {
@@ -307,55 +341,27 @@ export default function Home() {
   const loadProducts = async () => {
     try {
       setLoadingProducts(true);
-      // Try direct API call first
-      let prods = [];
-      try {
-        const response = await api.get('/products', { sort: '-created_at', limit: 16 });
-        prods = Array.isArray(response) ? response : (response.data || []);
-        console.log('✅ Direct API call successful:', prods.length, 'products');
-      } catch (err) {
-        console.warn('Direct API call failed, trying entities API:', err.message);
-        // Fallback to entities API
-        try {
-          prods = await api.entities.Product.list('-created_at', 16);
-          console.log('✅ Entities API call successful:', prods.length, 'products');
-        } catch (err2) {
-          console.error('Entities API also failed:', err2.message);
-          // Last resort: try without authentication
-          try {
-            const fallbackResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/products?limit=16&sort=-created_at`);
-            if (fallbackResponse.ok) {
-              const fallbackData = await fallbackResponse.json();
-              prods = Array.isArray(fallbackData) ? fallbackData : (fallbackData.data || []);
-              console.log('✅ Fallback API call successful:', prods.length, 'products');
-            } else {
-              console.error('Fallback response not OK:', fallbackResponse.status, fallbackResponse.statusText);
-            }
-          } catch (err3) {
-            console.error('All API calls failed:', err3.message);
-            prods = [];
-          }
+      console.log('🚀 Loading Fresh Drops...');
+
+      // Attempt 1: Direct Entity List (Most reliable standard method)
+      let prods = await api.entities.Product.list('-created_at', 12);
+
+      // Validate response
+      if (!Array.isArray(prods)) {
+        // Handle paginated response { data: [...] }
+        if (prods && Array.isArray(prods.data)) {
+          prods = prods.data;
+        } else {
+          prods = [];
         }
       }
-      
-      // Ensure we have an array
-      if (!Array.isArray(prods)) {
-        console.warn('Products is not an array:', typeof prods, prods);
-        prods = [];
-      }
-      
+
+      console.log(`✅ Loaded ${prods.length} products`);
       setProducts(prods);
-      console.log(`✅ Total loaded: ${prods.length} products for FreshDrops`);
-      if (prods.length === 0) {
-        console.warn('⚠️ No products found for FreshDrops!');
-        console.warn('   Make sure:');
-        console.warn('   1. Backend is running: cd backend && npm run dev');
-        console.warn('   2. Database is seeded: cd backend && npm run db:seed');
-        console.warn('   3. API URL is correct:', import.meta.env.VITE_API_URL || 'http://localhost:8000/api');
-      }
+
     } catch (error) {
       console.error('❌ Error loading products:', error);
-      console.error('Error stack:', error.stack);
+      // Fail gracefully
       setProducts([]);
     } finally {
       setLoadingProducts(false);
@@ -365,6 +371,8 @@ export default function Home() {
   const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
     try {
       const user = await api.auth.me();
+      if (!user) return; // Hook handles redirect usually
+
       const existing = await api.entities.StarCartItem.filter({
         user_id: user.id,
         product_id: product.id
@@ -391,37 +399,66 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)' }}>
-      {/* Animated Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
+    <div className="min-h-screen relative overflow-hidden bg-[#0A0C10]">
+      {/* 🌌 Nebula Alive: Living Background System */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Deep Space Base */}
+        <div className="absolute inset-0 bg-[#0A0C10]" />
+
+        {/* Dynamic Mouse-Following Spotlight (Subtle) */}
         <motion.div
+          className="absolute inset-0 opacity-30"
+          style={{
+            background: useTransform(
+              [spotlightX, spotlightY],
+              ([x, y]) => `radial-gradient(circle 800px at ${x} ${y}, rgba(139, 92, 246, 0.15), transparent 80%)`
+            )
+          }}
+        />
+
+        {/* Aurora Borealis Effect 1 (Purple/Blue) - Now Parallaxed */}
+        <motion.div
+          style={{
+            x: bgX,
+            y: bgY,
+            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.25), rgba(79, 70, 229, 0.1), transparent 70%)',
+            mixBlendMode: 'screen'
+          }}
           animate={{
             scale: [1, 1.2, 1],
-            opacity: [0.15, 0.25, 0.15]
+            rotate: [0, 10, 0],
+            opacity: [0.3, 0.5, 0.3] // Increased opacity for "geiler" look
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px]"
-          style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent 70%)' }}
+          className="absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] rounded-full blur-[100px]"
         />
+
+        {/* Aurora Borealis Effect 2 (Pink/Gold) - Parallaxed Opposite */}
         <motion.div
+          style={{
+            x: useTransform(bgX, v => -v), // Move opposite
+            y: useTransform(bgY, v => -v),
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), rgba(214, 178, 94, 0.15), transparent 70%)',
+            mixBlendMode: 'screen'
+          }}
           animate={{
             scale: [1.2, 1, 1.2],
-            opacity: [0.2, 0.15, 0.2]
+            rotate: [0, -10, 0],
+            opacity: [0.2, 0.4, 0.2]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[120px]"
-          style={{ background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), transparent 70%)' }}
+          className="absolute top-[40%] -right-[20%] w-[70vw] h-[70vw] rounded-full blur-[100px]"
         />
+
+        {/* Floating Particles/Stars - Parallaxed Layer */}
         <motion.div
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-            opacity: [0.1, 0.2, 0.1]
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-[100px]"
-          style={{ background: 'radial-gradient(circle, rgba(var(--gold-rgb), 0.15), transparent 70%)' }}
-        />
+          style={{ x: logoX, y: logoY }} // Move with logo layer for depth
+          className="absolute inset-0 opacity-40"
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 5, repeat: Infinity }}
+        >
+          <div style={{ width: '100%', height: '100%', backgroundImage: 'radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)), radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0))', backgroundSize: '200px 200px' }} />
+        </motion.div>
       </div>
 
       {/* Hero Section */}
@@ -434,79 +471,77 @@ export default function Home() {
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="text-center"
           >
-            {/* Ultra Premium Floating Logo */}
+            {/* Ultra Premium Floating Logo - With Parallax */}
             <motion.div
-              animate={{ 
+              style={{ x: logoX, y: logoY, rotateX: useTransform(logoY, [-30, 30], [5, -5]), rotateY: useTransform(logoX, [-30, 30], [-5, 5]) }}
+              animate={{
                 y: [0, -20, 0]
               }}
-              transition={{ 
+              transition={{
                 y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
               }}
-              className="inline-block mb-12"
+              className="inline-block mb-12 perspective-1000"
             >
-              <div className="relative">
+              <div className="relative transform-preserve-3d">
                 <motion.div
                   animate={{
                     boxShadow: [
                       '0 0 60px rgba(var(--gold-rgb), 0.6)',
-                      '0 0 100px rgba(var(--gold-rgb), 0.8)',
+                      '0 0 120px rgba(var(--gold-rgb), 0.9)', // Intensified glow
                       '0 0 60px rgba(var(--gold-rgb), 0.6)',
                     ]
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] p-4 mx-auto relative"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06))',
-                    border: '2px solid rgba(var(--gold-rgb), 0.5)',
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] p-4 mx-auto relative z-20"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08))',
+                    border: '2px solid rgba(var(--gold-rgb), 0.8)',
                     backdropFilter: 'blur(24px)',
                     WebkitBackdropFilter: 'blur(24px)'
                   }}
                 >
-                  <div className="absolute inset-0 rounded-[2.5rem]" 
-                    style={{
-                      background: 'radial-gradient(circle at 30% 30%, rgba(var(--gold-rgb), 0.2), transparent 70%)'
-                    }}
-                  />
-                  <img 
+                  <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden">
+                    {/* Inner shine effect */}
+                    <motion.div
+                      className="absolute inset-0 z-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent"
+                      animate={{ x: ['-100%', '200%'] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    />
+                  </div>
+
+                  <img
                     src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
                     alt="Nebula Supply"
-                    className="relative w-full h-full object-contain drop-shadow-2xl"
-                    style={{ filter: 'drop-shadow(0 0 20px rgba(var(--gold-rgb), 0.5))' }}
+                    className="relative w-full h-full object-contain drop-shadow-2xl z-10"
+                    style={{ filter: 'drop-shadow(0 0 25px rgba(var(--gold-rgb), 0.6))' }}
                   />
                 </motion.div>
-                {/* Premium Orbital Rings */}
+
+                {/* Premium Orbital Rings - Adjusted for 3D feel */}
                 <motion.div
-                  animate={{ rotate: 360 }}
+                  style={{ rotateX: 60, scaleY: 0.5 }}
+                  animate={{ rotateZ: 360 }}
                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-6 border-2 rounded-full"
-                  style={{ 
+                  className="absolute -inset-10 border-2 rounded-full z-10"
+                  style={{
                     borderColor: 'rgba(var(--gold-rgb), 0.4)',
                     boxShadow: '0 0 30px rgba(var(--gold-rgb), 0.3)'
                   }}
                 />
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                  className="absolute -inset-10 border-2 rounded-full"
-                  style={{ 
-                    borderColor: 'rgba(var(--gold-rgb), 0.3)',
-                    boxShadow: '0 0 40px rgba(var(--gold-rgb), 0.2)'
-                  }}
-                />
                 {/* Sparkle Accents */}
                 <motion.div
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.5, 1],
                     rotate: [0, 180, 360]
                   }}
                   transition={{ duration: 4, repeat: Infinity }}
-                  className="absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center"
+                  className="absolute -top-5 -right-5 w-10 h-10 rounded-full flex items-center justify-center z-30"
                   style={{
                     background: 'linear-gradient(135deg, var(--gold), var(--gold2))',
-                    boxShadow: '0 0 30px rgba(var(--gold-rgb), 0.8)'
+                    boxShadow: '0 0 40px rgba(var(--gold-rgb), 1)'
                   }}
                 >
-                  <Sparkles className="w-4 h-4 text-zinc-900" />
+                  <Sparkles className="w-5 h-5 text-zinc-900" />
                 </motion.div>
               </div>
             </motion.div>
@@ -518,22 +553,22 @@ export default function Home() {
               transition={{ delay: 0.2, duration: 0.6 }}
             >
               <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 leading-none">
-                <motion.span 
+                <motion.span
                   className="block bg-gradient-to-r from-white via-zinc-100 to-white bg-clip-text text-transparent"
-                  style={{ 
+                  style={{
                     textShadow: '0 0 40px rgba(255, 255, 255, 0.3)',
                     filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.2))'
                   }}
                 >
                   NEBULA
                 </motion.span>
-                <motion.span 
+                <motion.span
                   className="block bg-gradient-to-r from-[#E8C76A] via-[#F5D98B] to-[#E8C76A] bg-clip-text text-transparent"
-                  animate={{ 
+                  animate={{
                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
                   }}
                   transition={{ duration: 5, repeat: Infinity }}
-                  style={{ 
+                  style={{
                     backgroundSize: '200% auto',
                     textShadow: '0 0 60px rgba(var(--gold-rgb), 0.6)',
                     filter: 'drop-shadow(0 0 30px rgba(var(--gold-rgb), 0.4))'
@@ -545,12 +580,12 @@ export default function Home() {
             </motion.div>
 
             {/* Premium Subtitle */}
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
               className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto font-bold tracking-wide"
-              style={{ 
+              style={{
                 color: 'rgba(255, 255, 255, 0.85)',
                 textShadow: '0 2px 20px rgba(0, 0, 0, 0.5)'
               }}
@@ -598,7 +633,7 @@ export default function Home() {
                   whileHover={{ scale: 1.05, y: -5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button 
+                  <Button
                     className="h-16 px-10 text-lg rounded-2xl font-black"
                     style={{
                       background: 'linear-gradient(135deg, rgba(214, 178, 94, 0.15), rgba(214, 178, 94, 0.08))',
@@ -668,15 +703,15 @@ export default function Home() {
       <section className="py-20 md:py-28 relative z-10" style={{ background: '#0B0D12' }}>
         {/* Subtle Corner Glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div 
+          <div
             className="absolute top-0 left-0 w-[400px] h-[400px] rounded-full blur-[150px] opacity-30"
             style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent 70%)' }}
           />
-          <div 
+          <div
             className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-[150px] opacity-30"
             style={{ background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent 70%)' }}
           />
-          <div 
+          <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[180px] opacity-20"
             style={{ background: 'radial-gradient(circle, rgba(214, 178, 94, 0.15), transparent 70%)' }}
           />
@@ -703,7 +738,7 @@ export default function Home() {
               }}
             >
               <Sparkles className="w-4 h-4" style={{ color: '#F2D27C' }} />
-              <span 
+              <span
                 className="text-xs font-bold uppercase tracking-widest"
                 style={{ color: '#F2D27C' }}
               >
@@ -712,12 +747,12 @@ export default function Home() {
             </motion.div>
 
             {/* Title - High Contrast */}
-            <motion.h2 
+            <motion.h2
               className="text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              style={{ 
+              style={{
                 color: 'rgba(255, 255, 255, 0.95)',
                 textShadow: '0 2px 20px rgba(0, 0, 0, 0.3)'
               }}
@@ -726,7 +761,7 @@ export default function Home() {
             </motion.h2>
 
             {/* Subtitle - Better Readability */}
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -743,12 +778,12 @@ export default function Home() {
             {loadingDepts ? (
               // Skeleton Loading
               Array.from({ length: 4 }).map((_, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   animate={{ opacity: [0.3, 0.6, 0.3] }}
                   transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
                   className="rounded-[20px] min-h-[160px] md:min-h-[180px]"
-                  style={{ 
+                  style={{
                     background: 'rgba(255, 255, 255, 0.04)',
                     border: '1px solid rgba(255, 255, 255, 0.08)'
                   }}
@@ -764,12 +799,19 @@ export default function Home() {
               ))
             ) : (
               departments.map((dept, index) => (
-                <CategoryCard 
-                  key={dept.id} 
-                  department={dept} 
-                  index={index}
-                  productCount={departmentProductCounts[dept.id] || 0}
-                />
+                <motion.div
+                  key={dept.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                >
+                  <CategoryCard
+                    department={dept}
+                    index={index}
+                    productCount={departmentProductCounts[dept.id] || 0}
+                  />
+                </motion.div>
               ))
             )}
           </div>
@@ -784,7 +826,7 @@ export default function Home() {
           >
             <Link to={createPageUrl('Products')}>
               <motion.div whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}>
-                <Button 
+                <Button
                   className="h-12 px-8 rounded-xl font-bold"
                   style={{
                     background: 'rgba(255, 255, 255, 0.06)',
@@ -808,7 +850,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ 
+          transition={{
             delay: index * 0.2,
             duration: 0.8,
             ease: "easeOut"
@@ -831,14 +873,24 @@ export default function Home() {
       ))}
 
       {/* Featured Products - Fresh Drops Slider */}
-      <FreshDropsSection 
-        products={products} 
-        loading={loadingProducts}
-        onQuickView={(p) => {
-          setQuickViewProduct(p);
-          setIsQuickViewOpen(true);
-        }}
-      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+      >
+        <FreshDropsSection
+          products={products}
+          loading={loadingProducts}
+          onQuickView={(p) => {
+            setQuickViewProduct(p);
+            setIsQuickViewOpen(true);
+          }}
+        />
+      </motion.div>
+
+      {/* Video Spotlight Section */}
+      <VideoSpotlight />
 
       <ProductQuickView
         product={quickViewProduct}
@@ -853,7 +905,7 @@ export default function Home() {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-yellow-900/10 via-purple-900/10 to-pink-900/10" />
           <motion.div
-            animate={{ 
+            animate={{
               scale: [1, 1.3, 1],
               rotate: [0, 180, 360]
             }}
@@ -861,7 +913,7 @@ export default function Home() {
             className="absolute top-0 right-0 w-[600px] h-[600px] bg-yellow-500/20 rounded-full blur-[120px]"
           />
           <motion.div
-            animate={{ 
+            animate={{
               scale: [1.3, 1, 1.3],
               rotate: [360, 180, 0]
             }}
@@ -880,7 +932,7 @@ export default function Home() {
           >
             {/* Animated Background Pattern */}
             <motion.div
-              animate={{ 
+              animate={{
                 backgroundPosition: ['0% 0%', '100% 100%']
               }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -889,7 +941,7 @@ export default function Home() {
 
             {/* Rotating Crown */}
             <motion.div
-              animate={{ 
+              animate={{
                 rotate: [0, 15, -15, 0],
                 y: [0, -15, 0],
                 scale: [1, 1.1, 1]
@@ -912,7 +964,7 @@ export default function Home() {
               <div className="relative w-28 h-28 bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 rounded-3xl flex items-center justify-center shadow-2xl">
                 <span className="text-6xl drop-shadow-2xl">👑</span>
               </div>
-              
+
               {/* Orbiting Sparkles */}
               <motion.div
                 animate={{ rotate: 360 }}
@@ -926,7 +978,7 @@ export default function Home() {
             </motion.div>
 
             {/* Title */}
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -938,7 +990,7 @@ export default function Home() {
             </motion.h2>
 
             {/* Subtitle */}
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -951,7 +1003,7 @@ export default function Home() {
             </motion.p>
 
             <div className="grid md:grid-cols-3 gap-5 mb-10">
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -5, scale: 1.03 }}
                 className="rounded-2xl p-6 text-center"
                 style={{
@@ -965,7 +1017,7 @@ export default function Home() {
                 <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Erster Zugriff auf neue Produkte</p>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -5, scale: 1.03 }}
                 className="rounded-2xl p-6 text-center"
                 style={{
@@ -979,7 +1031,7 @@ export default function Home() {
                 <p className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Spezielle VIP-Rabatte & Angebote</p>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -5, scale: 1.03 }}
                 className="rounded-2xl p-6 text-center"
                 style={{
@@ -1009,14 +1061,14 @@ export default function Home() {
                   className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ backgroundSize: '200% 100%' }}
                 />
-                
+
                 {/* Shine Effect */}
                 <motion.div
                   animate={{ x: ['-100%', '200%'] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
                 />
-                
+
                 {/* Content */}
                 <span className="relative flex items-center gap-2">
                   <motion.span

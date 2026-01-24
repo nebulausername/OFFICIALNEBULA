@@ -50,7 +50,11 @@ import cronRoutes from './routes/cron.routes.js';
 import uploadsRoutes from './routes/uploads.routes.js';
 import userRoutes from './routes/user.routes.js';
 
+import { createServer } from 'http';
+import { initializeSocket } from './services/socket.service.js';
+
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 8000;
 
 // Security middleware
@@ -58,8 +62,11 @@ app.use(helmet());
 app.use(compression());
 
 // CORS configuration
+// CORS configuration
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+    : ['http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -159,8 +166,11 @@ if (!process.env.VERCEL) {
       console.error('❌ Error initializing Cleanup Service:', err);
     });
 
+  // Initialize Socket.io
+  initializeSocket(httpServer);
+
   // Start server (local / VPS only)
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🌐 CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:3000'}`);
