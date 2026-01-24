@@ -3,15 +3,15 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/src/server.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/health",
-      "dest": "backend/src/server.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/uploads/(.*)",
-      "dest": "backend/src/server.js"
+      "dest": "/api/index.js"
     },
     {
       "handle": "filesystem"
