@@ -1,59 +1,35 @@
-# Vercel Environment Variables Setup
+# Vercel Environment Variables Setup (Neon Edition)
 
 ## Wichtige Environment-Variablen für Vercel
 
 Gehe zu: **Vercel Dashboard → Dein Projekt → Settings → Environment Variables**
 
-### 1. DATABASE_URL (WICHTIG: Session Pooler verwenden!)
+### 1. DATABASE_URL (Pooled Connection)
+**Wert:**
 ```
-postgresql://postgres.imiitgxrweucowymbwiz:STARKESPASSWORT52241@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
-```
-**Wichtig:** Verwende die Session Pooler URL (Port 6543), nicht die direkte Verbindung!
-
-### 2. TELEGRAM_BOT_TOKEN
-```
-Dein Telegram Bot Token (von @BotFather)
+postgresql://neondb_owner:npg_73ZhrnXQEJMw@ep-curly-silence-ahf3ow1l-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
 ```
 
-### 3. USE_WEBHOOK
+### 2. DIRECT_URL (Direct Connection for Migrations)
+**Wert:**
 ```
-true
-```
-
-### 4. WEBAPP_URL
-```
-https://officialnebula.vercel.app
+postgresql://neondb_owner:npg_73ZhrnXQEJMw@ep-curly-silence-ahf3ow1l.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
 ```
 
-### 5. JWT_SECRET
-```
-Generiere mit: openssl rand -base64 32
-Oder nutze einen sicheren zufälligen String
-```
+### 3. TELEGRAM_BOT_TOKEN
+**Wert:** `7363417926:AAFF9c6g2Yp3EQ9z1ad-MRZM59f1JaRSMHM`
 
-### 6. NODE_ENV
-```
-production
-```
+### 4. JWT_SECRET
+**Wert:** `nebula-supply-jwt-secret-key-2026-super-secure`
+
+### 5. WEBAPP_URL
+**Wert:** `https://officialnebula.vercel.app`
+
+### 6. USE_WEBHOOK
+**Wert:** `true`
 
 ### 7. CORS_ORIGIN
-```
-https://officialnebula.vercel.app
-```
+**Wert:** `https://officialnebula.vercel.app`
 
-### 8. BOT_LOG_LEVEL (optional)
-```
-INFO
-```
-
-## Nach dem Deployment
-
-### Webhook bei Telegram setzen:
-```
-https://api.telegram.org/bot<DEIN_BOT_TOKEN>/setWebhook?url=https://officialnebula.vercel.app/api/telegram/webhook
-```
-
-### Status prüfen:
-```
-https://officialnebula.vercel.app/api/telegram/webhook/status
-```
+## Hinweis
+Ohne `DIRECT_URL` können Migrationen (Prisma Client Generation während des Deployments) fehlschlagen!
