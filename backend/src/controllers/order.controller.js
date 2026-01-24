@@ -2,6 +2,7 @@ import prisma from '../config/database.js';
 import { sendOrderConfirmation, sendStatusUpdate } from '../services/email.service.js';
 import { sendOrderNotification } from '../services/telegram.service.js';
 import { notifyUser, getIO } from '../services/socket.service.js';
+import { updateRankForUser } from '../services/ranking.service.js';
 
 export const listOrders = async (req, res, next) => {
   try {
@@ -276,6 +277,26 @@ export const updateOrderStatus = async (req, res, next) => {
         await sendStatusUpdate(request, status, message);
       } catch (notifError) {
         console.error('Notification error:', notifError);
+      }
+    }
+
+    // 🌟 Rank Progression Logic
+    if ((status === 'shipped' || status === 'completed') && request.user_id) {
+      try {
+        const result = await updateRankForUser(request.user_id);
+        if (result) {
+          console.log(`🎉 Rank Update for ${request.user_id}: ${result.oldRank} -> ${result.newRank}`);
+
+          // Notify User about Rank Up!
+          if (result.newRank !== result.oldRank) {
+            notifyUser(request.user_id, 'rank_up', {
+              newRank: result.newRank,
+              totalSpend: result.totalSpend
+            });
+          }
+        }
+      } catch (rankError) {
+        console.error('Rank Update failed:', rankError);
       }
     }
 

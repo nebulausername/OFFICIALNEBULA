@@ -74,21 +74,28 @@ const AuthenticatedApp = () => {
 
 
 import { SocketProvider } from '@/contexts/SocketContext';
+import { SoundProvider } from '@/contexts/SoundContext';
 import TelegramRealtimeListener from '@/components/TelegramRealtimeListener';
+import AdminRealtimeListener from '@/components/admin/AdminRealtimeListener';
+import UserRealtimeListener from '@/components/UserRealtimeListener';
 
 function App() {
 
   return (
     <AuthProvider>
       <SocketProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <NavigationTracker />
-            <TelegramRealtimeListener />
-            <AuthenticatedApp />
-          </Router>
-          <Toaster />
-        </QueryClientProvider>
+        <SoundProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <NavigationTracker />
+              <TelegramRealtimeListener />
+              <AdminRealtimeListener />
+              <UserRealtimeListener />
+              <AuthenticatedApp />
+            </Router>
+            <Toaster />
+          </QueryClientProvider>
+        </SoundProvider>
       </SocketProvider>
     </AuthProvider>
   )

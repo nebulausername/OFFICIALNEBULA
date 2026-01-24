@@ -12,6 +12,7 @@ import CategoryCard from '../components/home/CategoryCard';
 import FreshDropsSection from '../components/home/FreshDropsSection';
 import CategoryProductsSection from '../components/home/CategoryProductsSection';
 import VideoSpotlight from '../components/home/VideoSpotlight';
+import TypewriterEffect from '@/components/ui/TypewriterEffect';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
@@ -562,20 +563,20 @@ export default function Home() {
                 >
                   NEBULA
                 </motion.span>
-                <motion.span
-                  className="block bg-gradient-to-r from-[#E8C76A] via-[#F5D98B] to-[#E8C76A] bg-clip-text text-transparent"
-                  animate={{
-                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
-                  }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  style={{
-                    backgroundSize: '200% auto',
-                    textShadow: '0 0 60px rgba(var(--gold-rgb), 0.6)',
-                    filter: 'drop-shadow(0 0 30px rgba(var(--gold-rgb), 0.4))'
-                  }}
-                >
-                  SUPPLY
-                </motion.span>
+                <div className="relative inline-block">
+                  <TypewriterEffect
+                    words={['SUPPLY', 'LUXURY', 'FUTURE', 'VIBES']}
+                    className="block bg-gradient-to-r from-[#E8C76A] via-[#F5D98B] to-[#E8C76A] bg-clip-text text-transparent"
+                    cursorClassName="bg-[#E8C76A]"
+                  />
+                  {/* Glow Effect for Text */}
+                  <motion.div
+                    className="absolute inset-0 blur-2xl -z-10"
+                    animate={{ opacity: [0.5, 0.8, 0.5] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                    style={{ background: 'radial-gradient(ellipse at center, rgba(232, 199, 106, 0.3), transparent 70%)' }}
+                  />
+                </div>
               </h1>
             </motion.div>
 

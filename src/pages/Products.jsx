@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '@/api';
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
+import { InView } from 'react-intersection-observer';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import PremiumProductModal from '../components/products/PremiumProductModal';
 
@@ -33,15 +34,25 @@ export default function Products() {
     inStock: null
   });
 
+  const [inStock, setInStock] = useState(null);
+
+  // Infinite Scroll State
+  const [visibleProducts, setVisibleProducts] = useState(8);
+
+  useEffect(() => {
+    // Reset visible count when filters change
+    setVisibleProducts(8);
+  }, [searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
+
   useEffect(() => {
     loadData();
-    
+
     // Parse URL params
     const urlParams = new URLSearchParams(window.location.search);
     const searchParam = urlParams.get('search');
     const categoryParam = urlParams.get('category');
     const departmentParam = urlParams.get('department');
-    
+
     if (searchParam) setSearchQuery(searchParam);
     if (categoryParam) setSelectedCategory(categoryParam);
     if (departmentParam) setSelectedDepartment(departmentParam);
@@ -52,31 +63,31 @@ export default function Products() {
   const loadData = async () => {
     try {
       // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Products.jsx:loadData:start',message:'Loading all shop data',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Products.jsx:loadData:start', message: 'Loading all shop data', data: {}, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
       // #endregion
-      
+
       const [prods, cats, brds, depts] = await Promise.all([
         api.entities.Product.list('-created_at'), // Fixed: was '-created_date', should be '-created_at'
         api.entities.Category.list('sort_order'),
         api.entities.Brand.list('sort_order'),
         api.entities.Department.list('sort_order')
       ]);
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Products.jsx:loadData:loaded',message:'Shop data loaded',data:{productsCount:prods?.length||0,categoriesCount:cats?.length||0,brandsCount:brds?.length||0,departmentsCount:depts?.length||0,productDeptIds:prods?.map(p=>p.department_id)||[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Products.jsx:loadData:loaded', message: 'Shop data loaded', data: { productsCount: prods?.length || 0, categoriesCount: cats?.length || 0, brandsCount: brds?.length || 0, departmentsCount: depts?.length || 0, productDeptIds: prods?.map(p => p.department_id) || [] }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
       // #endregion
-      
+
       setProducts(prods);
       setCategories(cats);
       setBrands(brds);
       setDepartments(depts);
     } catch (error) {
       console.error('Error loading data:', error);
-      
+
       // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Products.jsx:loadData:error',message:'Error loading shop data',data:{error:error.message,networkError:error.networkError,apiUrl:import.meta.env.VITE_API_URL||'http://localhost:8000/api'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Products.jsx:loadData:error', message: 'Error loading shop data', data: { error: error.message, networkError: error.networkError, apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000/api' }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
       // #endregion
-      
+
       // Show user-friendly error message
       if (error.networkError || error.message?.includes('Verbindung zum Server')) {
         console.error('❌ Backend-Server läuft nicht!');
@@ -132,9 +143,9 @@ export default function Products() {
     let count = 0;
     if (advancedFilters.categories?.length > 0) count++;
     if (advancedFilters.brands?.length > 0) count++;
-    if (advancedFilters.priceRange && 
-        (advancedFilters.priceRange[0] > priceRange.min || 
-         advancedFilters.priceRange[1] < priceRange.max)) count++;
+    if (advancedFilters.priceRange &&
+      (advancedFilters.priceRange[0] > priceRange.min ||
+        advancedFilters.priceRange[1] < priceRange.max)) count++;
     if (advancedFilters.sizes?.length > 0) count++;
     if (advancedFilters.colors?.length > 0) count++;
     if (advancedFilters.inStock !== null) count++;
@@ -160,44 +171,44 @@ export default function Products() {
       })();
 
       // Search filter
-      const matchesSearch = !searchQuery || 
+      const matchesSearch = !searchQuery ||
         product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tagsArray.some(tag => (tag || '').toLowerCase().includes(searchQuery.toLowerCase()));
-      
+
       // Department filter
       const matchesDepartment = selectedDepartment === 'all' || product.department_id === selectedDepartment;
-      
+
       // Quick category filter (from chips)
       const matchesQuickCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
-      
+
       // Advanced category filter
-      const matchesAdvancedCategories = advancedFilters.categories.length === 0 || 
+      const matchesAdvancedCategories = advancedFilters.categories.length === 0 ||
         advancedFilters.categories.includes(product.category_id);
-      
+
       // Brand filter
-      const matchesBrand = advancedFilters.brands.length === 0 || 
+      const matchesBrand = advancedFilters.brands.length === 0 ||
         advancedFilters.brands.includes(product.brand_id);
-      
+
       // Price filter
-      const matchesPrice = !advancedFilters.priceRange || 
-        ((product.price || 0) >= advancedFilters.priceRange[0] && 
-         (product.price || 0) <= advancedFilters.priceRange[1]);
-      
+      const matchesPrice = !advancedFilters.priceRange ||
+        ((product.price || 0) >= advancedFilters.priceRange[0] &&
+          (product.price || 0) <= advancedFilters.priceRange[1]);
+
       // Size filter
-      const matchesSize = advancedFilters.sizes.length === 0 || 
+      const matchesSize = advancedFilters.sizes.length === 0 ||
         (product.sizes || []).some(size => advancedFilters.sizes.includes(size));
-      
+
       // Color filter
-      const matchesColor = advancedFilters.colors.length === 0 || 
+      const matchesColor = advancedFilters.colors.length === 0 ||
         (product.colors || []).some(color => advancedFilters.colors.includes(color.name));
-      
+
       // Stock filter
-      const matchesStock = advancedFilters.inStock === null || 
+      const matchesStock = advancedFilters.inStock === null ||
         product.in_stock === advancedFilters.inStock;
-      
-      return matchesSearch && matchesDepartment && matchesQuickCategory && matchesAdvancedCategories && 
-             matchesBrand && matchesPrice && matchesSize && matchesColor && matchesStock;
+
+      return matchesSearch && matchesDepartment && matchesQuickCategory && matchesAdvancedCategories &&
+        matchesBrand && matchesPrice && matchesSize && matchesColor && matchesStock;
     }).sort((a, b) => {
       switch (sortBy) {
         case 'price_asc': return (a.price || 0) - (b.price || 0);
@@ -222,7 +233,7 @@ export default function Products() {
     setSelectedCategory('all');
     setSelectedDepartment('all');
     setSearchQuery('');
-    
+
     // Update URL
     const url = new URL(window.location);
     url.searchParams.delete('department');
@@ -230,7 +241,7 @@ export default function Products() {
     url.searchParams.delete('search');
     window.history.pushState({}, '', url);
   };
-  
+
   const handleDepartmentSelect = (departmentId) => {
     setSelectedDepartment(departmentId);
     // Update URL
@@ -246,7 +257,7 @@ export default function Products() {
   const handleAddToCart = async (variantData) => {
     try {
       const user = await api.auth.me();
-      
+
       await api.entities.StarCartItem.create({
         user_id: user.id,
         product_id: variantData.product_id,
@@ -262,7 +273,7 @@ export default function Products() {
           sku: variantData.sku
         }
       });
-      
+
       setIsQuickViewOpen(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -274,7 +285,7 @@ export default function Products() {
       {/* Shop Hero */}
       <section className="relative pt-8 pb-10">
         {/* Subtle Background Gradient */}
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background: 'radial-gradient(ellipse at center top, rgba(214, 178, 94, 0.06) 0%, transparent 60%)'
@@ -288,7 +299,7 @@ export default function Products() {
             animate={{ opacity: 1, y: 0 }}
             className="flex justify-center mb-6"
           >
-            <div 
+            <div
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full"
               style={{
                 background: 'rgba(214, 178, 94, 0.1)',
@@ -309,7 +320,7 @@ export default function Products() {
             transition={{ delay: 0.1 }}
             className="text-center mb-4"
           >
-            <h1 
+            <h1
               className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight"
               style={{ color: '#FFFFFF' }}
             >
@@ -373,7 +384,7 @@ export default function Products() {
               animate={{ opacity: 1 }}
               className="text-center py-20"
             >
-              <div 
+              <div
                 className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
                 style={{ background: 'rgba(214, 178, 94, 0.1)', border: '1px solid rgba(214, 178, 94, 0.2)' }}
               >
@@ -388,12 +399,12 @@ export default function Products() {
             </motion.div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredProducts.map((product, index) => (
+              {filteredProducts.slice(0, visibleProducts).map((product, index) => (
                 <motion.div
                   key={product.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={{ delay: index % 8 * 0.05 }}
                 >
                   <PremiumProductCard
                     product={product}
@@ -404,6 +415,27 @@ export default function Products() {
                   />
                 </motion.div>
               ))}
+
+              {/* Infinite Scroll Trigger */}
+              {visibleProducts < filteredProducts.length && (
+                <InView
+                  as="div"
+                  onChange={(inView) => {
+                    if (inView) {
+                      // Load more
+                      setTimeout(() => {
+                        setVisibleProducts(prev => prev + 8);
+                      }, 300); // Small delay for effect
+                    }
+                  }}
+                  className="col-span-full py-10 flex justify-center w-full"
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-8 h-8 border-4 border-[#D6B25E] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-zinc-500 text-sm">Lade weitere Produkte...</span>
+                  </div>
+                </InView>
+              )}
             </div>
           )}
         </div>

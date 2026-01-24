@@ -4,11 +4,81 @@ import { api } from '@/api';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Star, Shield, Zap, Package, Truck, Clock, MapPin, Check, AlertCircle } from 'lucide-react';
+import { ShoppingBag, Plus, Minus, ArrowLeft, ChevronLeft, ChevronRight, Star, Shield, Zap, Package, Truck, Clock, MapPin, Check, AlertCircle, Timer } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import WishlistButton from '../components/wishlist/WishlistButton';
 import { useWishlist } from '../components/wishlist/WishlistContext';
+
+function DetailDropCountdown({ targetDate }) {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const difference = new Date(targetDate) - now;
+
+      if (difference <= 0) {
+        clearInterval(interval);
+        window.location.reload(); // Refresh to enable buying
+      } else {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  return (
+    <div className="w-full p-6 rounded-2xl border border-purple-500/50 bg-gradient-to-br from-purple-900/40 via-black to-purple-900/40 backdrop-blur-xl mb-8 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/30 animate-pulse">
+            <Timer className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl font-black text-white uppercase tracking-wider">Daily Drop</h3>
+            <p className="text-purple-200 font-medium">Dieses Produkt droppt in:</p>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <div className="text-center">
+            <div className="bg-black/50 border border-purple-500/30 rounded-xl w-16 h-16 flex items-center justify-center mb-1">
+              <span className="text-3xl font-black text-white">{timeLeft.days}</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">Tage</span>
+          </div>
+          <div className="text-center">
+            <div className="bg-black/50 border border-purple-500/30 rounded-xl w-16 h-16 flex items-center justify-center mb-1">
+              <span className="text-3xl font-black text-white">{timeLeft.hours.toString().padStart(2, '0')}</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">Std</span>
+          </div>
+          <div className="text-center">
+            <div className="bg-black/50 border border-purple-500/30 rounded-xl w-16 h-16 flex items-center justify-center mb-1">
+              <span className="text-3xl font-black text-white">{timeLeft.minutes.toString().padStart(2, '0')}</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">Min</span>
+          </div>
+          <div className="text-center">
+            <div className="bg-black/50 border border-purple-500/30 rounded-xl w-16 h-16 flex items-center justify-center mb-1">
+              <span className="text-3xl font-black text-white w-12">{timeLeft.seconds.toString().padStart(2, '0')}</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">Sek</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ProductDetail() {
   const [product, setProduct] = useState(null);
@@ -64,7 +134,7 @@ export default function ProductDetail() {
       const prod = productData[0];
       setProduct(prod);
       setImages(productImages.sort((a, b) => a.sort_order - b.sort_order));
-      
+
       // Auto-select first color if available and set initial image
       if (prod.colors && prod.colors.length > 0) {
         const firstColor = prod.colors[0];
@@ -118,7 +188,7 @@ export default function ProductDetail() {
   const handleAddToCart = async () => {
     try {
       const user = await api.auth.me();
-      
+
       // Find variant for price
       const variant = product.variants?.find(v => v.color_id === selectedColor?.id && v.size === selectedSize);
       const price = variant?.price_override || product.price;
@@ -161,7 +231,7 @@ export default function ProductDetail() {
 
   const calculatePrice = () => {
     let basePrice = product.price;
-    
+
     if (product.option_schema?.options) {
       product.option_schema.options.forEach(option => {
         const selectedValue = selectedOptions[option.name];
@@ -183,14 +253,14 @@ export default function ProductDetail() {
         basePrice = basePrice * (1 + selectedShipping.price_modifier);
       }
     }
-    
+
     return basePrice;
   };
 
   const navigateImage = (direction) => {
     const allImages = [product.cover_image, ...images.map(img => img.url)].filter(Boolean);
     const currentIndex = allImages.indexOf(selectedImage);
-    
+
     if (direction === 'next') {
       const nextIndex = (currentIndex + 1) % allImages.length;
       setSelectedImage(allImages[nextIndex]);
@@ -204,7 +274,7 @@ export default function ProductDetail() {
     const today = new Date();
     const deliveryStartDate = new Date(today);
     const deliveryEndDate = new Date(today);
-    
+
     // Add business days (skip weekends)
     let businessDaysAdded = 0;
     while (businessDaysAdded < daysMin) {
@@ -212,14 +282,14 @@ export default function ProductDetail() {
       const dayOfWeek = deliveryStartDate.getDay();
       if (dayOfWeek !== 0 && dayOfWeek !== 6) businessDaysAdded++;
     }
-    
+
     businessDaysAdded = 0;
     while (businessDaysAdded < daysMax) {
       deliveryEndDate.setDate(deliveryEndDate.getDate() + 1);
       const dayOfWeek = deliveryEndDate.getDay();
       if (dayOfWeek !== 0 && dayOfWeek !== 6) businessDaysAdded++;
     }
-    
+
     const dateFormatter = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
     return {
       start: dateFormatter.format(deliveryStartDate),
@@ -266,7 +336,7 @@ export default function ProductDetail() {
   // Build image gallery - color images first, then product images
   const getGalleryImages = () => {
     const result = [];
-    
+
     // If selected color has images, use those
     if (selectedColor?.images?.length > 0) {
       result.push(...selectedColor.images);
@@ -281,17 +351,20 @@ export default function ProductDetail() {
         }
       });
     }
-    
+
     return result.filter(Boolean);
   };
-  
+
   const allImages = getGalleryImages();
-  
+
   // Ensure selected image is in the gallery
   if (selectedImage && !allImages.includes(selectedImage) && allImages.length > 0) {
     setSelectedImage(allImages[0]);
   }
   const currentPrice = calculatePrice();
+
+  // Drop Logic
+  const isDrop = product.drop_date && new Date(product.drop_date) > new Date();
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
@@ -306,9 +379,9 @@ export default function ProductDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
         {/* Product Gallery */}
-          <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {/* Main Image with Navigation */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="relative aspect-square rounded-2xl overflow-hidden group"
@@ -380,7 +453,7 @@ export default function ProductDetail() {
 
           {/* Image Thumbnails Gallery */}
           {allImages.length > 1 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="grid grid-cols-5 gap-2"
@@ -391,11 +464,10 @@ export default function ProductDetail() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedImage(imgUrl)}
-                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                    selectedImage === imgUrl
+                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${selectedImage === imgUrl
                       ? 'border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/30'
                       : 'border-zinc-800 hover:border-zinc-600'
-                  }`}
+                    }`}
                 >
                   <img
                     src={imgUrl}
@@ -409,7 +481,7 @@ export default function ProductDetail() {
         </div>
 
         {/* Product Info */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="space-y-5 sm:space-y-6"
@@ -437,21 +509,29 @@ export default function ProductDetail() {
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-4 leading-tight drop-shadow-lg" style={{ color: 'rgba(255,255,255,0.95)' }}>{product.name}</h1>
             <div className="flex items-center gap-2 flex-wrap mb-4">
-              <span 
+              <span
                 className="px-3 py-1.5 rounded-lg font-mono text-xs font-bold"
-                style={{ 
-                  background: 'rgba(214, 178, 94, 0.15)', 
+                style={{
+                  background: 'rgba(214, 178, 94, 0.15)',
                   border: '1px solid rgba(214, 178, 94, 0.3)',
                   color: 'var(--gold)'
                 }}
               >
                 {product.sku}
               </span>
-              {product.in_stock ? (
-                <span 
+
+              {isDrop ? (
+                <span
+                  className="px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5 bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                >
+                  <Timer className="w-4 h-4 animate-pulse" />
+                  Coming Soon
+                </span>
+              ) : product.in_stock ? (
+                <span
                   className="px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1.5"
-                  style={{ 
-                    background: 'rgba(34, 197, 94, 0.15)', 
+                  style={{
+                    background: 'rgba(34, 197, 94, 0.15)',
                     border: '1px solid rgba(34, 197, 94, 0.3)',
                     color: '#22c55e'
                   }}
@@ -460,10 +540,10 @@ export default function ProductDetail() {
                   Auf Lager
                 </span>
               ) : (
-                <span 
+                <span
                   className="px-3 py-1.5 rounded-lg font-bold text-xs"
-                  style={{ 
-                    background: 'rgba(239, 68, 68, 0.15)', 
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.15)',
                     border: '1px solid rgba(239, 68, 68, 0.3)',
                     color: '#ef4444'
                   }}
@@ -472,10 +552,10 @@ export default function ProductDetail() {
                 </span>
               )}
               {brand && (
-                <span 
+                <span
                   className="px-3 py-1.5 rounded-lg font-bold text-xs"
-                  style={{ 
-                    background: 'rgba(139, 92, 246, 0.15)', 
+                  style={{
+                    background: 'rgba(139, 92, 246, 0.15)',
                     border: '1px solid rgba(139, 92, 246, 0.3)',
                     color: '#a78bfa'
                   }}
@@ -487,7 +567,7 @@ export default function ProductDetail() {
           </div>
 
           {/* Price */}
-          <div 
+          <div
             className="py-5 px-5 rounded-xl"
             style={{
               background: 'rgba(214, 178, 94, 0.08)',
@@ -495,7 +575,7 @@ export default function ProductDetail() {
             }}
           >
             <div className="flex items-baseline gap-3">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-gradient-gold">
+              <div className={`text-3xl sm:text-4xl md:text-5xl font-black ${isDrop ? 'text-zinc-500' : 'text-gradient-gold'}`}>
                 {currentPrice.toFixed(2)}€
               </div>
               {currentPrice !== product.price && (
@@ -511,7 +591,7 @@ export default function ProductDetail() {
 
           {/* Description */}
           {product.description && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
@@ -544,145 +624,145 @@ export default function ProductDetail() {
             </motion.div>
           )}
 
-          {/* Shipping Info Card - Enhanced */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-4"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <motion.div 
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50"
-              >
-                <Truck className="w-5 h-5 text-white" />
-              </motion.div>
-              <h3 className="text-lg sm:text-xl font-black text-white">
-                Versandoptionen
-              </h3>
-            </div>
-
-            {/* Germany Shipping */}
+          {/* Shipping Info Card - Enhanced - Hide for Drops */}
+          {!isDrop && (
             <motion.div
-              whileHover={{ x: 4, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedShippingOption('Germany')}
-              className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${
-                selectedShippingOption === 'Germany'
-                  ? 'bg-gradient-to-br from-green-500/25 via-emerald-500/15 to-green-600/15 border-green-400/80 shadow-lg shadow-green-500/40'
-                  : 'bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-green-500/40 hover:border-green-400/60 hover:shadow-lg hover:shadow-green-500/30'
-              }`}
-            >
-              <div className="absolute -right-20 -top-20 w-40 h-40 bg-green-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
-
-              <div className="relative flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1">
-                  <motion.div 
-                    whileHover={{ scale: 1.1, rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                    className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/50 flex-shrink-0"
-                  >
-                    <Truck className="w-7 h-7 text-white" />
-                  </motion.div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-green-300 uppercase tracking-widest mb-2">🚚 Deutschland</p>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-green-500/20 px-2.5 py-1 rounded-lg">
-                        <Clock className="w-4 h-4 text-green-400" />
-                        <span className="font-black text-sm text-green-200">1-5 Werktage</span>
-                      </motion.div>
-                      <div className="flex items-center gap-1.5 bg-green-500/20 px-2.5 py-1 rounded-lg">
-                        <MapPin className="w-4 h-4 text-emerald-400" />
-                        <span className="font-bold text-sm text-green-200">DE</span>
-                      </div>
-                    </div>
-                    <div className="mt-2 text-xs font-bold text-green-100 bg-green-500/20 px-2.5 py-1 rounded-lg w-fit">
-                      Normaler Preis
-                    </div>
-                  </div>
-                </div>
-                <motion.div
-                  whileHover={{ scale: 1.2, rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-lg font-black flex-shrink-0 shadow-lg"
-                >
-                  ✓
-                </motion.div>
-              </div>
-            </motion.div>
-
-            {/* China Shipping */}
-            <motion.div
-              whileHover={{ x: 4, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedShippingOption('China')}
-              className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${
-                selectedShippingOption === 'China'
-                  ? 'bg-gradient-to-br from-orange-500/25 via-amber-500/15 to-yellow-600/15 border-orange-400/80 shadow-lg shadow-orange-500/40'
-                  : 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-orange-500/30 hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/30'
-              }`}
-            >
-              <div className="absolute -right-20 -top-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
-
-              <div className="relative flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1">
-                  <motion.div 
-                    whileHover={{ scale: 1.1, rotate: -360 }}
-                    transition={{ duration: 0.6 }}
-                    className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/50 flex-shrink-0"
-                  >
-                    <Truck className="w-7 h-7 text-white" />
-                  </motion.div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-2">🌍 China</p>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-orange-500/20 px-2.5 py-1 rounded-lg">
-                        <Clock className="w-4 h-4 text-orange-400" />
-                        <span className="font-black text-sm text-orange-200">8-15 Werktage</span>
-                      </motion.div>
-                      <div className="flex items-center gap-1.5 bg-orange-500/20 px-2.5 py-1 rounded-lg">
-                        <MapPin className="w-4 h-4 text-amber-400" />
-                        <span className="font-bold text-sm text-orange-200">CN</span>
-                      </div>
-                    </div>
-                    {selectedShippingOption === 'China' && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-2 text-xs font-bold text-orange-100 bg-gradient-to-r from-orange-500/30 to-red-500/30 px-2.5 py-1 rounded-lg w-fit"
-                      >
-                        ✓ Günstiger
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-black flex-shrink-0 shadow-lg shadow-orange-500/50"
-                >
-                  BUDGET
-                </motion.div>
-              </div>
-            </motion.div>
-
-            {/* Info Banner */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3"
+              transition={{ delay: 0.2 }}
+              className="space-y-4"
             >
-              <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
-              <p className="text-xs font-medium text-blue-200">
-                Versand wird bei Bestellung automatisch ausgewählt. Standard ist der schnelle Versand aus Deutschland mit DHL/DPD.
-              </p>
+              <div className="flex items-center gap-3 mb-4">
+                <motion.div
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/50"
+                >
+                  <Truck className="w-5 h-5 text-white" />
+                </motion.div>
+                <h3 className="text-lg sm:text-xl font-black text-white">
+                  Versandoptionen
+                </h3>
+              </div>
+
+              {/* Germany Shipping */}
+              <motion.div
+                whileHover={{ x: 4, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedShippingOption('Germany')}
+                className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${selectedShippingOption === 'Germany'
+                    ? 'bg-gradient-to-br from-green-500/25 via-emerald-500/15 to-green-600/15 border-green-400/80 shadow-lg shadow-green-500/40'
+                    : 'bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-green-500/40 hover:border-green-400/60 hover:shadow-lg hover:shadow-green-500/30'
+                  }`}
+              >
+                <div className="absolute -right-20 -top-20 w-40 h-40 bg-green-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
+
+                <div className="relative flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 flex-1">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                      className="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-500/50 flex-shrink-0"
+                    >
+                      <Truck className="w-7 h-7 text-white" />
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-black text-green-300 uppercase tracking-widest mb-2">🚚 Deutschland</p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-green-500/20 px-2.5 py-1 rounded-lg">
+                          <Clock className="w-4 h-4 text-green-400" />
+                          <span className="font-black text-sm text-green-200">1-5 Werktage</span>
+                        </motion.div>
+                        <div className="flex items-center gap-1.5 bg-green-500/20 px-2.5 py-1 rounded-lg">
+                          <MapPin className="w-4 h-4 text-emerald-400" />
+                          <span className="font-bold text-sm text-green-200">DE</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-xs font-bold text-green-100 bg-green-500/20 px-2.5 py-1 rounded-lg w-fit">
+                        Normaler Preis
+                      </div>
+                    </div>
+                  </div>
+                  <motion.div
+                    whileHover={{ scale: 1.2, rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                    className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white text-lg font-black flex-shrink-0 shadow-lg"
+                  >
+                    ✓
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              {/* China Shipping */}
+              <motion.div
+                whileHover={{ x: 4, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedShippingOption('China')}
+                className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${selectedShippingOption === 'China'
+                    ? 'bg-gradient-to-br from-orange-500/25 via-amber-500/15 to-yellow-600/15 border-orange-400/80 shadow-lg shadow-orange-500/40'
+                    : 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-orange-500/30 hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/30'
+                  }`}
+              >
+                <div className="absolute -right-20 -top-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
+
+                <div className="relative flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-4 flex-1">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: -360 }}
+                      transition={{ duration: 0.6 }}
+                      className="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/50 flex-shrink-0"
+                    >
+                      <Truck className="w-7 h-7 text-white" />
+                    </motion.div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-black text-orange-300 uppercase tracking-widest mb-2">🌍 China</p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <motion.div whileHover={{ scale: 1.05 }} className="flex items-center gap-1.5 bg-orange-500/20 px-2.5 py-1 rounded-lg">
+                          <Clock className="w-4 h-4 text-orange-400" />
+                          <span className="font-black text-sm text-orange-200">8-15 Werktage</span>
+                        </motion.div>
+                        <div className="flex items-center gap-1.5 bg-orange-500/20 px-2.5 py-1 rounded-lg">
+                          <MapPin className="w-4 h-4 text-amber-400" />
+                          <span className="font-bold text-sm text-orange-200">CN</span>
+                        </div>
+                      </div>
+                      {selectedShippingOption === 'China' && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-2 text-xs font-bold text-orange-100 bg-gradient-to-r from-orange-500/30 to-red-500/30 px-2.5 py-1 rounded-lg w-fit"
+                        >
+                          ✓ Günstiger
+                        </motion.div>
+                      )}
+                    </div>
+                  </div>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className="px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-white text-xs font-black flex-shrink-0 shadow-lg shadow-orange-500/50"
+                  >
+                    BUDGET
+                  </motion.div>
+                </div>
+              </motion.div>
+
+              {/* Info Banner */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-start gap-3"
+              >
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                <p className="text-xs font-medium text-blue-200">
+                  Versand wird bei Bestellung automatisch ausgewählt. Standard ist der schnelle Versand aus Deutschland mit DHL/DPD.
+                </p>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          )}
 
           {/* Color Selection */}
-          {product.colors && product.colors.length > 0 && (
+          {!isDrop && product.colors && product.colors.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -708,12 +788,11 @@ export default function ProductDetail() {
                         setSelectedImage(product.cover_image || images[0]?.url);
                       }
                     }}
-                    className={`relative w-14 h-14 rounded-xl transition-all ${
-                      selectedColor?.id === color.id 
-                        ? 'ring-2 ring-gold ring-offset-2 ring-offset-black scale-110' 
+                    className={`relative w-14 h-14 rounded-xl transition-all ${selectedColor?.id === color.id
+                        ? 'ring-2 ring-gold ring-offset-2 ring-offset-black scale-110'
                         : 'hover:scale-105'
-                    }`}
-                    style={{ 
+                      }`}
+                    style={{
                       background: color.hex || '#888',
                       border: '2px solid rgba(255,255,255,0.2)'
                     }}
@@ -729,7 +808,7 @@ export default function ProductDetail() {
           )}
 
           {/* Size Selection */}
-          {product.sizes && product.sizes.length > 0 && (
+          {!isDrop && product.sizes && product.sizes.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -741,12 +820,12 @@ export default function ProductDetail() {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {product.sizes.map((size) => {
-                  const variant = product.variants?.find(v => 
+                  const variant = product.variants?.find(v =>
                     v.color_id === selectedColor?.id && v.size === size && v.active !== false
                   );
                   const stock = variant?.stock ?? 0;
                   const available = stock > 0;
-                  
+
                   return (
                     <motion.button
                       key={size}
@@ -754,13 +833,12 @@ export default function ProductDetail() {
                       whileTap={available ? { scale: 0.95 } : {}}
                       onClick={() => available && setSelectedSize(size)}
                       disabled={!available}
-                      className={`min-w-[56px] h-12 px-4 rounded-xl font-bold text-base transition-all ${
-                        selectedSize === size
+                      className={`min-w-[56px] h-12 px-4 rounded-xl font-bold text-base transition-all ${selectedSize === size
                           ? 'bg-gold text-black'
                           : available
                             ? 'hover:bg-white/10'
                             : 'opacity-30 cursor-not-allowed line-through'
-                      }`}
+                        }`}
                       style={{
                         background: selectedSize === size ? undefined : 'rgba(255,255,255,0.06)',
                         border: selectedSize === size ? 'none' : '1px solid rgba(255,255,255,0.1)',
@@ -775,7 +853,7 @@ export default function ProductDetail() {
                   );
                 })}
               </div>
-              
+
               {selectedColor && !selectedSize && (
                 <div className="flex items-center gap-2 p-3 rounded-xl" style={{ background: 'rgba(255, 180, 80, 0.1)', border: '1px solid rgba(255, 180, 80, 0.3)' }}>
                   <AlertCircle className="w-5 h-5 text-amber-400" />
@@ -797,7 +875,7 @@ export default function ProductDetail() {
           )}
 
           {/* Options with Price Impact */}
-          {product.option_schema?.options && product.option_schema.options.length > 0 && (
+          {!isDrop && product.option_schema?.options && product.option_schema.options.length > 0 && (
             <div className="space-y-5">
               <h3 className="text-lg sm:text-xl font-bold text-white">Optionen wählen</h3>
               {product.option_schema.options.map((option, index) => (
@@ -814,7 +892,7 @@ export default function ProductDetail() {
                     {option.values?.map((val, valIndex) => {
                       const isSelected = selectedOptions[option.name] === val.value;
                       const priceModifier = val.price_modifier || 0;
-                      
+
                       return (
                         <motion.button
                           key={valIndex}
@@ -823,11 +901,10 @@ export default function ProductDetail() {
                           onClick={() =>
                             setSelectedOptions({ ...selectedOptions, [option.name]: val.value })
                           }
-                          className={`relative px-4 py-3 rounded-xl border-2 transition-all font-medium ${
-                            isSelected
+                          className={`relative px-4 py-3 rounded-xl border-2 transition-all font-medium ${isSelected
                               ? 'border-purple-500 bg-purple-500/20 text-purple-400 shadow-lg shadow-purple-500/30'
                               : 'border-zinc-800 hover:border-zinc-600 text-zinc-300'
-                          }`}
+                            }`}
                         >
                           <div className="text-sm">{val.label || val.value}</div>
                           {priceModifier !== 0 && (
@@ -846,121 +923,139 @@ export default function ProductDetail() {
 
           {/* Quantity & Add to Cart */}
           <div className="space-y-4 pt-6">
+
+            {/* DAILY DROP COUNTDOWN */}
+            {isDrop && <DetailDropCountdown targetDate={product.drop_date} />}
+
             <div>
-              <label className="text-sm sm:text-base font-bold text-white mb-3 block">Anzahl</label>
+              {!isDrop && <label className="text-sm sm:text-base font-bold text-white mb-3 block">Anzahl</label>}
               <div className="flex flex-col sm:flex-row items-center gap-4">
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-2 glass-strong backdrop-blur-xl border-2 border-purple-400/60 bg-gradient-to-r from-purple-600/20 via-pink-500/15 to-purple-600/20 rounded-2xl p-3 hover:border-purple-300/80 shadow-xl shadow-purple-500/25 transition-all"
-                >
-                  <motion.button
-                    whileHover={{ scale: 1.2, rotate: -5 }}
-                    whileTap={{ scale: 0.9, rotate: -5 }}
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 rounded-xl transition-all text-white font-bold shadow-lg shadow-purple-600/50 hover:shadow-purple-500/70"
-                  >
-                    <Minus className="w-6 h-6" />
-                  </motion.button>
+                {!isDrop && (
                   <motion.div
-                    key={quantity}
-                    initial={{ scale: 1.3, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', bounce: 0.6 }}
-                    className="w-16 text-center font-black text-2xl bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-2 glass-strong backdrop-blur-xl border-2 border-purple-400/60 bg-gradient-to-r from-purple-600/20 via-pink-500/15 to-purple-600/20 rounded-2xl p-3 hover:border-purple-300/80 shadow-xl shadow-purple-500/25 transition-all"
                   >
-                    {quantity}
+                    <motion.button
+                      whileHover={{ scale: 1.2, rotate: -5 }}
+                      whileTap={{ scale: 0.9, rotate: -5 }}
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 rounded-xl transition-all text-white font-bold shadow-lg shadow-purple-600/50 hover:shadow-purple-500/70"
+                    >
+                      <Minus className="w-6 h-6" />
+                    </motion.button>
+                    <motion.div
+                      key={quantity}
+                      initial={{ scale: 1.3, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', bounce: 0.6 }}
+                      className="w-16 text-center font-black text-2xl bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent"
+                    >
+                      {quantity}
+                    </motion.div>
+                    <motion.button
+                      whileHover={{ scale: 1.2, rotate: 5 }}
+                      whileTap={{ scale: 0.9, rotate: 5 }}
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl transition-all text-white font-bold shadow-lg shadow-pink-600/50 hover:shadow-pink-500/70"
+                    >
+                      <Plus className="w-6 h-6" />
+                    </motion.button>
                   </motion.div>
-                  <motion.button
-                    whileHover={{ scale: 1.2, rotate: 5 }}
-                    whileTap={{ scale: 0.9, rotate: 5 }}
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 rounded-xl transition-all text-white font-bold shadow-lg shadow-pink-600/50 hover:shadow-pink-500/70"
-                  >
-                    <Plus className="w-6 h-6" />
-                  </motion.button>
-                </motion.div>
-                
+                )}
+
                 <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={!isDrop ? { scale: 1.02 } : {}}
+                  whileTap={!isDrop ? { scale: 0.98 } : {}}
                   className="flex-1 w-full"
                 >
                   <Button
                     onClick={handleAddToCart}
-                    disabled={!product.in_stock || (product.sizes?.length > 0 && !selectedSize)}
+                    disabled={!product.in_stock || (product.sizes?.length > 0 && !selectedSize) || isDrop}
                     className="w-full h-12 sm:h-14 text-sm sm:text-lg font-black rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
-                      background: (product.in_stock && (!product.sizes?.length || selectedSize))
-                        ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' 
-                        : 'rgba(255,255,255,0.1)',
-                      color: (product.in_stock && (!product.sizes?.length || selectedSize)) ? '#000' : 'rgba(255,255,255,0.4)',
-                      boxShadow: (product.in_stock && (!product.sizes?.length || selectedSize)) ? '0 8px 24px rgba(214, 178, 94, 0.3)' : 'none'
+                      background: (product.in_stock && (!product.sizes?.length || selectedSize) && !isDrop)
+                        ? 'linear-gradient(135deg, #D6B25E, #F2D27C)'
+                        : isDrop ? 'rgba(88, 28, 135, 0.2)' : 'rgba(255,255,255,0.1)',
+                      color: (product.in_stock && (!product.sizes?.length || selectedSize) && !isDrop) ? '#000' : 'rgba(255,255,255,0.4)',
+                      boxShadow: (product.in_stock && (!product.sizes?.length || selectedSize) && !isDrop) ? '0 8px 24px rgba(214, 178, 94, 0.3)' : 'none',
+                      cursor: isDrop ? 'default' : 'pointer'
                     }}
                   >
-                    <ShoppingBag className="w-5 sm:w-6 h-5 sm:h-6 mr-2" />
-                    {!product.in_stock ? 'Ausverkauft' : (product.sizes?.length > 0 && !selectedSize) ? 'Größe wählen' : 'In den Warenkorb'}
+                    {isDrop ? (
+                      <>
+                        <Clock className="w-5 h-5 mr-2" />
+                        Noch nicht verfügbar
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="w-5 sm:w-6 h-5 sm:h-6 mr-2" />
+                        {!product.in_stock ? 'Ausverkauft' : (product.sizes?.length > 0 && !selectedSize) ? 'Größe wählen' : 'In den Warenkorb'}
+                      </>
+                    )}
                   </Button>
                 </motion.div>
               </div>
             </div>
 
-            {/* Total Price Preview */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="glass backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-zinc-300 font-bold">Gesamtpreis:</span>
-                <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  {(currentPrice * quantity).toFixed(2)}€
-                </span>
-              </div>
-
-              {/* Delivery Time Info */}
-              <div className="pt-4 border-t border-purple-500/20 space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Germany Delivery */}
-                  <motion.div 
-                    whileHover={{ y: -2 }}
-                    className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
-                  >
-                    <p className="text-xs font-black text-green-300 mb-1">🇩🇪 DEUTSCHLAND</p>
-                    <p className="text-xs text-green-200 font-bold">
-                      {(() => {
-                        const start = calculateDeliveryDate(1, 5);
-                        const end = new Date();
-                        end.setDate(end.getDate() + 5);
-                        return `${start.startShort} - ${end.getDate()}.${end.getMonth() + 1}.`;
-                      })()}
-                    </p>
-                  </motion.div>
-
-                  {/* China Delivery */}
-                  <motion.div 
-                    whileHover={{ y: -2 }}
-                    className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg"
-                  >
-                    <p className="text-xs font-black text-orange-300 mb-1">🇨🇳 CHINA</p>
-                    <p className="text-xs text-orange-200 font-bold">
-                      {(() => {
-                        const start = calculateDeliveryDate(8, 15);
-                        const end = new Date();
-                        end.setDate(end.getDate() + 15);
-                        return `${start.startShort} - ${end.getDate()}.${end.getMonth() + 1}.`;
-                      })()}
-                    </p>
-                  </motion.div>
+            {/* Total Price Preview - Hide for Drops */}
+            {!isDrop && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="glass backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-zinc-300 font-bold">Gesamtpreis:</span>
+                  <span className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    {(currentPrice * quantity).toFixed(2)}€
+                  </span>
                 </div>
-              </div>
-            </motion.div>
+
+                {/* Delivery Time Info */}
+                <div className="pt-4 border-t border-purple-500/20 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Germany Delivery */}
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg"
+                    >
+                      <p className="text-xs font-black text-green-300 mb-1">🇩🇪 DEUTSCHLAND</p>
+                      <p className="text-xs text-green-200 font-bold">
+                        {(() => {
+                          const start = calculateDeliveryDate(1, 5);
+                          const end = new Date();
+                          end.setDate(end.getDate() + 5);
+                          return `${start.startShort} - ${end.getDate()}.${end.getMonth() + 1}.`;
+                        })()}
+                      </p>
+                    </motion.div>
+
+                    {/* China Delivery */}
+                    <motion.div
+                      whileHover={{ y: -2 }}
+                      className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg"
+                    >
+                      <p className="text-xs font-black text-orange-300 mb-1">🇨🇳 CHINA</p>
+                      <p className="text-xs text-orange-200 font-bold">
+                        {(() => {
+                          const start = calculateDeliveryDate(8, 15);
+                          const end = new Date();
+                          end.setDate(end.getDate() + 15);
+                          return `${start.startShort} - ${end.getDate()}.${end.getMonth() + 1}.`;
+                        })()}
+                      </p>
+                    </motion.div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
 
           {/* Features */}
           <div className="grid grid-cols-3 gap-4 pt-4">
-            <motion.div 
+            <motion.div
               whileHover={{ y: -5 }}
               className="flex flex-col items-center text-center p-5 glass backdrop-blur border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all"
             >
@@ -969,7 +1064,7 @@ export default function ProductDetail() {
               </div>
               <span className="text-xs font-semibold text-zinc-300">Schneller Versand</span>
             </motion.div>
-            <motion.div 
+            <motion.div
               whileHover={{ y: -5 }}
               className="flex flex-col items-center text-center p-5 glass backdrop-blur border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all"
             >
@@ -978,7 +1073,7 @@ export default function ProductDetail() {
               </div>
               <span className="text-xs font-semibold text-zinc-300">100% Authentisch</span>
             </motion.div>
-            <motion.div 
+            <motion.div
               whileHover={{ y: -5 }}
               className="flex flex-col items-center text-center p-5 glass backdrop-blur border border-zinc-800 rounded-xl hover:border-purple-500/50 transition-all"
             >
@@ -1001,14 +1096,14 @@ export default function ProductDetail() {
         >
           <div className="mb-8 relative">
             <div className="absolute -top-10 right-0 w-96 h-96 bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-transparent rounded-full blur-3xl -z-10" />
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
             >
               Das könnte dir auch gefallen
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
@@ -1017,7 +1112,7 @@ export default function ProductDetail() {
               Ähnliche Produkte aus der gleichen Kategorie
             </motion.p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((relatedProduct, index) => (
               <motion.div

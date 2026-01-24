@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, ShoppingBag, MapPin, Package, Sparkles, Phone, Mail, User, MessageCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useNebulaSound } from '@/contexts/SoundContext';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function Checkout() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,6 +31,8 @@ export default function Checkout() {
     shippingMethod: 'standard',
     notes: ''
   });
+
+  const { playSuccess, playError } = useNebulaSound();
 
   const steps = [
     { title: 'Warenkorb', icon: ShoppingBag },
@@ -45,7 +48,7 @@ export default function Checkout() {
     try {
       const userData = await api.auth.me();
       setUser(userData);
-      
+
       const items = await api.entities.StarCartItem.filter({ user_id: userData.id });
       setCartItems(items);
 
@@ -87,7 +90,7 @@ export default function Checkout() {
     setSubmitting(true);
     try {
       const total = await calculateTotal();
-      
+
       const request = await api.entities.Request.create({
         user_id: user.id,
         total_sum: total,
@@ -125,17 +128,43 @@ export default function Checkout() {
         await api.entities.StarCartItem.delete(item.id);
       }
 
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+      // Party Time! 🎉
+      playSuccess();
+      const duration = 3000;
+      const end = Date.now() + duration;
+
+      const colors = ['#E8C76A', '#F5D98B', '#FFFFFF'];
+
+      (function frame() {
+        const left = end - Date.now();
+        if (left <= 0) return; // Stop animation
+
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: colors,
+          zIndex: 9999
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: colors,
+          zIndex: 9999
+        });
+
+        requestAnimationFrame(frame);
+      }());
 
       setTimeout(() => {
         navigate(createPageUrl('OrderConfirmation') + `?orderId=${request.id}`);
-      }, 1000);
+      }, 2000); // Slightly longer delay to enjoy the show
     } catch (error) {
       console.error('Error submitting order:', error);
+      playError();
     } finally {
       setSubmitting(false);
     }
@@ -193,19 +222,18 @@ export default function Checkout() {
               const Icon = step.icon;
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
-              
+
               return (
                 <React.Fragment key={index}>
                   <div className="flex flex-col items-center z-10">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
-                      className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-2 transition-all ${
-                        isActive
-                          ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-2xl shadow-purple-500/50'
-                          : isCompleted
+                      className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-2 transition-all ${isActive
+                        ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-2xl shadow-purple-500/50'
+                        : isCompleted
                           ? 'bg-green-500 shadow-xl shadow-green-500/50'
                           : 'bg-zinc-800 border-2 border-zinc-700'
-                      }`}
+                        }`}
                     >
                       {isCompleted ? (
                         <Check className="w-8 h-8 text-white" />
@@ -217,7 +245,7 @@ export default function Checkout() {
                       {step.title}
                     </span>
                   </div>
-                  
+
                   {index < steps.length - 1 && (
                     <div className="flex-1 h-1 bg-zinc-800 mx-4 relative">
                       <motion.div
@@ -248,7 +276,7 @@ export default function Checkout() {
                   <ShoppingBag className="w-8 h-8 text-purple-400" />
                   Deine Artikel
                 </h2>
-                
+
                 <div className="space-y-4">
                   {cartItems.map((item, index) => (
                     <CartItemDisplay key={index} item={item} />
@@ -391,11 +419,10 @@ export default function Checkout() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setFormData({ ...formData, shippingMethod: 'standard' })}
-                        className={`p-6 rounded-2xl border-2 transition-all text-left ${
-                          formData.shippingMethod === 'standard'
-                            ? 'border-green-500 bg-green-500/10'
-                            : 'border-zinc-700 bg-zinc-900/50'
-                        }`}
+                        className={`p-6 rounded-2xl border-2 transition-all text-left ${formData.shippingMethod === 'standard'
+                          ? 'border-green-500 bg-green-500/10'
+                          : 'border-zinc-700 bg-zinc-900/50'
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-bold text-white">🇩🇪 Deutschland</span>
@@ -410,11 +437,10 @@ export default function Checkout() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setFormData({ ...formData, shippingMethod: 'express' })}
-                        className={`p-6 rounded-2xl border-2 transition-all text-left ${
-                          formData.shippingMethod === 'express'
-                            ? 'border-orange-500 bg-orange-500/10'
-                            : 'border-zinc-700 bg-zinc-900/50'
-                        }`}
+                        className={`p-6 rounded-2xl border-2 transition-all text-left ${formData.shippingMethod === 'express'
+                          ? 'border-orange-500 bg-orange-500/10'
+                          : 'border-zinc-700 bg-zinc-900/50'
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-bold text-white">🇨🇳 China</span>
@@ -531,7 +557,7 @@ export default function Checkout() {
                       <div>
                         <h3 className="font-bold text-white mb-2">Wichtiger Hinweis</h3>
                         <p className="text-sm text-zinc-300">
-                          Nach dem Absenden wird deine Bestellung als <strong>Anfrage</strong> an unser Team gesendet. 
+                          Nach dem Absenden wird deine Bestellung als <strong>Anfrage</strong> an unser Team gesendet.
                           Ein Admin wird sich in Kürze bei dir melden, um die Zahlung zu koordinieren und weitere Details zu besprechen.
                         </p>
                       </div>

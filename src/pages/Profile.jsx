@@ -5,12 +5,12 @@ import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import { useWishlist } from '../components/wishlist/WishlistContext';
 import { useI18n } from '../components/i18n/I18nProvider';
-import { 
-  User, 
-  ShoppingBag, 
-  HelpCircle, 
-  MessageCircle, 
-  Crown, 
+import {
+  User,
+  ShoppingBag,
+  HelpCircle,
+  MessageCircle,
+  Crown,
   LogOut,
   ArrowRight,
   Star,
@@ -20,6 +20,7 @@ import {
   Zap,
   Heart
 } from 'lucide-react';
+import RankCard from './Profile/RankCard';
 
 export default function Profile() {
   const { t } = useI18n();
@@ -34,7 +35,7 @@ export default function Profile() {
     openTicketCount: 0
   });
 
-  const isDark = useMemo(() => 
+  const isDark = useMemo(() =>
     document.documentElement.getAttribute('data-theme') === 'dark',
     []
   );
@@ -44,7 +45,7 @@ export default function Profile() {
       setLoading(true);
       const userData = await api.auth.me();
       setUser(userData);
-      
+
       // Load stats in parallel for better performance
       const [requests, cartItems, tickets] = await Promise.all([
         api.entities.Request.filter({ user_id: userData.id }).catch(() => []),
@@ -52,10 +53,10 @@ export default function Profile() {
         api.entities.Ticket.filter({ user_id: userData.id }).catch(() => [])
       ]);
 
-      const openTickets = tickets.filter(t => 
+      const openTickets = tickets.filter(t =>
         t.status === 'open' || t.status === 'in_progress'
       ).length;
-      
+
       setStats({
         requestCount: requests.length,
         cartCount: cartItems.length,
@@ -67,10 +68,10 @@ export default function Profile() {
       // Don't show error if it's just a network issue - user might be offline
       if (error.networkError) {
         // Set default user for offline mode
-        setUser({ 
-          full_name: 'Gast', 
+        setUser({
+          full_name: 'Gast',
           email: 'offline@nebula.supply',
-          role: 'user' 
+          role: 'user'
         });
       }
     } finally {
@@ -157,6 +158,7 @@ export default function Profile() {
     ];
 
     // Add Admin Dashboard link only for admins - at the top for visibility
+    // SECURITY: This ensures only users with role 'admin' can see this link
     if (user?.role === 'admin') {
       return [
         {
@@ -177,11 +179,10 @@ export default function Profile() {
 
   if (loading) {
     return (
-      <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 flex items-center justify-center ${
-        isDark
-          ? 'bg-gradient-to-br from-zinc-950 to-zinc-900'
-          : 'bg-gradient-to-br from-zinc-50 to-white'
-      }`}>
+      <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 flex items-center justify-center ${isDark
+        ? 'bg-gradient-to-br from-zinc-950 to-zinc-900'
+        : 'bg-gradient-to-br from-zinc-50 to-white'
+        }`}>
         <motion.div
           animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -194,11 +195,10 @@ export default function Profile() {
   }
 
   return (
-    <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 ${
-      isDark
-        ? 'bg-gradient-to-br from-zinc-950 to-zinc-900'
-        : 'bg-gradient-to-br from-zinc-50 to-white'
-    }`}>
+    <div className={`min-h-screen pb-24 md:pb-8 transition-colors duration-300 ${isDark
+      ? 'bg-gradient-to-br from-zinc-950 to-zinc-900'
+      : 'bg-gradient-to-br from-zinc-50 to-white'
+      }`}>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
         {/* Header */}
         <motion.div
@@ -207,20 +207,18 @@ export default function Profile() {
           transition={{ duration: 0.6 }}
           className="mb-12 text-center relative"
         >
-          <div className={`absolute inset-0 rounded-full blur-3xl -z-10 ${
-            isDark 
-              ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/30 to-purple-600/20'
-              : 'bg-gradient-to-br from-purple-200/40 via-pink-200/40 to-purple-200/20'
-          }`} />
-          
+          <div className={`absolute inset-0 rounded-full blur-3xl -z-10 ${isDark
+            ? 'bg-gradient-to-br from-purple-600/30 via-pink-600/30 to-purple-600/20'
+            : 'bg-gradient-to-br from-purple-200/40 via-pink-200/40 to-purple-200/20'
+            }`} />
+
           <motion.div
             whileHover={{ scale: 1.08, rotate: -5 }}
             whileTap={{ scale: 0.95 }}
             className="relative w-24 h-24 md:w-32 md:h-32 mx-auto mb-8 inline-block"
           >
-            <div className={`absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-3xl shadow-2xl ${
-              isDark ? 'shadow-purple-600/50' : 'shadow-purple-400/40'
-            }`} />
+            <div className={`absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-3xl shadow-2xl ${isDark ? 'shadow-purple-600/50' : 'shadow-purple-400/40'
+              }`} />
             <div className="relative w-full h-full flex items-center justify-center rounded-3xl">
               <User className="w-12 h-12 md:w-16 md:h-16 text-white" />
             </div>
@@ -232,28 +230,26 @@ export default function Profile() {
               <Star className="w-4 h-4 md:w-5 md:h-5 text-white" fill="white" />
             </motion.div>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
-            className={`text-4xl sm:text-5xl md:text-6xl font-black mb-3 ${
-              isDark
-                ? 'bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent'
-                : 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent'
-            }`}
+            className={`text-4xl sm:text-5xl md:text-6xl font-black mb-3 ${isDark
+              ? 'bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent'
+              : 'bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent'
+              }`}
             style={{ textShadow: isDark ? '0 0 30px rgba(168, 85, 247, 0.3)' : 'none' }}
           >
             {user?.full_name || t('profile.title') || 'Profil'}
           </motion.h1>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, type: 'spring', stiffness: 100 }}
-            className={`text-base md:text-lg flex items-center justify-center gap-2 flex-wrap font-semibold ${
-              isDark ? 'text-zinc-300' : 'text-zinc-600'
-            }`}
+            className={`text-base md:text-lg flex items-center justify-center gap-2 flex-wrap font-semibold ${isDark ? 'text-zinc-300' : 'text-zinc-600'
+              }`}
           >
             <motion.div
               animate={{ rotate: [0, 360] }}
@@ -269,17 +265,21 @@ export default function Profile() {
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, type: 'spring' }}
-              className={`mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border-2 ${
-                isDark
-                  ? 'bg-red-500/15 border-red-500/40 text-red-300'
-                  : 'bg-red-500/10 border-red-500/30 text-red-600'
-              }`}
+              className={`mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold border-2 ${isDark
+                ? 'bg-red-500/15 border-red-500/40 text-red-300'
+                : 'bg-red-500/10 border-red-500/30 text-red-600'
+                }`}
             >
               <Shield className="w-4 h-4" />
               {t('profile.administrator')}
             </motion.div>
           )}
         </motion.div>
+
+        {/* 🌟 Nebula Rank Progression Card */}
+        <div className="mb-12">
+          <RankCard user={user} />
+        </div>
 
         {/* Quick Stats - Enhanced */}
         <motion.div
@@ -291,11 +291,10 @@ export default function Profile() {
           <motion.div
             whileHover={{ y: -8, scale: 1.03, rotate: 1 }}
             whileTap={{ scale: 0.98 }}
-            className={`relative rounded-2xl p-6 text-center border-2 transition-all overflow-hidden group ${
-              isDark
-                ? 'bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-purple-500/30 hover:border-purple-400/60 hover:shadow-xl hover:shadow-purple-600/30'
-                : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 hover:border-purple-400 hover:shadow-xl hover:shadow-purple-300/40'
-            }`}
+            className={`relative rounded-2xl p-6 text-center border-2 transition-all overflow-hidden group ${isDark
+              ? 'bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-purple-500/30 hover:border-purple-400/60 hover:shadow-xl hover:shadow-purple-600/30'
+              : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 hover:border-purple-400 hover:shadow-xl hover:shadow-purple-300/40'
+              }`}
           >
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -307,7 +306,7 @@ export default function Profile() {
             >
               <Package className={`w-10 h-10 mx-auto mb-3 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
             </motion.div>
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.6, type: 'spring' }}
@@ -323,11 +322,10 @@ export default function Profile() {
           <motion.div
             whileHover={{ y: -8, scale: 1.03, rotate: -1 }}
             whileTap={{ scale: 0.98 }}
-            className={`relative rounded-2xl p-6 text-center border-2 transition-all overflow-hidden group ${
-              isDark
-                ? 'bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-blue-500/30 hover:border-blue-400/60 hover:shadow-xl hover:shadow-blue-600/30'
-                : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-300/40'
-            }`}
+            className={`relative rounded-2xl p-6 text-center border-2 transition-all overflow-hidden group ${isDark
+              ? 'bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-blue-500/30 hover:border-blue-400/60 hover:shadow-xl hover:shadow-blue-600/30'
+              : 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 hover:border-blue-400 hover:shadow-xl hover:shadow-blue-300/40'
+              }`}
           >
             <motion.div
               className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -339,7 +337,7 @@ export default function Profile() {
             >
               <ShoppingBag className={`w-10 h-10 mx-auto mb-3 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
             </motion.div>
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.7, type: 'spring' }}
@@ -368,18 +366,16 @@ export default function Profile() {
               >
                 <Link
                   to={item.link}
-                  className={`block glass backdrop-blur-xl border-2 rounded-2xl p-6 transition-all group relative overflow-hidden ${
-                    isAdminItem
-                      ? 'border-red-500/40 hover:border-red-400/80 hover:shadow-2xl hover:shadow-red-500/40'
-                      : 'border-zinc-800/50 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/30'
-                  }`}
+                  className={`block glass backdrop-blur-xl border-2 rounded-2xl p-6 transition-all group relative overflow-hidden ${isAdminItem
+                    ? 'border-red-500/40 hover:border-red-400/80 hover:shadow-2xl hover:shadow-red-500/40'
+                    : 'border-zinc-800/50 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/30'
+                    }`}
                 >
                   <motion.div
-                    className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity ${
-                      isAdminItem
-                        ? 'bg-gradient-to-br from-red-500/15 via-orange-500/10 to-amber-500/15'
-                        : 'bg-gradient-to-br from-purple-500/8 to-pink-500/8'
-                    }`}
+                    className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity ${isAdminItem
+                      ? 'bg-gradient-to-br from-red-500/15 via-orange-500/10 to-amber-500/15'
+                      : 'bg-gradient-to-br from-purple-500/8 to-pink-500/8'
+                      }`}
                     animate={isAdminItem ? {
                       background: [
                         'radial-gradient(circle at 0% 0%, rgba(239, 68, 68, 0.15), transparent 50%)',
@@ -389,10 +385,10 @@ export default function Profile() {
                     } : {}}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                   />
-                  
+
                   <div className="relative z-10">
                     <div className="flex items-start justify-between mb-4">
-                      <motion.div 
+                      <motion.div
                         whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.15 }}
                         transition={{ duration: 0.6, type: 'spring' }}
                         className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all relative overflow-hidden`}
@@ -412,7 +408,7 @@ export default function Profile() {
                         )}
                         <Icon className="w-8 h-8 text-white relative z-10" />
                       </motion.div>
-                      
+
                       {item.badge ? (
                         <motion.span
                           animate={isAdminItem ? {
@@ -424,18 +420,17 @@ export default function Profile() {
                             ]
                           } : {}}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className={`px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg ${
-                            isAdminItem
-                              ? isDark
-                                ? 'bg-gradient-to-r from-red-500/30 to-orange-500/30 text-red-300 border border-red-500/50'
-                                : 'bg-gradient-to-r from-red-100 to-orange-100 text-red-700 border border-red-300'
-                              : `bg-gradient-to-r ${item.color} text-white`
-                          }`}
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-black shadow-lg ${isAdminItem
+                            ? isDark
+                              ? 'bg-gradient-to-r from-red-500/30 to-orange-500/30 text-red-300 border border-red-500/50'
+                              : 'bg-gradient-to-r from-red-100 to-orange-100 text-red-700 border border-red-300'
+                            : `bg-gradient-to-r ${item.color} text-white`
+                            }`}
                         >
                           {item.badge}
                         </motion.span>
                       ) : item.stat !== null && item.stat > 0 ? (
-                        <motion.div 
+                        <motion.div
                           whileHover={{ scale: 1.15 }}
                           className="px-3.5 py-1.5 bg-purple-500/30 border-2 border-purple-500/50 rounded-full text-xs font-black text-purple-300 shadow-lg"
                         >
@@ -445,7 +440,7 @@ export default function Profile() {
                         <ArrowRight className="w-6 h-6 text-zinc-600 group-hover:text-purple-400 group-hover:translate-x-2 transition-all" />
                       )}
                     </div>
-                    
+
                     <h3 className="font-black text-xl mb-2 text-white group-hover:bg-gradient-to-r group-hover:from-purple-300 group-hover:to-pink-300 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
                       {item.title}
                     </h3>
@@ -506,7 +501,7 @@ export default function Profile() {
               {t('profile.fastSupport') || 'Schneller Support'}
             </p>
           </motion.div>
-          
+
           <motion.div
             whileHover={{ y: -8, scale: 1.05, rotate: -1 }}
             whileTap={{ scale: 0.98 }}
@@ -526,7 +521,7 @@ export default function Profile() {
               {t('profile.secure') || 'Sicher & Geschützt'}
             </p>
           </motion.div>
-          
+
           <motion.div
             whileHover={{ y: -8, scale: 1.05, rotate: 1 }}
             whileTap={{ scale: 0.98 }}
