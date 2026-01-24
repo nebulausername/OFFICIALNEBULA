@@ -117,52 +117,54 @@ function DropProductCard({ product, onQuickView }) {
               </div>
             </div>
 
-            {/* Content */}
-            <div className="p-4 space-y-3">
-              {/* Product Name */}
-              <h3
-                className="font-bold text-base line-clamp-2 leading-tight"
-                style={{ color: 'rgba(255, 255, 255, 0.92)' }}
-              >
-                {product.name}
-              </h3>
+          </div>
 
-              {/* Price + SKU Row */}
-              <div className="flex items-end justify-between">
-                <div>
+          {/* Content */}
+          <div className="p-4 space-y-3">
+            {/* Product Name */}
+            <h3
+              className="font-bold text-base line-clamp-2 leading-tight"
+              style={{ color: 'rgba(255, 255, 255, 0.92)' }}
+            >
+              {product.name}
+            </h3>
+
+            {/* Price + SKU Row */}
+            <div className="flex items-end justify-between">
+              <div>
+                <div
+                  className="text-2xl font-black"
+                  style={{ color: '#F2D27C' }}
+                >
+                  {(product.price || 0).toFixed(2)}€
+                </div>
+                {product.sku && (
                   <div
-                    className="text-2xl font-black"
-                    style={{ color: '#F2D27C' }}
+                    className="text-xs font-medium mt-0.5"
+                    style={{ color: 'rgba(255, 255, 255, 0.45)' }}
                   >
-                    {(product.price || 0).toFixed(2)}€
+                    {product.sku}
                   </div>
-                  {product.sku && (
-                    <div
-                      className="text-xs font-medium mt-0.5"
-                      style={{ color: 'rgba(255, 255, 255, 0.45)' }}
-                    >
-                      {product.sku}
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
+            </div>
 
-              {/* Shipping Info */}
-              <div
-                className="flex items-center gap-4 pt-2"
-                style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}
-              >
-                <div className="flex items-center gap-1.5">
-                  <Truck className="w-3.5 h-3.5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} />
-                  <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>China</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} />
-                  <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>8–17 Tage</span>
-                </div>
+            {/* Shipping Info */}
+            <div
+              className="flex items-center gap-4 pt-2"
+              style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}
+            >
+              <div className="flex items-center gap-1.5">
+                <Truck className="w-3.5 h-3.5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} />
+                <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>China</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} />
+                <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>8–17 Tage</span>
               </div>
             </div>
           </div>
+        </div>
       </Link>
     </motion.div>
   );
