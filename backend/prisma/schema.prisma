@@ -53,6 +53,7 @@ model Product {
   category_id   String?
   brand_id      String?
   in_stock      Boolean   @default(true)
+  stock         Int       @default(0)
   cover_image   String?
   product_type  String?   @default("other")
   tags          Json?     // JSONB: Array of strings

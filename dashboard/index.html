@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEBULA Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="page active">
+        <div class="login-container">
+            <div class="login-card">
+                <h1 class="logo">NEBULA<span>ADMIN</span></h1>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder="Username" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Login</button>
+                </form>
+                <div id="loginError" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboardPage" class="page">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>NEBULA<span>ADMIN</span></h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="overview">
+                    <span class="icon">📊</span>
+                    <span>Übersicht</span>
+                </a>
+                <a href="#" class="nav-item" data-view="products">
+                    <span class="icon">📦</span>
+                    <span>Produkte</span>
+                </a>
+                <a href="#" class="nav-item" data-view="orders">
+                    <span class="icon">🛒</span>
+                    <span>Bestellungen</span>
+                </a>
+                <a href="#" class="nav-item" data-view="customers">
+                    <span class="icon">👥</span>
+                    <span>Kunden</span>
+                </a>
+                <a href="#" class="nav-item" id="logoutBtn">
+                    <span class="icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview View -->
+            <div id="overviewView" class="view active">
+                <div class="view-header">
+                    <h1>Dashboard Übersicht</h1>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3>Gesamtumsatz</h3>
+                            <p class="stat-value" id="totalRevenue">€0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <h3>Bestellungen</h3>
+                            <p class="stat-value" id="totalOrders">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3>Kunden</h3>
+                            <p class="stat-value" id="totalCustomers">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-info">
+                            <h3>Top Produkt</h3>
+                            <p class="stat-value" id="topProduct">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-orders">
+                    <h2>Neueste Bestellungen</h2>
+                    <div class="table-container">
+                        <table id="recentOrdersTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kunde</th>
+                                    <th>Betrag</th>
+                                    <th>Status</th>
+                                    <th>Datum</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products View -->
+            <div id="productsView" class="view">
+                <div class="view-header">
+                    <h1>Produkte verwalten</h1>
+                    <button class="btn-primary" id="addProductBtn">+ Neues Produkt</button>
+                </div>
+                <div class="table-container">
+                    <table id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>Bild</th>
+                                <th>Name</th>
+                                <th>SKU</th>
+                                <th>Preis</th>
+                                <th>Lager</th>
+                                <th>Kategorie</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders View -->
+            <div id="ordersView" class="view">
+                <div class="view-header">
+                    <h1>Bestellungen</h1>
+                    <div class="filter-group">
+                        <select id="orderStatusFilter">
+                            <option value="">Alle Status</option>
+                            <option value="pending">Ausstehend</option>
+                            <option value="confirmed">Bestätigt</option>
+                            <option value="processing">In Bearbeitung</option>
+                            <option value="shipped">Versendet</option>
+                            <option value="completed">Abgeschlossen</option>
+                            <option value="cancelled">Storniert</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Kunde</th>
+                                <th>Artikel</th>
+                                <th>Betrag</th>
+                                <th>Status</th>
+                                <th>Datum</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customers View -->
+            <div id="customersView" class="view">
+                <div class="view-header">
+                    <h1>Kunden</h1>
+                </div>
+                <div class="table-container">
+                    <table id="customersTable">
+                        <thead>
+                            <tr>
+                                <th>Telegram ID</th>
+                                <th>Name</th>
+                                <th>Username</th>
+                                <th>Bestellungen</th>
+                                <th>Registriert</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="productModalTitle">Neues Produkt</h2>
+                <button class="modal-close" onclick="closeProductModal()">&times;</button>
+            </div>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="productName">Produktname*</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productSku">SKU*</label>
+                        <input type="text" id="productSku" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">Preis (€)*</label>
+                        <input type="number" id="productPrice" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productStock">Lagerbestand*</label>
+                        <input type="number" id="productStock" min="0" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="productDescription">Beschreibung</label>
+                        <textarea id="productDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Kategorie</label>
+                        <select id="productCategory"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productImageUrl">Bild URL</label>
+                        <input type="url" id="productImageUrl">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeProductModal()">Abbrechen</button>
+                    <button type="submit" class="btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Bestellung Details</h2>
+                <button class="modal-close" onclick="closeOrderModal()">&times;</button>
+            </div>
+            <div id="orderDetails"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeOrderModal()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

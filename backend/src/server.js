@@ -48,6 +48,7 @@ import verificationRoutes from './routes/verification.routes.js';
 import telegramRoutes from './routes/telegram.routes.js';
 import cronRoutes from './routes/cron.routes.js';
 import uploadsRoutes from './routes/uploads.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -90,6 +91,9 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Serve static files (admin dashboard)
+app.use('/dashboard', express.static(path.join(__dirname, '../../dashboard')));
+
 // Serve static files (verification photos)
 app.use('/uploads', uploadsRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -117,6 +121,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/wishlist-items', wishlistRoutes);
 app.use('/api/verification', verificationRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling
 app.use(notFound);

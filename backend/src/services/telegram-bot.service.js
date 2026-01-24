@@ -22,13 +22,13 @@ let adminListCache = {
 // Get cached admin list or fetch from database
 const getAdminList = async () => {
   const now = Date.now();
-  
+
   // Return cached data if still valid
   if (adminListCache.data && (now - adminListCache.timestamp) < adminListCache.ttl) {
     botLogger.debug('Using cached admin list');
     return adminListCache.data;
   }
-  
+
   // Fetch from database
   botLogger.debug('Fetching admin list from database');
   const admins = await prisma.user.findMany({
@@ -44,11 +44,11 @@ const getAdminList = async () => {
       role: true,
     },
   });
-  
+
   // Update cache
   adminListCache.data = admins;
   adminListCache.timestamp = now;
-  
+
   return admins;
 };
 
@@ -56,7 +56,7 @@ const getAdminList = async () => {
 const cleanupRejectionStates = () => {
   const now = Date.now();
   const timeout = 5 * 60 * 1000; // 5 minutes
-  
+
   for (const [adminId, state] of adminRejectionStates.entries()) {
     if (now - state.timestamp > timeout) {
       adminRejectionStates.delete(adminId);
@@ -136,7 +136,7 @@ const validateTextMessage = (msg) => {
 // Initialize bot
 export const initializeBot = () => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  
+
   if (!token) {
     botLogger.warn('TELEGRAM_BOT_TOKEN not set - Bot will not be initialized');
     return null;
@@ -144,10 +144,10 @@ export const initializeBot = () => {
 
   try {
     botLogger.info('Creating Telegram Bot instance...');
-    
+
     // Determine if we should use webhook or polling
     const useWebhook = process.env.NODE_ENV === 'production' || process.env.USE_WEBHOOK === 'true';
-    
+
     if (useWebhook) {
       // Webhook mode for production (Vercel)
       botLogger.info('Initializing bot in webhook mode');
@@ -159,17 +159,17 @@ export const initializeBot = () => {
       bot = new TelegramBot(token, { polling: true });
       botLogger.info('Telegram Bot instance created (polling mode)');
     }
-    
+
     setupBotHandlers();
     botLogger.info('Telegram Bot handlers setup complete');
-    
+
     // Test bot connection
     bot.getMe().then((botInfo) => {
       botLogger.info(`Bot connected as @${botInfo.username} (${botInfo.first_name})`);
     }).catch((err) => {
       botLogger.error('Error getting bot info:', err);
     });
-    
+
     return bot;
   } catch (error) {
     botLogger.error('Error initializing Telegram Bot:', error);
@@ -186,10 +186,10 @@ export const setupWebhook = async (webhookUrl) => {
 
   try {
     botLogger.info(`Setting up webhook: ${webhookUrl}`);
-    
+
     // Set webhook
     await bot.setWebHook(webhookUrl);
-    
+
     // Verify webhook
     const webhookInfo = await bot.getWebHookInfo();
     botLogger.info('Webhook info:', {
@@ -197,7 +197,7 @@ export const setupWebhook = async (webhookUrl) => {
       has_custom_certificate: webhookInfo.has_custom_certificate,
       pending_update_count: webhookInfo.pending_update_count,
     });
-    
+
     if (webhookInfo.url === webhookUrl) {
       botLogger.info('Webhook setup successful');
       return true;
@@ -220,11 +220,11 @@ export const handleWebhookUpdate = async (update) => {
 
   try {
     botLogger.debug('Received webhook update:', update.update_id);
-    
+
     // Process update through bot instance
     // The bot instance will automatically route to registered handlers
     await bot.processUpdate(update);
-    
+
     botLogger.debug(`Processed webhook update ${update.update_id}`);
   } catch (error) {
     botLogger.error('Error processing webhook update:', error);
@@ -289,8 +289,139 @@ const setupBotHandlers = () => {
       }
     }
   });
-  
+
   botLogger.info('/start command handler registered');
+
+  // /shop command - Browse products
+  bot.onText(/\/shop/, async (msg) => {
+    const chatId = msg.chat.id;
+    const telegramId = msg.from.id.toString();
+
+    try {
+      // Get user
+      const user = await prisma.user.findUnique({
+        where: { telegram_id: BigInt(telegramId) },
+      });
+
+      if (!user || user.verification_status !== 'verified') {
+        await sendMessageWithRetry(
+          bot,
+          chatId,
+          '⚠️ *Nicht verifiziert*\n\nBitte verifiziere dich erst mit /start um den Shop zu nutzen!',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
+      // Get categories with products
+      const products = await prisma.product.findMany({
+        where: { in_stock: true },
+        include: { category: true },
+        distinct: ['category_id'],
+      });
+
+      if (products.length === 0) {
+        await sendMessageWithRetry(
+          bot,
+          chatId,
+          '🚧 *Shop kommt bald!*\n\nDer Shop wird gerade vorbereitet. Schau später nochmal vorbei!',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
+      // Get unique categories
+      const categories = [...new Map(products.map(p => p.category).filter(c => c).map(c => [c.id, c])).values()];
+
+      const keyboard = categories.map(cat => [{
+        text: `🏷️ ${cat.name}`,
+        callback_data: `shop_cat_${cat.id}`,
+      }]);
+
+      await sendMessageWithRetry(
+        bot,
+        chatId,
+        '🛍️ *NEBULA SUPPLY*\n\nWähle eine Kategorie:',
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: keyboard,
+          },
+        }
+      );
+    } catch (error) {
+      botLogger.error('Error in /shop command:', error);
+      await sendMessageWithRetry(bot, chatId, '❌ Fehler beim Laden des Shops');
+    }
+  });
+
+  botLogger.info('/shop command handler registered');
+
+  // /cart command - View shopping cart
+  bot.onText(/\/cart/, async (msg) => {
+    const chatId = msg.chat.id;
+    const telegramId = msg.from.id.toString();
+
+    try {
+      const user = await prisma.user.findUnique({
+        where: { telegram_id: BigInt(telegramId) },
+        include: {
+          cart_items: {
+            include: { product: true },
+          },
+        },
+      });
+
+      if (!user) {
+        await sendMessageWithRetry(bot, chatId, '❌ User nicht gefunden');
+        return;
+      }
+
+      if (user.cart_items.length === 0) {
+        await sendMessageWithRetry(
+          bot,
+          chatId,
+          '🛒 *Dein Warenkorb ist leer!*\n\nNutze /shop um Produkte hinzuzufügen.',
+          { parse_mode: 'Markdown' }
+        );
+        return;
+      }
+
+      let message = '🛒 *DEIN WARENKORB*\n\n';
+      let total = 0;
+
+      user.cart_items.forEach((item, index) => {
+        const price = parseFloat(item.product.price);
+        const subtotal = price * item.quantity;
+        total += subtotal;
+        message += `${index + 1}. *${item.product.name}*\n`;
+        message += `   ${item.quantity}x €${price.toFixed(2)} = €${subtotal.toFixed(2)}\n\n`;
+      });
+
+      message += `\n💰 *Gesamt: €${total.toFixed(2)}*`;
+
+      await sendMessageWithRetry(
+        bot,
+        chatId,
+        message,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '✅ Zur Kasse', callback_data: 'checkout_start' }],
+              [{ text: '🗑️ Warenkorb leeren', callback_data: 'cart_clear' }],
+              [{ text: '🛍️ Weiter shoppen', callback_data: 'back_to_shop' }],
+            ],
+          },
+        }
+      );
+    } catch (error) {
+      botLogger.error('Error in /cart command:', error);
+      await sendMessageWithRetry(bot, chatId, '❌ Fehler beim Laden des Warenkorbs');
+    }
+  });
+
+  botLogger.info('/cart command handler registered');
 
   // Handle photo messages for verification
   bot.on('photo', async (msg) => {
@@ -512,7 +643,7 @@ const setupBotHandlers = () => {
       if (text === '/cancel') {
         const adminId = admin.id;
         const state = adminRejectionStates.get(adminId);
-        
+
         if (state) {
           adminRejectionStates.delete(adminId);
           await sendMessageWithRetry(
@@ -555,7 +686,7 @@ const setupBotHandlers = () => {
   });
 
   botLogger.info('Text message handler registered');
-  
+
   botLogger.info('✅ All bot handlers registered');
 };
 
@@ -617,10 +748,10 @@ Du hast bereits eine Verifizierung eingereicht.
 ✋ *Handzeichen:* ${handGesture}
 📸 *Foto:* ${hasPhoto ? 'Gesendet ✅' : 'Noch nicht gesendet'}
 
-${hasPhoto 
-  ? 'Wir prüfen deine Verifizierung schnellstmöglich. Du wirst benachrichtigt, sobald sie bestätigt wurde.'
-  : 'Bitte sende noch dein Foto mit dem Handzeichen ' + handGesture + ' 📸'
-}`;
+${hasPhoto
+      ? 'Wir prüfen deine Verifizierung schnellstmöglich. Du wirst benachrichtigt, sobald sie bestätigt wurde.'
+      : 'Bitte sende noch dein Foto mit dem Handzeichen ' + handGesture + ' 📸'
+    }`;
 
   await sendMessageWithRetry(bot, chatId, message, {
     parse_mode: 'Markdown',
@@ -767,7 +898,7 @@ ${verificationRequest.photo_url ? '📋 Bitte prüfe das Foto:\n• Gesicht klar
 
     // Wait for all notifications (don't fail if some fail)
     await Promise.allSettled(notificationPromises);
-    
+
     botLogger.info(`Sent verification notification to ${admins.length} admin(s)`);
   } catch (error) {
     botLogger.error('Error notifying admins:', error);
@@ -921,7 +1052,7 @@ const handleAdminRejection = async (query, verificationId, admin) => {
 const processRejectionReason = async (msg, admin) => {
   const adminId = admin.id;
   const state = adminRejectionStates.get(adminId);
-  
+
   if (!state) {
     return false; // Not a rejection reason message
   }
@@ -1027,7 +1158,7 @@ const handleViewCart = async (query, user) => {
 
     let total = 0;
     let message = '🛒 *Dein Warenkorb*\n\n';
-    
+
     cartItems.forEach((item, index) => {
       const itemTotal = parseFloat(item.product.price) * item.quantity;
       total += itemTotal;
@@ -1089,7 +1220,7 @@ const handleViewOrders = async (query, user) => {
     }
 
     let message = '📦 *Deine Bestellungen*\n\n';
-    
+
     orders.forEach((order, index) => {
       message += `${index + 1}. Bestellung #${order.id.slice(0, 8)}\n`;
       message += `   Summe: ${parseFloat(order.total_sum).toFixed(2)}€\n`;

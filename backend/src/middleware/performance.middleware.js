@@ -48,9 +48,11 @@ export const performanceMiddleware = (req, res, next) => {
       });
     }
 
-    // Add performance headers
-    res.setHeader('X-Response-Time', `${Math.round(duration)}ms`);
-    res.setHeader('X-Memory-Used', `${Math.round(memoryDelta.heapUsed / 1024 / 1024)}MB`);
+    // Add performance headers (only if headers haven't been sent yet)
+    if (!res.headersSent) {
+      res.setHeader('X-Response-Time', `${Math.round(duration)}ms`);
+      res.setHeader('X-Memory-Used', `${Math.round(memoryDelta.heapUsed / 1024 / 1024)}MB`);
+    }
 
     // Call original end
     originalEnd.apply(this, args);
