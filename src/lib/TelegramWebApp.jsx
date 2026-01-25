@@ -5,29 +5,27 @@ export const useTelegramWebApp = () => {
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
-      
+
       // Expand WebApp to full height
       tg.expand();
-      
+
       // Enable closing confirmation
       tg.enableClosingConfirmation();
-      
+
       // Set theme colors based on Telegram theme
       const themeParams = tg.themeParams;
       const bgColor = themeParams.bg_color || '#0B0D12';
       const headerColor = themeParams.bg_color || '#0B0D12';
-      
+
       tg.setHeaderColor(headerColor);
       tg.setBackgroundColor(bgColor);
-      
+
       // Enable vibration (haptic feedback)
       if (tg.HapticFeedback) {
         tg.HapticFeedback.impactOccurred('light');
       }
-      
-      // Set viewport settings
-      tg.viewportStableHeight = window.innerHeight;
-      
+
+
       // Handle back button
       if (tg.BackButton) {
         tg.BackButton.onClick(() => {
@@ -39,10 +37,10 @@ export const useTelegramWebApp = () => {
         });
         tg.BackButton.show();
       }
-      
+
       // Ready
       tg.ready();
-      
+
       // Log WebApp info for debugging
       console.log('Telegram WebApp initialized:', {
         version: tg.version,
@@ -50,7 +48,7 @@ export const useTelegramWebApp = () => {
         colorScheme: tg.colorScheme,
         themeParams: tg.themeParams,
       });
-      
+
       return () => {
         // Cleanup
         if (tg.BackButton) {
@@ -133,7 +131,7 @@ export const showMainButton = (text, onClick) => {
       tg.MainButton.offClick(onClick);
     };
   }
-  return () => {};
+  return () => { };
 };
 
 // Hide main button
@@ -175,7 +173,7 @@ export const showBackButton = (onClick) => {
       tg.BackButton.offClick(onClick);
     };
   }
-  return () => {};
+  return () => { };
 };
 
 // Hide back button
@@ -240,13 +238,13 @@ export const setupTelegramBackButton = (onBack) => {
   if (tg?.BackButton) {
     tg.BackButton.show();
     tg.BackButton.onClick(onBack);
-    
+
     return () => {
       tg.BackButton.offClick(onBack);
       tg.BackButton.hide();
     };
   }
-  return () => {};
+  return () => { };
 };
 
 // Main button handler
@@ -255,7 +253,7 @@ export const setupTelegramMainButton = (text, onClick, options = {}) => {
   if (tg?.MainButton) {
     tg.MainButton.setText(text);
     tg.MainButton.onClick(onClick);
-    
+
     if (options.show !== false) {
       tg.MainButton.show();
     }
@@ -268,11 +266,11 @@ export const setupTelegramMainButton = (text, onClick, options = {}) => {
     if (options.textColor) {
       tg.MainButton.textColor = options.textColor;
     }
-    
+
     return () => {
       tg.MainButton.offClick(onClick);
       tg.MainButton.hide();
     };
   }
-  return () => {};
+  return () => { };
 };
