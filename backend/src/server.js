@@ -66,7 +66,7 @@ app.use(compression());
 const corsOptions = {
   origin: process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-    : ['http://localhost:3000', 'http://localhost:5173'],
+    : ['http://localhost:3000', 'http://localhost:5173', 'https://officialnebula.vercel.app'],
   credentials: true,
   optionsSuccessStatus: 200,
 };

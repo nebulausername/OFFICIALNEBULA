@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const RANKS = {
@@ -76,7 +76,7 @@ const updateRankForUser = async (userId) => {
     }
 };
 
-module.exports = {
+export {
     updateRankForUser,
     RANKS
 };

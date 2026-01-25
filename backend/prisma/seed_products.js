@@ -10,31 +10,43 @@ async function main() {
     const getCat = async (slug) => (await prisma.category.findUnique({ where: { slug } }))?.id;
     const getBrand = async (slug) => (await prisma.brand.findUnique({ where: { slug } }))?.id;
 
-    const depts = {
-        unisex: await getDept('unisex'),
-        accessories: await getDept('accessories'),
-    };
+    // Ensure Departments exist
+    const departments = [
+        { name: 'Unisex', slug: 'unisex', sort_order: 1 },
+        { name: 'Zubehör', slug: 'accessories', sort_order: 2 },
+    ];
 
-    // Ensure 'accessories' dept exists if not (was missing in previous view)
-    if (!depts.accessories) {
-        console.log('Creating Accessory Dept...');
-        const d = await prisma.department.create({ data: { name: 'Zubehör', slug: 'accessories', sort_order: 5 } });
-        depts.accessories = d.id;
+    const depts = {};
+    for (const d of departments) {
+        let dept = await prisma.department.findUnique({ where: { slug: d.slug } });
+        if (!dept) {
+            dept = await prisma.department.create({ data: d });
+        }
+        depts[d.slug] = dept.id;
     }
 
     // Create/Get Categories
     const categoriesToCreate = [
-        { name: 'E-Shisha / Vapes', slug: 'vapes', sort_order: 10 },
-        { name: 'Tabak', slug: 'shisha-tobacco', sort_order: 11 },
-        { name: 'Kohle', slug: 'charcoal', sort_order: 12 },
-        { name: 'Shishas', slug: 'shishas', sort_order: 13 },
+        { name: 'E-Shisha / Vapes', slug: 'vapes', sort_order: 10, department: 'unisex' },
+        { name: 'Tabak', slug: 'shisha-tobacco', sort_order: 11, department: 'unisex' },
+        { name: 'Kohle', slug: 'charcoal', sort_order: 12, department: 'accessories' },
+        { name: 'Shishas', slug: 'shishas', sort_order: 13, department: 'unisex' },
+        { name: 'Mundstücke', slug: 'mouthpieces', sort_order: 14, department: 'accessories' },
+        { name: 'Köpfe', slug: 'bowls', sort_order: 15, department: 'accessories' }
     ];
 
     const cats = {};
     for (const c of categoriesToCreate) {
         let cat = await prisma.category.findUnique({ where: { slug: c.slug } });
         if (!cat) {
-            cat = await prisma.category.create({ data: { ...c, department_id: depts.unisex } });
+            cat = await prisma.category.create({
+                data: {
+                    name: c.name,
+                    slug: c.slug,
+                    sort_order: c.sort_order,
+                    department_id: depts[c.department]
+                }
+            });
         }
         cats[c.slug] = cat.id;
     }
@@ -47,6 +59,10 @@ async function main() {
         { name: 'Black Coco', slug: 'blackcoco', sort_order: 13 },
         { name: 'Moze', slug: 'moze', sort_order: 14 },
         { name: 'Holster', slug: 'holster', sort_order: 15 },
+        { name: 'Hookain', slug: 'hookain', sort_order: 16 },
+        { name: 'Al Massiva', slug: 'almassiva', sort_order: 17 },
+        { name: 'Vyro', slug: 'vyro', sort_order: 18 },
+        { name: 'Oblako', slug: 'oblako', sort_order: 19 }
     ];
 
     const brandIds = {};
@@ -87,6 +103,19 @@ async function main() {
             tags: ['Bestseller', 'Summer'],
             variants: [{ size: 'Standard', color: 'Red', stock: 300 }]
         },
+        {
+            sku: 'ELF-600-PINK',
+            name: 'Elfbar 600 - Pink Lemonade',
+            description: 'Süße Himbeeren treffen auf spritzige Limonade. Ein erfrischender Genuss.',
+            price: 6.90,
+            stock: 450,
+            department_id: depts.unisex,
+            brand_id: brandIds['elfbar'],
+            category_id: cats['vapes'],
+            cover_image: 'https://www.flotter-dampfer.de/img/cms/elfbar/elf-bar-600-pink-lemonade.jpg',
+            tags: ['Tasty', 'Fruity'],
+            variants: [{ size: 'Standard', color: 'Pink', stock: 450 }]
+        },
         // 187 Vapes
         {
             sku: '187-HAMBURG',
@@ -101,7 +130,20 @@ async function main() {
             tags: ['New', 'Hype'],
             variants: [{ size: 'Standard', color: 'Purple', stock: 200 }]
         },
-        // Tabak (Holster, Nameless)
+        {
+            sku: '187-QUELLE',
+            name: '187 Box - Quelle',
+            description: 'Traube Minze in Perfektion. Der Klassiker in Vape Form.',
+            price: 9.90,
+            stock: 150,
+            department_id: depts.unisex,
+            brand_id: brandIds['187'],
+            category_id: cats['vapes'],
+            cover_image: 'https://files.shisha-world.com/187-Strassenbande-E-Shisha-Quelle-0004.jpg',
+            tags: ['Classic', 'Hype'],
+            variants: [{ size: 'Standard', color: 'Purple', stock: 150 }]
+        },
+        // Tabak (Holster, Nameless, Hookain, Al Massiva)
         {
             sku: 'HOL-ICE-KAKTUZ',
             name: 'Holster - Ice Kaktuz',
@@ -128,6 +170,32 @@ async function main() {
             tags: ['Legendary', 'Grape'],
             variants: [{ size: '25g', color: 'Purple', stock: 80 }]
         },
+        {
+            sku: 'HK-WHITE-CAEK',
+            name: 'Hookain - White Caek',
+            description: 'Cremiger Käsekuchen mit einer leichten Zitronennote.',
+            price: 17.90,
+            stock: 60,
+            department_id: depts.unisex,
+            brand_id: brandIds['hookain'],
+            category_id: cats['shisha-tobacco'],
+            cover_image: 'https://shisha-cloud.de/media/image/hookain-white-caek-25g.jpg',
+            tags: ['Dessert', 'Sweet'],
+            variants: [{ size: '25g', color: 'White', stock: 60 }]
+        },
+        {
+            sku: 'AM-BRUDERHERZ',
+            name: 'Al Massiva - Bruderherz',
+            description: 'Drachenfrucht pur. Exotisch und intensiv.',
+            price: 17.90,
+            stock: 75,
+            department_id: depts.unisex,
+            brand_id: brandIds['almassiva'],
+            category_id: cats['shisha-tobacco'],
+            cover_image: 'https://shisha-cloud.de/media/image/al-massiva-bruderherz-25g.jpg',
+            tags: ['Fruity', 'Dragonfruit'],
+            variants: [{ size: '25g', color: 'Red', stock: 75 }]
+        },
         // Kohle
         {
             sku: 'BLK-COCO-1KG',
@@ -142,7 +210,7 @@ async function main() {
             tags: ['Essential'],
             variants: [{ size: '1kg', color: 'Black', stock: 1000 }]
         },
-        // Shishas (Moze)
+        // Shishas (Moze, Vyro)
         {
             sku: 'MOZE-BREEZE-TWO',
             name: 'Moze Breeze Two - Wavy Blue',
@@ -155,6 +223,46 @@ async function main() {
             cover_image: 'https://mozeshisha.de/media/image/product/14987/lg/moze-breeze-two-wavy-blue~2.jpg',
             tags: ['Premium', 'Hardware'],
             variants: [{ size: 'One Size', color: 'Blue', stock: 10 }]
+        },
+        {
+            sku: 'VYRO-SPECTRE',
+            name: 'Vyro Spectre - Carbon Red',
+            description: 'Kompakt, innovativ und mit einem einzigartigen Blow-Off System.',
+            price: 119.90,
+            stock: 15,
+            department_id: depts.unisex,
+            brand_id: brandIds['vyro'],
+            category_id: cats['shishas'],
+            cover_image: 'https://aeon-shisha.com/media/image/product/23306/lg/vyro-spectre-carbon-red.jpg',
+            tags: ['Innovation', 'Compact'],
+            variants: [{ size: 'One Size', color: 'Red', stock: 15 }]
+        },
+        // Zubehör
+        {
+            sku: 'OBLAKO-M-MONO',
+            name: 'Oblako M - Mono Cyan',
+            description: 'Der Phunnel für beste Performance und Hitzeverteilung.',
+            price: 24.90,
+            stock: 40,
+            department_id: depts.accessories,
+            brand_id: brandIds['oblako'],
+            category_id: cats['bowls'],
+            cover_image: 'https://shisha-cloud.de/media/image/oblako-phunnel-m-mono-cyan.jpg',
+            tags: ['Phunnel', 'Performance'],
+            variants: [{ size: 'M', color: 'Cyan', stock: 40 }]
+        },
+        {
+            sku: 'MOZE-TIP-CARBON',
+            name: 'Moze Carbon Mundstück - Black',
+            description: 'Echtes Carbon, liegt perfekt in der Hand.',
+            price: 19.90,
+            stock: 100,
+            department_id: depts.accessories,
+            brand_id: brandIds['moze'],
+            category_id: cats['mouthpieces'],
+            cover_image: 'https://mozeshisha.de/media/image/product/11545/lg/moze-carbon-mundstueck-schwarz-matt.jpg',
+            tags: ['Carbon', 'Style'],
+            variants: [{ size: 'Standard', color: 'Black', stock: 100 }]
         }
     ];
 

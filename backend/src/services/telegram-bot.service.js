@@ -974,33 +974,32 @@ const handleAdminApproval = async (query, verificationId, admin) => {
           },
         }
       );
-      );
     }
 
-// 📡 Emit Realtime Event to Frontend
-notifyUser(verificationRequest.user.id, 'verification_approved', {
-  status: 'verified',
-  userId: verificationRequest.user.id
-});
+    // 📡 Emit Realtime Event to Frontend
+    notifyUser(verificationRequest.user.id, 'verification_approved', {
+      status: 'verified',
+      userId: verificationRequest.user.id
+    });
 
-// Update admin message
-await editMessageTextWithRetry(
-  bot,
-  query.message.chat.id,
-  query.message.message_id,
-  `✅ *Verifizierung genehmigt*\n\n` +
-  `👤 User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n` +
-  `✋ Handzeichen: ${verificationRequest.hand_gesture}\n` +
-  `👨‍💼 Genehmigt von: ${admin.full_name || admin.username || 'Admin'}\n` +
-  `⏰ ${new Date().toLocaleString('de-DE')}`,
-  {
-    parse_mode: 'Markdown',
-  }
-);
+    // Update admin message
+    await editMessageTextWithRetry(
+      bot,
+      query.message.chat.id,
+      query.message.message_id,
+      `✅ *Verifizierung genehmigt*\n\n` +
+      `👤 User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n` +
+      `✋ Handzeichen: ${verificationRequest.hand_gesture}\n` +
+      `👨‍💼 Genehmigt von: ${admin.full_name || admin.username || 'Admin'}\n` +
+      `⏰ ${new Date().toLocaleString('de-DE')}`,
+      {
+        parse_mode: 'Markdown',
+      }
+    );
   } catch (error) {
-  botLogger.error('Error handling admin approval:', error);
-  throw error;
-}
+    botLogger.error('Error handling admin approval:', error);
+    throw error;
+  }
 };
 
 // Handle admin rejection

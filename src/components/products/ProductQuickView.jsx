@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { api } from '@/api';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [deliveryInfo, setDeliveryInfo] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  
+
   // Variant Selection
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
@@ -51,7 +52,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
       if (!product.colors || product.colors.length === 0) {
         const productImages = await api.entities.ProductImage.filter({ product_id: product.id });
         const sortedImages = productImages.sort((a, b) => a.sort_order - b.sort_order);
-        
+
         if (sortedImages.length > 0) {
           setImages(sortedImages.map(img => img.url));
         } else if (product.cover_image) {
@@ -82,12 +83,12 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
   const getVariantStock = () => {
     if (!product.variants || product.variants.length === 0) return 999;
     if (!selectedColor) return 0;
-    
-    const variant = product.variants.find(v => 
-      v.color_id === selectedColor.id && 
+
+    const variant = product.variants.find(v =>
+      v.color_id === selectedColor.id &&
       (!selectedSize || v.size === selectedSize)
     );
-    
+
     return variant?.stock || 0;
   };
 
@@ -105,24 +106,24 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
   const isSizeAvailable = (size) => {
     if (!product.variants || product.variants.length === 0) return true;
     if (!selectedColor) return false;
-    
-    const variant = product.variants.find(v => 
+
+    const variant = product.variants.find(v =>
       v.color_id === selectedColor.id && v.size === size
     );
-    
+
     return variant && variant.stock > 0;
   };
 
   const toggleWishlist = async () => {
     if (isPending) return;
-    
+
     setIsPending(true);
     const previousState = isWishlisted;
     setIsWishlisted(!isWishlisted);
 
     try {
       const user = await api.auth.me();
-      
+
       if (previousState) {
         const items = await api.entities.WishlistItem.filter({
           user_id: user.id,
@@ -149,15 +150,24 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
     if (product.sizes && product.sizes.length > 0 && !selectedSize) {
       return;
     }
-    
+
     setIsAddingToCart(true);
     try {
       const options = {};
       if (selectedColor) options.color = selectedColor.name;
       if (selectedSize) options.size = selectedSize;
-      
+
       await onAddToCart?.(product, quantity, options);
       setShowSuccess(true);
+
+      // Explosion!
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#D6B25E', '#F2D27C', '#FFFFFF']
+      });
+
       setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -174,7 +184,7 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
     startDate.setDate(today.getDate() + deliveryInfo.eta_min);
     const endDate = new Date(today);
     endDate.setDate(today.getDate() + deliveryInfo.eta_max);
-    
+
     return `${days[startDate.getDay()]}–${days[endDate.getDay()]} (${deliveryInfo.eta_min}–${deliveryInfo.eta_max} Werktage)`;
   };
 
@@ -187,9 +197,9 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
+      <DialogContent
         className="max-w-5xl p-0 overflow-hidden border-0"
-        style={{ 
+        style={{
           background: 'linear-gradient(180deg, rgba(12, 12, 16, 0.98), rgba(8, 8, 12, 0.98))',
           backdropFilter: 'blur(50px)',
           border: '1px solid rgba(214, 178, 94, 0.25)',
@@ -241,11 +251,10 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all ${
-                      idx === selectedImage
-                        ? 'ring-2 ring-gold ring-offset-2'
-                        : 'opacity-60 hover:opacity-100'
-                    }`}
+                    className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden transition-all ${idx === selectedImage
+                      ? 'ring-2 ring-gold ring-offset-2'
+                      : 'opacity-60 hover:opacity-100'
+                      }`}
                     style={{ ringOffsetColor: 'rgba(0, 0, 0, 0.5)' }}
                   >
                     <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
@@ -314,20 +323,19 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                     <button
                       key={color.id}
                       onClick={() => setSelectedColor(color)}
-                      className={`relative w-12 h-12 rounded-xl transition-all ${
-                        selectedColor?.id === color.id 
-                          ? 'ring-2 ring-gold ring-offset-2' 
-                          : 'hover:scale-110'
-                      }`}
-                      style={{ 
+                      className={`relative w-12 h-12 rounded-xl transition-all ${selectedColor?.id === color.id
+                        ? 'ring-2 ring-gold ring-offset-2'
+                        : 'hover:scale-110'
+                        }`}
+                      style={{
                         background: color.hex || '#888',
                         ringOffsetColor: 'rgba(0, 0, 0, 0.5)'
                       }}
                       title={color.name}
                     >
                       {selectedColor?.id === color.id && (
-                        <Check className="absolute inset-0 m-auto w-5 h-5" 
-                          style={{ color: color.hex === '#FFFFFF' || color.hex === '#FFF' ? '#000' : '#FFF' }} 
+                        <Check className="absolute inset-0 m-auto w-5 h-5"
+                          style={{ color: color.hex === '#FFFFFF' || color.hex === '#FFF' ? '#000' : '#FFF' }}
                         />
                       )}
                     </button>
@@ -351,13 +359,12 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                         key={size}
                         onClick={() => available && setSelectedSize(size)}
                         disabled={!available}
-                        className={`min-w-[52px] h-12 px-4 rounded-xl font-bold text-base transition-all ${
-                          selectedSize === size 
-                            ? 'bg-gold text-black' 
-                            : available 
-                              ? 'hover:border-gold' 
-                              : 'opacity-40 cursor-not-allowed line-through'
-                        }`}
+                        className={`min-w-[52px] h-12 px-4 rounded-xl font-bold text-base transition-all ${selectedSize === size
+                          ? 'bg-gold text-black'
+                          : available
+                            ? 'hover:border-gold'
+                            : 'opacity-40 cursor-not-allowed line-through'
+                          }`}
                         style={{
                           background: selectedSize === size ? undefined : 'rgba(255, 255, 255, 0.06)',
                           border: selectedSize === size ? 'none' : '1px solid rgba(255, 255, 255, 0.15)',
