@@ -175,6 +175,66 @@ export default function ProductDetail() {
       }
     } catch (error) {
       console.error('Error loading product:', error);
+      // Fallback for Demo IDs
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      if (productId && productId.startsWith('demo-')) {
+        const demoProducts = {
+          'demo-1': {
+            id: 'demo-1',
+            name: 'Moze Breeze Two - Wavy Black',
+            description: 'Die Moze Breeze Two ist die Shisha des Jahres. Premium Edelstahl trifft auf einzigartiges Design.',
+            price: 149.90,
+            cover_image: '/images/product-hookah.png',
+            tags: ['Bestseller', 'Premium'],
+            in_stock: true,
+            sku: 'MOZE-BRZ-BLK',
+            category_id: 'cat-shisha',
+            colors: [{ id: 'c1', name: 'Wavy Black', hex: '#222', images: ['/images/product-hookah.png'] }]
+          },
+          'demo-2': {
+            id: 'demo-2',
+            name: 'Elfbar 600 - Watermelon',
+            description: 'Der Klassiker. 600 Züge purer Geschmack. Watermelon ist der Bestseller.',
+            price: 7.90,
+            cover_image: 'https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg',
+            tags: ['New', 'Sale'],
+            in_stock: true,
+            sku: 'ELF-600-WAT',
+            category_id: 'cat-vape'
+          },
+          'demo-3': {
+            id: 'demo-3',
+            name: 'Nameless - Black Nana 200g',
+            description: 'Die Legende unter den Traube-Minze Tabaken. Ein Muss für jeden Shisha-Liebhaber.',
+            price: 17.90,
+            cover_image: 'https://www.shisha-world.com/media/image/product/10186/lg/nameless-black-nana-200g-shisha-tabak.jpg',
+            tags: ['Legendary'],
+            in_stock: true,
+            sku: 'NAME-BLK-NANA',
+            category_id: 'cat-tobacco'
+          },
+          'demo-4': {
+            id: 'demo-4',
+            name: 'Vyro Spectre - Carbon Red',
+            description: 'Kompakt, Leistungsstark, Carbon. Die Vyro Spectre setzt neue Maßstäbe.',
+            price: 99.90,
+            cover_image: 'https://aeon-shisha.com/media/image/product/5815/lg/vyro-spectre-carbon-red.jpg',
+            tags: ['Carbon', 'New'],
+            in_stock: false,
+            sku: 'VYRO-SPC-RED',
+            category_id: 'cat-shisha'
+          }
+        };
+
+        if (demoProducts[productId]) {
+          setProduct(demoProducts[productId]);
+          setImages([{ url: demoProducts[productId].cover_image, sort_order: 0 }]);
+          setSelectedImage(demoProducts[productId].cover_image);
+          return;
+        }
+      }
+
       toast({
         title: 'Fehler',
         description: 'Produkt konnte nicht geladen werden',
@@ -465,8 +525,8 @@ export default function ProductDetail() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedImage(imgUrl)}
                   className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${selectedImage === imgUrl
-                      ? 'border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/30'
-                      : 'border-zinc-800 hover:border-zinc-600'
+                    ? 'border-purple-500 ring-2 ring-purple-500/50 shadow-lg shadow-purple-500/30'
+                    : 'border-zinc-800 hover:border-zinc-600'
                     }`}
                 >
                   <img
@@ -651,8 +711,8 @@ export default function ProductDetail() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedShippingOption('Germany')}
                 className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${selectedShippingOption === 'Germany'
-                    ? 'bg-gradient-to-br from-green-500/25 via-emerald-500/15 to-green-600/15 border-green-400/80 shadow-lg shadow-green-500/40'
-                    : 'bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-green-500/40 hover:border-green-400/60 hover:shadow-lg hover:shadow-green-500/30'
+                  ? 'bg-gradient-to-br from-green-500/25 via-emerald-500/15 to-green-600/15 border-green-400/80 shadow-lg shadow-green-500/40'
+                  : 'bg-gradient-to-br from-green-500/15 via-emerald-500/10 to-green-600/10 border-green-500/40 hover:border-green-400/60 hover:shadow-lg hover:shadow-green-500/30'
                   }`}
               >
                 <div className="absolute -right-20 -top-20 w-40 h-40 bg-green-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
@@ -699,8 +759,8 @@ export default function ProductDetail() {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedShippingOption('China')}
                 className={`group relative p-5 rounded-2xl overflow-hidden transition-all cursor-pointer border-2 ${selectedShippingOption === 'China'
-                    ? 'bg-gradient-to-br from-orange-500/25 via-amber-500/15 to-yellow-600/15 border-orange-400/80 shadow-lg shadow-orange-500/40'
-                    : 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-orange-500/30 hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/30'
+                  ? 'bg-gradient-to-br from-orange-500/25 via-amber-500/15 to-yellow-600/15 border-orange-400/80 shadow-lg shadow-orange-500/40'
+                  : 'bg-gradient-to-br from-orange-500/15 via-amber-500/10 to-yellow-600/10 border-orange-500/30 hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-500/30'
                   }`}
               >
                 <div className="absolute -right-20 -top-20 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl group-hover:opacity-100 opacity-0 transition-opacity" />
@@ -789,8 +849,8 @@ export default function ProductDetail() {
                       }
                     }}
                     className={`relative w-14 h-14 rounded-xl transition-all ${selectedColor?.id === color.id
-                        ? 'ring-2 ring-gold ring-offset-2 ring-offset-black scale-110'
-                        : 'hover:scale-105'
+                      ? 'ring-2 ring-gold ring-offset-2 ring-offset-black scale-110'
+                      : 'hover:scale-105'
                       }`}
                     style={{
                       background: color.hex || '#888',
@@ -834,10 +894,10 @@ export default function ProductDetail() {
                       onClick={() => available && setSelectedSize(size)}
                       disabled={!available}
                       className={`min-w-[56px] h-12 px-4 rounded-xl font-bold text-base transition-all ${selectedSize === size
-                          ? 'bg-gold text-black'
-                          : available
-                            ? 'hover:bg-white/10'
-                            : 'opacity-30 cursor-not-allowed line-through'
+                        ? 'bg-gold text-black'
+                        : available
+                          ? 'hover:bg-white/10'
+                          : 'opacity-30 cursor-not-allowed line-through'
                         }`}
                       style={{
                         background: selectedSize === size ? undefined : 'rgba(255,255,255,0.06)',
@@ -902,8 +962,8 @@ export default function ProductDetail() {
                             setSelectedOptions({ ...selectedOptions, [option.name]: val.value })
                           }
                           className={`relative px-4 py-3 rounded-xl border-2 transition-all font-medium ${isSelected
-                              ? 'border-purple-500 bg-purple-500/20 text-purple-400 shadow-lg shadow-purple-500/30'
-                              : 'border-zinc-800 hover:border-zinc-600 text-zinc-300'
+                            ? 'border-purple-500 bg-purple-500/20 text-purple-400 shadow-lg shadow-purple-500/30'
+                            : 'border-zinc-800 hover:border-zinc-600 text-zinc-300'
                             }`}
                         >
                           <div className="text-sm">{val.label || val.value}</div>
