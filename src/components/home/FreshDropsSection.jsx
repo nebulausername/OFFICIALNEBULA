@@ -104,7 +104,7 @@ function DropProductCard({ product, onQuickView }) {
               </div>
 
               {/* Bottom: NEW Badge */}
-              <div className="absolute bottom-3 left-3">
+              <div className="absolute bottom-3 left-3 flex gap-2">
                 <div
                   className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide"
                   style={{
@@ -114,6 +114,19 @@ function DropProductCard({ product, onQuickView }) {
                 >
                   NEU
                 </div>
+              </div>
+
+              {/* Quick View Button (Hover only) */}
+              <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onQuickView(product);
+                  }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all text-white"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
+                </button>
               </div>
             </div>
 

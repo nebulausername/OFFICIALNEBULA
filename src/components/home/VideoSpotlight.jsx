@@ -28,7 +28,7 @@ export default function VideoSpotlight() {
                             </span>
                         </div>
 
-                        <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
+                        <h2 className="text-4xl md:text-6xl font-black mb-6 leading-tight text-white">
                             Die Nebula <span className="bg-gradient-to-r from-[#E8C76A] to-[#F5D98B] bg-clip-text text-transparent">Welt</span> erleben
                         </h2>
 
