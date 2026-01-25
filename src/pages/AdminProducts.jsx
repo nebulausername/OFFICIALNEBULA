@@ -15,21 +15,15 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Save, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, X, MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import DataTable from '@/components/admin/ui/DataTable';
+import { createPageUrl } from '@/utils';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -168,50 +162,80 @@ export default function AdminProducts() {
     }
   };
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
-
-  // ... (keep existing loadData, etc.)
-
-  const toggleSelectAll = () => {
-    if (selectedProducts.length === products.length) {
-      setSelectedProducts([]);
-    } else {
-      setSelectedProducts(products.map(p => p.id));
+  const columns = [
+    {
+      header: 'SKU',
+      accessorKey: 'sku',
+      sortable: true,
+      cell: (row) => <span className="font-mono text-purple-400 text-sm">{row.sku}</span>
+    },
+    {
+      header: 'Name',
+      accessorKey: 'name',
+      sortable: true,
+      cell: (row) => (
+        <InlineEditableField
+          value={row.name}
+          onSave={(value) => handleInlineUpdate(row.id, 'name', value)}
+          className="font-medium"
+        />
+      )
+    },
+    {
+      header: 'Preis',
+      accessorKey: 'price',
+      sortable: true,
+      cell: (row) => (
+        <InlineEditableField
+          value={row.price}
+          type="number"
+          onSave={(value) => handleInlineUpdate(row.id, 'price', parseFloat(value))}
+          className="text-purple-400 font-bold"
+        />
+      )
+    },
+    {
+      header: 'Kategorie',
+      accessorKey: 'category_id',
+      sortable: true,
+      cell: (row) => {
+        const cat = categories.find(c => c.id === row.category_id);
+        return <span className="text-zinc-400 text-sm">{cat ? cat.name : '-'}</span>
+      }
+    },
+    {
+      header: 'Marke',
+      accessorKey: 'brand_id',
+      sortable: true,
+      cell: (row) => {
+        const brand = brands.find(b => b.id === row.brand_id);
+        return <span className="text-zinc-400 text-sm">{brand ? brand.name : '-'}</span>
+      }
+    },
+    {
+      header: 'Status',
+      accessorKey: 'in_stock',
+      sortable: true,
+      cell: (row) => (
+        <button
+          onClick={() => handleInlineUpdate(row.id, 'in_stock', !row.in_stock)}
+          className="group"
+        >
+          {row.in_stock ? (
+            <span className="text-green-400 group-hover:text-green-300 transition-colors flex items-center gap-1">
+              <span className="w-2 h-2 bg-green-400 rounded-full" />
+              Verfügbar
+            </span>
+          ) : (
+            <span className="text-red-400 group-hover:text-red-300 transition-colors flex items-center gap-1">
+              <span className="w-2 h-2 bg-red-400 rounded-full" />
+              Ausverkauft
+            </span>
+          )}
+        </button>
+      )
     }
-  };
-
-  const toggleSelect = (id) => {
-    if (selectedProducts.includes(id)) {
-      setSelectedProducts(selectedProducts.filter(p => p !== id));
-    } else {
-      setSelectedProducts([...selectedProducts, id]);
-    }
-  };
-
-  const handeBulkDelete = async () => {
-    if (!confirm(`${selectedProducts.length} Produkte wirklich löschen?`)) return;
-    try {
-      await Promise.all(selectedProducts.map(id => api.entities.Product.delete(id)));
-      toast({ title: 'Gelöscht', description: `${selectedProducts.length} Produkte gelöscht` });
-      setSelectedProducts([]);
-      loadData();
-    } catch (error) {
-      toast({ title: 'Fehler', description: 'Bulk Delete fehlgeschlagen', variant: 'destructive' });
-    }
-  };
-
-  const handleBulkStatus = async (inStock) => {
-    try {
-      await Promise.all(
-        selectedProducts.map(id => api.entities.Product.update(id, { in_stock: inStock }))
-      );
-      toast({ title: 'Aktualisiert', description: `${selectedProducts.length} Produkte aktualisiert` });
-      setSelectedProducts([]);
-      loadData();
-    } catch (error) {
-      toast({ title: 'Fehler', description: 'Bulk Update fehlgeschlagen', variant: 'destructive' });
-    }
-  };
+  ];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -224,143 +248,34 @@ export default function AdminProducts() {
             {products.length} Produkte • <span className="text-purple-400">Echtzeit-Bearbeitung</span> aktiviert
           </p>
         </div>
-        <div className="flex gap-2">
-          {selectedProducts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex gap-2 mr-4"
-            >
-              <Button onClick={() => handleBulkStatus(true)} variant="outline" className="border-green-500/50 text-green-400 hover:bg-green-500/10">
-                Live schalten
-              </Button>
-              <Button onClick={() => handleBulkStatus(false)} variant="outline" className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10">
-                Verstecken
-              </Button>
-              <Button onClick={handeBulkDelete} variant="destructive">
-                <Trash2 className="w-4 h-4 mr-2" />
-                {selectedProducts.length} Löschen
-              </Button>
-            </motion.div>
-          )}
-          <Button onClick={handleNew} className="bg-gradient-to-r from-purple-500 to-pink-500">
-            <Plus className="w-5 h-5 mr-2" />
-            Neues Produkt
-          </Button>
-        </div>
+        <Button onClick={handleNew} className="bg-gradient-to-r from-purple-500 to-pink-500">
+          <Plus className="w-5 h-5 mr-2" />
+          Neues Produkt
+        </Button>
       </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass backdrop-blur border border-zinc-800 rounded-2xl overflow-hidden"
       >
-        <Table>
-          <TableHeader>
-            <TableRow className="border-zinc-800 hover:bg-transparent bg-zinc-900/50">
-              <TableHead className="w-[50px]">
-                <Checkbox
-                  checked={products.length > 0 && selectedProducts.length === products.length}
-                  onCheckedChange={toggleSelectAll}
-                  className="border-zinc-600"
-                />
-              </TableHead>
-              <TableHead className="font-bold">ProduktID</TableHead>
-              <TableHead className="font-bold">Name</TableHead>
-              <TableHead className="font-bold">Preis</TableHead>
-              <TableHead className="font-bold">Kategorie</TableHead>
-              <TableHead className="font-bold">Marke</TableHead>
-              <TableHead className="font-bold">Status</TableHead>
-              <TableHead className="text-right font-bold">Aktionen</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {products.map((product) => {
-              const category = categories.find(c => c.id === product.category_id);
-              const brand = brands.find(b => b.id === product.brand_id);
-              const isSelected = selectedProducts.includes(product.id);
-
-              return (
-                <TableRow key={product.id} className={`border-zinc-800 transition-colors ${isSelected ? 'bg-purple-500/10 hover:bg-purple-500/20' : 'hover:bg-zinc-900/30'}`}>
-                  <TableCell>
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleSelect(product.id)}
-                      className="border-zinc-600"
-                    />
-                  </TableCell>
-                  <TableCell className="font-mono text-purple-400 text-sm">{product.sku}</TableCell>
-                  <TableCell>
-                    <InlineEditableField
-                      value={product.name}
-                      onSave={(value) => handleInlineUpdate(product.id, 'name', value)}
-                      className="font-medium"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <InlineEditableField
-                      value={product.price}
-                      type="number"
-                      onSave={(value) => handleInlineUpdate(product.id, 'price', parseFloat(value))}
-                      className="text-purple-400 font-bold"
-                    />
-                  </TableCell>
-                  <TableCell className="text-zinc-400 text-sm">{category?.name || '-'}</TableCell>
-                  <TableCell className="text-zinc-400 text-sm">{brand?.name || '-'}</TableCell>
-                  <TableCell>
-                    <button
-                      onClick={() => handleInlineUpdate(product.id, 'in_stock', !product.in_stock)}
-                      className="group"
-                    >
-                      {product.in_stock ? (
-                        <span className="text-green-400 group-hover:text-green-300 transition-colors flex items-center gap-1">
-                          <span className="w-2 h-2 bg-green-400 rounded-full" />
-                          Verfügbar
-                        </span>
-                      ) : (
-                        <span className="text-red-400 group-hover:text-red-300 transition-colors flex items-center gap-1">
-                          <span className="w-2 h-2 bg-red-400 rounded-full" />
-                          Ausverkauft
-                        </span>
-                      )}
-                    </button>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      {/* Same buttons as before */}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => window.location.href = createPageUrl('AdminProductEditor') + `?id=${product.id}`}
-                        className="hover:bg-purple-500/20 hover:text-purple-400 transition-colors"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(product.id)}
-                        className="text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <DataTable
+          columns={columns}
+          data={products}
+          searchKey="name"
+          searchPlaceholder="Produktname, SKU..."
+          filters={[
+            { label: 'Kategorie', value: 'category' } // Needs implementation in DataTable eventually
+          ]}
+          actions={[
+            { label: 'Bearbeiten', icon: Pencil, onClick: (row) => window.location.href = createPageUrl('AdminProductEditor') + `?id=${row.id}` },
+            { label: 'Schnellbearbeitung', icon: Pencil, onClick: handleEdit }, // Opens modal
+            { label: 'Löschen', icon: Trash2, onClick: (row) => handleDelete(row.id) },
+          ]}
+        />
       </motion.div>
 
-      {/* Edit Dialog - Kept Exactly as is, just wrapped or below */}
+      {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        {/* ... (Keep existing Dialog Content exactly as is in previous file content) ... 
-             Since I cannot partial replace easily with this tool if I am replacing the whole return, I must include the Dialog content again or verify if I can target just the Table part. 
-             The previous tool call showed the file ends with the Dialog.
-             I will try to replace the return statement block mainly. but replace_file_content is line based.
-             Let's use a Replace Block that targets from `return (` down to the end of the file.
-         */}
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glass backdrop-blur-xl border-2 border-purple-500/30 shadow-2xl shadow-purple-500/20">
           <DialogHeader className="pb-4 border-b-2 border-zinc-700">
             <DialogTitle className="text-3xl md:text-4xl font-black bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 bg-clip-text text-transparent">

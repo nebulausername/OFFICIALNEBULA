@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { useToast } from '@/components/ui/use-toast';
+import CartItem from '@/components/cart/CartItem';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -35,14 +36,14 @@ export default function Cart() {
       // Load product details
       const productIds = [...new Set(items.map(item => item.product_id))];
       const productData = {};
-      
+
       for (const id of productIds) {
         const prods = await api.entities.Product.filter({ id });
         if (prods.length > 0) {
           productData[id] = prods[0];
         }
       }
-      
+
       setProducts(productData);
     } catch (error) {
       console.error('Error loading cart:', error);
@@ -58,13 +59,13 @@ export default function Cart() {
 
   const updateQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
-    
+
     try {
       await api.entities.StarCartItem.update(itemId, { quantity: newQuantity });
-      setCartItems(cartItems.map(item => 
+      setCartItems(cartItems.map(item =>
         item.id === itemId ? { ...item, quantity: newQuantity } : item
       ));
-      
+
       toast({
         title: '✓ Aktualisiert',
         description: 'Menge wurde geändert'
@@ -213,13 +214,13 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
         await api.integrations.sendEmail({
           to: user.email,
           subject: '✨ Bestellung eingegangen - Nebula Supply',
-          body: `Hallo ${contactInfo.name},\n\nDeine Bestellung wurde erfolgreich aufgegeben!\n\nWir melden uns schnellstmöglich bei dir.\n\nGesamtsumme: ${total.toFixed(2)}€\n\nViele Grüße,\nDein Nebula Supply Team`
+          html: `Hallo ${contactInfo.name},\n\nDeine Bestellung wurde erfolgreich aufgegeben!\n\nWir melden uns schnellstmöglich bei dir.\n\nGesamtsumme: ${total.toFixed(2)}€\n\nViele Grüße,\nDein Nebula Supply Team`
         });
 
         await api.integrations.sendEmail({
           to: 'admin@nebulasupply.com',
           subject: `🌟 Neue Bestellung #${request.id}`,
-          body: telegramMessage
+          html: telegramMessage.replace(/\n/g, '<br>')
         });
       } catch (notificationError) {
         console.error('Notification error:', notificationError);
@@ -324,7 +325,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
           className="text-center py-32 glass backdrop-blur-xl border-2 border-zinc-800 rounded-3xl relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5" />
-          
+
           <div className="relative z-10">
             <motion.div
               animate={{ y: [0, -10, 0] }}
@@ -333,12 +334,12 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
             >
               <ShoppingBag className="w-16 h-16 text-white" />
             </motion.div>
-            
+
             <h2 className="text-4xl font-black mb-4">Warenkorb ist leer</h2>
             <p className="text-zinc-400 text-xl mb-10 max-w-md mx-auto">
               Entdecke unsere exklusive Auswahl an Premium-Produkten
             </p>
-            
+
             <Link to={createPageUrl('Products')}>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -357,135 +358,21 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
-              {cartItems.map((item, index) => {
-                const product = products[item.product_id];
-                if (!product) return null;
-
-                return (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ delay: index * 0.05 }}
-                    whileHover={{ x: 5 }}
-                    className="group glass backdrop-blur-xl border-2 border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 transition-all relative"
-                  >
-                    {/* Shimmer Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                    
-                    <div className="flex gap-6 p-6 relative z-10">
-                      {/* Image */}
-                      <motion.div 
-                        whileHover={{ scale: 1.05 }}
-                        className="relative w-32 h-32 bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl overflow-hidden flex-shrink-0 shadow-lg"
-                      >
-                        {(item.selected_options?.image || product.cover_image) ? (
-                          <img
-                            src={item.selected_options?.image || product.cover_image}
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ShoppingBag className="w-12 h-12 text-zinc-700" />
-                          </div>
-                        )}
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-black/80 backdrop-blur rounded-lg text-xs font-mono text-purple-300 font-bold">
-                          {item.selected_options?.sku || product.sku}
-                        </div>
-                      </motion.div>
-
-                      {/* Details */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-4">
-                          <div className="flex-1 min-w-0 pr-4">
-                            <h3 className="font-black text-xl mb-2 truncate group-hover:text-purple-400 transition-colors">{product.name}</h3>
-                            <p className="text-sm text-zinc-500 flex items-center gap-2">
-                              <Star className="w-3 h-3 text-purple-400" />
-                              Einzelpreis: <span className="font-bold text-purple-400">{getItemPrice(item, product).toFixed(2)}€</span>
-                            </p>
-                            {item.selected_options?.color_name && (
-                              <div className="flex items-center gap-2 mt-1">
-                                <div className="w-4 h-4 rounded" style={{ background: item.selected_options.color_hex }} />
-                                <span className="text-xs font-bold text-white">{item.selected_options.color_name}</span>
-                                {item.selected_options.size && (
-                                  <span className="text-xs font-bold text-zinc-400">• {item.selected_options.size}</span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          <motion.button
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => removeItem(item.id)}
-                            className="flex-shrink-0 p-3 rounded-xl hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all border-2 border-transparent hover:border-red-500/30"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </motion.button>
-                        </div>
-
-                        {/* Options */}
-                        {item.selected_options && Object.keys(item.selected_options).length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {Object.entries(item.selected_options).map(([key, value]) => (
-                              <motion.div 
-                                key={key}
-                                whileHover={{ scale: 1.05 }}
-                                className="px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-xs text-purple-300 font-semibold"
-                              >
-                                {key}: <span className="text-purple-400">{value}</span>
-                              </motion.div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Quantity & Price */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 glass border-2 border-zinc-800 rounded-xl p-1.5">
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-purple-500/20 transition-all"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </motion.button>
-                            <span className="w-14 text-center font-black text-xl">{item.quantity}</span>
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-purple-500/20 transition-all"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </motion.button>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xs text-zinc-500 mb-1 font-semibold">Summe</div>
-                            <motion.div 
-                              key={item.quantity}
-                              initial={{ scale: 1.2 }}
-                              animate={{ scale: 1 }}
-                              className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent animate-gradient"
-                            >
-                              {(getItemPrice(item, product) * item.quantity).toFixed(2)}€
-                            </motion.div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {cartItems.map((item, index) => (
+                <CartItem
+                  key={item.id}
+                  item={item}
+                  product={products[item.product_id]}
+                  updateQuantity={updateQuantity}
+                  removeItem={removeItem}
+                />
+              ))}
             </AnimatePresence>
           </div>
 
           {/* Checkout */}
           <div className="lg:col-span-1">
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+            <motion.div
               className="sticky top-24 glass backdrop-blur-xl border-2 border-zinc-800 rounded-2xl p-8 space-y-6 shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-zinc-800">
@@ -555,7 +442,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
               <div className="pt-6 border-t-2 border-zinc-800 space-y-6">
                 <div className="flex justify-between items-center p-5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border border-purple-500/30">
                   <span className="text-lg font-bold text-zinc-300">Gesamt:</span>
-                  <motion.span 
+                  <motion.span
                     key={calculateTotal()}
                     initial={{ scale: 1.2 }}
                     animate={{ scale: 1 }}
@@ -573,7 +460,7 @@ ${note ? `📝 *Notiz:* ${note}` : ''}
                   className="neon-button w-full h-16 text-lg font-black bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 rounded-xl shadow-2xl shadow-purple-500/50 glow-effect disabled:opacity-50 disabled:cursor-not-allowed transition-all animate-gradient relative overflow-hidden group"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
+
                   {submitting ? (
                     <div className="flex items-center justify-center gap-3 relative z-10">
                       <motion.div

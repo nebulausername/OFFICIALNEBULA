@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, ShoppingBag, MapPin, Package, Sparkles, Phone, Mail, User, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Check, Package, CheckCircle2, MessageCircle, ShoppingBag, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useNebulaSound } from '@/contexts/SoundContext';
+import CheckoutSummary from '@/components/checkout/CheckoutSummary';
+import CheckoutTrust from '@/components/checkout/CheckoutTrust';
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -40,6 +42,8 @@ export default function Checkout() {
     { title: 'Bestätigung', icon: Check }
   ];
 
+  const [productsMap, setProductsMap] = useState({});
+
   useEffect(() => {
     loadCheckoutData();
   }, []);
@@ -51,6 +55,15 @@ export default function Checkout() {
 
       const items = await api.entities.StarCartItem.filter({ user_id: userData.id });
       setCartItems(items);
+
+      // Load products for map
+      const pMap = {};
+      const productIds = [...new Set(items.map(i => i.product_id).filter(Boolean))];
+      for (const pid of productIds) {
+        const res = await api.entities.Product.filter({ id: pid });
+        if (res[0]) pMap[pid] = res[0];
+      }
+      setProductsMap(pMap);
 
       const plans = await api.entities.VIPPlan.filter({ is_active: true });
       setVipPlans(plans);
@@ -185,488 +198,228 @@ export default function Checkout() {
     );
   }
 
-  if (cartItems.length === 0) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="text-center">
-          <ShoppingBag className="w-20 h-20 text-zinc-700 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Dein Warenkorb ist leer</h2>
-          <p className="text-zinc-400 mb-6">Füge Produkte hinzu, um fortzufahren</p>
-          <Button onClick={() => navigate(createPageUrl('Products'))}>
-            Jetzt shoppen
-          </Button>
+  return (
+    <div className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-20">
+      {/* Navbar Minimal */}
+      <div className="border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div onClick={() => navigate(-1)} className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white transition-colors">
+            <ArrowLeft size={20} />
+            <span className="font-medium">Zurück</span>
+          </div>
+          <div className="font-black text-xl tracking-tight bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            NEBULA CHECKOUT
+          </div>
+          <div className="w-[70px]"></div> {/* Spacer */}
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen bg-black py-8 px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
-            Checkout
-          </h1>
-          <p className="text-zinc-400">Schließe deine Bestellung ab</p>
-        </motion.div>
+      <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* Left Column: Form & Steps */}
+          <div className="lg:col-span-7 space-y-8">
 
-        {/* Progress Steps */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between relative">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = index === currentStep;
-              const isCompleted = index < currentStep;
+            {/* Progress Steps (Simpler) */}
+            <div className="flex items-center gap-4 mb-8">
+              {steps.map((step, i) => (
+                <div key={i} className={`flex items-center gap-2 ${i <= currentStep ? 'text-white' : 'text-zinc-600'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors ${i < currentStep ? 'bg-emerald-500 border-emerald-500' :
+                    i === currentStep ? 'border-purple-500 text-purple-400' :
+                      'border-zinc-700 text-zinc-600'
+                    }`}>
+                    {i < currentStep ? <Check size={14} /> : i + 1}
+                  </div>
+                  <span className="hidden sm:inline font-bold text-sm">{step.title}</span>
+                  {i < steps.length - 1 && (
+                    <div className="w-8 h-0.5 bg-zinc-800 mx-2" />
+                  )}
+                </div>
+              ))}
+            </div>
 
-              return (
-                <React.Fragment key={index}>
-                  <div className="flex flex-col items-center z-10">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-2 transition-all ${isActive
-                        ? 'bg-gradient-to-br from-purple-500 to-pink-500 shadow-2xl shadow-purple-500/50'
-                        : isCompleted
-                          ? 'bg-green-500 shadow-xl shadow-green-500/50'
-                          : 'bg-zinc-800 border-2 border-zinc-700'
-                        }`}
+            <AnimatePresence mode="wait">
+              {currentStep === 0 && (
+                <motion.div
+                  key="step0"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  <h2 className="text-3xl font-black mb-6">Versanddetails</h2>
+
+                  {/* Express Shipping Option */}
+                  <div
+                    onClick={() => setFormData({ ...formData, shippingMethod: formData.shippingMethod === 'express' ? 'standard' : 'express' })}
+                    className={`cursor-pointer group relative overflow-hidden p-6 rounded-2xl border-2 transition-all ${formData.shippingMethod === 'express'
+                      ? 'border-purple-500 bg-purple-500/10'
+                      : 'border-zinc-800 bg-zinc-900 hover:border-zinc-700'
+                      }`}
+                  >
+                    <div className="flex justify-between items-start relative z-10">
+                      <div className="flex gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${formData.shippingMethod === 'express' ? 'bg-purple-500 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                          <Package size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg text-white">Express Lieferung</h3>
+                          <p className="text-zinc-400 text-sm">Direkt aus China (8-15 Tage)</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="block font-bold text-emerald-400">-15% Rabatt</span>
+                        {formData.shippingMethod === 'express' && <CheckCircle2 className="text-purple-500 ml-auto mt-2" />}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-zinc-400 ml-1">Vollständiger Name</label>
+                      <Input
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        placeholder="Max Mustermann"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-zinc-400 ml-1">E-Mail Adresse</label>
+                      <Input
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        placeholder="max@example.com"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-bold text-zinc-400 ml-1">Adresse</label>
+                      <Input
+                        value={formData.address}
+                        onChange={e => setFormData({ ...formData, address: e.target.value })}
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        placeholder="Musterstraße 123"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-zinc-400 ml-1">PLZ</label>
+                      <Input
+                        value={formData.zip}
+                        onChange={e => setFormData({ ...formData, zip: e.target.value })}
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        placeholder="12345"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-zinc-400 ml-1">Stadt</label>
+                      <Input
+                        value={formData.city}
+                        onChange={e => setFormData({ ...formData, city: e.target.value })}
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        placeholder="Berlin"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-bold text-zinc-400 ml-1">Telegram (für Updates)</label>
+                      <div className="relative">
+                        <MessageCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
+                        <Input
+                          value={formData.telegram}
+                          onChange={e => setFormData({ ...formData, telegram: e.target.value })}
+                          className="h-12 pl-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                          placeholder="@username"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-6">
+                    <Button
+                      onClick={() => setCurrentStep(1)}
+                      disabled={!formData.name || !formData.email || !formData.address}
+                      className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black text-lg rounded-xl"
                     >
-                      {isCompleted ? (
-                        <Check className="w-8 h-8 text-white" />
-                      ) : (
-                        <Icon className={`w-8 h-8 ${isActive ? 'text-white' : 'text-zinc-500'}`} />
-                      )}
-                    </motion.div>
-                    <span className={`text-sm font-bold ${isActive ? 'text-white' : 'text-zinc-500'}`}>
-                      {step.title}
-                    </span>
+                      Weiter
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
+              {currentStep === 1 && (
+                <motion.div
+                  key="step1"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                >
+                  <h2 className="text-3xl font-black mb-6">Zahlungsmethode</h2>
+
+                  <div className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl mb-8">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <CheckCircle2 size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-white">Anfrage senden</h3>
+                        <p className="text-zinc-400 text-sm">Wir prüfen deine Bestellung und senden dir einen Zahlungslink (PayPal / Krypto).</p>
+                      </div>
+                    </div>
                   </div>
 
-                  {index < steps.length - 1 && (
-                    <div className="flex-1 h-1 bg-zinc-800 mx-4 relative">
-                      <motion.div
-                        initial={{ width: '0%' }}
-                        animate={{ width: index < currentStep ? '100%' : '0%' }}
-                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                      />
-                    </div>
-                  )}
-                </React.Fragment>
-              );
-            })}
+                  <Button
+                    onClick={handleSubmitOrder}
+                    disabled={submitting}
+                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-lg rounded-xl shadow-xl shadow-purple-500/20"
+                  >
+                    {submitting ? 'Verarbeite...' : 'Kostenpflichtig Bestellen'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setCurrentStep(0)}
+                    className="w-full mt-4 text-zinc-500 hover:text-white"
+                  >
+                    Zurück zu Details
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Mobile Trust badges */}
+            <div className="lg:hidden">
+              <CheckoutTrust />
+            </div>
+          </div>
+
+          {/* Right Column: Summary (Sticky) */}
+          <div className="lg:col-span-5">
+            <div className="sticky top-24 space-y-6">
+              <CheckoutSummary
+                cartItems={cartItems}
+                products={productsMap}
+                total={cartItems.reduce((sum, item) => {
+                  const p = productsMap[item.product_id];
+                  let price = p?.price || 0;
+
+                  // Handle price overrides
+                  if (item.selected_options?.price) price = item.selected_options.price;
+                  else if (item.selected_options?.variant_id) {
+                    const v = p?.variants?.find(v => v.id === item.selected_options.variant_id);
+                    if (v?.price_override) price = v.price_override;
+                  }
+
+                  return sum + (price * item.quantity);
+                }, 0)}
+              />
+
+              {/* Desktop Trust badges */}
+              <div className="hidden lg:block">
+                <CheckoutTrust />
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Step Content */}
-        <AnimatePresence mode="wait">
-          {currentStep === 0 && (
-            <motion.div
-              key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
-            >
-              <div className="glass backdrop-blur-xl border-2 border-zinc-800 rounded-3xl p-6 md:p-8">
-                <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
-                  <ShoppingBag className="w-8 h-8 text-purple-400" />
-                  Deine Artikel
-                </h2>
-
-                <div className="space-y-4">
-                  {cartItems.map((item, index) => (
-                    <CartItemDisplay key={index} item={item} />
-                  ))}
-                </div>
-
-                <div className="mt-8 pt-6 border-t border-zinc-800">
-                  <div className="flex justify-between items-center text-xl font-black">
-                    <span className="text-zinc-400">Zwischensumme:</span>
-                    <span className="text-white">Wird berechnet</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => setCurrentStep(1)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold px-8 py-6 text-lg rounded-2xl"
-                >
-                  Weiter zur Versandadresse
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 1 && (
-            <motion.div
-              key="step2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
-            >
-              <div className="glass backdrop-blur-xl border-2 border-zinc-800 rounded-3xl p-6 md:p-8">
-                <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
-                  <MapPin className="w-8 h-8 text-purple-400" />
-                  Kontakt & Versand
-                </h2>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      <User className="w-4 h-4 inline mr-2" />
-                      Name *
-                    </label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Dein Name"
-                      className="bg-zinc-900 border-zinc-700"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      <Mail className="w-4 h-4 inline mr-2" />
-                      E-Mail *
-                    </label>
-                    <Input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="deine@email.de"
-                      className="bg-zinc-900 border-zinc-700"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      <Phone className="w-4 h-4 inline mr-2" />
-                      Telefon
-                    </label>
-                    <Input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+49 123 456789"
-                      className="bg-zinc-900 border-zinc-700"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      <MessageCircle className="w-4 h-4 inline mr-2" />
-                      Telegram Username
-                    </label>
-                    <Input
-                      value={formData.telegram}
-                      onChange={(e) => setFormData({ ...formData, telegram: e.target.value })}
-                      placeholder="@username"
-                      className="bg-zinc-900 border-zinc-700"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      Adresse
-                    </label>
-                    <Input
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      placeholder="Straße und Hausnummer"
-                      className="bg-zinc-900 border-zinc-700"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      Stadt
-                    </label>
-                    <Input
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      placeholder="Stadt"
-                      className="bg-zinc-900 border-zinc-700"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      PLZ
-                    </label>
-                    <Input
-                      value={formData.zip}
-                      onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
-                      placeholder="12345"
-                      className="bg-zinc-900 border-zinc-700"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      Versandmethode
-                    </label>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setFormData({ ...formData, shippingMethod: 'standard' })}
-                        className={`p-6 rounded-2xl border-2 transition-all text-left ${formData.shippingMethod === 'standard'
-                          ? 'border-green-500 bg-green-500/10'
-                          : 'border-zinc-700 bg-zinc-900/50'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-white">🇩🇪 Deutschland</span>
-                          {formData.shippingMethod === 'standard' && (
-                            <Check className="w-5 h-5 text-green-400" />
-                          )}
-                        </div>
-                        <p className="text-sm text-zinc-400">1-5 Werktage</p>
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setFormData({ ...formData, shippingMethod: 'express' })}
-                        className={`p-6 rounded-2xl border-2 transition-all text-left ${formData.shippingMethod === 'express'
-                          ? 'border-orange-500 bg-orange-500/10'
-                          : 'border-zinc-700 bg-zinc-900/50'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-bold text-white">🇨🇳 China</span>
-                          {formData.shippingMethod === 'express' && (
-                            <Check className="w-5 h-5 text-orange-400" />
-                          )}
-                        </div>
-                        <p className="text-sm text-zinc-400">8-15 Werktage • -15%</p>
-                      </motion.button>
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-bold text-zinc-400 mb-2">
-                      Notizen (Optional)
-                    </label>
-                    <Textarea
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      placeholder="Besondere Wünsche oder Anmerkungen..."
-                      className="bg-zinc-900 border-zinc-700 min-h-[100px]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentStep(0)}
-                  className="border-zinc-700 text-white"
-                >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                  Zurück
-                </Button>
-                <Button
-                  onClick={() => setCurrentStep(2)}
-                  disabled={!formData.name || !formData.email}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold px-8"
-                >
-                  Weiter zur Bestätigung
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </div>
-            </motion.div>
-          )}
-
-          {currentStep === 2 && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
-            >
-              <div className="glass backdrop-blur-xl border-2 border-zinc-800 rounded-3xl p-6 md:p-8">
-                <h2 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
-                  <Package className="w-8 h-8 text-purple-400" />
-                  Bestellung überprüfen
-                </h2>
-
-                <div className="space-y-6">
-                  {/* Contact Info */}
-                  <div className="p-6 bg-zinc-900/50 rounded-2xl border border-zinc-800">
-                    <h3 className="font-bold text-white mb-4">Kontaktinformationen</h3>
-                    <div className="grid md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-zinc-500">Name:</span>
-                        <p className="text-white font-semibold">{formData.name}</p>
-                      </div>
-                      <div>
-                        <span className="text-zinc-500">E-Mail:</span>
-                        <p className="text-white font-semibold">{formData.email}</p>
-                      </div>
-                      {formData.phone && (
-                        <div>
-                          <span className="text-zinc-500">Telefon:</span>
-                          <p className="text-white font-semibold">{formData.phone}</p>
-                        </div>
-                      )}
-                      {formData.telegram && (
-                        <div>
-                          <span className="text-zinc-500">Telegram:</span>
-                          <p className="text-white font-semibold">{formData.telegram}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Shipping */}
-                  {formData.address && (
-                    <div className="p-6 bg-zinc-900/50 rounded-2xl border border-zinc-800">
-                      <h3 className="font-bold text-white mb-4">Versandadresse</h3>
-                      <p className="text-white">{formData.address}</p>
-                      <p className="text-white">{formData.zip} {formData.city}</p>
-                      <p className="text-white">{formData.country}</p>
-                    </div>
-                  )}
-
-                  {/* Items */}
-                  <div className="p-6 bg-zinc-900/50 rounded-2xl border border-zinc-800">
-                    <h3 className="font-bold text-white mb-4">Bestellte Artikel</h3>
-                    <div className="space-y-3">
-                      {cartItems.map((item, index) => (
-                        <CartItemDisplay key={index} item={item} compact />
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Important Notice */}
-                  <div className="p-6 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-500/40 rounded-2xl">
-                    <div className="flex items-start gap-4">
-                      <Sparkles className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
-                      <div>
-                        <h3 className="font-bold text-white mb-2">Wichtiger Hinweis</h3>
-                        <p className="text-sm text-zinc-300">
-                          Nach dem Absenden wird deine Bestellung als <strong>Anfrage</strong> an unser Team gesendet.
-                          Ein Admin wird sich in Kürze bei dir melden, um die Zahlung zu koordinieren und weitere Details zu besprechen.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentStep(1)}
-                  disabled={submitting}
-                  className="border-zinc-700 text-white"
-                >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
-                  Zurück
-                </Button>
-                <Button
-                  onClick={handleSubmitOrder}
-                  disabled={submitting}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold px-8 text-lg"
-                >
-                  {submitting ? (
-                    <>
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
-                      />
-                      Wird gesendet...
-                    </>
-                  ) : (
-                    <>
-                      Bestellung absenden
-                      <Check className="w-5 h-5 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );
 }
 
-function CartItemDisplay({ item, compact = false }) {
-  const [product, setProduct] = useState(null);
-  const [vipPlan, setVipPlan] = useState(null);
-
-  useEffect(() => {
-    loadItemDetails();
-  }, [item]);
-
-  const loadItemDetails = async () => {
-    if (item.product_id) {
-      const products = await api.entities.Product.filter({ id: item.product_id });
-      setProduct(products[0]);
-    }
-  };
-
-  if (!product && !vipPlan) {
-    return (
-      <div className="animate-pulse flex gap-4">
-        <div className="w-20 h-20 bg-zinc-800 rounded-xl" />
-        <div className="flex-1 space-y-2">
-          <div className="h-4 bg-zinc-800 rounded w-3/4" />
-          <div className="h-3 bg-zinc-800 rounded w-1/2" />
-        </div>
-      </div>
-    );
-  }
-
-  const displayItem = product || vipPlan;
-
-  if (compact) {
-    return (
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          {product?.cover_image && (
-            <img src={product.cover_image} alt={displayItem.name} className="w-12 h-12 rounded-lg object-cover" />
-          )}
-          <div>
-            <p className="text-white font-semibold text-sm">{displayItem.name}</p>
-            <p className="text-zinc-500 text-xs">Menge: {item.quantity || 1}</p>
-          </div>
-        </div>
-        <p className="text-white font-bold">{displayItem.price}€</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex gap-4 p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800">
-      {product?.cover_image && (
-        <img src={product.cover_image} alt={displayItem.name} className="w-24 h-24 rounded-xl object-cover" />
-      )}
-      <div className="flex-1">
-        <h3 className="font-bold text-white mb-1">{displayItem.name}</h3>
-        {product?.sku && (
-          <p className="text-sm text-zinc-500 mb-2">SKU: {product.sku}</p>
-        )}
-        <div className="flex items-center justify-between">
-          <span className="text-zinc-400">Menge: {item.quantity || 1}</span>
-          <span className="text-xl font-black text-white">{displayItem.price * (item.quantity || 1)}€</span>
-        </div>
-      </div>
-    </div>
-  );
-}
