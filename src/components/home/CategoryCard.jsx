@@ -2,45 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { motion } from 'framer-motion';
-import { ChevronRight, Shirt, ShoppingBag, Watch, Users } from 'lucide-react';
+import { ChevronRight, Sparkles } from 'lucide-react';
 
-// Category-specific icons and colors
-const categoryConfig = {
-  herren: {
-    icon: Shirt,
-    gradient: 'from-blue-500/20 to-indigo-500/20',
-    iconBg: 'from-blue-500/30 to-indigo-500/30'
-  },
-  damen: {
-    icon: ShoppingBag,
-    gradient: 'from-pink-500/20 to-rose-500/20',
-    iconBg: 'from-pink-500/30 to-rose-500/30'
-  },
-  accessoires: {
-    icon: Watch,
-    gradient: 'from-purple-500/20 to-violet-500/20',
-    iconBg: 'from-purple-500/30 to-violet-500/30'
-  },
-  unisex: {
-    icon: Users,
-    gradient: 'from-emerald-500/20 to-teal-500/20',
-    iconBg: 'from-emerald-500/30 to-teal-500/30'
-  }
-};
-
-const getConfig = (name) => {
-  const key = name?.toLowerCase() || '';
-  if (key.includes('herren') || key.includes('männer') || key.includes('men')) return categoryConfig.herren;
-  if (key.includes('damen') || key.includes('frauen') || key.includes('women')) return categoryConfig.damen;
-  if (key.includes('accessoire') || key.includes('zubehör')) return categoryConfig.accessoires;
-  if (key.includes('unisex') || key.includes('alle')) return categoryConfig.unisex;
-  return categoryConfig.unisex;
-};
-
-export default function CategoryCard({ department, index, productCount = 0 }) {
-  const config = getConfig(department.name);
-  const Icon = config.icon;
-
+export default function CategoryCard({ department, index, productCount = 0, image }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,83 +13,59 @@ export default function CategoryCard({ department, index, productCount = 0 }) {
       transition={{ delay: index * 0.1 }}
       whileHover={{ y: -6, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="group relative"
+      className="group relative h-full"
     >
       <Link
         to={createPageUrl('Products') + `?department=${department.id}`}
-        className="relative block rounded-[20px] overflow-hidden transition-all duration-300"
+        className="relative block h-full min-h-[220px] rounded-[24px] overflow-hidden transition-all duration-500"
         style={{
-          background: 'rgba(255, 255, 255, 0.04)',
-          border: '1px solid rgba(214, 178, 94, 0.2)'
+          boxShadow: '0 4px 20px -10px rgba(0,0,0,0.5)'
         }}
       >
-        {/* Hover Glow Effect */}
-        <div 
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-[20px]"
-          style={{ 
-            boxShadow: '0 0 40px rgba(214, 178, 94, 0.15), inset 0 0 30px rgba(214, 178, 94, 0.05)',
-            border: '1px solid rgba(214, 178, 94, 0.4)'
-          }}
+        {/* Background Image with Zoom */}
+        {image ? (
+          <div className="absolute inset-0 overflow-hidden">
+            <div
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+              style={{ backgroundImage: `url(${image})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80 group-hover:opacity-70 transition-opacity duration-300" />
+          </div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 group-hover:from-zinc-700 group-hover:to-zinc-800 transition-colors duration-300" />
+        )}
+
+        {/* Glass Border */}
+        <div
+          className="absolute inset-0 rounded-[24px] border border-white/10 group-hover:border-white/20 transition-colors z-20 pointer-events-none"
         />
 
-        {/* Background Gradient on Hover */}
-        <div 
-          className={`absolute inset-0 bg-gradient-to-br ${config.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-        />
-
-        <div className="relative p-5 md:p-6 min-h-[160px] md:min-h-[180px] flex flex-col">
-          {/* Top Row: Icon + Chevron */}
-          <div className="flex items-start justify-between mb-4">
-            {/* Icon Badge */}
-            <motion.div 
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br ${config.iconBg} relative overflow-hidden`}
-              style={{
-                border: '1px solid rgba(214, 178, 94, 0.3)',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)'
-              }}
-            >
-              {/* Inner Glow */}
-              <div 
-                className="absolute inset-0 opacity-50"
-                style={{ background: 'radial-gradient(circle at 30% 30%, rgba(214, 178, 94, 0.3), transparent 60%)' }}
-              />
-              <Icon className="w-7 h-7 md:w-8 md:h-8 relative z-10" style={{ color: '#F2D27C' }} />
-            </motion.div>
-
-            {/* Chevron Arrow */}
-            <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:translate-x-1"
-              style={{ 
-                background: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}
-            >
-              <ChevronRight className="w-4 h-4" style={{ color: 'rgba(255, 255, 255, 0.6)' }} />
+        <div className="relative z-10 p-6 h-full flex flex-col justify-end">
+          {/* Top Row: Badge */}
+          <div className="absolute top-6 left-6">
+            <div className="backdrop-blur-md bg-white/10 border border-white/20 px-3 py-1 rounded-full flex items-center gap-2">
+              <Sparkles className="w-3 h-3 text-yellow-400" />
+              <span className="text-[10px] uppercase font-bold tracking-wider text-white">Collection</span>
             </div>
           </div>
 
-          {/* Title */}
-          <h3 
-            className="text-lg md:text-xl font-bold mb-1 transition-colors duration-300 group-hover:text-gold"
-            style={{ color: 'rgba(255, 255, 255, 0.92)' }}
-          >
-            {department.name}
-          </h3>
+          <div className="translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+            {/* Title */}
+            <h3 className="text-2xl font-black mb-1 text-white leading-tight group-hover:text-yellow-400 transition-colors">
+              {department.name}
+            </h3>
 
-          {/* Subtitle / Product Count */}
-          <p 
-            className="text-sm font-medium"
-            style={{ color: 'rgba(255, 255, 255, 0.55)' }}
-          >
-            {productCount > 0 ? `${productCount} Produkte` : 'Entdecken'}
-          </p>
+            {/* Subtitle / Product Count */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+                {productCount > 0 ? `${productCount} Produkte` : 'Jetzt entdecken'}
+              </p>
 
-          {/* Bottom Accent Line */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(214, 178, 94, 0.5), transparent)' }}
-          />
+              <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-yellow-500 group-hover:text-black transition-all duration-300">
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
         </div>
       </Link>
     </motion.div>

@@ -818,45 +818,48 @@ export default function Home() {
           </motion.div>
 
           {/* Category Grid - 2 cols mobile, 4 cols desktop */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {loadingDepts ? (
               // Skeleton Loading
               Array.from({ length: 4 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  animate={{ opacity: [0.3, 0.6, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1 }}
-                  className="rounded-[20px] min-h-[160px] md:min-h-[180px]"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
-                  }}
-                >
-                  <div className="p-5 md:p-6 space-y-4">
-                    <div className="w-14 h-14 rounded-2xl" style={{ background: 'rgba(255, 255, 255, 0.06)' }} />
-                    <div className="space-y-2">
-                      <div className="h-5 w-24 rounded" style={{ background: 'rgba(255, 255, 255, 0.08)' }} />
-                      <div className="h-4 w-16 rounded" style={{ background: 'rgba(255, 255, 255, 0.05)' }} />
-                    </div>
-                  </div>
-                </motion.div>
+                <div key={i} className="rounded-[24px] h-[220px] bg-zinc-900/50 animate-pulse border border-zinc-800" />
               ))
             ) : (
-              departments.map((dept, index) => (
-                <motion.div
-                  key={dept.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                >
-                  <CategoryCard
-                    department={dept}
-                    index={index}
-                    productCount={departmentProductCounts[dept.id] || 0}
-                  />
-                </motion.div>
-              ))
+              departments.map((dept, index) => {
+                // Dynamic Image Assignment
+                let bgImage = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop'; // Default Sneaker/Store vibe
+
+                const name = dept.name.toLowerCase();
+                if (name.includes('shisha') || name.includes('hookah')) {
+                  bgImage = '/images/product-hookah.png'; // Our premium hookahs
+                } else if (name.includes('vape') || name.includes('e-zigarette')) {
+                  bgImage = 'https://images.unsplash.com/photo-1536412597336-ade7b523ecfc?q=80&w=1587&auto=format&fit=crop'; // Vape smoke
+                } else if (name.includes('tabak') || name.includes('tobacco')) {
+                  bgImage = 'https://cdn03.plentymarkets.com/b2nt0o88r126/frontend/Kategorien/Tabak-Kategoriebild.jpg'; // Tobacco leaves/tins
+                } else if (name.includes('kohle') || name.includes('coal')) {
+                  bgImage = 'https://cdn03.plentymarkets.com/b2nt0o88r126/frontend/Kategorien/Kohle-Kategoriebild.jpg'; // Burning coals
+                } else if (name.includes('zubehör') || name.includes('accessories')) {
+                  bgImage = 'https://images.unsplash.com/photo-1523293182086-7651a899d60f?q=80&w=2068&auto=format&fit=crop';
+                }
+
+                return (
+                  <motion.div
+                    key={dept.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    className="h-full"
+                  >
+                    <CategoryCard
+                      department={dept}
+                      index={index}
+                      productCount={departmentProductCounts[dept.id] || 0}
+                      image={bgImage}
+                    />
+                  </motion.div>
+                );
+              })
             )}
           </div>
 
