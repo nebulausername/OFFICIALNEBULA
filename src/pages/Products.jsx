@@ -88,6 +88,66 @@ export default function Products() {
       fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Products.jsx:loadData:error', message: 'Error loading shop data', data: { error: error.message, networkError: error.networkError, apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000/api' }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
       // #endregion
 
+      // Fallback: Show Premium Demo Products
+      const demoProducts = [
+        {
+          id: 'demo-1',
+          name: 'Moze Breeze Two - Wavy Black',
+          description: 'Die Moze Breeze Two ist die Shisha des Jahres. Premium Edelstahl trifft auf einzigartiges Design.',
+          price: 149.90,
+          cover_image: 'https://cdn03.plentymarkets.com/b2nt0o88r126/item/images/15368/full/Moze-Breeze-Two-Wavy-Black-15368.jpg',
+          tags: ['Bestseller', 'Premium'],
+          in_stock: true,
+          sku: 'MOZE-BRZ-BLK',
+          department_id: 'shishas'
+        },
+        {
+          id: 'demo-2',
+          name: 'Elfbar 600 - Watermelon',
+          description: 'Der Klassiker. 600 Züge purer Geschmack. Watermelon ist der Bestseller.',
+          price: 7.90,
+          cover_image: 'https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg',
+          tags: ['New', 'Sale'],
+          in_stock: true,
+          sku: 'ELF-600-WAT',
+          department_id: 'vapes'
+        },
+        {
+          id: 'demo-3',
+          name: 'Nameless - Black Nana 200g',
+          description: 'Die Legende unter den Traube-Minze Tabaken. Ein Muss für jeden Shisha-Liebhaber.',
+          price: 17.90,
+          cover_image: 'https://www.shisha-world.com/media/image/product/10186/lg/nameless-black-nana-200g-shisha-tabak.jpg',
+          tags: ['Legendary'],
+          in_stock: true,
+          sku: 'NAME-BLK-NANA',
+          department_id: 'tabak'
+        },
+        {
+          id: 'demo-4',
+          name: 'Vyro Spectre - Carbon Red',
+          description: 'Kompakt, Leistungsstark, Carbon. Die Vyro Spectre setzt neue Maßstäbe.',
+          price: 99.90,
+          cover_image: 'https://aeon-shisha.com/media/image/product/5815/lg/vyro-spectre-carbon-red.jpg',
+          tags: ['Carbon', 'New'],
+          in_stock: false,
+          sku: 'VYRO-SPC-RED',
+          department_id: 'shishas'
+        }
+      ];
+      console.log('⚠️ Using Fallback Products:', demoProducts);
+      setProducts(demoProducts);
+
+      // Extract unique departments/categories from demo products as fallback
+      if (departments.length === 0) {
+        setDepartments([
+          { id: 'vapes', name: 'Vapes', slug: 'vapes' },
+          { id: 'shishas', name: 'Shishas', slug: 'shishas' },
+          { id: 'tabak', name: 'Tabak', slug: 'tabak' }
+        ]);
+      }
+
+
       // Show user-friendly error message
       if (error.networkError || error.message?.includes('Verbindung zum Server')) {
         console.error('❌ Backend-Server läuft nicht!');

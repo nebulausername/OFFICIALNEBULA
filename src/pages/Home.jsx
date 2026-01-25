@@ -362,8 +362,51 @@ export default function Home() {
 
     } catch (error) {
       console.error('❌ Error loading products:', error);
-      // Fail gracefully
-      setProducts([]);
+      // Fallback: Show Premium Demo Products
+      const demoProducts = [
+        {
+          id: 'demo-1',
+          name: 'Moze Breeze Two - Wavy Black',
+          description: 'Die Moze Breeze Two ist die Shisha des Jahres. Premium Edelstahl trifft auf einzigartiges Design.',
+          price: 149.90,
+          cover_image: 'https://cdn03.plentymarkets.com/b2nt0o88r126/item/images/15368/full/Moze-Breeze-Two-Wavy-Black-15368.jpg',
+          tags: ['Bestseller', 'Premium'],
+          in_stock: true,
+          sku: 'MOZE-BRZ-BLK'
+        },
+        {
+          id: 'demo-2',
+          name: 'Elfbar 600 - Watermelon',
+          description: 'Der Klassiker. 600 Züge purer Geschmack. Watermelon ist der Bestseller.',
+          price: 7.90,
+          cover_image: 'https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg',
+          tags: ['New', 'Sale'],
+          in_stock: true,
+          sku: 'ELF-600-WAT'
+        },
+        {
+          id: 'demo-3',
+          name: 'Nameless - Black Nana 200g',
+          description: 'Die Legende unter den Traube-Minze Tabaken. Ein Muss für jeden Shisha-Liebhaber.',
+          price: 17.90,
+          cover_image: 'https://www.shisha-world.com/media/image/product/10186/lg/nameless-black-nana-200g-shisha-tabak.jpg',
+          tags: ['Legendary'],
+          in_stock: true,
+          sku: 'NAME-BLK-NANA'
+        },
+        {
+          id: 'demo-4',
+          name: 'Vyro Spectre - Carbon Red',
+          description: 'Kompakt, Leistungsstark, Carbon. Die Vyro Spectre setzt neue Maßstäbe.',
+          price: 99.90,
+          cover_image: 'https://aeon-shisha.com/media/image/product/5815/lg/vyro-spectre-carbon-red.jpg',
+          tags: ['Carbon', 'New'],
+          in_stock: false,
+          sku: 'VYRO-SPC-RED'
+        }
+      ];
+      console.log('⚠️ Using Fallback Products:', demoProducts);
+      setProducts(demoProducts);
     } finally {
       setLoadingProducts(false);
     }

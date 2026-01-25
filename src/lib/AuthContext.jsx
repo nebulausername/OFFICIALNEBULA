@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingPublicSettings(false);
       setAuthError(null);
-      
+
       // Check if user is authenticated
       const token = getToken();
       if (token) {
@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setIsLoadingAuth(false);
         setIsAuthenticated(false);
+        console.log('No token found, defaulting to guest mode');
       }
       setIsLoadingPublicSettings(false);
     } catch (error) {
@@ -52,13 +53,13 @@ export const AuthProvider = ({ children }) => {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
-      
-      // If user auth fails, it might be an expired token
+
+      // If user auth fails, it might be an expired token, but we allow guest access
+      // so we don't set a blocking error unless specifically required by a protected route
       if (error.status === 401 || error.status === 403) {
-        setAuthError({
-          type: 'auth_required',
-          message: 'Authentication required'
-        });
+        console.log('Guest mode active');
+        // Clear token if invalid
+        setToken(null);
       }
     }
   };
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
-    
+
     if (shouldRedirect) {
       await api.auth.logout(window.location.href);
     } else {
@@ -84,9 +85,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated, 
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
       isLoadingAuth,
       isLoadingPublicSettings,
       authError,
