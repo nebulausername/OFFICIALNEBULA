@@ -369,7 +369,7 @@ export default function Home() {
           name: 'Moze Breeze Two - Wavy Black',
           description: 'Die Moze Breeze Two ist die Shisha des Jahres. Premium Edelstahl trifft auf einzigartiges Design.',
           price: 149.90,
-          cover_image: 'https://cdn03.plentymarkets.com/b2nt0o88r126/item/images/15368/full/Moze-Breeze-Two-Wavy-Black-15368.jpg',
+          cover_image: '/images/product-hookah.png',
           tags: ['Bestseller', 'Premium'],
           in_stock: true,
           sku: 'MOZE-BRZ-BLK'
@@ -554,7 +554,7 @@ export default function Home() {
                   </div>
 
                   <img
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                    src="/images/hero-logo.png"
                     alt="Nebula Supply"
                     className="relative w-full h-full object-contain drop-shadow-2xl z-10"
                     style={{ filter: 'drop-shadow(0 0 25px rgba(var(--gold-rgb), 0.6))' }}
