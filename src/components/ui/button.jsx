@@ -37,7 +37,9 @@ const buttonVariants = cva(
 
 const Button = React.forwardRef(({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
-  const { playClick, playHover } = useNebulaSound ? useNebulaSound() : { playClick: () => { }, playHover: () => { } };
+  const soundContext = useNebulaSound ? useNebulaSound() : null;
+  const playClick = soundContext?.playClick || (() => { });
+  const playHover = soundContext?.playHover || (() => { });
 
   const handleClick = (e) => {
     playClick();
