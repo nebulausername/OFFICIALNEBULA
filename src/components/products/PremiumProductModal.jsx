@@ -374,12 +374,32 @@ export default function PremiumProductModal({ product, open, onClose, onAddToCar
 
             {/* Quantity */}
             <div className="mb-6">
-              <label className="block text-sm font-bold text-white mb-3">Anzahl</label>
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-sm font-bold text-white">Anzahl</label>
+                {product.min_order_quantity > 1 && (
+                  <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
+                    Mindestbestellmenge: {product.min_order_quantity} Stk
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center bg-zinc-800 rounded-xl border border-zinc-700">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-12 h-12 flex items-center justify-center text-white hover:bg-zinc-700 rounded-l-xl transition-colors"><Minus className="w-5 h-5" /></button>
+                  <button
+                    onClick={() => setQuantity(Math.max(product.min_order_quantity || 1, quantity - 1))}
+                    className="w-12 h-12 flex items-center justify-center text-white hover:bg-zinc-700 rounded-l-xl transition-colors"
+                  >
+                    <Minus className="w-5 h-5" />
+                  </button>
                   <span className="w-12 text-center font-bold text-xl text-white">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="w-12 h-12 flex items-center justify-center text-white hover:bg-zinc-700 rounded-r-xl transition-colors"><Plus className="w-5 h-5" /></button>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-12 h-12 flex items-center justify-center text-white hover:bg-zinc-700 rounded-r-xl transition-colors"
+                  >
+                    <Plus className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="text-sm text-zinc-400">
+                  <span className="text-white font-bold">{(currentPrice * quantity).toFixed(2)}€</span> Gesamt
                 </div>
               </div>
             </div>

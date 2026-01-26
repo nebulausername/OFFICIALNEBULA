@@ -55,7 +55,7 @@ function DropCountdown({ targetDate }) {
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
-      const difference = new Date(targetDate) - now;
+      const difference = new Date(targetDate).getTime() - now.getTime();
 
       if (difference <= 0) {
         clearInterval(interval);
@@ -216,9 +216,22 @@ export default function PremiumProductCard({ product, onQuickView }) {
 
           {/* Price & SKU Row */}
           <div className="flex items-baseline justify-between gap-3">
-            <div className="text-2xl font-black" style={{ color: isDrop ? '#9CA3AF' : '#F2D27C', filter: isDrop ? 'grayscale(1)' : 'none' }}>
-              {formatCurrency(product.price)}
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-2">
+                <div className="text-2xl font-black" style={{ color: isDrop ? '#9CA3AF' : '#F2D27C', filter: isDrop ? 'grayscale(1)' : 'none' }}>
+                  {formatCurrency(product.price)}
+                </div>
+                {product.min_order_quantity > 1 && (
+                  <span className="text-xs text-zinc-400 font-medium">/ Stk</span>
+                )}
+              </div>
+              {product.min_order_quantity > 1 && (
+                <div className="text-[10px] uppercase font-bold tracking-wider text-purple-400">
+                  Ab {product.min_order_quantity} Stück
+                </div>
+              )}
             </div>
+
             {!isDrop && (
               <div className="text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg"
                 style={{
