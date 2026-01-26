@@ -887,11 +887,27 @@ export default function ProductDetail() {
                   const available = stock > 0;
 
                   return (
+
                     <motion.button
                       key={size}
                       whileHover={available ? { scale: 1.05 } : {}}
                       whileTap={available ? { scale: 0.95 } : {}}
-                      onClick={() => available && setSelectedSize(size)}
+                      onClick={() => {
+                        if (!available) return;
+                        setSelectedSize(size);
+
+                        // Check for variant image override
+                        const specificVariant = product.variants?.find(v =>
+                          v.color_id === selectedColor?.id && v.size === size
+                        );
+
+                        if (specificVariant?.image) {
+                          setSelectedImage(specificVariant.image);
+                        } else if (selectedColor?.images?.length > 0) {
+                          // Fallback to color image if no specific variant image
+                          setSelectedImage(selectedColor.images[0]);
+                        }
+                      }}
                       disabled={!available}
                       className={`min-w-[56px] h-12 px-4 rounded-xl font-bold text-base transition-all ${selectedSize === size
                         ? 'bg-gold text-black'

@@ -66,13 +66,13 @@ export default function DataTable({
 
     return (
         <div className="space-y-4">
-            {/* Toolbar */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-900/50 p-4 rounded-xl border border-zinc-800">
-                <div className="relative w-full sm:w-72">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4" />
+            {/* Toolbar - Modern Glass */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-zinc-900/40 backdrop-blur-xl p-4 rounded-2xl border border-white/5 shadow-2xl">
+                <div className="relative w-full sm:w-72 group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-hover:text-amber-400 transition-colors w-4 h-4" />
                     <Input
                         placeholder={searchPlaceholder}
-                        className="pl-9 bg-zinc-950 border-zinc-800 focus:border-purple-500 rounded-lg"
+                        className="pl-10 bg-black/40 border-white/10 focus:border-amber-500/50 rounded-xl h-10 transition-all"
                         value={searchTerm}
                         onChange={(e) => {
                             setSearchTerm(e.target.value);
@@ -84,71 +84,72 @@ export default function DataTable({
 
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     {filters.map((filter, idx) => (
-                        <Button key={idx} variant="outline" className="border-zinc-800 bg-zinc-950 text-zinc-300 hover:text-white hover:bg-zinc-900">
+                        <Button key={idx} variant="outline" className="border-white/10 bg-black/20 text-zinc-300 hover:text-white hover:bg-white/5 hover:border-amber-500/30">
                             <Filter className="w-4 h-4 mr-2" />
                             {filter.label}
                         </Button>
                     ))}
-                    <Button variant="outline" className="border-zinc-800 bg-zinc-950 text-zinc-300 hover:text-white hover:bg-zinc-900">
+                    <Button variant="outline" className="border-white/10 bg-black/20 text-zinc-300 hover:text-white hover:bg-white/5">
                         <Download className="w-4 h-4 mr-2" />
                         Export
                     </Button>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="rounded-xl border border-zinc-800 overflow-hidden bg-zinc-900/30 backdrop-blur-sm">
+            {/* Table - Premium Layout */}
+            <div className="rounded-2xl border border-white/5 overflow-hidden bg-zinc-900/30 backdrop-blur-md shadow-inner">
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-zinc-900/80 text-zinc-400 uppercase font-medium border-b border-zinc-800">
+                        <thead className="bg-black/40 text-zinc-400 uppercase font-bold text-xs border-b border-white/5">
                             <tr>
                                 {columns.map((col, idx) => (
                                     <th
                                         key={idx}
-                                        className="px-6 py-4 cursor-pointer hover:text-white transition-colors"
+                                        className="px-6 py-4 cursor-pointer hover:text-amber-400 transition-colors"
                                         onClick={() => col.sortable && handleSort(col.accessorKey)}
                                     >
                                         <div className="flex items-center gap-2">
                                             {col.header}
-                                            {col.sortable && <ArrowUpDown className="w-3 h-3" />}
+                                            {col.sortable && <ArrowUpDown className="w-3 h-3 opacity-50" />}
                                         </div>
                                     </th>
                                 ))}
-                                <th className="px-6 py-4 text-right">Aktionen</th>
+                                <th className="px-6 py-4 text-right">Optionen</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-800">
+                        <tbody className="divide-y divide-white/5">
                             {currentData.length > 0 ? (
                                 currentData.map((row, rIdx) => (
                                     <motion.tr
                                         key={row.id || rIdx}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: rIdx * 0.05 }}
-                                        className="hover:bg-zinc-900/50 transition-colors"
+                                        initial={{ opacity: 0, y: 5 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: rIdx * 0.03 }}
+                                        className="group hover:bg-white/[0.02] transition-colors"
                                     >
                                         {columns.map((col, cIdx) => (
-                                            <td key={cIdx} className="px-6 py-4 text-zinc-300">
+                                            <td key={cIdx} className="px-6 py-4 text-zinc-300 font-medium group-hover:text-zinc-100 transition-colors">
                                                 {col.cell ? col.cell(row) : row[col.accessorKey]}
                                             </td>
                                         ))}
                                         <td className="px-6 py-4 text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0 text-zinc-400 hover:text-white">
+                                                    <Button variant="ghost" className="h-8 w-8 p-0 text-zinc-500 hover:text-white hover:bg-white/10 rounded-lg">
                                                         <span className="sr-only">Menü öffnen</span>
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="bg-zinc-950 border-zinc-800 text-zinc-100">
+                                                <DropdownMenuContent align="end" className="bg-zinc-950 border-zinc-800 text-zinc-100 shadow-xl">
                                                     <DropdownMenuLabel>Aktionen</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator className="bg-zinc-800" />
                                                     {actions.map((action, aIdx) => (
                                                         <DropdownMenuItem
                                                             key={aIdx}
                                                             onClick={() => action.onClick(row)}
-                                                            className="hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-white"
+                                                            className="hover:bg-zinc-900 cursor-pointer focus:bg-zinc-900 focus:text-amber-400 transition-colors"
                                                         >
-                                                            {action.icon && <action.icon className="w-4 h-4 mr-2 text-zinc-400" />}
+                                                            {action.icon && <action.icon className="w-4 h-4 mr-2 opacity-70" />}
                                                             {action.label}
                                                         </DropdownMenuItem>
                                                     ))}
@@ -159,8 +160,11 @@ export default function DataTable({
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={columns.length + 1} className="px-6 py-12 text-center text-zinc-500">
-                                        Keine Daten gefunden.
+                                    <td colSpan={columns.length + 1} className="px-6 py-16 text-center">
+                                        <div className="flex flex-col items-center gap-3 text-zinc-500">
+                                            <Search className="w-10 h-10 opacity-20" />
+                                            <p>Keine Einträge gefunden</p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -172,27 +176,27 @@ export default function DataTable({
             {/* Pagination */}
             <div className="flex items-center justify-between px-2">
                 <div className="text-sm text-zinc-500">
-                    Zeige <span className="font-bold text-white">{(currentPage - 1) * itemsPerPage + 1}</span> bis <span className="font-bold text-white">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> von <span className="font-bold text-white">{filteredData.length}</span> Einträgen
+                    <span className="text-zinc-300 font-bold">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> von <span className="text-zinc-300 font-bold">{filteredData.length}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                         disabled={currentPage === 1}
-                        className="border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-zinc-300 hover:text-white disabled:opacity-50"
+                        className="w-9 h-9 border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 hover:border-amber-500/50 disabled:opacity-30 rounded-lg transition-all"
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
-                    <div className="text-sm font-bold text-zinc-300">
-                        Seite {currentPage} von {totalPages}
+                    <div className="text-sm font-bold text-zinc-300 min-w-[3rem] text-center">
+                        {currentPage} / {totalPages}
                     </div>
                     <Button
                         variant="outline"
-                        size="sm"
+                        size="icon"
                         onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                         disabled={currentPage === totalPages}
-                        className="border-zinc-800 bg-zinc-950 hover:bg-zinc-900 text-zinc-300 hover:text-white disabled:opacity-50"
+                        className="w-9 h-9 border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 hover:border-amber-500/50 disabled:opacity-30 rounded-lg transition-all"
                     >
                         <ChevronRight className="w-4 h-4" />
                     </Button>

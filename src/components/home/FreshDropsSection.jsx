@@ -12,7 +12,11 @@ import { useWishlist } from '../wishlist/WishlistContext';
 function DropProductCard({ product, onQuickView }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
   const inWishlist = isInWishlist(product.id);
+
+  const displayImage = previewImage || product.cover_image;
 
   const handleWishlistClick = (e) => {
     e.preventDefault();
@@ -22,159 +26,149 @@ function DropProductCard({ product, onQuickView }) {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      className="flex-shrink-0 w-[280px] md:w-[300px]"
+      whileHover={{ y: -8 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => {
+        setIsHovered(false);
+        setPreviewImage(null);
+      }}
+      className="flex-shrink-0 w-[280px] md:w-[300px] group"
     >
       <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`}>
         <div
-          className="glass-panel-hover rounded-[24px] overflow-hidden h-full flex flex-col"
+          className="glass-panel-hover rounded-[24px] overflow-hidden h-full flex flex-col bg-[#09090b] border border-zinc-800/50 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500"
         >
           {/* Image Container */}
-          <div className="relative aspect-square overflow-hidden bg-[#12151C]">
-            {/* Image */}
-            {product.cover_image ? (
-              <img
-                src={product.cover_image}
-                alt={product.name}
-                className={`w-full h-full object-cover transition-all duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-                onLoad={() => setImageLoaded(true)}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                <Package className="w-16 h-16" style={{ color: 'rgba(255,255,255,0.2)' }} />
-              </div>
-            )}
+          <div className="relative aspect-square overflow-hidden bg-zinc-900">
+            {/* Image with Fade Transition */}
+            <div className="w-full h-full relative">
+              {product.cover_image ? (
+                <img
+                  src={product.cover_image}
+                  alt={product.name}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${!previewImage ? 'opacity-100' : 'opacity-0'}`}
+                  onLoad={() => setImageLoaded(true)}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center absolute inset-0">
+                  <Package className="w-16 h-16 text-zinc-800" />
+                </div>
+              )}
+
+              {previewImage && (
+                <img
+                  src={previewImage}
+                  alt={product.name}
+                  className="absolute inset-0 w-full h-full object-cover animate-fadeIn"
+                />
+              )}
+            </div>
 
             {/* Gradient Overlay */}
             <div
-              className="absolute inset-0 pointer-events-none opacity-60"
-              style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%)' }}
+              className="absolute inset-0 pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity"
+              style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%)' }}
             />
 
-            {/* Top Row */}
-            <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
-              {/* NEW Badge */}
-              <div
-                className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg backdrop-blur-md"
-                style={{
-                  background: 'rgba(214, 184, 94, 0.95)',
-                  color: '#000',
-                  boxShadow: '0 0 20px rgba(214, 178, 94, 0.4)'
-                }}
-              >
-                NEU
-              </div>
-
-              {/* Top Left: Wishlist Button */}
-              <button
-                onClick={handleWishlistClick}
-                className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center transition-all z-10"
-                style={{
-                  background: inWishlist ? 'rgba(239, 68, 68, 0.9)' : 'rgba(0, 0, 0, 0.5)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)'
-                }}
-              >
-                <Heart
-                  className="w-5 h-5 transition-all"
-                  style={{ color: inWishlist ? '#FFF' : 'rgba(255,255,255,0.9)' }}
-                  fill={inWishlist ? 'currentColor' : 'none'}
-                />
-              </button>
-
-              {/* Top Right: Availability Badge */}
-              <div
-                className="absolute top-3 right-3 px-3 py-1.5 rounded-full flex items-center gap-1.5 z-10"
-                style={{
-                  background: product.in_stock !== false ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                  backdropFilter: 'blur(8px)',
-                  border: `1px solid ${product.in_stock !== false ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
-                }}
-              >
-                <div
-                  className="w-2 h-2 rounded-full"
-                  style={{ background: product.in_stock !== false ? '#22C55E' : '#EF4444' }}
-                />
-                <span
-                  className="text-xs font-bold"
-                  style={{ color: product.in_stock !== false ? '#86EFAC' : '#FCA5A5' }}
-                >
-                  {product.in_stock !== false ? 'Verfügbar' : 'Ausverkauft'}
-                </span>
-              </div>
-
-              {/* Bottom: NEW Badge */}
-              <div className="absolute bottom-3 left-3 flex gap-2">
-                <div
-                  className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide"
-                  style={{
-                    background: 'linear-gradient(135deg, #D6B25E, #F2D27C)',
-                    color: '#0B0D12'
-                  }}
-                >
-                  NEU
-                </div>
-              </div>
-
-              {/* Quick View Button (Hover only) */}
-              <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onQuickView(product);
-                  }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all text-white"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></svg>
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Content */}
-          <div className="p-4 space-y-3">
-            {/* Product Name */}
-            <h3
-              className="font-bold text-base line-clamp-2 leading-tight"
-              style={{ color: 'rgba(255, 255, 255, 0.92)' }}
-            >
-              {product.name}
-            </h3>
-
-            {/* Price + SKU Row */}
-            <div className="flex items-end justify-between">
-              <div>
-                <div
-                  className="text-2xl font-black"
-                  style={{ color: '#F2D27C' }}
-                >
-                  {(product.price || 0).toFixed(2)}€
-                </div>
-                {product.sku && (
-                  <div
-                    className="text-xs font-medium mt-0.5"
-                    style={{ color: 'rgba(255, 255, 255, 0.45)' }}
+            {/* Badges & Actions Container (Clean Layout) */}
+            <div className="absolute inset-0 p-4 flex flex-col justify-between pointer-events-none">
+              {/* Top Row */}
+              <div className="flex justify-between items-start pointer-events-auto">
+                {/* Left: Badges */}
+                <div className="flex flex-col gap-2">
+                  <span
+                    className="px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-amber-400 text-black shadow-lg backdrop-blur-md"
                   >
-                    {product.sku}
-                  </div>
+                    NEU
+                  </span>
+                </div>
+
+                {/* Right: Availability */}
+                {product.in_stock ? (
+                  <span className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" title="Verfügbar" />
+                ) : (
+                  <span className="px-2 py-0.5 rounded bg-red-500/90 text-white text-[10px] font-bold shadow-lg">SOLD</span>
                 )}
               </div>
             </div>
 
-            {/* Shipping Info */}
-            <div
-              className="flex items-center gap-4 pt-2"
-              style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}
-            >
-              <div className="flex items-center gap-1.5">
-                <Truck className="w-3.5 h-3.5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} />
-                <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>China</span>
+            {/* Quick Actions (Center Hover) */}
+            <div className={`absolute inset-0 flex items-center justify-center gap-3 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+              <motion.button
+                initial={{ scale: 0.8 }}
+                animate={isHovered ? { scale: 1 } : { scale: 0.8 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onQuickView?.(product);
+                }}
+                className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-amber-400 transition-colors shadow-xl"
+              >
+                <ShoppingBag className="w-5 h-5" />
+              </motion.button>
+              <motion.button
+                initial={{ scale: 0.8 }}
+                animate={isHovered ? { scale: 1 } : { scale: 0.8 }}
+                onClick={handleWishlistClick}
+                className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shadow-xl"
+              >
+                <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current text-red-500' : ''}`} />
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Info Section */}
+          <div className="p-5 flex-1 flex flex-col gap-3 relative overflow-hidden">
+            {/* Background Glow */}
+            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            <div>
+              <div className="flex justify-between items-start gap-2 mb-1">
+                <h3 className="font-bold text-base text-zinc-100 leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">
+                  {product.name}
+                </h3>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" style={{ color: 'rgba(255, 255, 255, 0.5)' }} />
-                <span className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>8–17 Tage</span>
+              <div className="flex items-center gap-2 text-xs text-zinc-500">
+                <span className="font-mono">{product.sku}</span>
+                <span>•</span>
+                <span className="text-green-400">Sofort lieferbar</span>
               </div>
+            </div>
+
+            {/* Color Preview Dots */}
+            {product.colors && product.colors.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 h-4">
+                {product.colors.map(color => (
+                  <button
+                    key={color.id}
+                    className="w-3 h-3 rounded-full border border-zinc-700/50 hover:scale-125 hover:border-white transition-all"
+                    style={{ backgroundColor: color.hex }}
+                    onMouseEnter={(e) => {
+                      e.preventDefault();
+                      if (color.images && color.images.length > 0) {
+                        setPreviewImage(color.images[0]);
+                      }
+                    }}
+                    onClick={(e) => e.preventDefault()}
+                  />
+                ))}
+              </div>
+            )}
+
+            <div className="mt-auto pt-4 flex items-center justify-between">
+              <span className="text-xl font-black text-white group-hover:text-amber-400 transition-colors">
+                {product.price}€
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="hover:bg-amber-400 hover:text-black rounded-lg transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // onAddToCart logic? Or link
+                }}
+              >
+                <ArrowRight className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </div>

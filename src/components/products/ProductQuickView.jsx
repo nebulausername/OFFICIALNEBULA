@@ -357,7 +357,30 @@ export default function ProductQuickView({ product, isOpen, onClose, onAddToCart
                     return (
                       <button
                         key={size}
-                        onClick={() => available && setSelectedSize(size)}
+                        onClick={() => {
+                          if (!available) return;
+                          setSelectedSize(size);
+
+                          // Check for variant image override
+                          const specificVariant = product.variants?.find(v =>
+                            v.color_id === selectedColor?.id && v.size === size
+                          );
+
+                          if (specificVariant?.image) {
+                            setSelectedImage(0); // Reset index? No, we need to inject the image
+                            // Actually QuickView uses an array of images. 
+                            // If we have a single variant image, we might want to prioritize it.
+                            // Strategy: Prepend it or replace images?
+                            // Let's replace 'images' with [variant.image] to focus on it, 
+                            // or verify if it's already in the list.
+                            // Simply updating the displayed image logic is safer:
+                            setImages([specificVariant.image]);
+                            setSelectedImage(0);
+                          } else if (selectedColor?.images?.length > 0) {
+                            setImages(selectedColor.images);
+                            setSelectedImage(0);
+                          }
+                        }}
                         disabled={!available}
                         className={`min-w-[52px] h-12 px-4 rounded-xl font-bold text-base transition-all ${selectedSize === size
                           ? 'bg-gold text-black'
