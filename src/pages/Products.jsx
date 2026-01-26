@@ -131,24 +131,26 @@ export default function Products() {
           name: 'Nameless - Black Nana',
           description: 'Die Legende unter den Traube-Minze Tabaken.',
           price: 17.90,
-          cover_image: 'https://shisha-cloud.de/media/image/c2/f0/54/nameless-tobacco-black-nana-25g.jpg',
-          tags: ['Legendary'],
+          cover_image: '/images/products/tobacco-black-nana.png',
+          tags: ['Legendary', 'Bestseller'],
           in_stock: true,
           sku: 'NAM-BLK-NANA',
           department_id: 'shisha-tobacco',
-          min_order_quantity: 1
+          min_order_quantity: 1,
+          colors: [{ id: 't1', name: '200g Dose', hex: '#222', thumbnail: '/images/products/tobacco-black-nana.png' }]
         },
         {
           id: 'demo-4',
           name: 'Vyro Spectre - Carbon Red',
           description: 'Kompakt, innovativ und mit einem einzigartigen Blow-Off System.',
           price: 119.90,
-          cover_image: 'https://aeon-shisha.com/media/image/product/23306/lg/vyro-spectre-carbon-red.jpg',
-          tags: ['Innovation'],
+          cover_image: '/images/products/shisha-moze.png',
+          tags: ['Innovation', 'Premium'],
           in_stock: true,
           sku: 'VYRO-SPC-RED',
           department_id: 'shishas',
-          min_order_quantity: 1
+          min_order_quantity: 1,
+          colors: [{ id: 's1', name: 'Wavy Black (Resin)', hex: '#000', thumbnail: '/images/products/shisha-moze.png' }]
         },
         {
           id: 'demo-5',
