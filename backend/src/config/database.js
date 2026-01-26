@@ -1,14 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 
 // Prüfe ob SQLite oder PostgreSQL verwendet wird
-const isSQLite = process.env.DATABASE_PROVIDER === 'sqlite' || 
-                 !process.env.DATABASE_URL?.includes('postgresql');
+// Auf Vercel MÜSSEN wir Postgres nutzen. Wenn DATABASE_URL fehlt, crashen wir lieber mit Fehler als SQLite zu versuchen.
+const isVercel = !!process.env.VERCEL;
+const isSQLite = !isVercel && (process.env.DATABASE_PROVIDER === 'sqlite' || !process.env.DATABASE_URL?.includes('postgresql'));
+
+if (isVercel && !process.env.DATABASE_URL) {
+  console.error('❌ FATAL: DATABASE_URL is missing in Vercel environment variables!');
+}
 
 // Optimized Prisma Client with connection pooling
 const prisma = new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  // Nur bei PostgreSQL die URL aus .env verwenden
-  // Bei SQLite wird die URL aus schema.prisma verwendet
   datasources: isSQLite ? undefined : {
     db: {
       url: process.env.DATABASE_URL,
