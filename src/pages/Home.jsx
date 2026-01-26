@@ -13,6 +13,7 @@ import FreshDropsSection from '../components/home/FreshDropsSection';
 import CategoryProductsSection from '../components/home/CategoryProductsSection';
 import VideoSpotlight from '../components/home/VideoSpotlight';
 import TypewriterEffect from '@/components/ui/TypewriterEffect';
+import CosmicHeroBackground from '../components/home/CosmicHeroBackground';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
@@ -377,65 +378,7 @@ export default function Home() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0A0C10]">
       {/* 🌌 Nebula Alive: Living Background System */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* Deep Space Base */}
-        <div className="absolute inset-0 bg-[#0A0C10]" />
-
-        {/* Dynamic Mouse-Following Spotlight (Subtle) */}
-        <motion.div
-          className="absolute inset-0 opacity-30"
-          style={{
-            background: useTransform(
-              [spotlightX, spotlightY],
-              ([x, y]) => `radial-gradient(circle 800px at ${x} ${y}, rgba(139, 92, 246, 0.15), transparent 80%)`
-            )
-          }}
-        />
-
-        {/* Aurora Borealis Effect 1 (Purple/Blue) - Now Parallaxed */}
-        <motion.div
-          style={{
-            x: bgX,
-            y: bgY,
-            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.25), rgba(79, 70, 229, 0.1), transparent 70%)',
-            mixBlendMode: 'screen'
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 10, 0],
-            opacity: [0.3, 0.5, 0.3] // Increased opacity for "geiler" look
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[80vw] h-[80vw] rounded-full blur-[100px]"
-        />
-
-        {/* Aurora Borealis Effect 2 (Pink/Gold) - Parallaxed Opposite */}
-        <motion.div
-          style={{
-            x: useTransform(bgX, v => -v), // Move opposite
-            y: useTransform(bgY, v => -v),
-            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), rgba(214, 178, 94, 0.15), transparent 70%)',
-            mixBlendMode: 'screen'
-          }}
-          animate={{
-            scale: [1.2, 1, 1.2],
-            rotate: [0, -10, 0],
-            opacity: [0.2, 0.4, 0.2]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[40%] -right-[20%] w-[70vw] h-[70vw] rounded-full blur-[100px]"
-        />
-
-        {/* Floating Particles/Stars - Parallaxed Layer */}
-        <motion.div
-          style={{ x: logoX, y: logoY }} // Move with logo layer for depth
-          className="absolute inset-0 opacity-40"
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 5, repeat: Infinity }}
-        >
-          <div style={{ width: '100%', height: '100%', backgroundImage: 'radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)), radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0))', backgroundSize: '200px 200px' }} />
-        </motion.div>
-      </div>
+      <CosmicHeroBackground />
 
       {/* Hero Section */}
       <section className="relative z-10 min-h-screen flex items-center justify-center overflow-hidden">
