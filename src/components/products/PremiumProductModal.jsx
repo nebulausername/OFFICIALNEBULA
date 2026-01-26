@@ -358,31 +358,33 @@ export default function PremiumProductModal({ product, open, onClose, onAddToCar
                               : 'border-white/10 hover:border-white/30 bg-black/40'}
                           `}
                         >
-                          <div className="aspect-square relative p-2 flex flex-col items-center justify-center gap-2">
+                          <div className="aspect-square relative w-full h-full flex items-center justify-center overflow-hidden rounded-lg bg-black/50">
                             {/* Indicator / Image */}
                             {color.thumbnail ? (
                               <img
                                 src={color.thumbnail}
                                 alt={color.name}
-                                className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}
+                                className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${isSelected ? 'opacity-100' : 'opacity-80'}`}
                               />
                             ) : (
                               <div
-                                className="w-8 h-8 rounded-full shadow-lg"
+                                className="w-8 h-8 rounded-full shadow-lg ring-2 ring-white/10"
                                 style={{ backgroundColor: color.hex }}
                               />
                             )}
 
                             {isSelected && (
-                              <div className="absolute inset-0 bg-black/20 z-10 flex items-center justify-center backdrop-blur-[1px]">
+                              <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center backdrop-blur-[1px]">
                                 <Check className="w-6 h-6 text-[#F2D27C] drop-shadow-md" />
                               </div>
                             )}
                           </div>
 
                           {!color.thumbnail && (
-                            <div className="text-[10px] uppercase font-bold text-center pb-1 px-1 truncate w-full opacity-80">
-                              {color.name}
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-md py-1">
+                              <div className="text-[9px] uppercase font-bold text-center text-white/90 truncate px-1">
+                                {color.name}
+                              </div>
                             </div>
                           )}
                         </button>

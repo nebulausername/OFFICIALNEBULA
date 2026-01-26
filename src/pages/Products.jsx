@@ -105,31 +105,24 @@ export default function Products() {
           colors: [
             {
               id: 'c1',
-              name: 'Watermelon',
+              name: 'Watermelon Luxury',
               hex: '#EF5350',
-              thumbnail: 'https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg',
-              images: ['https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg']
+              thumbnail: '/images/products/vape-watermelon.png',
+              images: ['/images/products/vape-watermelon.png']
             },
             {
               id: 'c2',
-              name: 'Blue Razz Lemonade',
+              name: 'Blue Razz Diamond',
               hex: '#42A5F5',
-              thumbnail: 'https://dampfdorado.de/media/image/8d/4f/2e/elfbar-600-blue-razz-lemonade.jpg',
-              images: ['https://dampfdorado.de/media/image/8d/4f/2e/elfbar-600-blue-razz-lemonade.jpg']
+              thumbnail: '/images/products/vape-blue-razz.png',
+              images: ['/images/products/vape-blue-razz.png']
             },
             {
               id: 'c3',
-              name: 'Grape',
+              name: 'Grape (Classic)',
               hex: '#AB47BC',
               thumbnail: 'https://dampfdorado.de/media/image/9e/7c/1f/elfbar-600-grape.jpg',
               images: ['https://dampfdorado.de/media/image/9e/7c/1f/elfbar-600-grape.jpg']
-            },
-            {
-              id: 'c4',
-              name: 'Apple Peach',
-              hex: '#66BB6A',
-              thumbnail: 'https://dampfdorado.de/media/image/7a/3b/4c/elfbar-600-apple-peach.jpg',
-              images: ['https://dampfdorado.de/media/image/7a/3b/4c/elfbar-600-apple-peach.jpg']
             }
           ]
         },
