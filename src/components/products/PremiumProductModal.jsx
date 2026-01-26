@@ -329,79 +329,140 @@ export default function PremiumProductModal({ product, open, onClose, onAddToCar
               </div>
             </div>
 
-            {/* Color Selection */}
-            {product.colors?.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-bold text-white mb-3">Farbe: <span className="text-gold">{selectedColor?.name || 'Wählen'}</span></label>
-                <div className="flex flex-wrap gap-3">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.id}
-                      onClick={() => handleColorChange(color)}
-                      className={`relative w-12 h-12 rounded-xl transition-all ${selectedColor?.id === color.id ? 'ring-2 ring-gold ring-offset-2 ring-offset-zinc-950 scale-110' : 'hover:scale-105'}`}
-                      style={{ background: color.hex || '#666', border: '2px solid rgba(255,255,255,0.2)' }}
-                      title={color.name}
-                    >
-                      {selectedColor?.id === color.id && <Check className="absolute inset-0 m-auto w-5 h-5 text-white drop-shadow-lg" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Configuration Area */}
+            <div className="space-y-8 mb-8">
 
-            {/* Size Selection */}
-            {product.sizes?.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-bold text-white mb-3">Größe: <span className="text-gold">{selectedSize || 'Wählen'}</span></label>
-                <div className="grid grid-cols-4 gap-2">
-                  {product.sizes.map((size) => {
-                    const stock = getStockForSize(size);
-                    const available = stock > 0;
-                    return (
+              {/* Visual Variant Selector (Sorten / Farben / Modelle) */}
+              {product.colors && product.colors.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-baseline mb-4">
+                    <label className="text-sm font-bold text-white uppercase tracking-wider opacity-90">
+                      Variante
+                    </label>
+                    <span className="text-sm font-bold text-[#F2D27C]">
+                      {selectedColor ? selectedColor.name : 'Bitte wählen'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                    {product.colors.map((color) => {
+                      const isSelected = selectedColor?.id === color.id;
+                      return (
+                        <button
+                          key={color.id}
+                          onClick={() => handleColorChange(color)}
+                          className={`
+                            group relative overflow-hidden rounded-xl border-2 transition-all duration-300
+                            ${isSelected
+                              ? 'border-[#F2D27C] bg-[#F2D27C]/10 shadow-[0_0_20px_rgba(242,210,124,0.2)]'
+                              : 'border-white/10 hover:border-white/30 bg-black/40'}
+                          `}
+                        >
+                          <div className="aspect-square relative p-2 flex flex-col items-center justify-center gap-2">
+                            {/* Indicator / Image */}
+                            {color.thumbnail ? (
+                              <img
+                                src={color.thumbnail}
+                                alt={color.name}
+                                className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}
+                              />
+                            ) : (
+                              <div
+                                className="w-8 h-8 rounded-full shadow-lg"
+                                style={{ backgroundColor: color.hex }}
+                              />
+                            )}
+
+                            {isSelected && (
+                              <div className="absolute inset-0 bg-black/20 z-10 flex items-center justify-center backdrop-blur-[1px]">
+                                <Check className="w-6 h-6 text-[#F2D27C] drop-shadow-md" />
+                              </div>
+                            )}
+                          </div>
+
+                          {!color.thumbnail && (
+                            <div className="text-[10px] uppercase font-bold text-center pb-1 px-1 truncate w-full opacity-80">
+                              {color.name}
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Size Selector (if applicable) */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-baseline mb-3">
+                    <label className="text-sm font-bold text-white uppercase tracking-wider opacity-90">Größe</label>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {product.sizes.map((size) => {
+                      const stock = getStockForSize(size);
+                      const disabled = stock <= 0;
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          disabled={disabled}
+                          className={`
+                            h-12 min-w-[3rem] px-4 rounded-xl font-bold border-2 transition-all
+                            ${selectedSize === size
+                              ? 'border-[#F2D27C] bg-[#F2D27C] text-black shadow-lg shadow-[#F2D27C]/20'
+                              : disabled
+                                ? 'border-white/5 text-white/20 bg-white/5 cursor-not-allowed decoration-slice'
+                                : 'border-white/10 text-white/70 hover:border-white/30 hover:bg-white/5'}
+                          `}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Quantity & MOQ */}
+              <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+                <div className="flex flex-col gap-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-white">Menge</span>
+                    {product.min_order_quantity > 1 && (
+                      <span className="text-xs font-bold text-[#F2D27C] bg-[#F2D27C]/10 px-2 py-1 rounded">
+                        MOQ: {product.min_order_quantity} Stk
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 bg-black/50 rounded-xl p-1 border border-white/10">
                       <button
-                        key={size}
-                        onClick={() => available && setSelectedSize(size)}
-                        disabled={!available}
-                        className={`relative h-12 rounded-xl font-bold text-sm transition-all ${selectedSize === size ? 'bg-gold text-black' : available ? 'bg-zinc-800 text-white hover:bg-zinc-700' : 'bg-zinc-900 text-zinc-600 cursor-not-allowed line-through'}`}
+                        onClick={() => setQuantity(Math.max(product.min_order_quantity || 1, quantity - 1))}
+                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white transition-colors"
                       >
-                        {size}
+                        <Minus className="w-4 h-4" />
                       </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                      <span className="w-8 text-center font-mono font-bold text-lg text-white">{quantity}</span>
+                      <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
 
-            {/* Quantity */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-sm font-bold text-white">Anzahl</label>
-                {product.min_order_quantity > 1 && (
-                  <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
-                    Mindestbestellmenge: {product.min_order_quantity} Stk
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center bg-zinc-800 rounded-xl border border-zinc-700">
-                  <button
-                    onClick={() => setQuantity(Math.max(product.min_order_quantity || 1, quantity - 1))}
-                    className="w-12 h-12 flex items-center justify-center text-white hover:bg-zinc-700 rounded-l-xl transition-colors"
-                  >
-                    <Minus className="w-5 h-5" />
-                  </button>
-                  <span className="w-12 text-center font-bold text-xl text-white">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-12 h-12 flex items-center justify-center text-white hover:bg-zinc-700 rounded-r-xl transition-colors"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="text-sm text-zinc-400">
-                  <span className="text-white font-bold">{(currentPrice * quantity).toFixed(2)}€</span> Gesamt
+                    <div className="text-right">
+                      <div className="text-xs text-zinc-400 font-medium">Gesamtpreis</div>
+                      <div className="text-xl font-black text-[#F2D27C] tracking-tight">
+                        {(currentPrice * quantity).toFixed(2)}€
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
+
             </div>
 
             {/* Hype Delivery Section */}

@@ -93,15 +93,45 @@ export default function Products() {
         },
         {
           id: 'demo-2',
-          name: 'Elfbar 600 - Watermelon',
-          description: 'Der Klassiker. 600 Züge purer Geschmack.',
+          name: 'Elfbar 600 - Premium Selection',
+          description: 'Der Klassiker neu definiert. Wähle deinen Favoriten aus unserer exklusiven Kollektion.',
           price: 7.90,
           cover_image: 'https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg',
-          tags: ['New', 'Sale'],
+          tags: ['Bestseller', 'Configurable'],
           in_stock: true,
-          sku: 'ELF-600-WAT',
+          sku: 'ELF-600-VAR',
           department_id: 'vapes',
-          min_order_quantity: 1
+          min_order_quantity: 1,
+          colors: [
+            {
+              id: 'c1',
+              name: 'Watermelon',
+              hex: '#EF5350',
+              thumbnail: 'https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg',
+              images: ['https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg']
+            },
+            {
+              id: 'c2',
+              name: 'Blue Razz Lemonade',
+              hex: '#42A5F5',
+              thumbnail: 'https://dampfdorado.de/media/image/8d/4f/2e/elfbar-600-blue-razz-lemonade.jpg',
+              images: ['https://dampfdorado.de/media/image/8d/4f/2e/elfbar-600-blue-razz-lemonade.jpg']
+            },
+            {
+              id: 'c3',
+              name: 'Grape',
+              hex: '#AB47BC',
+              thumbnail: 'https://dampfdorado.de/media/image/9e/7c/1f/elfbar-600-grape.jpg',
+              images: ['https://dampfdorado.de/media/image/9e/7c/1f/elfbar-600-grape.jpg']
+            },
+            {
+              id: 'c4',
+              name: 'Apple Peach',
+              hex: '#66BB6A',
+              thumbnail: 'https://dampfdorado.de/media/image/7a/3b/4c/elfbar-600-apple-peach.jpg',
+              images: ['https://dampfdorado.de/media/image/7a/3b/4c/elfbar-600-apple-peach.jpg']
+            }
+          ]
         },
         {
           id: 'demo-3',
