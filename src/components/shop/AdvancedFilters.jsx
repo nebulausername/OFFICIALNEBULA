@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, SlidersHorizontal, ChevronDown, ChevronUp, 
-  Check, RotateCcw, Sparkles 
+import {
+  X, SlidersHorizontal, ChevronDown, ChevronUp,
+  Check, RotateCcw, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -15,7 +15,8 @@ export default function AdvancedFilters({
   products = [],
   filters,
   onFiltersChange,
-  onReset
+  onReset,
+  variant = 'drawer'
 }) {
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
@@ -34,7 +35,7 @@ export default function AdvancedFilters({
     return a.localeCompare(b);
   });
 
-  const allColors = [...new Set(products.flatMap(p => 
+  const allColors = [...new Set(products.flatMap(p =>
     (p.colors || []).map(c => JSON.stringify({ name: c.name, hex: c.hex }))
   ))].map(c => JSON.parse(c));
 
@@ -95,7 +96,7 @@ export default function AdvancedFilters({
       className="w-full flex items-center justify-between py-2 px-2 rounded-lg transition-all hover:bg-white/5 group"
     >
       <div className="flex items-center gap-3">
-        <div 
+        <div
           className="w-5 h-5 rounded flex items-center justify-center transition-all"
           style={{
             background: checked ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' : 'rgba(255, 255, 255, 0.06)',
@@ -104,7 +105,7 @@ export default function AdvancedFilters({
         >
           {checked && <Check className="w-3 h-3" style={{ color: '#0B0D12' }} />}
         </div>
-        <span 
+        <span
           className="text-sm font-medium"
           style={{ color: checked ? '#F2D27C' : 'rgba(255, 255, 255, 0.75)' }}
         >
@@ -130,8 +131,8 @@ export default function AdvancedFilters({
       title={color.name}
     >
       {selected && (
-        <Check 
-          className="absolute inset-0 m-auto w-4 h-4" 
+        <Check
+          className="absolute inset-0 m-auto w-4 h-4"
           style={{ color: isLightColor(color.hex) ? '#000' : '#FFF' }}
         />
       )}
@@ -147,6 +148,195 @@ export default function AdvancedFilters({
     return (r * 299 + g * 587 + b * 114) / 1000 > 128;
   };
 
+  // Extract inner content to reuse
+  const FilterContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Categories */}
+      <FilterSection title="Kategorien" section="categories">
+        <div className="space-y-1">
+          {categories.map(cat => {
+            const count = products.filter(p => p.category_id === cat.id).length;
+            return (
+              <CheckboxItem
+                key={cat.id}
+                label={cat.name}
+                count={count}
+                checked={filters.categories?.includes(cat.id)}
+                onChange={() => {
+                  const current = filters.categories || [];
+                  const updated = current.includes(cat.id)
+                    ? current.filter(id => id !== cat.id)
+                    : [...current, cat.id];
+                  onFiltersChange({ ...filters, categories: updated });
+                }}
+              />
+            );
+          })}
+        </div>
+      </FilterSection>
+
+      {/* Brands */}
+      <FilterSection title="Marken" section="brands">
+        <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
+          {brands.map(brand => {
+            const count = products.filter(p => p.brand_id === brand.id).length;
+            return (
+              <CheckboxItem
+                key={brand.id}
+                label={brand.name}
+                count={count}
+                checked={filters.brands?.includes(brand.id)}
+                onChange={() => {
+                  const current = filters.brands || [];
+                  const updated = current.includes(brand.id)
+                    ? current.filter(id => id !== brand.id)
+                    : [...current, brand.id];
+                  onFiltersChange({ ...filters, brands: updated });
+                }}
+              />
+            );
+          })}
+        </div>
+      </FilterSection>
+
+      {/* Price Range */}
+      <FilterSection title="Preis" section="price">
+        <div className="space-y-4 pt-2">
+          <Slider
+            value={filters.priceRange || [minPrice, maxPrice]}
+            min={minPrice}
+            max={maxPrice}
+            step={5}
+            onValueChange={(value) => {
+              onFiltersChange({ ...filters, priceRange: value });
+            }}
+            className="w-full"
+          />
+          <div className="flex items-center justify-between">
+            <div
+              className="px-4 py-2 rounded-lg text-sm font-bold"
+              style={{ background: 'rgba(255, 255, 255, 0.06)', color: '#FFFFFF' }}
+            >
+              {(filters.priceRange?.[0] || minPrice).toFixed(0)}€
+            </div>
+            <span style={{ color: 'rgba(255, 255, 255, 0.4)' }}>—</span>
+            <div
+              className="px-4 py-2 rounded-lg text-sm font-bold"
+              style={{ background: 'rgba(255, 255, 255, 0.06)', color: '#FFFFFF' }}
+            >
+              {(filters.priceRange?.[1] || maxPrice).toFixed(0)}€
+            </div>
+          </div>
+        </div>
+      </FilterSection>
+
+      {/* Sizes */}
+      {allSizes.length > 0 && (
+        <FilterSection title="Größen" section="sizes">
+          <div className="flex flex-wrap gap-2">
+            {allSizes.map(size => {
+              const selected = filters.sizes?.includes(size);
+              return (
+                <button
+                  key={size}
+                  onClick={() => {
+                    const current = filters.sizes || [];
+                    const updated = current.includes(size)
+                      ? current.filter(s => s !== size)
+                      : [...current, size];
+                    onFiltersChange({ ...filters, sizes: updated });
+                  }}
+                  className="px-3 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                  style={{
+                    background: selected ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' : 'rgba(255, 255, 255, 0.06)',
+                    color: selected ? '#0B0D12' : 'rgba(255, 255, 255, 0.75)',
+                    border: selected ? 'none' : '1px solid rgba(255, 255, 255, 0.1)'
+                  }}
+                >
+                  {size}
+                </button>
+              );
+            })}
+          </div>
+        </FilterSection>
+      )}
+
+      {/* Colors */}
+      {allColors.length > 0 && (
+        <FilterSection title="Farben" section="colors">
+          <div className="flex flex-wrap gap-3">
+            {allColors.map((color, idx) => (
+              <ColorSwatch
+                key={idx}
+                color={color}
+                selected={filters.colors?.includes(color.name)}
+                onClick={() => {
+                  const current = filters.colors || [];
+                  const updated = current.includes(color.name)
+                    ? current.filter(c => c !== color.name)
+                    : [...current, color.name];
+                  onFiltersChange({ ...filters, colors: updated });
+                }}
+              />
+            ))}
+          </div>
+        </FilterSection>
+      )}
+
+      {/* Availability */}
+      <FilterSection title="Verfügbarkeit" section="availability">
+        <div className="space-y-1">
+          <CheckboxItem
+            label="Auf Lager"
+            checked={filters.inStock === true}
+            onChange={() => {
+              onFiltersChange({
+                ...filters,
+                inStock: filters.inStock === true ? null : true
+              });
+            }}
+          />
+          <CheckboxItem
+            label="Alle anzeigen"
+            checked={filters.inStock === null}
+            onChange={() => {
+              onFiltersChange({ ...filters, inStock: null });
+            }}
+          />
+        </div>
+      </FilterSection>
+
+      {/* Sidebar Footer Actions (Only for sidebar mode if needed, usually auto-applies) */}
+      <div className="pt-6 mt-auto">
+        <Button
+          onClick={onReset}
+          variant="outline"
+          className="w-full h-10 rounded-lg text-xs font-bold uppercase tracking-wider"
+          style={{
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            color: '#FFFFFF'
+          }}
+        >
+          <RotateCcw className="w-3 h-3 mr-2" />
+          Filter zurücksetzen
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (variant === 'sidebar') {
+    return (
+      <div className="w-full h-full">
+        <div className="flex items-center gap-3 mb-6">
+          <SlidersHorizontal className="w-5 h-5" style={{ color: '#D6B25E' }} />
+          <span className="text-lg font-bold text-white">Filter</span>
+        </div>
+        <FilterContent />
+      </div>
+    );
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -157,7 +347,7 @@ export default function AdvancedFilters({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-40 lg:hidden" // Hide backdrop on desktop if we use sidebar, but here it's drawer mode
             style={{ background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}
           />
 
@@ -167,7 +357,7 @@ export default function AdvancedFilters({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 overflow-hidden flex flex-col"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 overflow-hidden flex flex-col shadow-2xl"
             style={{
               background: 'rgba(15, 18, 26, 0.98)',
               backdropFilter: 'blur(24px)',
@@ -175,7 +365,7 @@ export default function AdvancedFilters({
             }}
           >
             {/* Header */}
-            <div 
+            <div
               className="flex items-center justify-between px-6 py-5"
               style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}
             >
@@ -183,7 +373,7 @@ export default function AdvancedFilters({
                 <SlidersHorizontal className="w-5 h-5" style={{ color: '#D6B25E' }} />
                 <span className="text-lg font-bold" style={{ color: '#FFFFFF' }}>Filter</span>
                 {activeFilterCount > 0 && (
-                  <span 
+                  <span
                     className="px-2 py-0.5 rounded-full text-xs font-bold"
                     style={{ background: 'rgba(214, 178, 94, 0.2)', color: '#F2D27C' }}
                   >
@@ -193,204 +383,32 @@ export default function AdvancedFilters({
               </div>
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105"
-                style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:scale-105 bg-white/5 hover:bg-white/10"
               >
                 <X className="w-5 h-5" style={{ color: '#FFFFFF' }} />
               </button>
             </div>
 
             {/* Filters Content */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-6">
-              {/* Categories */}
-              <FilterSection title="Kategorien" section="categories">
-                <div className="space-y-1">
-                  {categories.map(cat => {
-                    const count = products.filter(p => p.category_id === cat.id).length;
-                    return (
-                      <CheckboxItem
-                        key={cat.id}
-                        label={cat.name}
-                        count={count}
-                        checked={filters.categories?.includes(cat.id)}
-                        onChange={() => {
-                          const current = filters.categories || [];
-                          const updated = current.includes(cat.id)
-                            ? current.filter(id => id !== cat.id)
-                            : [...current, cat.id];
-                          onFiltersChange({ ...filters, categories: updated });
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              </FilterSection>
-
-              {/* Brands */}
-              <FilterSection title="Marken" section="brands">
-                <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
-                  {brands.map(brand => {
-                    const count = products.filter(p => p.brand_id === brand.id).length;
-                    return (
-                      <CheckboxItem
-                        key={brand.id}
-                        label={brand.name}
-                        count={count}
-                        checked={filters.brands?.includes(brand.id)}
-                        onChange={() => {
-                          const current = filters.brands || [];
-                          const updated = current.includes(brand.id)
-                            ? current.filter(id => id !== brand.id)
-                            : [...current, brand.id];
-                          onFiltersChange({ ...filters, brands: updated });
-                        }}
-                      />
-                    );
-                  })}
-                </div>
-              </FilterSection>
-
-              {/* Price Range */}
-              <FilterSection title="Preis" section="price">
-                <div className="space-y-4 pt-2">
-                  <Slider
-                    value={filters.priceRange || [minPrice, maxPrice]}
-                    min={minPrice}
-                    max={maxPrice}
-                    step={5}
-                    onValueChange={(value) => {
-                      onFiltersChange({ ...filters, priceRange: value });
-                    }}
-                    className="w-full"
-                  />
-                  <div className="flex items-center justify-between">
-                    <div 
-                      className="px-4 py-2 rounded-lg text-sm font-bold"
-                      style={{ background: 'rgba(255, 255, 255, 0.06)', color: '#FFFFFF' }}
-                    >
-                      {(filters.priceRange?.[0] || minPrice).toFixed(0)}€
-                    </div>
-                    <span style={{ color: 'rgba(255, 255, 255, 0.4)' }}>—</span>
-                    <div 
-                      className="px-4 py-2 rounded-lg text-sm font-bold"
-                      style={{ background: 'rgba(255, 255, 255, 0.06)', color: '#FFFFFF' }}
-                    >
-                      {(filters.priceRange?.[1] || maxPrice).toFixed(0)}€
-                    </div>
-                  </div>
-                </div>
-              </FilterSection>
-
-              {/* Sizes */}
-              {allSizes.length > 0 && (
-                <FilterSection title="Größen" section="sizes">
-                  <div className="flex flex-wrap gap-2">
-                    {allSizes.map(size => {
-                      const selected = filters.sizes?.includes(size);
-                      return (
-                        <button
-                          key={size}
-                          onClick={() => {
-                            const current = filters.sizes || [];
-                            const updated = current.includes(size)
-                              ? current.filter(s => s !== size)
-                              : [...current, size];
-                            onFiltersChange({ ...filters, sizes: updated });
-                          }}
-                          className="px-3 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                          style={{
-                            background: selected ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' : 'rgba(255, 255, 255, 0.06)',
-                            color: selected ? '#0B0D12' : 'rgba(255, 255, 255, 0.75)',
-                            border: selected ? 'none' : '1px solid rgba(255, 255, 255, 0.1)'
-                          }}
-                        >
-                          {size}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </FilterSection>
-              )}
-
-              {/* Colors */}
-              {allColors.length > 0 && (
-                <FilterSection title="Farben" section="colors">
-                  <div className="flex flex-wrap gap-3">
-                    {allColors.map((color, idx) => (
-                      <ColorSwatch
-                        key={idx}
-                        color={color}
-                        selected={filters.colors?.includes(color.name)}
-                        onClick={() => {
-                          const current = filters.colors || [];
-                          const updated = current.includes(color.name)
-                            ? current.filter(c => c !== color.name)
-                            : [...current, color.name];
-                          onFiltersChange({ ...filters, colors: updated });
-                        }}
-                      />
-                    ))}
-                  </div>
-                </FilterSection>
-              )}
-
-              {/* Availability */}
-              <FilterSection title="Verfügbarkeit" section="availability">
-                <div className="space-y-1">
-                  <CheckboxItem
-                    label="Auf Lager"
-                    checked={filters.inStock === true}
-                    onChange={() => {
-                      onFiltersChange({ 
-                        ...filters, 
-                        inStock: filters.inStock === true ? null : true 
-                      });
-                    }}
-                  />
-                  <CheckboxItem
-                    label="Alle anzeigen"
-                    checked={filters.inStock === null}
-                    onChange={() => {
-                      onFiltersChange({ ...filters, inStock: null });
-                    }}
-                  />
-                </div>
-              </FilterSection>
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4">
+              <FilterContent />
             </div>
 
-            {/* Footer */}
-            <div 
-              className="px-6 py-4 flex gap-3"
-              style={{ 
-                background: 'rgba(214, 178, 94, 0.05)', 
-                borderTop: '1px solid rgba(214, 178, 94, 0.15)' 
-              }}
-            >
-              <Button
-                onClick={onReset}
-                variant="outline"
-                className="flex-1 h-12 rounded-xl font-bold"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#FFFFFF'
-                }}
-              >
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Zurücksetzen
-              </Button>
+            {/* Drawer Footer */}
+            <div className="p-6 border-t border-white/10 bg-black/20">
               <Button
                 onClick={onClose}
-                className="flex-1 h-12 rounded-xl font-bold"
+                className="w-full h-12 rounded-xl font-bold"
                 style={{
                   background: 'linear-gradient(135deg, #D6B25E, #F2D27C)',
                   color: '#0B0D12'
                 }}
               >
                 <Sparkles className="w-4 h-4 mr-2" />
-                Anwenden
+                Ergebnisse anzeigen
               </Button>
             </div>
+
           </motion.div>
         </>
       )}

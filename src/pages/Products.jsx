@@ -9,6 +9,7 @@ import PremiumProductModal from '../components/products/PremiumProductModal';
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
 import AdvancedFilters from '../components/shop/AdvancedFilters';
+import ProductGridSkeleton from '../components/products/ProductGridSkeleton';
 import { useI18n } from '../components/i18n/I18nProvider';
 
 export default function Products() {
@@ -456,79 +457,99 @@ export default function Products() {
         </div>
       </section>
 
-      {/* Products Grid */}
+      {/* Main Shop Layout */}
       <section className="pb-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="space-y-4">
-                  <div className="aspect-square rounded-2xl animate-pulse" style={{ background: 'var(--surface)' }} />
-                  <div className="h-5 w-3/4 rounded animate-pulse" style={{ background: 'var(--surface)' }} />
-                  <div className="h-7 w-1/2 rounded animate-pulse" style={{ background: 'var(--surface)' }} />
-                </div>
-              ))}
-            </div>
-          ) : filteredProducts.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20"
-            >
-              <div
-                className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
-                style={{ background: 'rgba(214, 178, 94, 0.1)', border: '1px solid rgba(214, 178, 94, 0.2)' }}
-              >
-                <Sparkles className="w-10 h-10" style={{ color: '#D6B25E' }} />
-              </div>
-              <h3 className="text-2xl font-bold mb-3" style={{ color: '#FFFFFF' }}>
-                {t('shop.noProducts')}
-              </h3>
-              <p className="text-base" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-                {t('shop.resetFilters')}
-              </p>
-            </motion.div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredProducts.slice(0, visibleProducts).map((product, index) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index % 8 * 0.05 }}
-                >
-                  <PremiumProductCard
-                    product={product}
-                    onQuickView={(p) => {
-                      setQuickViewProduct(p);
-                      setIsQuickViewOpen(true);
-                    }}
-                  />
-                </motion.div>
-              ))}
 
-              {/* Infinite Scroll Trigger */}
-              {visibleProducts < filteredProducts.length && (
-                <InView
-                  as="div"
-                  onChange={(inView) => {
-                    if (inView) {
-                      // Load more
-                      setTimeout(() => {
-                        setVisibleProducts(prev => prev + 8);
-                      }, 300); // Small delay for effect
-                    }
-                  }}
-                  className="col-span-full py-10 flex justify-center w-full"
+          <div className="flex flex-col lg:flex-row gap-8">
+
+            {/* Desktop Sidebar Filters */}
+            <div className="hidden lg:block w-72 flex-shrink-0">
+              <div className="sticky top-24 p-6 rounded-2xl border border-white/10 bg-[#0F121A]/50 backdrop-blur-xl h-[calc(100vh-8rem)] overflow-hidden flex flex-col">
+                <AdvancedFilters
+                  variant="sidebar"
+                  isOpen={true} // Always open as sidebar
+                  onClose={() => { }}
+                  categories={categories}
+                  brands={brands}
+                  products={products}
+                  filters={advancedFilters}
+                  onFiltersChange={setAdvancedFilters}
+                  onReset={resetFilters}
+                />
+              </div>
+            </div>
+
+            {/* Product Grid Area */}
+            <div className="flex-1">
+              {loading ? (
+                <ProductGridSkeleton count={8} />
+              ) : filteredProducts.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-20 bg-white/5 rounded-3xl border border-white/10"
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-8 h-8 border-4 border-[#D6B25E] border-t-transparent rounded-full animate-spin" />
-                    <span className="text-zinc-500 text-sm">Lade weitere Produkte...</span>
+                  <div
+                    className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
+                    style={{ background: 'rgba(214, 178, 94, 0.1)', border: '1px solid rgba(214, 178, 94, 0.2)' }}
+                  >
+                    <Sparkles className="w-10 h-10" style={{ color: '#D6B25E' }} />
                   </div>
-                </InView>
+                  <h3 className="text-2xl font-bold mb-3" style={{ color: '#FFFFFF' }}>
+                    {t('shop.noProducts')}
+                  </h3>
+                  <p className="text-base text-zinc-400 max-w-md mx-auto mb-8">
+                    Leider keine Ergebnisse für deine Auswahl. Versuche es mit weniger Filtern.
+                  </p>
+                  <button
+                    onClick={resetFilters}
+                    className="px-6 py-3 rounded-xl font-bold bg-[#D6B25E] text-black hover:bg-[#F2D27C] transition-colors"
+                  >
+                    Filter zurücksetzen
+                  </button>
+                </motion.div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {filteredProducts.slice(0, visibleProducts).map((product, index) => (
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index % 8 * 0.05 }}
+                    >
+                      <PremiumProductCard
+                        product={product}
+                        onQuickView={(p) => {
+                          setQuickViewProduct(p);
+                          setIsQuickViewOpen(true);
+                        }}
+                      />
+                    </motion.div>
+                  ))}
+
+                  {/* Infinite Scroll Trigger */}
+                  {visibleProducts < filteredProducts.length && (
+                    <InView
+                      as="div"
+                      onChange={(inView) => {
+                        if (inView) {
+                          setTimeout(() => {
+                            setVisibleProducts(prev => prev + 8);
+                          }, 300);
+                        }
+                      }}
+                      className="col-span-full py-10 flex justify-center w-full"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 border-4 border-[#D6B25E] border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    </InView>
+                  )}
+                </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
