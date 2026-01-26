@@ -73,82 +73,14 @@ export default function Home() {
 
   const loadDepartments = async () => {
     try {
-      console.log('🏢 Loading departments...');
-
-      // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartments:start', message: 'Loading departments', data: {}, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-      // #endregion
-
       const depts = await api.entities.Department.list('sort_order');
-      console.log('✅ Departments loaded:', depts.length);
-      depts.forEach(dept => {
-        console.log(`   - ${dept.name} (ID: ${dept.id}, Slug: ${dept.slug})`);
-      });
-
-      // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartments:loaded', message: 'Departments loaded', data: { count: depts.length, departments: depts.map(d => ({ id: d.id, name: d.name, slug: d.slug })) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-      // #endregion
-
       setDepartments(depts);
     } catch (error) {
       console.error('❌ Error loading departments:', error);
-      console.error('Error details:', error.message, error.stack);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartments:error', message: 'Error loading departments', data: { error: error.message }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-      // #endregion
     } finally {
       setLoadingDepts(false);
     }
   };
-
-  // Test-Funktion für API-Debugging
-  const testAPI = async () => {
-    console.group('🧪 API Test Suite');
-    try {
-      // Test 1: Alle Produkte
-      console.log('Test 1: Loading all products...');
-      const allProducts = await api.entities.Product.list('-created_at', 20);
-      console.log(`✅ All products: ${allProducts.length}`, allProducts);
-
-      // Test 2: Mit Department Filter
-      if (departments.length > 0) {
-        const dept = departments[0];
-        console.log(`Test 2: Loading products for ${dept.name} (ID: ${dept.id})...`);
-        const deptProducts = await api.entities.Product.filter({ department_id: dept.id });
-        console.log(`✅ Products for ${dept.name}: ${deptProducts.length}`, deptProducts);
-      }
-
-      // Test 3: Direkter Fetch
-      console.log('Test 3: Direct fetch test...');
-      console.log('   API Base URL:', API_BASE_URL);
-      const directFetch = await fetch(`${API_BASE_URL}/products?limit=10`);
-      if (directFetch.ok) {
-        const directData = await directFetch.json();
-        console.log('✅ Direct fetch:', directData);
-      } else {
-        console.error('❌ Direct fetch failed:', directFetch.status, directFetch.statusText);
-      }
-
-      // Test 4: Alle Departments
-      console.log('Test 4: Loading all departments...');
-      const allDepts = await api.entities.Department.list();
-      console.log(`✅ All departments: ${allDepts.length}`, allDepts);
-
-    } catch (error) {
-      console.error('❌ API Test failed:', error);
-      console.error('Error details:', error.message, error.stack);
-    }
-    console.groupEnd();
-  };
-
-  // Expose test function to window for manual testing
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.testNebulaAPI = testAPI;
-      console.log('💡 API Test function available: window.testNebulaAPI()');
-    }
-  }, [departments]);
 
   const loadDepartmentProductCounts = async () => {
     try {
@@ -563,11 +495,12 @@ export default function Home() {
 
                 {/* Premium Orbital Rings - Adjusted for 3D feel */}
                 <motion.div
-                  style={{ rotateX: 60, scaleY: 0.5 }}
                   animate={{ rotateZ: 360 }}
                   transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
                   className="absolute -inset-10 border-2 rounded-full z-10"
                   style={{
+                    rotateX: 60,
+                    scaleY: 0.5,
                     borderColor: 'rgba(var(--gold-rgb), 0.4)',
                     boxShadow: '0 0 30px rgba(var(--gold-rgb), 0.3)'
                   }}

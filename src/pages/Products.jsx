@@ -62,20 +62,12 @@ export default function Products() {
 
   const loadData = async () => {
     try {
-      // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Products.jsx:loadData:start', message: 'Loading all shop data', data: {}, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-      // #endregion
-
       const [prods, cats, brds, depts] = await Promise.all([
-        api.entities.Product.list('-created_at'), // Fixed: was '-created_date', should be '-created_at'
+        api.entities.Product.list('-created_at'),
         api.entities.Category.list('sort_order'),
         api.entities.Brand.list('sort_order'),
         api.entities.Department.list('sort_order')
       ]);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Products.jsx:loadData:loaded', message: 'Shop data loaded', data: { productsCount: prods?.length || 0, categoriesCount: cats?.length || 0, brandsCount: brds?.length || 0, departmentsCount: depts?.length || 0, productDeptIds: prods?.map(p => p.department_id) || [] }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-      // #endregion
 
       setProducts(prods);
       setCategories(cats);
@@ -83,10 +75,6 @@ export default function Products() {
       setDepartments(depts);
     } catch (error) {
       console.error('Error loading data:', error);
-
-      // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Products.jsx:loadData:error', message: 'Error loading shop data', data: { error: error.message, networkError: error.networkError, apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000/api' }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-      // #endregion
 
       // Fallback: Show Premium Demo Products
       const demoProducts = [
@@ -135,7 +123,6 @@ export default function Products() {
           department_id: 'shishas'
         }
       ];
-      console.log('⚠️ Using Fallback Products:', demoProducts);
       setProducts(demoProducts);
 
       // Extract unique departments/categories from demo products as fallback
@@ -146,15 +133,6 @@ export default function Products() {
           { id: 'tabak', name: 'Tabak', slug: 'tabak' }
         ]);
       }
-
-
-      // Show user-friendly error message
-      if (error.networkError || error.message?.includes('Verbindung zum Server')) {
-        console.error('❌ Backend-Server läuft nicht!');
-        console.error('   Bitte starte das Backend mit:');
-        console.error('   cd backend && npm run dev');
-        console.error('   Oder verwende: .\\start-backend.ps1');
-      }
     } finally {
       setLoading(false);
     }
@@ -163,7 +141,7 @@ export default function Products() {
   const handleCategoryFromDrawer = (categoryId, categoryName) => {
     setSelectedCategory(categoryId);
     // Update URL
-    const url = new URL(window.location);
+    const url = new URL(window.location.href);
     if (categoryId === 'all') {
       url.searchParams.delete('category');
     } else {
@@ -295,7 +273,7 @@ export default function Products() {
     setSearchQuery('');
 
     // Update URL
-    const url = new URL(window.location);
+    const url = new URL(window.location.href);
     url.searchParams.delete('department');
     url.searchParams.delete('category');
     url.searchParams.delete('search');
@@ -305,7 +283,7 @@ export default function Products() {
   const handleDepartmentSelect = (departmentId) => {
     setSelectedDepartment(departmentId);
     // Update URL
-    const url = new URL(window.location);
+    const url = new URL(window.location.href);
     if (departmentId === 'all') {
       url.searchParams.delete('department');
     } else {
