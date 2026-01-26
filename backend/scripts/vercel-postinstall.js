@@ -29,13 +29,13 @@ if (!isVercel) {
   process.exit(0);
 }
 
-if (!hasDb) {
-  console.log('[VERCEL] DATABASE_URL not set; skipping Prisma generate/migrate.');
-  process.exit(0);
-}
-
 console.log('[VERCEL] Running Prisma generate...');
 run(['generate']);
+
+if (!hasDb) {
+  console.log('[VERCEL] DATABASE_URL not set; skipping Prisma migrate deploy.');
+  process.exit(0);
+}
 
 console.log('[VERCEL] Running Prisma migrate deploy...');
 run(['migrate', 'deploy']);
