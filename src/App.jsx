@@ -78,6 +78,8 @@ import { SoundProvider } from '@/contexts/SoundContext';
 import TelegramRealtimeListener from '@/components/TelegramRealtimeListener';
 import AdminRealtimeListener from '@/components/admin/AdminRealtimeListener';
 import UserRealtimeListener from '@/components/UserRealtimeListener';
+import LiveChatWidget from '@/components/LiveChatWidget';
+import ScrollToTop from '@/components/ScrollToTop';
 
 function App() {
 
@@ -92,6 +94,8 @@ function App() {
               <AdminRealtimeListener />
               <UserRealtimeListener />
               <AuthenticatedApp />
+              <LiveChatWidget />
+              <ScrollToTop />
             </Router>
             <Toaster />
           </QueryClientProvider>

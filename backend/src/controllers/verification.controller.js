@@ -385,7 +385,7 @@ export const createVerificationRequest = async (telegramId) => {
 export const downloadTelegramPhoto = async (bot, fileId) => {
   const TIMEOUT_MS = 30000; // 30 seconds
   let timeoutId;
-  
+
   try {
     // Generate unique filename
     const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
@@ -397,24 +397,24 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
     const timeoutPromise = new Promise((_, reject) => {
       timeoutId = setTimeout(() => reject(new Error('File download timeout')), TIMEOUT_MS);
     });
-    
+
     const file = await Promise.race([filePromise, timeoutPromise]);
     clearTimeout(timeoutId);
-    
+
     const filePath = file.file_path;
     console.log(`[PHOTO] Downloading file: ${filePath}`);
 
     // Download file from Telegram with timeout
     const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${filePath}`;
-    
+
     const downloadPromise = fetch(fileUrl);
     const downloadTimeoutPromise = new Promise((_, reject) => {
       timeoutId = setTimeout(() => reject(new Error('Download timeout')), TIMEOUT_MS);
     });
-    
+
     const response = await Promise.race([downloadPromise, downloadTimeoutPromise]);
     clearTimeout(timeoutId);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to download photo: ${response.statusText}`);
     }
@@ -422,17 +422,17 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
     // Stream-based download with progress tracking
     const contentLength = parseInt(response.headers.get('content-length') || '0');
     let downloadedBytes = 0;
-    
+
     const reader = response.body.getReader();
     const chunks = [];
-    
+
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      
+
       chunks.push(value);
       downloadedBytes += value.length;
-      
+
       // Log progress every 10%
       if (contentLength > 0) {
         const progress = Math.floor((downloadedBytes / contentLength) * 100);
@@ -441,12 +441,12 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
         }
       }
     }
-    
+
     // Combine chunks into buffer
     const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
     const buffer = Buffer.concat(chunks, totalLength);
     const fileSize = buffer.length;
-    
+
     console.log(`[PHOTO] Downloaded ${(fileSize / 1024).toFixed(2)}KB`);
 
     // Validate photo (buffer-based for Supabase mode, file-based for local mode)
@@ -489,7 +489,7 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
       console.log(`[PHOTO] Photo validated and saved locally: ${filename}`);
     }
 
-    return relativePath;
+    return { url: relativePath, buffer };
   } catch (error) {
     if (timeoutId) {
       clearTimeout(timeoutId);

@@ -292,6 +292,7 @@ model VerificationRequest {
   user_id         String
   hand_gesture    String    // Generiertes Handzeichen (z.B. "👍", "✌️", "👌")
   photo_url       String?   // URL zum Verifizierungsfoto
+  photo_data      Bytes?    // Fallback: Bilddaten direkt in DB speichern (wenn kein Object Storage)
   status          String    @default("pending") // pending, approved, rejected
   submitted_at    DateTime  @default(now())
   reviewed_at     DateTime?

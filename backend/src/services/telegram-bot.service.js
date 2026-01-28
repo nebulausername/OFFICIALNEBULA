@@ -13,19 +13,26 @@ let bot = null;
 // State management for admin rejection
 const adminRejectionStates = new Map(); // adminId -> { verificationId, timestamp, chatId }
 
-// Admin list cache (5 minutes TTL)
+// Admin list cache (1 minute TTL)
 let adminListCache = {
   data: null,
   timestamp: 0,
-  ttl: 5 * 60 * 1000, // 5 minutes
+  ttl: 60 * 1000, // 1 minute
+};
+
+// Invalidate admin cache
+export const invalidateAdminCache = () => {
+  adminListCache.data = null;
+  adminListCache.timestamp = 0;
+  botLogger.debug('Admin cache invalidated');
 };
 
 // Get cached admin list or fetch from database
-const getAdminList = async () => {
+const getAdminList = async (forceRefresh = false) => {
   const now = Date.now();
 
-  // Return cached data if still valid
-  if (adminListCache.data && (now - adminListCache.timestamp) < adminListCache.ttl) {
+  // Return cached data if still valid and not forced
+  if (!forceRefresh && adminListCache.data && (now - adminListCache.timestamp) < adminListCache.ttl) {
     botLogger.debug('Using cached admin list');
     return adminListCache.data;
   }
@@ -476,10 +483,10 @@ const setupBotHandlers = () => {
       const fileId = largestPhoto.file_id;
 
       // Download and save photo
-      let photoUrl;
+      let downloadResult;
       try {
-        photoUrl = await downloadTelegramPhoto(bot, fileId);
-        botLogger.info(`Photo downloaded and saved: ${photoUrl}`);
+        downloadResult = await downloadTelegramPhoto(bot, fileId);
+        botLogger.info(`Photo downloaded: ${downloadResult.url}`);
       } catch (downloadError) {
         botLogger.error('Error downloading photo:', downloadError);
         await sendMessageWithRetry(
@@ -491,11 +498,28 @@ const setupBotHandlers = () => {
         return;
       }
 
+      const { url: relativePath, buffer } = downloadResult;
+      let finalUrl = relativePath;
+      let photoData = null;
+
+      // Handle DB storage fallback if Supabase is not configured
+      const hasSupabase = !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+      if (buffer) {
+        photoData = buffer;
+        if (!hasSupabase) {
+          // Use DB serving route
+          finalUrl = `/api/upload/verifications/db/${verificationRequest.id}`;
+          botLogger.info('Using DB storage for verification photo');
+        }
+      }
+
       // Update verification request with photo
       await prisma.verificationRequest.update({
         where: { id: verificationRequest.id },
         data: {
-          photo_url: photoUrl,
+          photo_url: finalUrl,
+          photo_data: photoData,
         },
       });
 
@@ -818,39 +842,49 @@ Du bist bereits verifiziert und kannst jetzt den vollständigen Shop nutzen! �
 const notifyAdminsOfNewVerification = async (user, verificationRequest) => {
   try {
     // Use cached admin list for better performance
-    const admins = await getAdminList();
+    let admins = await getAdminList();
+
+    // If no admins found, try forced refresh (in case it's a new admin)
+    if (admins.length === 0) {
+      botLogger.warn('No admins found in cache, forcing refresh...');
+      admins = await getAdminList(true);
+    }
 
     if (admins.length === 0) {
-      botLogger.warn('No admins found to notify about verification request');
+      botLogger.warn('No admins found to notify about verification request even after refresh');
       return;
     }
 
     const webAppUrl = getWebAppUrl();
     const adminPanelUrl = `${webAppUrl}/AdminVerifications`;
 
-    let message = `🔔 *Neue Verifizierungsanfrage*
+    let message = `🚨 *NEUE VERIFIZIERUNG* 🚨
+    
+👤 *USER DETAILS*
+• *Name:* ${user.full_name || user.username || 'Unbekannt'}
+• *Telegram:* @${user.username || user.telegram_id?.toString()}
+• *ID:* \`${user.id.slice(0, 8)}\`
 
-👤 *User:*
-• Name: ${user.full_name || user.username || 'Unbekannt'}
-• Telegram: @${user.username || user.telegram_id?.toString()}
-• ID: ${user.id.slice(0, 8)}...
+🤚 *HANDZEICHEN CHECK*
+• Gefordert: *${verificationRequest.hand_gesture}*
 
-✋ *Handzeichen:* ${verificationRequest.hand_gesture}
-📸 *Foto:* ${verificationRequest.photo_url ? 'Gesendet ✅' : 'Noch nicht gesendet'}
+📸 *FOTOATUS*
+• ${verificationRequest.photo_url ? '✅ Foto erhalten' : '⏳ Warte auf Foto...'}
 
-*Status:* ⏳ Pending
+📅 *ZEITSTEMPEL*
+• ${new Date().toLocaleString('de-DE')}
 
-${verificationRequest.photo_url ? '📋 Bitte prüfe das Foto:\n• Gesicht klar erkennbar?\n• Handzeichen sichtbar?' : '⏳ Warte auf Foto...'}`;
+${verificationRequest.photo_url ? '👇 *BITTE PRÜFEN:*' : ''}`;
 
     // Build inline keyboard
     const inlineKeyboard = [
       [
         {
-          text: '✅ Approve',
+          text: '✅ ANNEHMEN',
           callback_data: `approve_${verificationRequest.id}`,
         },
         {
-          text: '❌ Reject',
+          text: '❌ ABLEHNEN',
           callback_data: `reject_${verificationRequest.id}`,
         },
       ],

@@ -4,7 +4,7 @@
 
 import fs from 'fs';
 
-const MIN_FILE_SIZE = 100 * 1024; // 100KB
+const MIN_FILE_SIZE = 5 * 1024; // 5KB
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -52,7 +52,7 @@ export const validatePhoto = (filePath, fileSize) => {
   try {
     const buffer = fs.readFileSync(filePath, { start: 0, end: 12 });
     const isValidImage = checkImageHeader(buffer);
-    
+
     if (!isValidImage) {
       return {
         valid: false,
@@ -130,12 +130,12 @@ const checkImageHeader = (buffer) => {
   if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) {
     return true;
   }
-  
+
   // PNG: 89 50 4E 47 0D 0A 1A 0A
   if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
     return true;
   }
-  
+
   // WEBP: RIFF ... WEBP
   if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46) {
     // Check for WEBP at position 8
@@ -143,7 +143,7 @@ const checkImageHeader = (buffer) => {
       return true;
     }
   }
-  
+
   return false;
 };
 

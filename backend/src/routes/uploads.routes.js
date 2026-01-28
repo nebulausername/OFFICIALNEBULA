@@ -38,5 +38,32 @@ router.get('/verifications/:filename', async (req, res, next) => {
   }
 });
 
+// Serve verification photo from DB (fallback)
+router.get('/verifications/db/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Import prisma dynamically to avoid circular dependency issues if any
+    const { default: prisma } = await import('../config/database.js');
+
+    const request = await prisma.verificationRequest.findUnique({
+      where: { id },
+      select: { photo_data: true }
+    });
+
+    if (!request || !request.photo_data) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    // Serve image
+    res.setHeader('Content-Type', 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day cache
+    res.send(request.photo_data);
+  } catch (error) {
+    console.error('Error serving DB image:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 export default router;
 
