@@ -81,24 +81,30 @@ import UserRealtimeListener from '@/components/UserRealtimeListener';
 import LiveChatWidget from '@/components/LiveChatWidget';
 import ScrollToTop from '@/components/ScrollToTop';
 
+import { ProductModalProvider } from '@/contexts/ProductModalContext';
+import GlobalProductModal from '@/components/products/GlobalProductModal';
+
 function App() {
 
   return (
     <AuthProvider>
       <SocketProvider>
         <SoundProvider>
-          <QueryClientProvider client={queryClientInstance}>
-            <Router>
-              <NavigationTracker />
-              <TelegramRealtimeListener />
-              <AdminRealtimeListener />
-              <UserRealtimeListener />
-              <AuthenticatedApp />
-              <LiveChatWidget />
-              <ScrollToTop />
-            </Router>
-            <Toaster />
-          </QueryClientProvider>
+          <ProductModalProvider>
+            <QueryClientProvider client={queryClientInstance}>
+              <Router>
+                <NavigationTracker />
+                <TelegramRealtimeListener />
+                <AdminRealtimeListener />
+                <UserRealtimeListener />
+                <AuthenticatedApp />
+                <GlobalProductModal />
+                <LiveChatWidget />
+                <ScrollToTop />
+              </Router>
+              <Toaster />
+            </QueryClientProvider>
+          </ProductModalProvider>
         </SoundProvider>
       </SocketProvider>
     </AuthProvider>

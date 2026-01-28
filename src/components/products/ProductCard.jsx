@@ -6,9 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWishlist } from '../wishlist/WishlistContext';
 import { toast } from 'sonner';
 
-export default function ProductCard({ product, onAddToCart, onQuickView }) {
+import { useProductModal } from '@/contexts/ProductModalContext';
+
+export default function ProductCard({ product, onAddToCart }) {
   const [isHovered, setIsHovered] = useState(false);
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { openProduct } = useProductModal();
   const [previewImage, setPreviewImage] = useState(null);
 
   // Determine badge
@@ -69,7 +72,8 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
               animate={isHovered ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
               onClick={(e) => {
                 e.preventDefault();
-                onQuickView?.(product);
+                e.stopPropagation();
+                openProduct(product, 'full');
               }}
               className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-amber-400 transition-colors shadow-lg"
               title="Vorschau"

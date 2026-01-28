@@ -10,7 +10,11 @@ import {
   Crown,
   TrendingUp,
   Users,
-  DollarSign
+  DollarSign,
+  Trophy,
+  Activity,
+  Server,
+  ArrowRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -202,6 +206,7 @@ export default function Admin() {
                   setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
                 }
               }}
+              onNotificationClick={(n) => console.log('Notification clicked', n)}
             />
 
             <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center gap-4">
@@ -304,9 +309,90 @@ export default function Admin() {
             </motion.div>
           </Link>
 
-          <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-3xl flex items-center justify-center border-dashed">
-            <span className="text-white/20 font-bold text-sm">More Widgets Soon</span>
+          <div className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-3xl flex flex-col justify-between group overflow-hidden relative">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
+                <div className="absolute inset-0 bg-emerald-500 rounded-full animate-ping opacity-20" />
+              </div>
+              <span className="text-emerald-500 font-bold text-xs uppercase tracking-wider">System Normal</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
+                <Server className="w-4 h-4" />
+                <span>Server Status</span>
+              </div>
+              <div className="font-mono text-emerald-400 font-bold">99.9% Uptime</div>
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center gap-2 text-white/60 text-sm mb-1">
+                <Activity className="w-4 h-4" />
+                <span>Response Time</span>
+              </div>
+              <div className="font-mono text-emerald-400 font-bold">24ms</div>
+            </div>
           </div>
+
+          {/* New Row: Top Sellers & Live Chat */}
+          <Link to={createPageUrl('AdminProducts')} className="col-span-1 md:col-span-2 group">
+            <motion.div whileHover={{ scale: 1.01 }} className="h-full bg-zinc-900 border border-zinc-800 p-6 rounded-3xl relative overflow-hidden group-hover:border-zinc-700 transition-colors">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="font-bold text-white text-xl">Top Seller</h3>
+                  <p className="text-white/40 text-sm">Die Bestseller der Woche</p>
+                </div>
+                <div className="p-2 bg-[#D6B25E]/10 rounded-xl">
+                  <Trophy className="w-6 h-6 text-[#D6B25E]" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { name: '187 Hamburg', sold: 420 },
+                  { name: 'Nameless Black Nana', sold: 350 },
+                  { name: 'Elfbar Watermelon', sold: 890 }
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
+                    <div className="w-8 h-8 flex items-center justify-center font-bold text-[#D6B25E] bg-[#D6B25E]/10 rounded-lg text-sm">#{i + 1}</div>
+                    <div className="flex-1">
+                      <div className="font-bold text-sm text-white">{item.name}</div>
+                      <div className="h-1.5 w-full bg-zinc-800 rounded-full mt-1.5 overflow-hidden">
+                        <div className="h-full bg-[#D6B25E]" style={{ width: `${100 - (i * 15)}%` }} />
+                      </div>
+                    </div>
+                    <div className="text-xs font-mono text-white/50">{item.sold} sold</div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </Link>
+
+          <Link to={createPageUrl('AdminLiveChat')} className="col-span-1 md:col-span-2 group">
+            <motion.div whileHover={{ scale: 1.01 }} className="h-full bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/20 p-6 rounded-3xl relative overflow-hidden flex flex-col">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h3 className="font-bold text-white text-xl">Live Support</h3>
+                  <p className="text-indigo-300/60 text-sm">Aktive Gespräche</p>
+                </div>
+                <div className="p-2 bg-indigo-500/20 rounded-xl">
+                  <MessageCircle className="w-6 h-6 text-indigo-400" />
+                </div>
+              </div>
+
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="flex -space-x-4 justify-center mb-4">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-[#0A0C10] flex items-center justify-center text-xs font-bold">U{i}</div>
+                    ))}
+                  </div>
+                  <p className="text-indigo-200 font-bold mb-2">3 User Online</p>
+                  <button className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto transition-colors">
+                    Zum Chat <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </Link>
         </div>
 
         {/* 📊 Stats Grid */}
