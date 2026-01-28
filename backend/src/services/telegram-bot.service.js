@@ -489,10 +489,30 @@ const setupBotHandlers = () => {
         botLogger.info(`Photo downloaded: ${downloadResult.url}`);
       } catch (downloadError) {
         botLogger.error('Error downloading photo:', downloadError);
+
+        let errorMessage = '❌ Fehler beim Speichern des Fotos.';
+
+        // Show specific validation errors to the user
+        if (downloadError.message) {
+          if (downloadError.message.includes('zu klein')) {
+            errorMessage = `❌ ${downloadError.message}`;
+          } else if (downloadError.message.includes('zu groß')) {
+            errorMessage = `❌ ${downloadError.message}`;
+          } else if (downloadError.message.includes('Format')) {
+            errorMessage = `❌ ${downloadError.message}`;
+          } else if (downloadError.message.includes('kein gültiges Bild')) {
+            errorMessage = `❌ ${downloadError.message}`;
+          }
+        }
+
+        if (errorMessage === '❌ Fehler beim Speichern des Fotos.') {
+          errorMessage += ' Bitte versuche es erneut.';
+        }
+
         await sendMessageWithRetry(
           bot,
           chatId,
-          '❌ Fehler beim Speichern des Fotos. Bitte versuche es erneut.',
+          errorMessage,
           { parse_mode: 'Markdown' }
         );
         return;
@@ -609,6 +629,13 @@ const setupBotHandlers = () => {
       } else if (data.startsWith('reject_')) {
         const verificationId = data.replace('reject_', '');
         await handleAdminRejection(query, verificationId, admin);
+      } else if (data.startsWith('reason_')) {
+        await handleRejectionReasonSelection(query, data, admin);
+      } else if (data.startsWith('back_verify_')) {
+        // Re-show the original verification message (simplified for now as just cancel)
+        await answerCallbackQueryWithRetry(bot, query.id, { text: 'Aktion abgebrochen' });
+        // Ideally restore the original message, but for speed, we just delete the menu or show text
+        await sendMessageWithRetry(bot, chatId, 'Rejection abgebrochen.');
       } else if (data === 'view_cart') {
         await handleViewCart(query, admin);
       } else if (data === 'view_orders') {
@@ -1052,7 +1079,7 @@ const handleAdminRejection = async (query, verificationId, admin) => {
       return;
     }
 
-    // Store admin state for rejection reason
+    // Store admin state in case they choose "Custom Reason"
     const adminId = admin.id;
     adminRejectionStates.set(adminId, {
       verificationId,
@@ -1061,31 +1088,119 @@ const handleAdminRejection = async (query, verificationId, admin) => {
       user: verificationRequest.user,
     });
 
-    // Ask admin for rejection reason
-    await answerCallbackQueryWithRetry(bot, query.id, {
-      text: 'Bitte gib einen Ablehnungsgrund ein',
-      show_alert: false,
-    });
-
-    // Send message asking for reason
-    await sendMessageWithRetry(
+    // Show Quick-Reject Menu
+    await editMessageTextWithRetry(
       bot,
       query.message.chat.id,
-      `❌ *Verifizierung ablehnen*\n\n` +
-      `User: ${verificationRequest.user.full_name || verificationRequest.user.username || 'Unbekannt'}\n\n` +
-      `Bitte sende den Ablehnungsgrund als Antwort auf diese Nachricht.\n` +
-      `Oder sende /cancel zum Abbrechen.`,
+      query.message.message_id,
+      `❌ *ABLEHNUNGSGRUND WÄHLEN*\n\n` +
+      `Warum wird die Verifizierung abgelehnt?`,
       {
         parse_mode: 'Markdown',
         reply_markup: {
-          force_reply: true,
-          selective: true,
+          inline_keyboard: [
+            [
+              { text: '✋ Falsches Handzeichen', callback_data: `reason_hand_${verificationId}` },
+              { text: '😶 Gesicht nicht erkennbar', callback_data: `reason_face_${verificationId}` },
+            ],
+            [
+              { text: '📸 Schlechte Qualität', callback_data: `reason_quality_${verificationId}` },
+              { text: '📝 Eigener Grund', callback_data: `reason_custom_${verificationId}` },
+            ],
+            [
+              { text: '🔙 Zurück', callback_data: `back_verify_${verificationId}` }
+            ]
+          ],
         },
       }
     );
   } catch (error) {
     botLogger.error('Error handling admin rejection:', error);
     throw error;
+  }
+};
+
+// Handle rejection reason selection
+const handleRejectionReasonSelection = async (query, data, admin) => {
+  const [type, reasonKey, verificationId] = data.split('_'); // reason_hand_ID
+
+  if (reasonKey === 'custom') {
+    // Already state set in handleAdminRejection, just prompt for text
+    await sendMessageWithRetry(
+      bot,
+      query.message.chat.id,
+      `📝 *Eigener Grund*\n\nBitte sende den Grund als Nachricht:`,
+      { parse_mode: 'Markdown', reply_markup: { force_reply: true } }
+    );
+    return;
+  }
+
+  // Map keys to texts
+  const reasons = {
+    'hand': 'Das Handzeichen stimmt nicht mit der Vorgabe überein.',
+    'face': 'Das Gesicht ist nicht vollständig oder klar erkennbar.',
+    'quality': 'Die Bildqualität ist zu niedrig, bitte ein schärferes Foto senden.'
+  };
+
+  const reason = reasons[reasonKey] || 'Verifizierung abgelehnt.';
+
+  // Process rejection
+  await processRejectionFinal(query.message.chat.id, admin.id, verificationId, reason);
+};
+
+// Finalize rejection
+const processRejectionFinal = async (chatId, adminId, verificationId, reason) => {
+  try {
+    const verificationRequest = await prisma.verificationRequest.findUnique({
+      where: { id: verificationId },
+      include: { user: true }
+    });
+
+    if (!verificationRequest) return;
+
+    // Update DB
+    await prisma.verificationRequest.update({
+      where: { id: verificationId },
+      data: {
+        status: 'rejected',
+        reviewed_at: new Date(),
+        reviewed_by: adminId,
+        rejection_reason: reason
+      }
+    });
+
+    await prisma.user.update({
+      where: { id: verificationRequest.user_id },
+      data: {
+        verification_status: 'rejected',
+        rejection_reason: reason
+      }
+    });
+
+    // Notify User
+    if (verificationRequest.user.telegram_id) {
+      await sendMessageWithRetry(
+        bot,
+        verificationRequest.user.telegram_id.toString(),
+        `❌ *VERIFIZIERUNG ABGELEHNT*\n\n` +
+        `Grund: *${reason}*\n\n` +
+        `Bitte versuche es erneut mit /start`,
+        { parse_mode: 'Markdown' }
+      );
+    }
+
+    // Notify Admin (Edit original message if possible or send new)
+    await sendMessageWithRetry(
+      bot,
+      chatId,
+      `✅ *Abgelehnt*\nUser: ${verificationRequest.user.full_name}\nGrund: ${reason}`
+    );
+
+    // Cleanup
+    adminRejectionStates.delete(adminId);
+
+  } catch (e) {
+    botLogger.error('Error finalizing rejection:', e);
   }
 };
 

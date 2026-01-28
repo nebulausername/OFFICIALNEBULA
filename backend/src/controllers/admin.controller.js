@@ -20,7 +20,7 @@ export const getStats = async (req, res, next) => {
     const todayStart = new Date(now.setHours(0, 0, 0, 0));
     const weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const monthStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    
+
     // Use Promise.all for parallel execution
     const [
       totalProducts,
@@ -78,7 +78,7 @@ export const getStats = async (req, res, next) => {
         }),
       ]),
     ]);
-    
+
     const [totalRevenue, todayRevenue, weekRevenue, monthRevenue] = revenueData;
 
     // Get recent orders
@@ -197,7 +197,7 @@ export const listUsers = async (req, res, next) => {
     const { search, role, is_vip, sort = '-created_at', limit, page = 1 } = req.query;
 
     const where = {};
-    
+
     if (search) {
       where.OR = [
         { full_name: { contains: search, mode: 'insensitive' } },
@@ -205,7 +205,7 @@ export const listUsers = async (req, res, next) => {
         { username: { contains: search, mode: 'insensitive' } },
       ];
     }
-    
+
     if (role) where.role = role;
     if (is_vip !== undefined) where.is_vip = is_vip === 'true';
 
@@ -297,7 +297,7 @@ export const toggleVIP = async (req, res, next) => {
 export const bulkImportProducts = async (req, res, next) => {
   try {
     const { products } = req.body;
-    
+
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({
         error: 'Bad Request',
@@ -344,7 +344,7 @@ export const bulkImportProducts = async (req, res, next) => {
             variants: toJsonValue(productData.variants || []),
           },
         });
-        
+
         results.updated++;
       } catch (error) {
         results.errors.push({
@@ -469,8 +469,8 @@ export const getCategoryRevenue = async (req, res, next) => {
             count: 0,
           };
         }
-        const price = typeof item.price_snapshot === 'number' 
-          ? item.price_snapshot 
+        const price = typeof item.price_snapshot === 'number'
+          ? item.price_snapshot
           : parseFloat(item.price_snapshot) || 0;
         categoryRevenue[categoryId].revenue += price * item.quantity_snapshot;
         categoryRevenue[categoryId].count += item.quantity_snapshot;
@@ -561,6 +561,41 @@ export const getRecentActivity = async (req, res, next) => {
       tickets: recentTickets,
       users: recentUsers,
     });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getChatSessions = async (req, res, next) => {
+  try {
+    const sessions = await prisma.chatSession.findMany({
+      orderBy: { updated_at: 'desc' },
+      include: {
+        user: { select: { id: true, full_name: true, email: true, rank: true } },
+        messages: {
+          orderBy: { created_at: 'desc' },
+          take: 1
+        },
+        _count: {
+          select: { messages: { where: { is_read: false, sender: 'user' } } }
+        }
+      }
+    });
+    res.json(sessions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getChatHistory = async (req, res, next) => {
+  try {
+    const { sessionId } = req.params;
+    const messages = await prisma.chatMessage.findMany({
+      where: { session_id: sessionId },
+      orderBy: { created_at: 'asc' }
+    });
+    res.json(messages);
   } catch (error) {
     next(error);
   }

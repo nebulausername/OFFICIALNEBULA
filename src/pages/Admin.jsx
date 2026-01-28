@@ -170,6 +170,7 @@ export default function Admin() {
     { title: 'Kategorien', icon: Tag, count: stats.categories, description: 'Struktur verwalten', color: 'from-green-500 to-emerald-500', link: 'AdminCategories' },
     { title: 'Marken', icon: Star, count: stats.brands, description: 'Marken Partner', color: 'from-orange-500 to-amber-500', link: 'AdminBrands' },
     { title: 'Support', icon: MessageCircle, count: stats.tickets, description: 'Offene Tickets', color: 'from-cyan-500 to-blue-500', link: 'AdminSupport' },
+    { title: 'Live Chat', icon: MessageCircle, count: '💬', description: 'Real-time', color: 'from-green-500 to-emerald-500', link: 'AdminLiveChat' },
     { title: 'VIP User', icon: Crown, count: stats.vipUsers, description: 'Premium Mitglieder', color: 'from-yellow-500 to-amber-500', link: 'AdminSupport' },
   ];
 

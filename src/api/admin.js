@@ -14,6 +14,14 @@ export const admin = {
   toggleVIP: async (userId, data) => {
     return await apiClient.patch(`/admin/users/${userId}/vip`, data);
   },
+
+  getChatSessions: async () => {
+    return await apiClient.get('/admin/chats');
+  },
+
+  getChatHistory: async (sessionId) => {
+    return await apiClient.get(`/admin/chats/${sessionId}/messages`);
+  },
 };
 
 export default admin;

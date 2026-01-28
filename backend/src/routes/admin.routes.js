@@ -20,5 +20,8 @@ router.get('/users', validatePagination, adminController.listUsers);
 router.patch('/users/:id/vip', validateId, adminController.toggleVIP);
 router.post('/products/bulk-import', adminController.bulkImportProducts);
 
+router.get('/chats', adminController.getChatSessions);
+router.get('/chats/:sessionId/messages', validateId('sessionId'), adminController.getChatHistory);
+
 export default router;
 

@@ -9,9 +9,11 @@ import AdminProductEditor from './pages/AdminProductEditor';
 import AdminProducts from './pages/AdminProducts';
 import AdminRequests from './pages/AdminRequests';
 import AdminSupport from './pages/AdminSupport';
+import AdminLiveChat from './pages/AdminLiveChat';
 import AdminVerifications from './pages/AdminVerifications';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+
 import FAQ from './pages/FAQ';
 import Help from './pages/Help';
 import Home from './pages/Home';
@@ -28,7 +30,6 @@ import Wishlist from './pages/Wishlist';
 import Login from './pages/Login';
 import __Layout from './Layout.jsx';
 
-
 export const PAGES = {
     "Admin": Admin,
     "AdminAnalytics": AdminAnalytics,
@@ -41,8 +42,10 @@ export const PAGES = {
     "AdminProducts": AdminProducts,
     "AdminRequests": AdminRequests,
     "AdminSupport": AdminSupport,
+    "AdminLiveChat": AdminLiveChat,
     "AdminVerifications": AdminVerifications,
     "Cart": Cart,
+
     "Checkout": Checkout,
     "FAQ": FAQ,
     "Help": Help,

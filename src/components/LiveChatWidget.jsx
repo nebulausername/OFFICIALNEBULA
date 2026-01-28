@@ -1,61 +1,94 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, Minimize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
+import { useSocket } from '@/contexts/SocketContext';
+import { useAuth } from '@/lib/AuthContext';
+import { format } from 'date-fns';
+import { useSound } from '@/contexts/SoundContext';
 
 /**
- * Live Chat Widget - Floating button with chat window
- * Appears in bottom-right corner
+ * Real-time Live Chat Widget
+ * Connects to backend via Socket.io
  */
 export default function LiveChatWidget() {
+    const { socket, isConnected } = useSocket();
+    const { user } = useAuth();
+    const { playSound } = useSound();
+
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
-    const [messages, setMessages] = useState([
-        {
-            id: 1,
-            type: 'bot',
-            text: 'Hallo! 👋 Wie kann ich dir heute helfen?',
-            timestamp: new Date()
-        }
-    ]);
+    const [messages, setMessages] = useState([]);
+    const [session, setSession] = useState(null);
+    const [isTyping, setIsTyping] = useState(false);
+    const scrollRef = useRef(null);
 
-    const quickReplies = [
-        '📦 Wo ist meine Bestellung?',
-        '💳 Zahlungsmethoden?',
-        '🚚 Versandkosten?',
-        '💬 Support kontaktieren'
-    ];
+    // Join Chat when opened
+    useEffect(() => {
+        if (!isOpen || !socket || !isConnected) return;
+
+        console.log('💬 Joining Chat...');
+        socket.emit('chat:join');
+
+        const handleJoined = (existingSession) => {
+            console.log('✅ Joined Chat Session:', existingSession);
+            setSession(existingSession);
+            if (existingSession.messages) {
+                setMessages(existingSession.messages);
+            }
+            scrollToBottom();
+        };
+
+        const handleMessage = (msg) => {
+            setMessages(prev => {
+                // Deduplicate
+                if (prev.find(m => m.id === msg.id)) return prev;
+                return [...prev, msg];
+            });
+            scrollToBottom();
+
+            // Play sound if message is from admin
+            if (msg.sender === 'admin') {
+                playSound('notification');
+            }
+        };
+
+        const handleTyping = (data) => {
+            setIsTyping(data.isTyping);
+            if (data.isTyping) {
+                scrollToBottom();
+            }
+        };
+
+        socket.on('chat:joined', handleJoined);
+        socket.on('chat:message', handleMessage);
+        socket.on('typing', handleTyping);
+
+        return () => {
+            socket.off('chat:joined', handleJoined);
+            socket.off('chat:message', handleMessage);
+            socket.off('typing', handleTyping);
+        };
+    }, [isOpen, socket, isConnected]);
 
     const handleSendMessage = () => {
-        if (!message.trim()) return;
+        if (!message.trim() || !socket || !session) return;
 
-        // Add user message
-        const userMsg = {
-            id: Date.now(),
-            type: 'user',
-            text: message,
-            timestamp: new Date()
-        };
-        setMessages(prev => [...prev, userMsg]);
-        setMessage('');
+        const content = message;
+        setMessage(''); // Creating feeling of instant send
 
-        // Simulate bot response
-        setTimeout(() => {
-            const botMsg = {
-                id: Date.now() + 1,
-                type: 'bot',
-                text: 'Vielen Dank für deine Nachricht! Unser Team wird sich so schnell wie möglich bei dir melden. 🚀',
-                timestamp: new Date()
-            };
-            setMessages(prev => [...prev, botMsg]);
-        }, 1000);
+        socket.emit('chat:message', {
+            content,
+            sessionId: session.id
+        });
     };
 
-    const handleQuickReply = (reply) => {
-        setMessage(reply);
+    const scrollToBottom = () => {
+        setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     };
+
+    if (!user) return null; // Show nothing if not logged in
 
     return (
         <>
@@ -98,10 +131,10 @@ export default function LiveChatWidget() {
                                     <MessageCircle className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
-                                    <h3 className="font-black text-white text-lg">Nebula Support</h3>
+                                    <h3 className="font-black text-white text-lg">Live Support</h3>
                                     <div className="flex items-center gap-2 text-white/80 text-xs">
                                         <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                        Online
+                                        {isConnected ? 'Online' : 'Verbinde...'}
                                     </div>
                                 </div>
                             </div>
@@ -115,45 +148,48 @@ export default function LiveChatWidget() {
 
                         {/* Messages */}
                         <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-zinc-950">
-                            {messages.map((msg) => (
-                                <motion.div
-                                    key={msg.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                                >
-                                    <div
-                                        className={`max-w-[75%] px-4 py-3 rounded-2xl ${msg.type === 'user'
-                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                                                : 'bg-zinc-800 text-white'
-                                            }`}
-                                    >
-                                        <p className="text-sm">{msg.text}</p>
-                                        <p className="text-xs opacity-60 mt-1">
-                                            {msg.timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        {/* Quick Replies */}
-                        {messages.length <= 2 && (
-                            <div className="p-4 bg-zinc-900 border-t border-zinc-800">
-                                <p className="text-xs text-zinc-500 mb-2">Schnellantworten:</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {quickReplies.map((reply, i) => (
-                                        <button
-                                            key={i}
-                                            onClick={() => handleQuickReply(reply)}
-                                            className="text-xs px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors"
-                                        >
-                                            {reply}
-                                        </button>
-                                    ))}
+                            {messages.length === 0 && (
+                                <div className="text-center text-zinc-500 mt-10">
+                                    <p>Sag Hallo! 👋</p>
+                                    <p className="text-xs">Unser Team meldet sich sofort.</p>
                                 </div>
-                            </div>
-                        )}
+                            )}
+
+                            {messages.map((msg, idx) => {
+                                const isMe = msg.sender === 'user' || msg.sender === user.id; // 'user' is what backend sends
+                                return (
+                                    <motion.div
+                                        key={idx} // Using index fallback if id missing briefly
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div
+                                            className={`max-w-[75%] px-4 py-3 rounded-2xl ${isMe
+                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-tr-none'
+                                                : 'bg-zinc-800 text-white rounded-tl-none'
+                                                }`}
+                                        >
+                                            <p className="text-sm">{msg.content}</p>
+                                            <p className="text-[10px] opacity-60 mt-1 flex justify-end">
+                                                {msg.created_at ? format(new Date(msg.created_at), 'HH:mm') : '...'}
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+
+                            {isTyping && (
+                                <div className="flex justify-start">
+                                    <div className="bg-zinc-800 px-4 py-2 rounded-2xl rounded-tl-none flex gap-1 items-center">
+                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" />
+                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce delay-75" />
+                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce delay-150" />
+                                    </div>
+                                </div>
+                            )}
+                            <div ref={scrollRef} />
+                        </div>
 
                         {/* Input */}
                         <div className="p-4 bg-zinc-900 border-t-2 border-zinc-800">
@@ -162,12 +198,13 @@ export default function LiveChatWidget() {
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                    placeholder="Nachricht schreiben..."
+                                    placeholder="Nachricht..."
                                     className="flex-1 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+                                    disabled={!isConnected}
                                 />
                                 <Button
                                     onClick={handleSendMessage}
-                                    disabled={!message.trim()}
+                                    disabled={!message.trim() || !isConnected}
                                     className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
                                 >
                                     <Send className="w-4 h-4" />
