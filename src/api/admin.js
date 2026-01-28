@@ -22,6 +22,18 @@ export const admin = {
   getChatHistory: async (sessionId) => {
     return await apiClient.get(`/admin/chats/${sessionId}/messages`);
   },
+
+  getTopProducts: async (limit = 10) => {
+    return await apiClient.get('/admin/top-products', { limit });
+  },
+
+  getRecentActivity: async () => {
+    return await apiClient.get('/admin/recent-activity');
+  },
+
+  getSalesData: async (days = 30) => {
+    return await apiClient.get('/admin/sales-data', { period: days });
+  },
 };
 
 export default admin;

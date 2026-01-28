@@ -49,7 +49,8 @@ export default function Admin() {
     tickets: 0,
     vipUsers: 0,
     revenue: 0,
-    activeVisitors: 0
+    activeVisitors: 0,
+    topProducts: []
   });
   const [recentRequests, setRecentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,13 +90,15 @@ export default function Admin() {
       setUser(userData);
 
       try {
-        const [products, requests, categories, brands, tickets, users] = await Promise.all([
+        const [products, requests, categories, brands, tickets, users, topProducts, recentActivity] = await Promise.all([
           api.entities.Product.list(),
           api.entities.Request.list('-created_at', 100),
           api.entities.Category.list(),
           api.entities.Brand.list(),
           api.entities.Ticket.list(),
-          api.entities.User.list()
+          api.entities.User.list(),
+          api.admin.getTopProducts(5),
+          api.admin.getRecentActivity()
         ]);
 
         const vipUsers = users.filter(u => u.is_vip).length;
@@ -110,10 +113,11 @@ export default function Admin() {
           brands: brands.length,
           tickets: openTickets || 0,
           vipUsers: vipUsers || 0,
-          revenue: totalRevenue
+          revenue: totalRevenue,
+          topProducts: topProducts || []
         }));
 
-        setRecentRequests(requests.slice(0, 5));
+        setRecentRequests(recentActivity?.orders || []);
         setChartData(DEMO_CHART_DATA); // In real app, calculate from requests
       } catch (apiError) {
         console.warn('API Error, loading Admin Demo Data', apiError);
@@ -346,20 +350,18 @@ export default function Admin() {
                 </div>
               </div>
               <div className="space-y-3">
-                {[
-                  { name: '187 Hamburg', sold: 420 },
-                  { name: 'Nameless Black Nana', sold: 350 },
-                  { name: 'Elfbar Watermelon', sold: 890 }
-                ].map((item, i) => (
+                {(stats.topProducts && stats.topProducts.length > 0 ? stats.topProducts : [
+                  { product: { name: 'Noch keine Verkäufe' }, orderCount: 0 }
+                ]).map((item, i) => (
                   <div key={i} className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
                     <div className="w-8 h-8 flex items-center justify-center font-bold text-[#D6B25E] bg-[#D6B25E]/10 rounded-lg text-sm">#{i + 1}</div>
                     <div className="flex-1">
-                      <div className="font-bold text-sm text-white">{item.name}</div>
+                      <div className="font-bold text-sm text-white truncate">{item.product?.name || 'Unbekannt'}</div>
                       <div className="h-1.5 w-full bg-zinc-800 rounded-full mt-1.5 overflow-hidden">
-                        <div className="h-full bg-[#D6B25E]" style={{ width: `${100 - (i * 15)}%` }} />
+                        <div className="h-full bg-[#D6B25E]" style={{ width: `${Math.min((item.orderCount / (stats.topProducts[0]?.orderCount || 1)) * 100, 100)}%` }} />
                       </div>
                     </div>
-                    <div className="text-xs font-mono text-white/50">{item.sold} sold</div>
+                    <div className="text-xs font-mono text-white/50">{item.orderCount} sold</div>
                   </div>
                 ))}
               </div>

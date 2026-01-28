@@ -5,6 +5,7 @@ import { Eye, MapPin, Clock, Package, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 import WishlistButton from '../wishlist/WishlistButton';
 import { useI18n } from '../i18n/I18nProvider';
+import { useProductModal } from '@/contexts/ProductModalContext';
 
 // Separate Image component with proper error handling
 function ProductImage({ src, alt }) {
@@ -106,9 +107,10 @@ function DropCountdown({ targetDate }) {
   );
 }
 
-export default function PremiumProductCard({ product, onQuickView }) {
+export default function PremiumProductCard({ product }) {
   const navigate = useNavigate();
   const { t, formatCurrency } = useI18n();
+  const { openModal } = useProductModal();
 
   // Daily Drop Logic
   const isDrop = product.drop_date && new Date(product.drop_date) > new Date();
@@ -119,7 +121,7 @@ export default function PremiumProductCard({ product, onQuickView }) {
     if (isDrop) return; // Disable for drops
 
     if (product.colors?.length > 0 || product.sizes?.length > 0) {
-      onQuickView?.(product);
+      openModal(product);
     } else {
       navigate(createPageUrl('ProductDetail') + `?id=${product.id}`);
     }

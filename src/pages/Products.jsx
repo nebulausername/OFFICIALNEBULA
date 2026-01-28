@@ -4,13 +4,14 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import PremiumProductCard from '../components/products/PremiumProductCard';
-import UnifiedProductModal from '../components/products/UnifiedProductModal';
+
 
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
 import AdvancedFilters from '../components/shop/AdvancedFilters';
 import ProductGridSkeleton from '../components/products/ProductGridSkeleton';
 import { useI18n } from '../components/i18n/I18nProvider';
+import { products as staticProducts } from '../data/products';
 
 export default function Products() {
   const { t } = useI18n();
@@ -23,8 +24,6 @@ export default function Products() {
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
-  const [quickViewProduct, setQuickViewProduct] = useState(null);
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState({
     categories: [],
@@ -70,114 +69,20 @@ export default function Products() {
         api.entities.Department.list('sort_order')
       ]);
 
-      setProducts(prods);
+      if (prods && prods.length > 0) {
+        setProducts(prods);
+      } else {
+        // Fallback to static data
+        setProducts(staticProducts);
+      }
+
       setCategories(cats);
       setBrands(brds);
       setDepartments(depts);
     } catch (error) {
       console.error('Error loading data:', error);
-
-      // Fallback: Show Premium Demo Products
-      const demoProducts = [
-        {
-          id: 'demo-1',
-          name: 'Moze Breeze Two - Wavy Black',
-          description: 'Die Moze Breeze Two ist die Shisha des Jahres.',
-          price: 149.90,
-          cover_image: 'https://mozeshisha.de/media/image/product/14987/lg/moze-breeze-two-wavy-blue~2.jpg',
-          tags: ['Bestseller', 'Premium'],
-          in_stock: true,
-          stock: 10,
-          sku: 'MOZE-BRZ-BLK',
-          department_id: 'shishas',
-          min_order_quantity: 1
-        },
-        {
-          id: 'demo-2',
-          name: 'Elfbar 600 - Premium Selection',
-          description: 'Der Klassiker neu definiert. Wähle deinen Favoriten aus unserer exklusiven Kollektion.',
-          price: 7.90,
-          cover_image: 'https://dampfdorado.de/media/image/5f/8c/9b/elfbar-600-watermelon.jpg',
-          tags: ['Bestseller', 'Configurable'],
-          in_stock: true,
-          sku: 'ELF-600-VAR',
-          department_id: 'vapes',
-          min_order_quantity: 1,
-          colors: [
-            {
-              id: 'c1',
-              name: 'Watermelon Luxury',
-              hex: '#EF5350',
-              thumbnail: '/images/products/vape-watermelon.png',
-              images: ['/images/products/vape-watermelon.png']
-            },
-            {
-              id: 'c2',
-              name: 'Blue Razz Diamond',
-              hex: '#42A5F5',
-              thumbnail: '/images/products/vape-blue-razz.png',
-              images: ['/images/products/vape-blue-razz.png']
-            },
-            {
-              id: 'c3',
-              name: 'Grape (Classic)',
-              hex: '#AB47BC',
-              thumbnail: 'https://dampfdorado.de/media/image/9e/7c/1f/elfbar-600-grape.jpg',
-              images: ['https://dampfdorado.de/media/image/9e/7c/1f/elfbar-600-grape.jpg']
-            }
-          ]
-        },
-        {
-          id: 'demo-3',
-          name: 'Nameless - Black Nana',
-          description: 'Die Legende unter den Traube-Minze Tabaken.',
-          price: 17.90,
-          cover_image: '/images/products/tobacco-black-nana.png',
-          tags: ['Legendary', 'Bestseller'],
-          in_stock: true,
-          sku: 'NAM-BLK-NANA',
-          department_id: 'shisha-tobacco',
-          min_order_quantity: 1,
-          colors: [{ id: 't1', name: '200g Dose', hex: '#222', thumbnail: '/images/products/tobacco-black-nana.png' }]
-        },
-        {
-          id: 'demo-4',
-          name: 'Vyro Spectre - Carbon Red',
-          description: 'Kompakt, innovativ und mit einem einzigartigen Blow-Off System.',
-          price: 119.90,
-          cover_image: '/images/products/shisha-moze.png',
-          tags: ['Innovation', 'Premium'],
-          in_stock: true,
-          sku: 'VYRO-SPC-RED',
-          department_id: 'shishas',
-          min_order_quantity: 1,
-          colors: [{ id: 's1', name: 'Wavy Black (Resin)', hex: '#000', thumbnail: '/images/products/shisha-moze.png' }]
-        },
-        {
-          id: 'demo-5',
-          name: 'OCB Slim Premium Box (50 Stk)',
-          description: 'Der Headshop Klassiker im Bulk-Pack.',
-          price: 1.20,
-          cover_image: 'https://m.media-amazon.com/images/I/71wLpQd0LBL._AC_SL1500_.jpg',
-          tags: ['Bulk', 'Deal'],
-          in_stock: true,
-          sku: 'OCB-BOX',
-          min_order_quantity: 50
-        },
-        {
-          id: 'demo-6',
-          name: '187 Strassenbande - Hamburg',
-          description: 'Ein wilder Beerenmix, der so legendär ist wie die Stadt selbst.',
-          price: 9.90,
-          cover_image: 'https://files.shisha-world.com/187-Strassenbande-E-Shisha-Hamburg-0004.jpg',
-          tags: ['Hype'],
-          in_stock: true,
-          sku: '187-HH',
-          department_id: 'vapes',
-          min_order_quantity: 1
-        }
-      ];
-      setProducts(demoProducts);
+      // Fallback: Show Premium Demo Products from static file
+      setProducts(staticProducts);
 
       // Extract unique departments/categories from demo products as fallback
       if (departments.length === 0) {
@@ -346,31 +251,7 @@ export default function Products() {
     window.history.pushState({}, '', url);
   };
 
-  const handleAddToCart = async (variantData) => {
-    try {
-      const user = await api.auth.me();
 
-      await api.entities.StarCartItem.create({
-        user_id: user.id,
-        product_id: variantData.product_id,
-        quantity: variantData.quantity,
-        selected_options: {
-          variant_id: variantData.variant_id,
-          color_id: variantData.color_id,
-          color_name: variantData.color_name,
-          color_hex: variantData.color_hex,
-          size: variantData.size,
-          image: variantData.image,
-          price: variantData.price,
-          sku: variantData.sku
-        }
-      });
-
-      setIsQuickViewOpen(false);
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-    }
-  };
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
@@ -521,10 +402,6 @@ export default function Products() {
                     >
                       <PremiumProductCard
                         product={product}
-                        onQuickView={(p) => {
-                          setQuickViewProduct(p);
-                          setIsQuickViewOpen(true);
-                        }}
                       />
                     </motion.div>
                   ))}
@@ -567,13 +444,7 @@ export default function Products() {
       />
 
       {/* Unified Product Modal */}
-      <UnifiedProductModal
-        product={quickViewProduct}
-        open={isQuickViewOpen}
-        onClose={() => setIsQuickViewOpen(false)}
-        onAddToCart={handleAddToCart}
-        mode="full"
-      />
+
 
       {/* Advanced Filters Panel */}
       <AdvancedFilters
