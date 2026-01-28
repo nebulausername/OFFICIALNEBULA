@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import {
   Plus, Trash2, X,
-  Palette, Ruler, Package, RefreshCw, Save, ImagePlus, Upload, ImageIcon
+  Palette, Ruler, Package, RefreshCw, Save, Upload, ImageIcon
 } from 'lucide-react';
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';

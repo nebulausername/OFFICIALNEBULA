@@ -4,7 +4,6 @@ import { api } from '@/api';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Check, Package, CheckCircle2, MessageCircle, ShoppingBag, MapPin } from 'lucide-react';
 import confetti from 'canvas-confetti';

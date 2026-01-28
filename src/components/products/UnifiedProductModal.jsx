@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
     X, Heart, ShoppingBag, ChevronLeft, ChevronRight,
-    Check, AlertCircle, Clock, Plus, Minus, Zap,
+    Check, AlertCircle, Plus, Minus, Zap,
     ShieldCheck, ExternalLink, Truck
 } from 'lucide-react';
 import { api } from '@/api';

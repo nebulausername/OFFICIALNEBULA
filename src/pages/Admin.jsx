@@ -6,22 +6,15 @@ import {
   Tag,
   Star,
   Plus,
-  Settings,
-  Sparkles,
-  Activity,
-  ArrowUpRight,
-  Clock,
   MessageCircle,
   Crown,
   TrendingUp,
-  Shield,
   Users,
-  DollarSign,
-  Zap
+  DollarSign
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import NotificationCenter, { generateDemoNotifications } from '../components/admin/NotificationCenter';
 

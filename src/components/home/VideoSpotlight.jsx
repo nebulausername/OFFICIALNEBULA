@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactPlayer from 'react-player';
 import { motion } from 'framer-motion';
 import { Play, Sparkles, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, Shield, ArrowRight, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { api } from '@/api';
 import { setToken } from '@/api/config';
 import { useTelegramWebApp, isTelegramWebApp, getTelegramUser, hapticFeedback, openTelegramLink } from '../lib/TelegramWebApp';

@@ -20,7 +20,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Save, X, MoreHorizontal } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import DataTable from '@/components/admin/ui/DataTable';
 import { createPageUrl } from '@/utils';

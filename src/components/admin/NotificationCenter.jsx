@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Bell, X, Check, AlertTriangle, Package, ShoppingBag,
-    TrendingUp, MessageCircle, Star, Clock, ChevronRight,
-    XCircle
+    Bell, Check, AlertTriangle, Package, ShoppingBag,
+    TrendingUp, MessageCircle, Star, Clock, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

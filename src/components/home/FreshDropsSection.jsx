@@ -4,7 +4,7 @@ import { createPageUrl } from '../../utils';
 import { motion } from 'framer-motion';
 import {
   Sparkles, Heart, ChevronLeft, ChevronRight,
-  ShoppingBag, ArrowRight, Truck, Clock, Package
+  ShoppingBag, ArrowRight, Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWishlist } from '../wishlist/WishlistContext';

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, Sparkles, Star, Lock } from 'lucide-react';
+import { Crown, Sparkles, Star } from 'lucide-react';
 import { useI18n } from '@/components/i18n/I18nProvider';
 
 const RANKS = {

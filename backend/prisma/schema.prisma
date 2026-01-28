@@ -43,6 +43,7 @@ model User {
   ticket_messages TicketMessage[]
   wishlist_items WishlistItem[]
   verification_requests VerificationRequest[]
+  chat_sessions ChatSession[]
 
   @@index([telegram_id])
   @@index([role, rank])

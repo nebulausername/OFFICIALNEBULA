@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Minus, Plus, Trash2, Star, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 
 export default function CartItem({ item, product, updateQuantity, removeItem }) {
     if (!product) return null;

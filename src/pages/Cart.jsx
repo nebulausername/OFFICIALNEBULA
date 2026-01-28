@@ -3,7 +3,7 @@ import { api } from '@/api';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Trash2, Plus, Minus, ShoppingBag, Send, Sparkles, Star, Package, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ShoppingBag, Send, Sparkles, Package, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';

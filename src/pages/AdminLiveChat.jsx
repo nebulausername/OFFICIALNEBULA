@@ -3,13 +3,11 @@ import { api } from '@/api';
 import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/lib/AuthContext';
 import {
-    Send, Search, User, Clock, Check, MoreVertical,
-    Phone, Video, Smile, Paperclip, MessageCircle,
+    Send, MoreVertical,
+    Phone, Paperclip, MessageCircle,
     ArrowLeft, CheckCheck
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
 
 export default function AdminLiveChat() {
     const { socket } = useSocket();
