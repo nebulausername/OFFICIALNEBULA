@@ -6,7 +6,7 @@ import { API_BASE_URL } from '@/api/config';
 import { Star, Sparkles } from 'lucide-react';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import ProductQuickView from '../components/products/ProductQuickView';
+import UnifiedProductModal from '../components/products/UnifiedProductModal';
 import DeliveryBar from '../components/delivery/DeliveryBar';
 import CategoryCard from '../components/home/CategoryCard';
 import FreshDropsSection from '../components/home/FreshDropsSection';
@@ -815,11 +815,12 @@ export default function Home() {
       {/* Video Spotlight Section */}
       <VideoSpotlight />
 
-      <ProductQuickView
+      <UnifiedProductModal
         product={quickViewProduct}
-        isOpen={isQuickViewOpen}
+        open={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
+        mode="full"
       />
 
       {/* VIP Section - Ultra Premium */}

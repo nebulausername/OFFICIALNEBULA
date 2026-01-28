@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import NotificationCenter, { generateDemoNotifications } from '../components/admin/NotificationCenter';
 
 // Demo Data for Fallback
 const DEMO_CHART_DATA = [
@@ -56,6 +57,7 @@ export default function Admin() {
   const [recentRequests, setRecentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
+  const [notifications, setNotifications] = useState(generateDemoNotifications());
 
   // Live Visitor Simulation
   useEffect(() => {
@@ -195,6 +197,19 @@ export default function Admin() {
           </div>
 
           <div className="flex items-center gap-4">
+            {/* Notification Center */}
+            <NotificationCenter
+              notifications={notifications}
+              onClear={() => setNotifications([])}
+              onMarkRead={(id) => {
+                if (id === 'all') {
+                  setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                } else {
+                  setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+                }
+              }}
+            />
+
             <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center gap-4">
               <div className="flex flex-col">
                 <span className="text-xs text-white/40 font-medium uppercase tracking-wider">Live Visitors</span>

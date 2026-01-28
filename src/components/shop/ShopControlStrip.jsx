@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, SlidersHorizontal, ChevronDown, Store, Command } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Search, X, SlidersHorizontal, ChevronDown, Store, Command, Clock, TrendingUp, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useI18n } from '../i18n/I18nProvider';
+
+const RECENT_SEARCHES_KEY = 'nebula_recent_searches';
+const MAX_RECENT_SEARCHES = 5;
 
 export default function ShopControlStrip({
   searchQuery,
@@ -19,11 +22,38 @@ export default function ShopControlStrip({
   onDepartmentSelect,
   sortBy,
   onSortChange,
-  productCount = 0
+  productCount = 0,
+  products = [] // For search suggestions
 }) {
   const { t } = useI18n();
   const [isFocused, setIsFocused] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [recentSearches, setRecentSearches] = useState([]);
   const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  // Load recent searches from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+      if (saved) {
+        setRecentSearches(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Error loading recent searches:', e);
+    }
+  }, []);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Keyboard shortcut CMD/CTRL + K
   useEffect(() => {
@@ -32,45 +62,114 @@ export default function ShopControlStrip({
         e.preventDefault();
         inputRef.current?.focus();
       }
+      // ESC to close dropdown
+      if (e.key === 'Escape') {
+        setShowDropdown(false);
+        inputRef.current?.blur();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Save search to recent when user submits
+  const saveRecentSearch = (query) => {
+    if (!query.trim() || query.length < 2) return;
+
+    const updated = [
+      query.trim(),
+      ...recentSearches.filter(s => s.toLowerCase() !== query.toLowerCase())
+    ].slice(0, MAX_RECENT_SEARCHES);
+
+    setRecentSearches(updated);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+  };
+
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+    localStorage.removeItem(RECENT_SEARCHES_KEY);
+  };
+
+  const handleSearchSelect = (query) => {
+    onSearchChange(query);
+    saveRecentSearch(query);
+    setShowDropdown(false);
+    inputRef.current?.blur();
+  };
+
+  // Generate search suggestions from products
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery || searchQuery.length < 2 || !products.length) return [];
+
+    const query = searchQuery.toLowerCase();
+    return products
+      .filter(p =>
+        p.name?.toLowerCase().includes(query) ||
+        p.sku?.toLowerCase().includes(query)
+      )
+      .slice(0, 4)
+      .map(p => ({
+        type: 'product',
+        text: p.name,
+        sku: p.sku,
+        image: p.cover_image
+      }));
+  }, [searchQuery, products]);
+
+  // Handle Enter key to save search
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      saveRecentSearch(searchQuery);
+      setShowDropdown(false);
+    }
+  };
+
   const sortOptions = [
     { value: 'newest', label: 'Neueste' },
     { value: 'popular', label: 'Beliebt' },
-    { value: 'price_asc', label: 'Preis aufsteigend' },
-    { value: 'price_desc', label: 'Preis absteigend' },
+    { value: 'price_asc', label: 'Preis ↑' },
+    { value: 'price_desc', label: 'Preis ↓' },
     { value: 'name_asc', label: 'A-Z' },
     { value: 'name_desc', label: 'Z-A' }
   ];
+
+  const hasDropdownContent =
+    (isFocused && !searchQuery && recentSearches.length > 0) ||
+    (searchQuery && searchSuggestions.length > 0);
 
   return (
     <div className="space-y-6">
       {/* Main Control Row */}
       <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center">
         {/* Search Bar - Premium Glow Effect */}
-        <div className="flex-1 relative group">
+        <div className="flex-1 relative group" ref={dropdownRef}>
           <div
             className={`absolute -inset-0.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-purple-600/20 opacity-0 transition-opacity duration-500 blur-md ${isFocused ? 'opacity-100' : 'group-hover:opacity-50'}`}
           />
           <div className="relative">
             <Search
-              className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${isFocused ? 'text-amber-400' : 'text-zinc-500 group-hover:text-zinc-400'}`}
+              className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 z-10 ${isFocused ? 'text-amber-400' : 'text-zinc-500 group-hover:text-zinc-400'}`}
             />
             <Input
               ref={inputRef}
               type="text"
-              placeholder={t('shop.searchPlaceholder')}
+              placeholder={t('shop.searchPlaceholder') || 'Produkte suchen...'}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onFocus={() => {
+                setIsFocused(true);
+                setShowDropdown(true);
+              }}
+              onBlur={() => {
+                setIsFocused(false);
+                // Delay hiding dropdown to allow clicks
+                setTimeout(() => setShowDropdown(false), 150);
+              }}
+              onKeyDown={handleKeyDown}
               className="w-full h-14 pl-12 pr-14 text-base font-medium rounded-xl bg-black/40 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all shadow-xl"
             />
 
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2 z-10">
               <AnimatePresence>
                 {searchQuery ? (
                   <motion.button
@@ -90,6 +189,89 @@ export default function ShopControlStrip({
                 )}
               </AnimatePresence>
             </div>
+
+            {/* Search Dropdown */}
+            <AnimatePresence>
+              {showDropdown && hasDropdownContent && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute top-full left-0 right-0 mt-2 p-3 rounded-xl bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 shadow-2xl z-50 overflow-hidden"
+                >
+                  {/* Search Suggestions */}
+                  {searchQuery && searchSuggestions.length > 0 && (
+                    <div className="mb-3">
+                      <div className="flex items-center gap-2 px-2 py-1 text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+                        <TrendingUp className="w-3 h-3" />
+                        Vorschläge
+                      </div>
+                      <div className="space-y-1 mt-1">
+                        {searchSuggestions.map((suggestion, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleSearchSelect(suggestion.text)}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors group"
+                          >
+                            {suggestion.image && (
+                              <div className="w-10 h-10 rounded-lg bg-zinc-800 overflow-hidden flex-shrink-0">
+                                <img
+                                  src={suggestion.image}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 text-left">
+                              <div className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate">
+                                {suggestion.text}
+                              </div>
+                              {suggestion.sku && (
+                                <div className="text-xs text-zinc-500">{suggestion.sku}</div>
+                              )}
+                            </div>
+                            <Sparkles className="w-4 h-4 text-amber-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recent Searches */}
+                  {!searchQuery && recentSearches.length > 0 && (
+                    <div>
+                      <div className="flex items-center justify-between px-2 py-1">
+                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-zinc-500 font-bold">
+                          <Clock className="w-3 h-3" />
+                          Letzte Suchen
+                        </div>
+                        <button
+                          onClick={clearRecentSearches}
+                          className="text-[10px] text-zinc-600 hover:text-amber-400 transition-colors"
+                        >
+                          Löschen
+                        </button>
+                      </div>
+                      <div className="space-y-1 mt-1">
+                        {recentSearches.map((search, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleSearchSelect(search)}
+                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors group"
+                          >
+                            <Clock className="w-4 h-4 text-zinc-600" />
+                            <span className="text-sm text-zinc-300 group-hover:text-white transition-colors">
+                              {search}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -109,7 +291,7 @@ export default function ShopControlStrip({
           >
             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <Store className="w-5 h-5 text-amber-500" />
-            <span className="text-zinc-200 group-hover:text-white">{t('shop.categories')}</span>
+            <span className="text-zinc-200 group-hover:text-white">{t('shop.categories') || 'Kategorien'}</span>
           </motion.button>
 
           {/* Filter Button */}
@@ -119,7 +301,7 @@ export default function ShopControlStrip({
             className={`h-14 px-6 rounded-xl font-bold text-sm relative transition-all border-zinc-800 hover:bg-zinc-800 hover:text-white ${activeFilters > 0 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-black/40 text-zinc-300'}`}
           >
             <SlidersHorizontal className="w-5 h-5 me-2" />
-            {t('shop.filters')}
+            {t('shop.filters') || 'Filter'}
             {activeFilters > 0 && (
               <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-amber-500 text-black text-xs font-black flex items-center justify-center shadow-lg shadow-amber-500/20">
                 {activeFilters}
@@ -137,8 +319,8 @@ export default function ShopControlStrip({
             whileTap={{ scale: 0.95 }}
             onClick={() => onDepartmentSelect?.('all')}
             className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 border ${selectedDepartment === 'all'
-                ? 'bg-amber-500 text-black border-amber-500 shadow-lg shadow-amber-500/20'
-                : 'bg-zinc-900/50 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
+              ? 'bg-amber-500 text-black border-amber-500 shadow-lg shadow-amber-500/20'
+              : 'bg-zinc-900/50 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
               }`}
           >
             Alle Welten
@@ -151,8 +333,8 @@ export default function ShopControlStrip({
               whileTap={{ scale: 0.95 }}
               onClick={() => onDepartmentSelect?.(dept.id)}
               className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 border ${selectedDepartment === dept.id
-                  ? 'bg-amber-500 text-black border-amber-500 shadow-lg shadow-amber-500/20'
-                  : 'bg-zinc-900/50 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
+                ? 'bg-amber-500 text-black border-amber-500 shadow-lg shadow-amber-500/20'
+                : 'bg-zinc-900/50 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white'
                 }`}
             >
               {dept.name}
@@ -164,7 +346,7 @@ export default function ShopControlStrip({
       {/* Results Bar */}
       <div className="flex items-center justify-between py-2">
         <span className="text-sm font-medium text-zinc-500">
-          <span className="text-white font-bold">{productCount}</span> {t('shop.products')} gefunden
+          <span className="text-white font-bold">{productCount}</span> {t('shop.products') || 'Produkte'} gefunden
         </span>
 
         <div className="flex items-center gap-4">

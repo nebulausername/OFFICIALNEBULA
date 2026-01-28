@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { ShoppingBag, Heart, Eye, Zap, Flame, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useWishlist } from '../wishlist/WishlistContext';
+import { toast } from 'sonner';
 
 export default function ProductCard({ product, onAddToCart, onQuickView }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [previewImage, setPreviewImage] = useState(null);
 
   // Determine badge
@@ -78,14 +80,24 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={isHovered ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
               transition={{ delay: 0.05 }}
-              onClick={(e) => {
+              onClick={async (e) => {
                 e.preventDefault();
-                setIsFavorite(!isFavorite);
+                const result = await toggleWishlist(product.id);
+                if (result.success) {
+                  toast.dismiss(); // Clean up previous toasts
+                  toast.success(result.saved ? 'Zur Merkliste hinzugefügt' : 'Von Merkliste entfernt', {
+                    duration: 2000,
+                    style: { background: '#18181b', border: '1px solid #27272a', color: '#fff' }
+                  });
+                }
               }}
-              className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shadow-lg"
-              title="Favorit"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg ${isInWishlist(product.id)
+                ? 'bg-white text-[#D6B25E] shadow-[0_0_15px_rgba(214,178,94,0.4)]'
+                : 'bg-white text-black hover:bg-[#D6B25E] hover:text-white'
+                }`}
+              title={isInWishlist(product.id) ? "Von Merkliste entfernen" : "Zur Merkliste hinzufügen"}
             >
-              <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current text-red-500' : ''}`} />
+              <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? 'fill-current' : ''}`} />
             </motion.button>
           </div>
 
@@ -168,8 +180,8 @@ export default function ProductCard({ product, onAddToCart, onQuickView }) {
               }}
               disabled={!product.in_stock}
               className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${product.in_stock
-                  ? 'bg-zinc-800 text-white hover:bg-amber-400 hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.4)]'
-                  : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'
+                ? 'bg-zinc-800 text-white hover:bg-amber-400 hover:text-black hover:shadow-[0_0_15px_rgba(251,191,36,0.4)]'
+                : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'
                 }`}
             >
               <ShoppingBag className="w-4 h-4" />

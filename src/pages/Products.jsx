@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import PremiumProductCard from '../components/products/PremiumProductCard';
-import PremiumProductModal from '../components/products/PremiumProductModal';
+import UnifiedProductModal from '../components/products/UnifiedProductModal';
 
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
@@ -452,6 +452,7 @@ export default function Products() {
               sortBy={sortBy}
               onSortChange={setSortBy}
               productCount={filteredProducts.length}
+              products={products}
             />
           </motion.div>
         </div>
@@ -565,12 +566,13 @@ export default function Products() {
         selectedCategory={selectedCategory}
       />
 
-      {/* Premium Product Modal */}
-      <PremiumProductModal
+      {/* Unified Product Modal */}
+      <UnifiedProductModal
         product={quickViewProduct}
         open={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
+        mode="full"
       />
 
       {/* Advanced Filters Panel */}

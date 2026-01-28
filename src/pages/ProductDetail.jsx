@@ -9,6 +9,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import WishlistButton from '../components/wishlist/WishlistButton';
 import { useWishlist } from '../components/wishlist/WishlistContext';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
+import RecentlyViewedSection from '../components/products/RecentlyViewedSection';
 
 function DetailDropCountdown({ targetDate }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -16,7 +18,7 @@ function DetailDropCountdown({ targetDate }) {
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
-      const difference = new Date(targetDate) - now;
+      const difference = new Date(targetDate).getTime() - now.getTime();
 
       if (difference <= 0) {
         clearInterval(interval);
@@ -96,10 +98,17 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState(null);
   const { toast } = useToast();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { addRecentlyViewed } = useRecentlyViewed();
 
   useEffect(() => {
     loadProduct();
   }, []);
+
+  useEffect(() => {
+    if (product) {
+      addRecentlyViewed(product);
+    }
+  }, [product]);
 
   const loadProduct = async () => {
     try {
@@ -1240,6 +1249,9 @@ export default function ProductDetail() {
           </div>
         </motion.div>
       )}
+
+      {/* Recently Viewed Section */}
+      <RecentlyViewedSection currentProductId={product.id} />
     </div>
   );
 }
