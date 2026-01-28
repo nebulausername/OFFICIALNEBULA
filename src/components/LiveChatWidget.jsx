@@ -6,7 +6,7 @@ import { Input } from './ui/input';
 import { useSocket } from '@/contexts/SocketContext';
 import { useAuth } from '@/lib/AuthContext';
 import { format } from 'date-fns';
-import { useSound } from '@/contexts/SoundContext';
+import { useNebulaSound } from '@/contexts/SoundContext';
 
 /**
  * Real-time Live Chat Widget
@@ -15,7 +15,7 @@ import { useSound } from '@/contexts/SoundContext';
 export default function LiveChatWidget() {
     const { socket, isConnected } = useSocket();
     const { user } = useAuth();
-    const { playSound } = useSound();
+    const { playSuccess } = useNebulaSound();
 
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
@@ -50,7 +50,7 @@ export default function LiveChatWidget() {
 
             // Play sound if message is from admin
             if (msg.sender === 'admin') {
-                playSound('notification');
+                playSuccess();
             }
         };
 
