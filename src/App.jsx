@@ -84,6 +84,8 @@ import ScrollToTop from '@/components/ScrollToTop';
 import { ProductModalProvider } from '@/contexts/ProductModalContext';
 import GlobalProductModal from '@/components/products/GlobalProductModal';
 import { I18nProvider } from '@/components/i18n/I18nProvider';
+import { WishlistProvider } from '@/components/wishlist/WishlistContext';
+import { HelmetProvider } from 'react-helmet-async';
 
 function App() {
 
@@ -92,21 +94,25 @@ function App() {
       <SocketProvider>
         <SoundProvider>
           <ProductModalProvider>
-            <I18nProvider>
-              <QueryClientProvider client={queryClientInstance}>
-                <Router>
-                  <NavigationTracker />
-                  <TelegramRealtimeListener />
-                  <AdminRealtimeListener />
-                  <UserRealtimeListener />
-                  <AuthenticatedApp />
-                  <GlobalProductModal />
-                  <LiveChatWidget />
-                  <ScrollToTop />
-                </Router>
-                <Toaster />
-              </QueryClientProvider>
-            </I18nProvider>
+            <WishlistProvider>
+              <I18nProvider>
+                <HelmetProvider>
+                  <QueryClientProvider client={queryClientInstance}>
+                    <Router>
+                      <NavigationTracker />
+                      <TelegramRealtimeListener />
+                      <AdminRealtimeListener />
+                      <UserRealtimeListener />
+                      <AuthenticatedApp />
+                      <GlobalProductModal />
+                      <LiveChatWidget />
+                      <ScrollToTop />
+                    </Router>
+                    <Toaster />
+                  </QueryClientProvider>
+                </HelmetProvider>
+              </I18nProvider>
+            </WishlistProvider>
           </ProductModalProvider>
         </SoundProvider>
       </SocketProvider>

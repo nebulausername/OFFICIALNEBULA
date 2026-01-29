@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import PremiumProductCard from '../components/products/PremiumProductCard';
+import SEO from '@/components/seo/SEO';
 
 
 import ShopControlStrip from '../components/shop/ShopControlStrip';
@@ -213,7 +214,7 @@ export default function Products() {
         case 'name_asc': return (a.name || '').localeCompare(b.name || '');
         case 'name_desc': return (b.name || '').localeCompare(a.name || '');
         case 'popular': return 0;
-        default: return new Date(b.created_at || b.created_date || 0) - new Date(a.created_at || a.created_date || 0);
+        default: return new Date(b.created_at || b.created_date || 0).getTime() - new Date(a.created_at || a.created_date || 0).getTime();
       }
     });
   }, [products, searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
@@ -255,6 +256,12 @@ export default function Products() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <SEO
+        title="Produkte"
+        description="Entdecke unsere Premium Shisha, Vapes und Zubehör Auswahl."
+        image="/images/hero-logo.png"
+        url={window.location.href}
+      />
       {/* Shop Hero */}
       <section className="relative pt-8 pb-10">
         {/* Subtle Background Gradient */}

@@ -13,6 +13,7 @@ import CategoryProductsSection from '../components/home/CategoryProductsSection'
 import VideoSpotlight from '../components/home/VideoSpotlight';
 import TypewriterEffect from '@/components/ui/TypewriterEffect';
 import CosmicHeroBackground from '../components/home/CosmicHeroBackground';
+import SEO from '@/components/seo/SEO';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
@@ -376,6 +377,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0A0C10]">
+      <SEO
+        title="Home"
+        description="Willkommen bei Nebula Shop - Dein Premium Store für Shisha, Vapes & Lifestyle."
+        image="/images/hero-logo.png"
+        url={window.location.href}
+      />
       {/* 🌌 Nebula Alive: Living Background System */}
       <CosmicHeroBackground />
 

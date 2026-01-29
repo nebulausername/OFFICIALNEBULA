@@ -11,6 +11,7 @@ import WishlistButton from '../components/wishlist/WishlistButton';
 import { useWishlist } from '../components/wishlist/WishlistContext';
 import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
 import RecentlyViewedSection from '../components/products/RecentlyViewedSection';
+import SEO from '@/components/seo/SEO';
 
 function DetailDropCountdown({ targetDate }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -437,6 +438,15 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
+      {product && (
+        <SEO
+          title={product.name}
+          description={product.description || `Kaufe ${product.name} bei Nebula Shop. Beste Preise, schnelle Lieferung.`}
+          image={selectedImage || product.cover_image}
+          url={window.location.href}
+          type="product"
+        />
+      )}
       {/* Back Button */}
       <Link
         to={createPageUrl('Products')}
