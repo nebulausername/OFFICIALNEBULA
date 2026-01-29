@@ -76,6 +76,19 @@ export default function Checkout() {
       console.error('Error loading checkout data:', error);
     } finally {
       setLoading(false);
+
+      // TELEGRAM AUTO-FILL 🚀
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
+        if (tgUser) {
+          setFormData(prev => ({
+            ...prev,
+            // Only fill if not already set (e.g. by Auth)
+            name: prev.name || `${tgUser.first_name} ${tgUser.last_name || ''}`.trim(),
+            telegram: prev.telegram || (tgUser.username ? `@${tgUser.username}` : '')
+          }));
+        }
+      }
     }
   };
 
