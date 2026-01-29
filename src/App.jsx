@@ -83,6 +83,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 
 import { ProductModalProvider } from '@/contexts/ProductModalContext';
 import GlobalProductModal from '@/components/products/GlobalProductModal';
+import { I18nProvider } from '@/components/i18n/I18nProvider';
 
 function App() {
 
@@ -91,19 +92,21 @@ function App() {
       <SocketProvider>
         <SoundProvider>
           <ProductModalProvider>
-            <QueryClientProvider client={queryClientInstance}>
-              <Router>
-                <NavigationTracker />
-                <TelegramRealtimeListener />
-                <AdminRealtimeListener />
-                <UserRealtimeListener />
-                <AuthenticatedApp />
-                <GlobalProductModal />
-                <LiveChatWidget />
-                <ScrollToTop />
-              </Router>
-              <Toaster />
-            </QueryClientProvider>
+            <I18nProvider>
+              <QueryClientProvider client={queryClientInstance}>
+                <Router>
+                  <NavigationTracker />
+                  <TelegramRealtimeListener />
+                  <AdminRealtimeListener />
+                  <UserRealtimeListener />
+                  <AuthenticatedApp />
+                  <GlobalProductModal />
+                  <LiveChatWidget />
+                  <ScrollToTop />
+                </Router>
+                <Toaster />
+              </QueryClientProvider>
+            </I18nProvider>
           </ProductModalProvider>
         </SoundProvider>
       </SocketProvider>

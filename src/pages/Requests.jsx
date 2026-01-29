@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '@/api';
 import { Badge } from '@/components/ui/badge';
-import { Package, Calendar, Euro, MessageSquare, User, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { Package, Calendar, MessageSquare, User, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { createPageUrl } from '../utils';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function Requests() {
   const [requests, setRequests] = useState([]);
