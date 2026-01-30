@@ -23,6 +23,7 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
+  /* Removed unused state: quickViewProduct, isQuickViewOpen */
   const [sortBy, setSortBy] = useState('newest');
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -449,9 +450,6 @@ export default function Products() {
         onSelectBrand={handleBrandFromDrawer}
         selectedCategory={selectedCategory}
       />
-
-      {/* Unified Product Modal */}
-
 
       {/* Advanced Filters Panel */}
       <AdvancedFilters

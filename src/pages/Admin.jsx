@@ -90,7 +90,7 @@ export default function Admin() {
       setUser(userData);
 
       try {
-        const [products, requests, categories, brands, tickets, users, topProducts, recentActivity] = await Promise.all([
+        const [products, requests, categories, brands, tickets, users, topProducts, recentActivity, salesData] = await Promise.all([
           api.entities.Product.list(),
           api.entities.Request.list('-created_at', 100),
           api.entities.Category.list(),
@@ -98,7 +98,8 @@ export default function Admin() {
           api.entities.Ticket.list(),
           api.entities.User.list(),
           api.admin.getTopProducts(5),
-          api.admin.getRecentActivity()
+          api.admin.getRecentActivity(),
+          api.admin.getSalesData(7)
         ]);
 
         const vipUsers = users.filter(u => u.is_vip).length;
@@ -118,7 +119,18 @@ export default function Admin() {
         }));
 
         setRecentRequests(recentActivity?.orders || []);
-        setChartData(DEMO_CHART_DATA); // In real app, calculate from requests
+
+        // Format Sales Data for Chart
+        if (salesData && salesData.data) {
+          const formattedChart = salesData.data.map(d => ({
+            name: new Date(d.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }),
+            value: d.revenue
+          }));
+          setChartData(formattedChart.length > 0 ? formattedChart : DEMO_CHART_DATA);
+        } else {
+          setChartData(DEMO_CHART_DATA);
+        }
+
       } catch (apiError) {
         console.warn('API Error, loading Admin Demo Data', apiError);
         // Fallback to Demo Data

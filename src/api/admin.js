@@ -34,6 +34,14 @@ export const admin = {
   getSalesData: async (days = 30) => {
     return await apiClient.get('/admin/sales-data', { period: days });
   },
+
+  getCategoryRevenue: async (days = 30) => {
+    return await apiClient.get('/admin/category-revenue', { period: days });
+  },
+
+  getUserGrowth: async (days = 30) => {
+    return await apiClient.get('/admin/user-growth', { period: days });
+  },
 };
 
 export default admin;

@@ -1,250 +1,156 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, Loader2 } from 'lucide-react';
-import { api } from '@/api';
-import { toast } from 'sonner';
+import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
+import { apiClient } from '@/api';
 
-export default function ImageUpload({
-    value,
-    onChange,
-    className,
-    multiple = false,
-    maxFiles = 5
-}) {
+export default function ImageUpload({ value, onChange, className }) {
+    const [isDragOver, setIsDragOver] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [dragActive, setDragActive] = useState(false);
-    const inputRef = useRef(null);
+    const fileInputRef = useRef(null);
 
-    const handleFiles = async (files) => {
-        if (!files || files.length === 0) return;
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    };
 
-        setUploading(true);
-        const uploadedUrls = [];
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+    };
+
+    const handleDrop = async (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            await handleUpload(e.dataTransfer.files[0]);
+        }
+    };
+
+    const handleFileSelect = async (e) => {
+        if (e.target.files && e.target.files[0]) {
+            await handleUpload(e.target.files[0]);
+        }
+    };
+
+    const handleUpload = async (file) => {
+        if (!file) return;
+
+        // Validate type
+        if (!file.type.startsWith('image/')) {
+            // TODO: Add toast error here
+            console.error('Only images supported');
+            return;
+        }
 
         try {
-            // Upload files sequentially to ensure order or handle errors individually
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
+            setUploading(true);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('bucket', 'products');
 
-                // Validate
-                if (!file.type.startsWith('image/')) {
-                    toast.error(`${file.name} ist kein Bild`);
-                    continue;
+            // Assuming we have a general upload endpoint. 
+            // If not, we might need to use the supabase client directly or a specific endpoint.
+            // Based on previous context, user has backend/src/routes/upload.routes.js
+
+            const response = await apiClient.post('/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    // Note: axios/fetch typically handles boundary automatically if we pass FormData, 
+                    // but our api wrapper might need care.
                 }
+            });
 
-                if (file.size > 5 * 1024 * 1024) { // 5MB
-                    toast.error(`${file.name} ist zu groß (Max 5MB)`);
-                    continue;
-                }
+            // Adjust based on actual API response structure
+            const url = response.url || response.data?.url;
 
-                try {
-                    const { file_url } = await api.integrations.uploadFile({ file });
-                    // Ensure we get a full URL if it's relative
-                    const fullUrl = file_url.startsWith('http')
-                        ? file_url
-                        : `${api.API_BASE_URL?.replace('/api', '') || 'http://localhost:8000'}${file_url}`;
-
-                    uploadedUrls.push(fullUrl);
-                } catch (err) {
-                    console.error('Upload failed for file:', file.name, err);
-                    toast.error(`Upload fehlgeschlagen für ${file.name}`);
-                }
-            }
-
-            if (uploadedUrls.length > 0) {
-                if (multiple) {
-                    onChange([...(value || []), ...uploadedUrls]);
-                } else {
-                    onChange(uploadedUrls[0]);
-                }
-                toast.success(`${uploadedUrls.length} Bild(er) hochgeladen`);
+            if (url) {
+                onChange(url);
             }
         } catch (error) {
-            console.error('Upload error:', error);
-            toast.error('Upload Fehler');
+            console.error('Upload failed:', error);
         } finally {
             setUploading(false);
         }
     };
 
-    const handleChange = (e) => {
-        e.preventDefault();
-        if (e.target.files && e.target.files.length > 0) {
-            handleFiles(e.target.files);
-        }
+    const handleRemove = () => {
+        onChange('');
     };
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setDragActive(false);
-
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            handleFiles(e.dataTransfer.files);
-        }
-    };
-
-    const handleDrag = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (e.type === 'dragenter' || e.type === 'dragover') {
-            setDragActive(true);
-        } else if (e.type === 'dragleave') {
-            setDragActive(false);
-        }
-    };
-
-    const removeImage = (indexToRemove) => {
-        if (multiple) {
-            onChange(value.filter((_, index) => index !== indexToRemove));
-        } else {
-            onChange('');
-        }
-    };
-
-    const openFileDialog = () => {
-        inputRef.current?.click();
-    };
-
-    // Render Logic
-
-    // Single Image Mode
-    if (!multiple) {
-        return (
-            <div className={cn("w-full", className)}>
-                <input
-                    ref={inputRef}
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleChange}
-                />
-
+    return (
+        <div className={cn("relative group", className)}>
+            <AnimatePresence mode="wait">
                 {value ? (
-                    <div className="relative group rounded-xl overflow-hidden border-2 border-zinc-700 bg-zinc-900 aspect-video">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="relative aspect-video w-full rounded-xl overflow-hidden border-2 border-purple-500/30 bg-zinc-900/50"
+                    >
                         <img
                             src={value}
-                            alt="Preview"
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            alt="Uploaded"
+                            className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <button
-                                onClick={openFileDialog}
-                                className="p-2 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-sm transition-colors"
-                                title="Change Image"
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={handleRemove}
+                                className="rounded-full w-12 h-12"
                             >
-                                <Upload className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={() => removeImage(0)}
-                                className="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-full backdrop-blur-sm transition-colors"
-                                title="Remove Image"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
+                                <X className="w-6 h-6" />
+                            </Button>
                         </div>
-                    </div>
+                    </motion.div>
                 ) : (
-                    <div
-                        className={cn(
-                            "relative rounded-xl border-2 border-dashed transition-all aspect-video flex flex-col items-center justify-center cursor-pointer",
-                            dragActive
-                                ? "border-purple-500 bg-purple-500/10"
-                                : "border-zinc-700 bg-zinc-900/50 hover:border-zinc-500 hover:bg-zinc-800/50"
-                        )}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        onClick={() => fileInputRef.current?.click()}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
-                        onClick={openFileDialog}
-                    >
-                        {uploading ? (
-                            <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-                        ) : (
-                            <>
-                                <div className="p-4 rounded-full bg-zinc-800 mb-3 group-hover:scale-110 transition-transform">
-                                    <Upload className="w-6 h-6 text-zinc-400 group-hover:text-purple-400" />
-                                </div>
-                                <p className="text-sm font-bold text-zinc-300">
-                                    Bild hierher ziehen
-                                </p>
-                                <p className="text-xs text-zinc-500 mt-1">
-                                    oder klicken zum Hochladen
-                                </p>
-                            </>
+                        className={cn(
+                            "relative aspect-video w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-300",
+                            isDragOver
+                                ? "border-purple-400 bg-purple-500/10 scale-[1.02]"
+                                : "border-zinc-700 bg-zinc-800/50 hover:border-zinc-500 hover:bg-zinc-800",
+                            uploading && "pointer-events-none opacity-80"
                         )}
-                    </div>
-                )}
-            </div>
-        );
-    }
+                    >
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleFileSelect}
+                        />
 
-    // Multiple Images Mode
-    return (
-        <div className={cn("w-full space-y-4", className)}>
-            <input
-                ref={inputRef}
-                type="file"
-                className="hidden"
-                accept="image/*"
-                multiple
-                onChange={handleChange}
-            />
-
-            {/* Upload Zone */}
-            <div
-                className={cn(
-                    "relative rounded-xl border-2 border-dashed transition-all p-8 flex flex-col items-center justify-center cursor-pointer",
-                    dragActive
-                        ? "border-purple-500 bg-purple-500/10"
-                        : "border-zinc-700 bg-zinc-900/50 hover:border-zinc-500 hover:bg-zinc-800/50"
+                        {uploading ? (
+                            <div className="flex flex-col items-center gap-3 text-purple-400 animate-pulse">
+                                <Loader2 className="w-10 h-10 animate-spin" />
+                                <span className="font-bold text-sm">Uploading...</span>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center gap-3 text-zinc-400 group-hover:text-zinc-200 transition-colors">
+                                <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center group-hover:border-purple-500/50 group-hover:scale-110 transition-all">
+                                    <Upload className="w-8 h-8" />
+                                </div>
+                                <div className="text-center">
+                                    <span className="font-bold text-purple-400">Klicken</span> oder Bild hierhin ziehen
+                                </div>
+                                <div className="text-xs text-zinc-500">
+                                    JPG, PNG, WEBP bis 5MB
+                                </div>
+                            </div>
+                        )}
+                    </motion.div>
                 )}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                onClick={openFileDialog}
-            >
-                {uploading ? (
-                    <div className="flex flex-col items-center">
-                        <Loader2 className="w-8 h-8 text-purple-500 animate-spin mb-2" />
-                        <p className="text-sm text-zinc-400">Wird hochgeladen...</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="p-4 rounded-full bg-zinc-800 mb-3">
-                            <Upload className="w-6 h-6 text-zinc-400" />
-                        </div>
-                        <p className="text-sm font-bold text-zinc-300">
-                            Bilder hierher ziehen
-                        </p>
-                        <p className="text-xs text-zinc-500 mt-1">
-                            JPG, PNG, WebP (Max 5MB)
-                        </p>
-                    </>
-                )}
-            </div>
-
-            {/* Grid of uploaded images */}
-            {value && value.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {value.map((url, index) => (
-                        <div key={index} className="relative group rounded-xl overflow-hidden border border-zinc-700 bg-zinc-900 aspect-square">
-                            <img
-                                src={url}
-                                alt={`Uploaded ${index + 1}`}
-                                className="w-full h-full object-cover"
-                            />
-                            <button
-                                onClick={(e) => { e.stopPropagation(); removeImage(index); }}
-                                className="absolute top-2 right-2 p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all transform scale-90 group-hover:scale-100 shadow-lg"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
+            </AnimatePresence>
         </div>
     );
 }

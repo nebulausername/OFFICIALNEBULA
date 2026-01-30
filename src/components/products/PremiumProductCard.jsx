@@ -110,7 +110,7 @@ function DropCountdown({ targetDate }) {
 export default function PremiumProductCard({ product }) {
   const navigate = useNavigate();
   const { t, formatCurrency } = useI18n();
-  const { openModal } = useProductModal();
+  const { openProduct } = useProductModal();
 
   // Daily Drop Logic
   const isDrop = product.drop_date && new Date(product.drop_date) > new Date();
@@ -121,7 +121,7 @@ export default function PremiumProductCard({ product }) {
     if (isDrop) return; // Disable for drops
 
     if (product.colors?.length > 0 || product.sizes?.length > 0) {
-      openModal(product);
+      openProduct(product);
     } else {
       navigate(createPageUrl('ProductDetail') + `?id=${product.id}`);
     }

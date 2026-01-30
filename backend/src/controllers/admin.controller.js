@@ -435,10 +435,15 @@ export const getTopProducts = async (req, res, next) => {
 
 export const getCategoryRevenue = async (req, res, next) => {
   try {
+    const { period = '30' } = req.query;
+    const days = parseInt(period);
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
     const requestItems = await prisma.requestItem.findMany({
       where: {
         request: {
           status: { in: ['completed', 'shipped'] },
+          created_at: { gte: startDate },
         },
       },
       include: {

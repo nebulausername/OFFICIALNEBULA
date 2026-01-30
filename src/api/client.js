@@ -79,21 +79,22 @@ const apiRequest = async (endpoint, options = {}) => {
 };
 
 // HTTP method helpers - optimized
-const createMethod = (method) => (endpoint, data = null) => {
+const createMethod = (method) => (endpoint, data = null, options = {}) => {
   if (method === 'GET' && data) {
     const queryString = new URLSearchParams(data).toString();
     const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-    return apiRequest(url, { method });
+    return apiRequest(url, { method, ...options });
   }
 
   if (data !== null) {
     return apiRequest(endpoint, {
       method,
       body: data instanceof FormData ? data : JSON.stringify(data),
+      ...options,
     });
   }
 
-  return apiRequest(endpoint, { method });
+  return apiRequest(endpoint, { method, ...options });
 };
 
 export const api = {

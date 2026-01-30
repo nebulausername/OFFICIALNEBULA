@@ -1,32 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api';
 import { Button } from '@/components/ui/button';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue 
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow 
-} from '@/components/ui/table';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle 
+  DialogTitle
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Eye } from 'lucide-react';
+import { Eye, Filter } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import StatusChangeDialog from '../components/admin/StatusChangeDialog';
+import DataTable from '@/components/admin/ui/DataTable';
 
 export default function AdminRequests() {
   const [requests, setRequests] = useState([]);
@@ -36,6 +29,7 @@ export default function AdminRequests() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [statusChangeDialogOpen, setStatusChangeDialogOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState({ request: null, newStatus: null });
+  const [statusFilter, setStatusFilter] = useState('all');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,8 +44,9 @@ export default function AdminRequests() {
       // Load items and users
       const itemsData = {};
       const usersData = {};
-      
+
       for (const req of reqs) {
+        // Optimization: Could be parallelized or fetched in bulk if API supported it
         const items = await api.entities.RequestItem.filter({ request_id: req.id });
         itemsData[req.id] = items;
 
@@ -62,11 +57,12 @@ export default function AdminRequests() {
           }
         }
       }
-      
+
       setRequestItems(itemsData);
       setUsers(usersData);
     } catch (error) {
       console.error('Error loading requests:', error);
+      toast({ title: 'Fehler', description: 'Daten konnten nicht geladen werden', variant: 'destructive' });
     }
   };
 
@@ -77,6 +73,7 @@ export default function AdminRequests() {
 
   const handleStatusChangeConfirm = () => {
     loadData();
+    // Optimistic update could go here
   };
 
   const handleViewDetails = (request) => {
@@ -93,83 +90,104 @@ export default function AdminRequests() {
     cancelled: { label: 'Storniert', color: 'bg-red-500/20 text-red-400 border-red-500/30' }
   };
 
+  const columns = [
+    {
+      header: 'ID',
+      accessorKey: 'id',
+      sortable: true,
+      cell: (row) => <span className="font-mono text-sm font-bold text-purple-400">#{row.id.slice(0, 8)}</span>
+    },
+    {
+      header: 'Kunde',
+      accessorKey: 'user_id',
+      cell: (row) => {
+        const user = users[row.user_id];
+        return (
+          <div>
+            <div className="font-bold text-zinc-100">{user?.full_name || 'Unbekannt'}</div>
+            <div className="text-sm font-medium text-zinc-300">{user?.email}</div>
+          </div>
+        );
+      }
+    },
+    {
+      header: 'Datum',
+      accessorKey: 'created_at',
+      sortable: true,
+      cell: (row) => <span className="text-sm font-medium text-zinc-200">{format(new Date(row.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}</span>
+    },
+    {
+      header: 'Summe',
+      accessorKey: 'total_sum',
+      sortable: true,
+      cell: (row) => (
+        <span className="font-black text-lg bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+          {row.total_sum.toFixed(2)}€
+        </span>
+      )
+    },
+    {
+      header: 'Status',
+      accessorKey: 'status',
+      sortable: true,
+      cell: (row) => (
+        <Select
+          value={row.status}
+          onValueChange={(val) => handleStatusChange(row, val)}
+        >
+          <SelectTrigger className={`w-40 font-bold border-2 ${statusConfig[row.status]?.color || statusConfig.pending.color} transition-all`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="glass backdrop-blur-xl border-2 border-zinc-700">
+            {Object.entries(statusConfig).map(([key, config]) => (
+              <SelectItem key={key} value={key} className="font-bold">
+                {config.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )
+    }
+  ];
+
+  const filteredRequests = requests.filter(req => {
+    if (statusFilter !== 'all' && req.status !== statusFilter) return false;
+    return true;
+  });
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-12">
-        <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-300 bg-clip-text text-transparent">Anfragen</h1>
-        <p className="text-zinc-300 text-lg font-semibold">{requests.length} Anfragen insgesamt</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-300 bg-clip-text text-transparent">Anfragen</h1>
+          <p className="text-zinc-300 text-lg font-semibold">{requests.length} Anfragen insgesamt</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px] bg-zinc-900 border-zinc-700 font-bold">
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue placeholder="Status Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Status</SelectItem>
+              {Object.entries(statusConfig).map(([key, config]) => (
+                <SelectItem key={key} value={key}>{config.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="glass backdrop-blur-xl border-2 border-zinc-700 rounded-3xl overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b-2 border-zinc-700 hover:bg-zinc-800/50">
-              <TableHead className="font-black text-zinc-200 text-base">ID</TableHead>
-              <TableHead className="font-black text-zinc-200 text-base">Kunde</TableHead>
-              <TableHead className="font-black text-zinc-200 text-base">Datum</TableHead>
-              <TableHead className="font-black text-zinc-200 text-base">Artikel</TableHead>
-              <TableHead className="font-black text-zinc-200 text-base">Summe</TableHead>
-              <TableHead className="font-black text-zinc-200 text-base">Status</TableHead>
-              <TableHead className="text-right font-black text-zinc-200 text-base">Aktionen</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {requests.map((request) => {
-              const items = requestItems[request.id] || [];
-              const user = users[request.user_id];
-              const status = statusConfig[request.status] || statusConfig.pending;
-
-              return (
-                <TableRow key={request.id} className="border-b border-zinc-800 hover:bg-zinc-800/30">
-                  <TableCell className="font-mono text-sm font-bold text-purple-400">
-                    #{request.id.slice(0, 8)}
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-bold text-zinc-100">{user?.full_name || 'Unbekannt'}</div>
-                      <div className="text-sm font-medium text-zinc-300">{user?.email}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm font-medium text-zinc-200">
-                    {format(new Date(request.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
-                  </TableCell>
-                  <TableCell className="font-bold text-zinc-100">{items.length} Artikel</TableCell>
-                  <TableCell className="font-black text-lg bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
-                    {request.total_sum.toFixed(2)}€
-                  </TableCell>
-                  <TableCell>
-                    <Select
-                      value={request.status}
-                      onValueChange={(val) => handleStatusChange(request, val)}
-                    >
-                      <SelectTrigger className="w-40 font-bold border-2 border-zinc-700 bg-zinc-800/50">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="glass backdrop-blur-xl border-2 border-zinc-700">
-                        {Object.entries(statusConfig).map(([key, config]) => (
-                          <SelectItem key={key} value={key} className="font-bold">
-                            {config.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleViewDetails(request)}
-                      className="hover:bg-purple-500/20 hover:text-purple-300"
-                    >
-                      <Eye className="w-5 h-5" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={filteredRequests}
+        searchKey="id"
+        searchPlaceholder="Suche nach ID..."
+        actions={[
+          { label: 'Details ansehen', icon: Eye, onClick: handleViewDetails }
+        ]}
+      />
 
       {/* Details Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

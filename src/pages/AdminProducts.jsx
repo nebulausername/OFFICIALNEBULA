@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import InlineEditableField from '../components/admin/InlineEditableField';
+import ImageUpload from '../components/admin/ImageUpload';
 import { motion } from 'framer-motion';
 import {
   Select,
@@ -381,11 +382,10 @@ export default function AdminProducts() {
 
             <div className="space-y-3">
               <Label className="text-lg font-black text-white mb-2">Cover Bild URL</Label>
-              <Input
+              <ImageUpload
                 value={formData.cover_image}
-                onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
-                placeholder="https://..."
-                className="h-14 bg-zinc-800/70 border-2 border-zinc-600 text-zinc-50 placeholder:text-zinc-400 font-medium text-base focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 rounded-xl"
+                onChange={(url) => setFormData({ ...formData, cover_image: url })}
+                className="w-full"
               />
             </div>
 
