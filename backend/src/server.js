@@ -19,16 +19,14 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Validate environment variables
+// Validate environment variables
+let startupError = null;
 try {
   const { validateEnv } = await import('./config/env.js');
   validateEnv();
 } catch (err) {
   console.error('❌ Error validating environment variables:', err);
-  // In serverless (Vercel) we must not hard-exit the process
-  if (!process.env.VERCEL) {
-    process.exit(1);
-  }
-  throw err;
+  startupError = err.message;
 }
 
 // Import routes
@@ -58,6 +56,16 @@ const httpServer = createServer(app);
 const PORT = process.env.PORT || 8000;
 
 // Security middleware
+app.use((req, res, next) => {
+  if (startupError) {
+    return res.status(500).json({
+      error: 'Server Startup Error',
+      message: startupError,
+      hint: 'Please check your Vercel Environment Variables.'
+    });
+  }
+  next();
+});
 app.use(helmet());
 app.use(compression());
 
