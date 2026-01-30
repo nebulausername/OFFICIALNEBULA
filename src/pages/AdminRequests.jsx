@@ -16,7 +16,9 @@ import {
 } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Eye, Filter } from 'lucide-react';
+import { Eye, Filter, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { useToast } from '@/components/ui/use-toast';
 import StatusChangeDialog from '../components/admin/StatusChangeDialog';
 import DataTable from '@/components/admin/ui/DataTable';
@@ -159,6 +161,10 @@ export default function AdminRequests() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
+          <Link to={createPageUrl('Admin')} className="inline-flex items-center text-zinc-400 hover:text-white mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Zurück zum Dashboard
+          </Link>
           <h1 className="text-4xl md:text-5xl font-black mb-3 bg-gradient-to-r from-blue-300 via-cyan-300 to-blue-300 bg-clip-text text-transparent">Anfragen</h1>
           <p className="text-zinc-300 text-lg font-semibold">{requests.length} Anfragen insgesamt</p>
         </div>
