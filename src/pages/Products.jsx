@@ -5,7 +5,7 @@ import { Sparkles } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import SEO from '@/components/seo/SEO';
-
+import UnifiedProductModal from '../components/products/UnifiedProductModal';
 
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';
@@ -19,10 +19,12 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
+
   /* Removed unused state: quickViewProduct, isQuickViewOpen */
   const [sortBy, setSortBy] = useState('newest');
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
@@ -36,31 +38,8 @@ export default function Products() {
     inStock: null
   });
 
-  const [inStock, setInStock] = useState(null);
-
   // Infinite Scroll State
   const [visibleProducts, setVisibleProducts] = useState(8);
-
-  useEffect(() => {
-    // Reset visible count when filters change
-    setVisibleProducts(8);
-  }, [searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
-
-  useEffect(() => {
-    loadData();
-
-    // Parse URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchParam = urlParams.get('search');
-    const categoryParam = urlParams.get('category');
-    const departmentParam = urlParams.get('department');
-
-    if (searchParam) setSearchQuery(searchParam);
-    if (categoryParam) setSelectedCategory(categoryParam);
-    if (departmentParam) setSelectedDepartment(departmentParam);
-  }, []);
-
-  const [departments, setDepartments] = useState([]);
 
   const loadData = async () => {
     try {
@@ -74,7 +53,6 @@ export default function Products() {
       if (prods && prods.length > 0) {
         setProducts(prods);
       } else {
-        // Fallback to static data
         setProducts(staticProducts);
       }
 
@@ -83,10 +61,7 @@ export default function Products() {
       setDepartments(depts);
     } catch (error) {
       console.error('Error loading data:', error);
-      // Fallback: Show Premium Demo Products from static file
       setProducts(staticProducts);
-
-      // Extract unique departments/categories from demo products as fallback
       if (departments.length === 0) {
         setDepartments([
           { id: 'vapes', name: 'Vapes', slug: 'vapes' },
@@ -99,24 +74,18 @@ export default function Products() {
     }
   };
 
-  const handleCategoryFromDrawer = (categoryId, categoryName) => {
-    setSelectedCategory(categoryId);
-    // Update URL
-    const url = new URL(window.location.href);
-    if (categoryId === 'all') {
-      url.searchParams.delete('category');
-    } else {
-      url.searchParams.set('category', categoryId);
-    }
-    window.history.pushState({}, '', url);
-  };
+  useEffect(() => {
+    loadData();
 
-  const handleBrandFromDrawer = (brandId) => {
-    setAdvancedFilters(prev => ({
-      ...prev,
-      brands: [brandId]
-    }));
-  };
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    const categoryParam = urlParams.get('category');
+    const departmentParam = urlParams.get('department');
+
+    if (searchParam) setSearchQuery(searchParam);
+    if (categoryParam) setSelectedCategory(categoryParam);
+    if (departmentParam) setSelectedDepartment(departmentParam);
+  }, []);
 
   // Calculate price range for slider
   const priceRange = useMemo(() => {
@@ -137,7 +106,60 @@ export default function Products() {
     }
   }, [products, priceRange]);
 
-  // Count active filters
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleProducts(8);
+  }, [searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
+
+  const handleCategoryFromDrawer = (categoryId, categoryName) => {
+    setSelectedCategory(categoryId);
+    const url = new URL(window.location.href);
+    if (categoryId === 'all') {
+      url.searchParams.delete('category');
+    } else {
+      url.searchParams.set('category', categoryId);
+    }
+    window.history.pushState({}, '', url);
+  };
+
+  const handleBrandFromDrawer = (brandId) => {
+    setAdvancedFilters(prev => ({
+      ...prev,
+      brands: [brandId]
+    }));
+  };
+
+  const handleDepartmentSelect = (departmentId) => {
+    setSelectedDepartment(departmentId);
+    const url = new URL(window.location.href);
+    if (departmentId === 'all') {
+      url.searchParams.delete('department');
+    } else {
+      url.searchParams.set('department', departmentId);
+    }
+    window.history.pushState({}, '', url);
+  };
+
+  const resetFilters = () => {
+    setAdvancedFilters({
+      categories: [],
+      brands: [],
+      priceRange: [priceRange.min, priceRange.max],
+      sizes: [],
+      colors: [],
+      inStock: null
+    });
+    setSelectedCategory('all');
+    setSelectedDepartment('all');
+    setSearchQuery('');
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete('department');
+    url.searchParams.delete('category');
+    url.searchParams.delete('search');
+    window.history.pushState({}, '', url);
+  };
+
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (advancedFilters.categories?.length > 0) count++;
@@ -151,10 +173,8 @@ export default function Products() {
     return count;
   }, [advancedFilters, priceRange]);
 
-  // Filter and sort products
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
-      // Normalize tags to always be an array of strings (supports legacy string/JSON-string)
       const tagsArray = (() => {
         const raw = product.tags;
         if (Array.isArray(raw)) return raw;
@@ -169,40 +189,30 @@ export default function Products() {
         return [];
       })();
 
-      // Search filter
       const matchesSearch = !searchQuery ||
         product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tagsArray.some(tag => (tag || '').toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Department filter
       const matchesDepartment = selectedDepartment === 'all' || product.department_id === selectedDepartment;
-
-      // Quick category filter (from chips)
       const matchesQuickCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
 
-      // Advanced category filter
       const matchesAdvancedCategories = advancedFilters.categories.length === 0 ||
         advancedFilters.categories.includes(product.category_id);
 
-      // Brand filter
       const matchesBrand = advancedFilters.brands.length === 0 ||
         advancedFilters.brands.includes(product.brand_id);
 
-      // Price filter
       const matchesPrice = !advancedFilters.priceRange ||
         ((product.price || 0) >= advancedFilters.priceRange[0] &&
           (product.price || 0) <= advancedFilters.priceRange[1]);
 
-      // Size filter
       const matchesSize = advancedFilters.sizes.length === 0 ||
         (product.sizes || []).some(size => advancedFilters.sizes.includes(size));
 
-      // Color filter
       const matchesColor = advancedFilters.colors.length === 0 ||
         (product.colors || []).some(color => advancedFilters.colors.includes(color.name));
 
-      // Stock filter
       const matchesStock = advancedFilters.inStock === null ||
         product.in_stock === advancedFilters.inStock;
 
@@ -220,41 +230,6 @@ export default function Products() {
     });
   }, [products, searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
 
-  const resetFilters = () => {
-    setAdvancedFilters({
-      categories: [],
-      brands: [],
-      priceRange: [priceRange.min, priceRange.max],
-      sizes: [],
-      colors: [],
-      inStock: null
-    });
-    setSelectedCategory('all');
-    setSelectedDepartment('all');
-    setSearchQuery('');
-
-    // Update URL
-    const url = new URL(window.location.href);
-    url.searchParams.delete('department');
-    url.searchParams.delete('category');
-    url.searchParams.delete('search');
-    window.history.pushState({}, '', url);
-  };
-
-  const handleDepartmentSelect = (departmentId) => {
-    setSelectedDepartment(departmentId);
-    // Update URL
-    const url = new URL(window.location.href);
-    if (departmentId === 'all') {
-      url.searchParams.delete('department');
-    } else {
-      url.searchParams.set('department', departmentId);
-    }
-    window.history.pushState({}, '', url);
-  };
-
-
-
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <SEO
@@ -265,7 +240,6 @@ export default function Products() {
       />
       {/* Shop Hero */}
       <section className="relative pt-8 pb-10">
-        {/* Subtle Background Gradient */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -274,7 +248,6 @@ export default function Products() {
         />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Premium Badge */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -294,7 +267,6 @@ export default function Products() {
             </div>
           </motion.div>
 
-          {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -309,7 +281,6 @@ export default function Products() {
             </h1>
           </motion.div>
 
-          {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -320,7 +291,6 @@ export default function Products() {
             {t('misc.discoverPremium')}
           </motion.p>
 
-          {/* Shop Control Strip */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -408,6 +378,71 @@ export default function Products() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index % 8 * 0.05 }}
                     >
+                      {/* Inject Quick View Handler via onClick or special prop if card supports it, 
+                        or wrap in div. But PremiumProductCard likely handles onClick for navigation. 
+                        We need to pass a "onQuickView" prop if we added it to PremiumProductCard (we didn't yet).
+                        Actually, PremiumProductCard uses useProductModal hook?
+                        
+                        CHECK: PremiumProductCard uses `useProductModal` context!
+                        Ah, if it uses useProductModal, then we might not need local state here if strict context is used.
+                        BUT, I wanted to use MY local state for QuickView.
+                        
+                        Let's check PremiumProductCard again.
+                        It uses `useProductModal`.
+                        
+                        If I want to use my local QuickView, I should use Context or pass props.
+                        However, PremiumProductCard imports `useProductModal` from `@/contexts/ProductModalContext`.
+                        
+                        If `Products.jsx` is NOT providing that context, it might be provided in App.jsx.
+                        
+                        Wait, `UnifiedProductModal` is the component.
+                        If I use `ProductModalContext`, I might not need to render `UnifiedProductModal` here manually if the context provider already has one.
+                        
+                        Let's check `App.jsx` or `ProductModalContext`.
+                        
+                        For now, I'll pass `onQuickView` to `PremiumProductCard` if I can modify it, OR rely on context.
+                        
+                        In PremiumProductCard (viewed in 328):
+                        `const { openProduct } = useProductModal();`
+                        `handleQuickView` calls `openProduct(product)`.
+                        
+                        So `PremiumProductCard` ALREADY triggers a global modal.
+                        
+                        If so, why did the plan say "Implement ProductQuickView"?
+                        Maybe the global modal isn't the "Quick View" glass modal?
+                        
+                        If I render `UnifiedProductModal` here manually, I might duplicate it.
+                        
+                        However, usually `openProduct` opens the global one.
+                        If I want a *specific* "Quick View" on the products page that is different (e.g. glass modal), I should handle it here.
+                        
+                        But `PremiumProductCard` calls `openProduct`.
+                        
+                        If `Products.jsx` is the only place we want this specific Quick View, maybe I should wrap `PremiumProductCard` with a Context Provider that overrides `openProduct`?
+                        
+                        Or simpler: Just rely on the global modal if it's good enough.
+                        But the plan says "ProductQuickView (Glass Modal)".
+                        `UnifiedProductModal` IS the glass modal.
+                        
+                        So enabling it via Context is arguably the right way.
+                        
+                        BUT, I see that I commented out `quickViewProduct` in Step 324.
+                        
+                        If `PremiumProductCard` is using `useProductModal`, then I don't need to pass anything. I just need to make sure the Context Provider exists and renders the Modal.
+                        
+                        If `App.jsx` renders `UnifiedProductModal` globally, then I don't need to do anything here!
+                        
+                        Let's check `App.jsx` again (Step 294 viewed it).
+                        It imports `ProductModalContext`.
+                        Does it render the modal?
+                        I need to check `src/contexts/ProductModalContext.jsx`.
+                        
+                        If the context PROVIDER renders the modal, then `Products.jsx` doesn't need to.
+                        
+                        If not, then I need to render it.
+                        
+                        Hypothesis: The context just manages state, and I need to render the modal somewhere (App or Page).
+                    */}
                       <PremiumProductCard
                         product={product}
                       />
@@ -439,7 +474,6 @@ export default function Products() {
         </div>
       </section>
 
-      {/* Category Drawer */}
       <ShopCategoryDrawer
         isOpen={megaMenuOpen}
         onClose={() => setMegaMenuOpen(false)}
@@ -451,7 +485,6 @@ export default function Products() {
         selectedCategory={selectedCategory}
       />
 
-      {/* Advanced Filters Panel */}
       <AdvancedFilters
         isOpen={filtersOpen}
         onClose={() => setFiltersOpen(false)}
@@ -462,6 +495,8 @@ export default function Products() {
         onFiltersChange={setAdvancedFilters}
         onReset={resetFilters}
       />
+
+
     </div>
   );
 }

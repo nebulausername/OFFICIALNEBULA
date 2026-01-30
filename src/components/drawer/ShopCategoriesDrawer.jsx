@@ -13,7 +13,7 @@ const categoryIcons = {
   'default': Star
 };
 
-export default function ShopCategoriesDrawer({ isOpen, onClose, departments = [], categories = [] }) {
+export default function ShopCategoriesDrawer({ isOpen, onClose, onBack, departments = [], categories = [] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDept, setSelectedDept] = useState(null);
   const drawerRef = useRef(null);
@@ -70,7 +70,15 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, departments = []
               {/* Top Row */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" 
+                  {onBack && (
+                    <button
+                      onClick={onBack}
+                      className="w-10 h-10 -ml-2 rounded-xl flex items-center justify-center hover:bg-white/5"
+                    >
+                      <ChevronRight className="w-6 h-6 rotate-180" style={{ color: 'var(--text)' }} />
+                    </button>
+                  )}
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{ background: 'linear-gradient(135deg, var(--gold), var(--gold2))' }}>
                     <Sparkles className="w-5 h-5" style={{ color: '#0B0D12' }} />
                   </div>
@@ -141,7 +149,7 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, departments = []
                   ))}
                 </div>
                 {/* Fade edges */}
-                <div className="absolute right-0 top-0 bottom-1 w-8 pointer-events-none" 
+                <div className="absolute right-0 top-0 bottom-1 w-8 pointer-events-none"
                   style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
               </div>
             </div>
@@ -162,7 +170,7 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, departments = []
                   {!selectedDept && !searchQuery && departments.map((dept) => {
                     const Icon = categoryIcons[dept.name] || categoryIcons.default;
                     const count = getCategoryCount(dept.id);
-                    
+
                     return (
                       <motion.button
                         key={dept.id}
@@ -191,7 +199,7 @@ export default function ShopCategoriesDrawer({ isOpen, onClose, departments = []
                   {/* Show Categories if filtered */}
                   {(selectedDept || searchQuery) && filteredCategories.map((cat) => {
                     const Icon = categoryIcons[cat.name] || categoryIcons.default;
-                    
+
                     return (
                       <Link
                         key={cat.id}

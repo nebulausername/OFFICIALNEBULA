@@ -112,7 +112,8 @@ export default function ShopControlStrip({
         type: 'product',
         text: p.name,
         sku: p.sku,
-        image: p.cover_image
+        image: p.cover_image,
+        price: p.price
       }));
   }, [searchQuery, products]);
 
@@ -136,6 +137,11 @@ export default function ShopControlStrip({
   const hasDropdownContent =
     (isFocused && !searchQuery && recentSearches.length > 0) ||
     (searchQuery && searchSuggestions.length > 0);
+
+  // Format currency helper if not available from hook (though it should be)
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(price);
+  };
 
   return (
     <div className="space-y-6">
@@ -215,21 +221,24 @@ export default function ShopControlStrip({
                             className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors group"
                           >
                             {suggestion.image && (
-                              <div className="w-10 h-10 rounded-lg bg-zinc-800 overflow-hidden flex-shrink-0">
+                              <div className="w-12 h-12 rounded-lg bg-zinc-800 overflow-hidden flex-shrink-0 border border-white/5">
                                 <img
                                   src={suggestion.image}
                                   alt=""
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 />
                               </div>
                             )}
-                            <div className="flex-1 text-left">
+                            <div className="flex-1 text-left min-w-0">
                               <div className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors truncate">
                                 {suggestion.text}
                               </div>
-                              {suggestion.sku && (
-                                <div className="text-xs text-zinc-500">{suggestion.sku}</div>
-                              )}
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-xs font-mono text-amber-400">{formatPrice(suggestion.price)}</span>
+                                {suggestion.sku && (
+                                  <span className="text-[10px] text-zinc-600 bg-zinc-800/50 px-1.5 py-0.5 rounded">{suggestion.sku}</span>
+                                )}
+                              </div>
                             </div>
                             <Sparkles className="w-4 h-4 text-amber-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
                           </button>

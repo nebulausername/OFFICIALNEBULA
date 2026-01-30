@@ -13,10 +13,18 @@ export default function CosmicHeroBackground() {
 
         let animationFrame;
         const particles = [];
+        let mouse = { x: null, y: null, radius: 150 };
 
         // Configuration
-        const particleCount = 60;
-        const colors = ['#8B5CF6', '#F59E0B', '#3B82F6', '#EC4899']; // Purple, Gold, Blue, Pink
+        const particleCount = 80; // Increased count
+        const colors = ['#8B5CF6', '#F59E0B', '#3B82F6', '#EC4899', '#ffffff'];
+
+        const handleMouseMove = (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        }
+
+        window.addEventListener('mousemove', handleMouseMove);
 
         // Particle Class
         class Particle {
@@ -28,6 +36,9 @@ export default function CosmicHeroBackground() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
                 this.size = Math.random() * 2 + 0.5;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.density = (Math.random() * 30) + 1;
                 this.speedX = Math.random() * 0.5 - 0.25;
                 this.speedY = Math.random() * 0.5 - 0.25;
                 this.color = colors[Math.floor(Math.random() * colors.length)];
@@ -37,6 +48,27 @@ export default function CosmicHeroBackground() {
             }
 
             update() {
+                // Mouse Interaction
+                if (mouse.x != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    let forceDirectionX = dx / distance;
+                    let forceDirectionY = dy / distance;
+                    let maxDistance = mouse.radius;
+                    let force = (maxDistance - distance) / maxDistance;
+                    let directionX = forceDirectionX * force * this.density;
+                    let directionY = forceDirectionY * force * this.density;
+
+                    if (distance < mouse.radius) {
+                        this.x -= directionX;
+                        this.y -= directionY;
+                    } else {
+                        // Return to natural movement/position slowly? 
+                        // Actually just let them drift naturally
+                    }
+                }
+
                 this.x += this.speedX;
                 this.y += this.speedY;
 
@@ -71,10 +103,6 @@ export default function CosmicHeroBackground() {
 
         const animate = () => {
             ctx.clearRect(0, 0, width, height);
-
-            // Draw smooth gradient trail (simulating motion blur/nebula gas)
-            ctx.globalCompositeOperation = 'source-over';
-            // We don't clear completely to leave trails? No, for this style, clean is better but maybe a gradient overlay.
 
             // Draw Stars
             ctx.globalCompositeOperation = 'lighter';
@@ -116,6 +144,7 @@ export default function CosmicHeroBackground() {
 
         return () => {
             window.removeEventListener('resize', handleResize);
+            window.removeEventListener('mousemove', handleMouseMove);
             cancelAnimationFrame(animationFrame);
         };
     }, []);

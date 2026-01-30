@@ -121,9 +121,12 @@ export default function PremiumProductCard({ product }) {
     if (isDrop) return; // Disable for drops
 
     if (product.colors?.length > 0 || product.sizes?.length > 0) {
-      openProduct(product);
+      openProduct(product, 'quick');
     } else {
-      navigate(createPageUrl('ProductDetail') + `?id=${product.id}`);
+      // If simple product, also open quick view instead of navigation for the eye button?
+      // "Quick View" usually means "Stay on page".
+      // So yes, open modal for all products when clicking Quick View.
+      openProduct(product, 'quick');
     }
   };
 

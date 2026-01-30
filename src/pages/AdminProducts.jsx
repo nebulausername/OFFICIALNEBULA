@@ -21,7 +21,8 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Save, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Pencil, Trash2, Save, X, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import DataTable from '@/components/admin/ui/DataTable';
 import { createPageUrl } from '@/utils';
@@ -240,19 +241,25 @@ export default function AdminProducts() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Produkte verwalten
-          </h1>
-          <p className="text-zinc-400 text-lg">
-            {products.length} Produkte • <span className="text-purple-400">Echtzeit-Bearbeitung</span> aktiviert
-          </p>
+      <div className="mb-8">
+        <Link to={createPageUrl('Admin')} className="inline-flex items-center text-zinc-400 hover:text-white mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Zurück zum Dashboard
+        </Link>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-black mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Produkte verwalten
+            </h1>
+            <p className="text-zinc-400 text-lg">
+              {products.length} Produkte • <span className="text-purple-400">Echtzeit-Bearbeitung</span> aktiviert
+            </p>
+          </div>
+          <Button onClick={handleNew} className="bg-gradient-to-r from-purple-500 to-pink-500">
+            <Plus className="w-5 h-5 mr-2" />
+            Neues Produkt
+          </Button>
         </div>
-        <Button onClick={handleNew} className="bg-gradient-to-r from-purple-500 to-pink-500">
-          <Plus className="w-5 h-5 mr-2" />
-          Neues Produkt
-        </Button>
       </div>
 
       <motion.div

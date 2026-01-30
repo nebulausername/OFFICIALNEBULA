@@ -1,19 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Menu, ShoppingBag, Star, Moon, Sun } from 'lucide-react';
+import { Menu, ShoppingBag, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '@/api';
 import SideDrawer from './SideDrawer';
+import { useWishlist } from '../wishlist/WishlistContext';
 
-export default function MobileHeader({ theme, toggleTheme }) {
+export default function MobileHeader() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const [language, setLanguage] = useState('DE');
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     loadCartCount();
-  }, [theme]);
+  }, []);
 
   const loadCartCount = async () => {
     try {
@@ -25,51 +32,26 @@ export default function MobileHeader({ theme, toggleTheme }) {
     }
   };
 
-  const languages = ['DE', 'EN', 'FR'];
-
   return (
     <>
-      <header className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
-        theme === 'light'
-          ? 'bg-white border-zinc-200'
-          : 'bg-zinc-900 border-zinc-700'
-      }`}>
-        {/* USP Bar */}
-        <div className={`bg-gradient-to-r transition-colors duration-300 ${
-          theme === 'light'
-            ? 'from-zinc-100 via-zinc-50 to-zinc-100'
-            : 'from-zinc-900 via-zinc-800 to-zinc-900'
-        }`}>
-          <div className={`flex items-center justify-center gap-6 px-4 py-2 text-xs font-medium overflow-x-auto ${
-            theme === 'light' ? 'text-zinc-700' : 'text-white'
-          }`}>
-            <span className="flex items-center gap-1.5 whitespace-nowrap">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-              Free Shipping
-            </span>
-            <span className={theme === 'light' ? 'text-zinc-400' : 'text-zinc-500'}>•</span>
-            <span className="flex items-center gap-1.5 whitespace-nowrap">
-              <Star className="w-3 h-3" fill="currentColor" />
-              Premium Qualität
-            </span>
-            <span className={theme === 'light' ? 'text-zinc-400' : 'text-zinc-500'}>•</span>
-            <span className="whitespace-nowrap">24/7 Support</span>
-          </div>
-        </div>
-
-        {/* Main Header */}
-        <div className="flex items-center justify-between px-4 py-4">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'py-3' : 'py-5'}`}
+        style={{
+          background: 'rgba(11, 13, 18, 0.8)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        }}
+      >
+        <div className="px-4 flex items-center justify-between">
           {/* Hamburger */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={() => setDrawerOpen(true)}
-            className={`p-2 -ml-2 touch-manipulation rounded-lg transition-colors ${
-              theme === 'light'
-                ? 'hover:bg-zinc-100 text-zinc-900'
-                : 'hover:bg-zinc-800 text-white'
-            }`}
+            className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white shadow-lg backdrop-blur-md"
           >
-            <Menu className="w-6 h-6" />
-          </button>
+            <Menu className="w-5 h-5 text-white" />
+          </motion.button>
 
           {/* Logo */}
           <Link to={createPageUrl('Home')} className="absolute left-1/2 -translate-x-1/2">
@@ -77,57 +59,45 @@ export default function MobileHeader({ theme, toggleTheme }) {
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <Star className="w-4 h-4 text-white" fill="white" />
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center relative overflow-hidden"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(214, 178, 94, 0.3)',
+                  boxShadow: '0 0 15px rgba(0,0,0,0.3)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-50" />
+                <img
+                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                  alt="Nebula"
+                  className="w-full h-full object-contain p-1.5"
+                />
               </div>
-              <span className={`text-lg font-black tracking-tight ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`}>
+              <span className="text-lg font-black tracking-tight text-white hidden xs:block">
                 NEBULA
               </span>
             </motion.div>
           </Link>
 
-          {/* Theme + Language + Cart */}
-          <div className="flex items-center gap-2">
-            {/* Theme Toggle */}
+          {/* Cart */}
+          <Link to={createPageUrl('Cart')} className="relative">
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={toggleTheme}
-              className={`p-2 rounded-lg transition-colors ${
-                theme === 'light'
-                  ? 'hover:bg-zinc-100 text-zinc-900'
-                  : 'hover:bg-zinc-800 text-yellow-400'
-              }`}
+              className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white shadow-lg backdrop-blur-md"
             >
-              {theme === 'light' ? (
-                <Moon className="w-5 h-5" />
-              ) : (
-                <Sun className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5 text-white" />
+              {cartCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute -top-1.5 -right-1.5 min-w-[1.25rem] h-5 px-1 bg-gradient-to-r from-[#D6B25E] to-[#F2D27C] rounded-full flex items-center justify-center text-[10px] font-black text-black shadow-lg"
+                >
+                  {cartCount}
+                </motion.span>
               )}
             </motion.button>
-
-            {/* Cart */}
-            <Link to={createPageUrl('Cart')} className="relative">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                className={`p-2 rounded-lg transition-colors touch-manipulation ${
-                  theme === 'light'
-                    ? 'hover:bg-zinc-100'
-                    : 'hover:bg-zinc-800'
-                }`}
-              >
-                <ShoppingBag className={`w-6 h-6 ${theme === 'light' ? 'text-zinc-900' : 'text-white'}`} />
-                {cartCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 min-w-5 h-5 px-1.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-xs font-black text-white shadow-lg"
-                  >
-                    {cartCount}
-                  </motion.span>
-                )}
-              </motion.button>
-            </Link>
-          </div>
+          </Link>
         </div>
       </header>
 

@@ -109,28 +109,20 @@ const createEntity = (entityName) => {
       const params = buildQueryParams(filters, sort, limit);
       const fullUrl = `${API_BASE_URL}${basePath}?${new URLSearchParams(params).toString()}`;
 
-      // #region agent log
-      fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'entities.js:filter:entry', message: 'Filter API call started', data: { entity: entityName, filters, sort, limit, params, fullUrl }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-      // #endregion
+
 
       try {
         const result = await api.get(basePath, params);
 
-        // #region agent log
-        fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'entities.js:filter:response', message: 'API response received', data: { entity: entityName, resultType: typeof result, isArray: Array.isArray(result), hasData: !!result?.data, resultLength: Array.isArray(result) ? result.length : (result?.data?.length || 0), rawResult: JSON.stringify(result).substring(0, 500) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
-        // #endregion
+
 
         const normalized = normalizeArray(result);
 
-        // #region agent log
-        fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'entities.js:filter:normalized', message: 'Response normalized', data: { entity: entityName, normalizedLength: normalized.length, normalizedSample: normalized.length > 0 ? normalized[0] : null }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H3' }) }).catch(() => { });
-        // #endregion
+
 
         return normalized;
       } catch (error) {
-        // #region agent log
-        fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'entities.js:filter:error', message: 'API filter error', data: { entity: entityName, error: error.message, status: error.status, url: fullUrl }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-        // #endregion
+
         throw error;
       }
     },

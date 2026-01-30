@@ -126,9 +126,7 @@ export default function Home() {
         departments.map(async (dept) => {
           console.group(`🔍 Loading products for ${dept.name}`);
 
-          // #region agent log
-          fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:dept-start', message: 'Starting product load for department', data: { deptId: dept.id, deptName: dept.name, deptSlug: dept.slug }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-          // #endregion
+
 
           try {
             // Entferne in_stock Filter komplett - lade alle Produkte
@@ -140,9 +138,7 @@ export default function Home() {
               limit: 8
             });
 
-            // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:before-api', message: 'Before API filter call', data: { deptId: dept.id, queryParams, sort: '-created_at', limit: 8 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-            // #endregion
+
 
             const prods = await api.entities.Product.filter(
               queryParams,
@@ -150,9 +146,7 @@ export default function Home() {
               8
             );
 
-            // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:after-api', message: 'After API filter call', data: { deptId: dept.id, prodsLength: prods?.length || 0, prodsType: typeof prods, isArray: Array.isArray(prods), firstProduct: prods && prods.length > 0 ? { id: prods[0].id, name: prods[0].name, deptId: prods[0].department_id } : null }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-            // #endregion
+
 
             console.log('📥 Raw API Response:', prods);
             console.log('📊 Response type:', typeof prods, Array.isArray(prods) ? 'Array' : 'Not Array');
@@ -161,9 +155,7 @@ export default function Home() {
             if (prods && prods.length > 0) {
               console.log('✅ Products loaded:', prods.map(p => ({ id: p.id, name: p.name, dept_id: p.department_id })));
 
-              // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:products-loaded', message: 'Products successfully loaded', data: { deptId: dept.id, productCount: prods.length, productDeptIds: prods.map(p => p.department_id), expectedDeptId: dept.id }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-              // #endregion
+
             }
 
             productsByDept[dept.id] = Array.isArray(prods) ? prods : [];
@@ -172,18 +164,14 @@ export default function Home() {
               console.warn(`⚠️ No products found for department: ${dept.name} (ID: ${dept.id})`);
               console.warn('   Checking if products exist in database...');
 
-              // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:no-products', message: 'No products found, testing all products', data: { deptId: dept.id, deptName: dept.name }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-              // #endregion
+
 
               // Test: Lade alle Produkte ohne Filter
               try {
                 const allProds = await api.entities.Product.list('-created_at', 50);
                 console.log(`   Total products in database: ${allProds?.length || 0}`);
 
-                // #region agent log
-                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:all-products-test', message: 'All products test result', data: { totalProducts: allProds?.length || 0, allProductDeptIds: allProds?.map(p => p.department_id) || [], expectedDeptId: dept.id, matchingCount: allProds?.filter(p => p.department_id === dept.id).length || 0 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-                // #endregion
+
 
                 if (allProds && allProds.length > 0) {
                   const matchingProds = allProds.filter(p => p.department_id === dept.id);
@@ -191,20 +179,14 @@ export default function Home() {
                   if (matchingProds.length > 0) {
                     console.log('   Matching products:', matchingProds.map(p => ({ id: p.id, name: p.name, dept_id: p.department_id })));
                   } else {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:no-matching', message: 'No matching products found', data: { deptId: dept.id, allProductDeptIds: allProds.map(p => p.department_id), uniqueDeptIds: [...new Set(allProds.map(p => p.department_id))] }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H2' }) }).catch(() => { });
-                    // #endregion
+
                   }
                 } else {
-                  // #region agent log
-                  fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:no-products-in-db', message: 'No products in database at all', data: { deptId: dept.id }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-                  // #endregion
+
                 }
               } catch (testErr) {
                 console.error('   Error testing all products:', testErr);
-                // #region agent log
-                fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:test-error', message: 'Error testing all products', data: { deptId: dept.id, error: testErr.message }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H5' }) }).catch(() => { });
-                // #endregion
+
               }
             }
           } catch (err) {
@@ -212,9 +194,7 @@ export default function Home() {
             console.error('Error details:', err.message);
             console.error('Error stack:', err.stack);
 
-            // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:error', message: 'Error loading products', data: { deptId: dept.id, error: err.message, status: err.status, stack: err.stack?.substring(0, 200) }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-            // #endregion
+
 
             // Fallback: Versuche ohne Filter
             try {
@@ -223,23 +203,17 @@ export default function Home() {
               console.log(`   Fallback loaded ${fallbackProds?.length || 0} products`);
               productsByDept[dept.id] = Array.isArray(fallbackProds) ? fallbackProds : [];
 
-              // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:fallback-success', message: 'Fallback load successful', data: { deptId: dept.id, fallbackCount: fallbackProds?.length || 0 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-              // #endregion
+
             } catch (fallbackErr) {
               console.error(`❌ Fallback also failed for ${dept.name}:`, fallbackErr);
               productsByDept[dept.id] = [];
 
-              // #region agent log
-              fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:fallback-error', message: 'Fallback also failed', data: { deptId: dept.id, error: fallbackErr.message }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H4' }) }).catch(() => { });
-              // #endregion
+
             }
           } finally {
             loadingStates[dept.id] = false;
 
-            // #region agent log
-            fetch('http://127.0.0.1:7598/ingest/56ffd1df-b6f5-46c3-9934-bd492350b6cd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'Home.jsx:loadDepartmentProducts:dept-end', message: 'Department product load completed', data: { deptId: dept.id, finalCount: productsByDept[dept.id]?.length || 0 }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'H1' }) }).catch(() => { });
-            // #endregion
+
 
             console.groupEnd();
           }

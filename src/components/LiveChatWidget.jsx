@@ -88,7 +88,11 @@ export default function LiveChatWidget() {
         setTimeout(() => scrollRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
     };
 
-    if (!user) return null; // Show nothing if not logged in
+    const handleLogin = () => {
+        window.location.href = '/login';
+    };
+
+    // if (!user) return null; // REMOVED: Show widget for everyone
 
     return (
         <>
@@ -133,7 +137,7 @@ export default function LiveChatWidget() {
                                 <div>
                                     <h3 className="font-black text-white text-lg">Live Support</h3>
                                     <div className="flex items-center gap-2 text-white/80 text-xs">
-                                        <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                                        <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
                                         {isConnected ? 'Online' : 'Verbinde...'}
                                     </div>
                                 </div>
@@ -146,71 +150,93 @@ export default function LiveChatWidget() {
                             </button>
                         </div>
 
-                        {/* Messages */}
-                        <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-zinc-950">
-                            {messages.length === 0 && (
-                                <div className="text-center text-zinc-500 mt-10">
-                                    <p>Sag Hallo! 👋</p>
-                                    <p className="text-xs">Unser Team meldet sich sofort.</p>
+                        {!user ? (
+                            /* Guest View */
+                            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-zinc-950">
+                                <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-6 border border-zinc-800">
+                                    <MessageCircle className="w-10 h-10 text-purple-500" />
                                 </div>
-                            )}
-
-                            {messages.map((msg, idx) => {
-                                const isMe = msg.sender === 'user' || msg.sender === user.id; // 'user' is what backend sends
-                                return (
-                                    <motion.div
-                                        key={idx} // Using index fallback if id missing briefly
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                                    >
-                                        <div
-                                            className={`max-w-[75%] px-4 py-3 rounded-2xl ${isMe
-                                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-tr-none'
-                                                : 'bg-zinc-800 text-white rounded-tl-none'
-                                                }`}
-                                        >
-                                            <p className="text-sm">{msg.content}</p>
-                                            <p className="text-[10px] opacity-60 mt-1 flex justify-end">
-                                                {msg.created_at ? format(new Date(msg.created_at), 'HH:mm') : '...'}
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-
-                            {isTyping && (
-                                <div className="flex justify-start">
-                                    <div className="bg-zinc-800 px-4 py-2 rounded-2xl rounded-tl-none flex gap-1 items-center">
-                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" />
-                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce delay-75" />
-                                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce delay-150" />
-                                    </div>
-                                </div>
-                            )}
-                            <div ref={scrollRef} />
-                        </div>
-
-                        {/* Input */}
-                        <div className="p-4 bg-zinc-900 border-t-2 border-zinc-800">
-                            <div className="flex gap-2">
-                                <Input
-                                    value={message}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                    placeholder="Nachricht..."
-                                    className="flex-1 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
-                                    disabled={!isConnected}
-                                />
+                                <h3 className="text-xl font-bold text-white mb-2">Hilfe benötigt?</h3>
+                                <p className="text-zinc-400 mb-8 mx-auto max-w-[200px]">
+                                    Melde dich an, um direkt mit unserem Support-Team zu chatten.
+                                </p>
                                 <Button
-                                    onClick={handleSendMessage}
-                                    disabled={!message.trim() || !isConnected}
-                                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                                    onClick={handleLogin}
+                                    className="w-full bg-white text-black hover:bg-zinc-200 font-bold h-12 rounded-xl"
                                 >
-                                    <Send className="w-4 h-4" />
+                                    Jetzt Anmelden
                                 </Button>
                             </div>
-                        </div>
+                        ) : (
+                            /* Logged In View */
+                            <>
+                                {/* Messages */}
+                                <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-zinc-950">
+                                    {messages.length === 0 && (
+                                        <div className="text-center text-zinc-500 mt-10">
+                                            <p>Sag Hallo! 👋</p>
+                                            <p className="text-xs">Unser Team meldet sich sofort.</p>
+                                        </div>
+                                    )}
+
+                                    {messages.map((msg, idx) => {
+                                        const isMe = msg.sender === 'user' || msg.sender === user.id;
+                                        return (
+                                            <motion.div
+                                                key={idx}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div
+                                                    className={`max-w-[75%] px-4 py-3 rounded-2xl ${isMe
+                                                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-tr-none'
+                                                        : 'bg-zinc-800 text-white rounded-tl-none'
+                                                        }`}
+                                                >
+                                                    <p className="text-sm">{msg.content}</p>
+                                                    <p className="text-[10px] opacity-60 mt-1 flex justify-end">
+                                                        {msg.created_at ? format(new Date(msg.created_at), 'HH:mm') : '...'}
+                                                    </p>
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+
+                                    {isTyping && (
+                                        <div className="flex justify-start">
+                                            <div className="bg-zinc-800 px-4 py-2 rounded-2xl rounded-tl-none flex gap-1 items-center">
+                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" />
+                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce delay-75" />
+                                                <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce delay-150" />
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div ref={scrollRef} />
+                                </div>
+
+                                {/* Input */}
+                                <div className="p-4 bg-zinc-900 border-t-2 border-zinc-800">
+                                    <div className="flex gap-2">
+                                        <Input
+                                            value={message}
+                                            onChange={(e) => setMessage(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                            placeholder="Nachricht..."
+                                            className="flex-1 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+                                            disabled={!isConnected}
+                                        />
+                                        <Button
+                                            onClick={handleSendMessage}
+                                            disabled={!message.trim() || !isConnected}
+                                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                                        >
+                                            <Send className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
