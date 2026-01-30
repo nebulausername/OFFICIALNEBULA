@@ -4,7 +4,7 @@ import { API_BASE_URL, getToken, removeToken } from './config';
 const handleResponse = async (response) => {
   const contentType = response.headers.get('content-type');
   const isJson = contentType && contentType.includes('application/json');
-  
+
   if (!response.ok) {
     let errorData;
     try {
@@ -12,18 +12,22 @@ const handleResponse = async (response) => {
     } catch {
       errorData = { message: response.statusText || 'API request failed' };
     }
-    
+
     const apiError = new Error(errorData.message || 'API request failed');
     apiError.status = response.status;
     apiError.data = errorData;
+
+    if (response.status === 500) {
+      console.error('Critical Server Error (500):', errorData);
+    }
     throw apiError;
   }
-  
+
   // Handle empty responses
   if (response.status === 204 || !isJson) {
     return null;
   }
-  
+
   try {
     return await response.json();
   } catch {
@@ -35,7 +39,7 @@ const handleResponse = async (response) => {
 const apiRequest = async (endpoint, options = {}) => {
   const token = getToken();
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const config = {
     ...options,
     headers: {
@@ -52,14 +56,14 @@ const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-    
+
     // Handle 401 Unauthorized - token expired
     if (response.status === 401) {
       removeToken();
       window.location.href = '/login';
       throw new Error('Unauthorized');
     }
-    
+
     return await handleResponse(response);
   } catch (error) {
     // Handle network errors gracefully
@@ -81,14 +85,14 @@ const createMethod = (method) => (endpoint, data = null) => {
     const url = queryString ? `${endpoint}?${queryString}` : endpoint;
     return apiRequest(url, { method });
   }
-  
+
   if (data !== null) {
     return apiRequest(endpoint, {
       method,
       body: data instanceof FormData ? data : JSON.stringify(data),
     });
   }
-  
+
   return apiRequest(endpoint, { method });
 };
 

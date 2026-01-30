@@ -130,7 +130,8 @@ export default function Admin() {
           tickets: 5,
           vipUsers: 128,
           revenue: 45290.50,
-          activeVisitors: 32
+          activeVisitors: 32,
+          topProducts: []
         });
         setRecentRequests(DEMO_RECENT_REQUESTS);
         setChartData(DEMO_CHART_DATA);
@@ -358,7 +359,7 @@ export default function Admin() {
                     <div className="flex-1">
                       <div className="font-bold text-sm text-white truncate">{item.product?.name || 'Unbekannt'}</div>
                       <div className="h-1.5 w-full bg-zinc-800 rounded-full mt-1.5 overflow-hidden">
-                        <div className="h-full bg-[#D6B25E]" style={{ width: `${Math.min((item.orderCount / (stats.topProducts[0]?.orderCount || 1)) * 100, 100)}%` }} />
+                        <div className="h-full bg-[#D6B25E]" style={{ width: `${Math.min((item.orderCount / (stats.topProducts?.[0]?.orderCount || 1)) * 100, 100)}%` }} />
                       </div>
                     </div>
                     <div className="text-xs font-mono text-white/50">{item.orderCount} sold</div>

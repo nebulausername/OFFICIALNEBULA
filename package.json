@@ -8,6 +8,7 @@
     "dev:frontend": "vite",
     "dev:backend": "cd backend && pnpm run dev",
     "build": "vite build",
+    "postinstall": "prisma generate --schema=./backend/prisma/schema.prisma",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
