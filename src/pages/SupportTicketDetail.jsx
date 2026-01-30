@@ -4,7 +4,14 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Send, FileText, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, Send, FileText, ThumbsUp, MessageSquare } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -24,10 +31,10 @@ export default function SupportTicketDetail() {
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
-  
+
   const localeMap = { de, en: enUS, sk, ar };
   const dateLocale = localeMap[locale] || de;
-  
+
   const getCategoryLabel = (category) => {
     const labels = {
       order: t('support.category.order'),
@@ -40,6 +47,19 @@ export default function SupportTicketDetail() {
       other: t('support.category.other')
     };
     return labels[category] || category;
+    return labels[category] || category;
+  };
+
+  const QUICK_REPLIES = [
+    { label: 'Hallo & Empfang', text: 'Hallo, danke für deine Nachricht. Wir schauen uns das sofort an.' },
+    { label: 'Status Update', text: 'Wir arbeiten aktuell an deinem Anliegen und melden uns in Kürze wieder.' },
+    { label: 'Erstattung', text: 'Wir haben die Erstattung veranlasst. Das Geld sollte innerhalb von 3-5 Werktagen bei dir sein.' },
+    { label: 'Versand', text: 'Deine Bestellung wurde versandt und ist auf dem Weg zu dir.' },
+    { label: 'Abschluss', text: 'Freut mich, dass wir helfen konnten. Melde dich gerne, falls noch etwas ist.' }
+  ];
+
+  const handleQuickReply = (value) => {
+    setNewMessage(prev => prev ? prev + '\n' + value : value);
   };
 
   useEffect(() => {
@@ -74,7 +94,7 @@ export default function SupportTicketDetail() {
       }
 
       setTicket(ticketData);
-      
+
       // Mark as read by user
       if (ticketData.unread_by_user) {
         await api.entities.Ticket.update(ticketId, { unread_by_user: false });
@@ -190,7 +210,7 @@ export default function SupportTicketDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-        <div 
+        <div
           className="animate-spin w-12 h-12 border-4 rounded-full"
           style={{ borderColor: 'rgba(139, 92, 246, 0.3)', borderTopColor: '#8B5CF6' }}
         />
@@ -204,7 +224,7 @@ export default function SupportTicketDetail() {
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div 
+        <div
           className="sticky top-0 z-10 px-4 py-4"
           style={{
             background: 'rgba(0, 0, 0, 0.4)',
@@ -224,8 +244,8 @@ export default function SupportTicketDetail() {
             <div className="flex items-center gap-3 flex-wrap">
               <StatusChip status={ticket.status} />
               {!isClosed && (
-                <Button 
-                  onClick={handleMarkSolved} 
+                <Button
+                  onClick={handleMarkSolved}
                   size="sm"
                   style={{
                     background: 'rgba(52, 211, 153, 0.15)',
@@ -238,9 +258,9 @@ export default function SupportTicketDetail() {
                 </Button>
               )}
               {ticket.status === 'solved' && (
-                <Button 
-                  onClick={handleCloseTicket} 
-                  size="sm" 
+                <Button
+                  onClick={handleCloseTicket}
+                  size="sm"
                   variant="outline"
                   style={{ background: 'rgba(255, 255, 255, 0.05)' }}
                 >
@@ -248,9 +268,9 @@ export default function SupportTicketDetail() {
                 </Button>
               )}
               {ticket.status === 'closed' && (
-                <Button 
-                  onClick={handleReopenTicket} 
-                  size="sm" 
+                <Button
+                  onClick={handleReopenTicket}
+                  size="sm"
                   style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
                 >
                   {t('support.chat.reopenTicket')}
@@ -261,12 +281,12 @@ export default function SupportTicketDetail() {
         </div>
 
         {/* Ticket Info */}
-        <div 
+        <div
           className="px-4 py-6"
           style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}
         >
           <h1 className="text-2xl font-black text-white mb-2">{ticket.subject}</h1>
-          <div 
+          <div
             className={`flex items-center gap-4 text-sm flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}
             style={{ color: 'rgba(255, 255, 255, 0.5)' }}
           >
@@ -296,7 +316,7 @@ export default function SupportTicketDetail() {
                   transition={{ delay: index * 0.05 }}
                   className={`flex ${isUserMessage ? (isRTL ? 'justify-start' : 'justify-end') : (isRTL ? 'justify-end' : 'justify-start')}`}
                 >
-                  <div 
+                  <div
                     className="max-w-[80%] border rounded-2xl p-4 backdrop-blur-sm transition-all"
                     style={{
                       background: isAdmin ? 'rgba(59, 130, 246, 0.15)' : 'rgba(139, 92, 246, 0.15)',
@@ -339,7 +359,7 @@ export default function SupportTicketDetail() {
 
         {/* Input */}
         {!isClosed && (
-          <div 
+          <div
             className="sticky bottom-0 px-4 py-4"
             style={{
               background: 'rgba(0, 0, 0, 0.4)',
@@ -347,6 +367,23 @@ export default function SupportTicketDetail() {
               borderTop: '1px solid rgba(255, 255, 255, 0.06)'
             }}
           >
+            {user?.role === 'admin' && (
+              <div className="mb-3 px-1">
+                <Select onValueChange={handleQuickReply}>
+                  <SelectTrigger className="w-full md:w-[250px] bg-zinc-900/50 border-zinc-700 h-8 text-xs text-zinc-300">
+                    <SelectValue placeholder="⚡ Quick Reply wählen..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
+                    {QUICK_REPLIES.map((reply, i) => (
+                      <SelectItem key={i} value={reply.text} className="focus:bg-zinc-800 focus:text-white cursor-pointer text-xs">
+                        <span className="font-bold text-purple-400 mr-2">[{reply.label}]</span>
+                        {reply.text.substring(0, 30)}...
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <form onSubmit={handleSendMessage} className="flex gap-3">
               <Textarea
                 value={newMessage}
@@ -367,7 +404,7 @@ export default function SupportTicketDetail() {
                 style={{ background: 'linear-gradient(135deg, #8B5CF6, #EC4899)' }}
               >
                 {sending ? (
-                  <div 
+                  <div
                     className="w-5 h-5 border-2 rounded-full animate-spin"
                     style={{ borderColor: 'rgba(255, 255, 255, 0.3)', borderTopColor: '#FFFFFF' }}
                   />

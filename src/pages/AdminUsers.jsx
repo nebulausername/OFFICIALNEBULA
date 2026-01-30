@@ -24,6 +24,14 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
 
 export default function AdminUsers() {
   const [user, setUser] = useState(null);
@@ -32,7 +40,11 @@ export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [vipFilter, setVipFilter] = useState('all');
+
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [historyUser, setHistoryUser] = useState(null);
+  const [historyOrders, setHistoryOrders] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -93,6 +105,21 @@ export default function AdminUsers() {
       loadUsers();
     } catch (error) {
       console.error('Error bulk VIP update:', error);
+    }
+  };
+
+  const handleOpenHistory = async (user) => {
+    setHistoryUser(user);
+    setHistoryLoading(true);
+    try {
+      const orders = await api.entities.Request.filter({ user_id: user.id });
+      // Sort by newest first
+      orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setHistoryOrders(orders);
+    } catch (error) {
+      console.error('Error loading history:', error);
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -287,9 +314,9 @@ export default function AdminUsers() {
                 </div>
 
                 <div className="flex items-center gap-4 text-sm text-zinc-400 mb-4">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 cursor-pointer hover:text-white transition-colors" onClick={() => handleOpenHistory(u)}>
                     <ShoppingBag className="w-4 h-4" />
-                    <span>{u._count?.requests || 0} Orders</span>
+                    <span className="underline decoration-zinc-700 underline-offset-4">{u._count?.requests || 0} Orders</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MessageCircle className="w-4 h-4" />
@@ -302,11 +329,10 @@ export default function AdminUsers() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleToggleVIP(u.id, u.is_vip)}
-                    className={`flex-1 border-zinc-600 ${
-                      u.is_vip
-                        ? 'text-yellow-400 hover:bg-yellow-500/10'
-                        : 'text-white hover:bg-zinc-800'
-                    }`}
+                    className={`flex-1 border-zinc-600 ${u.is_vip
+                      ? 'text-yellow-400 hover:bg-yellow-500/10'
+                      : 'text-white hover:bg-zinc-800'
+                      }`}
                   >
                     <Crown className="w-4 h-4 mr-2" />
                     {u.is_vip ? 'VIP entfernen' : 'VIP aktivieren'}
@@ -317,6 +343,57 @@ export default function AdminUsers() {
           </div>
         )}
       </div>
+
+      {/* History Dialog */}
+      <Dialog open={!!historyUser} onOpenChange={(open) => !open && setHistoryUser(null)}>
+        <DialogContent className="bg-zinc-950 border-zinc-800 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <ShoppingBag className="w-5 h-5 text-purple-400" />
+              Bestellhistorie: {historyUser?.full_name}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="mt-4 space-y-4">
+            {historyLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-12 w-full bg-zinc-900" />
+                <Skeleton className="h-12 w-full bg-zinc-900" />
+                <Skeleton className="h-12 w-full bg-zinc-900" />
+              </div>
+            ) : historyOrders.length === 0 ? (
+              <div className="text-center py-8 text-zinc-500">
+                Keine Bestellungen gefunden.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {historyOrders.map(order => (
+                  <div key={order.id} className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex items-center justify-between hover:bg-zinc-900 transition-colors">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-xs text-zinc-500">#{order.id.slice(0, 8)}</span>
+                        <Badge variant="outline" className={`
+                          ${order.status === 'completed' ? 'border-green-500 text-green-400' :
+                            order.status === 'cancelled' ? 'border-red-500 text-red-400' :
+                              'border-blue-500 text-blue-400'}
+                        `}>
+                          {order.status}
+                        </Badge>
+                      </div>
+                      <div className="text-sm font-medium text-zinc-200">
+                        {order.item_count || 1} Artikel • {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(order.total_amount || 0)}
+                      </div>
+                    </div>
+                    <div className="text-xs text-zinc-500">
+                      {format(new Date(order.created_at), 'dd.MM.yyyy')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

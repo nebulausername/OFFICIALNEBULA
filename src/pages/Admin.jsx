@@ -74,85 +74,79 @@ export default function Admin() {
 
   const loadData = async () => {
     try {
-      // Try to load real user, fallback to demo admin if fails (for dev/showcase)
-      let userData;
-      try {
-        userData = await api.auth.me();
-      } catch (e) {
-        console.warn('Auth failed, strictly using Demo Admin for showcase', e);
-        userData = { role: 'admin', full_name: 'Demo Admin', id: 'demo' };
-      }
-
-      if (userData.role !== 'admin') {
+      // 1. Auth Check - Strictly Admin
+      const userData = await api.auth.me();
+      if (!userData || userData.role !== 'admin') {
         window.location.href = createPageUrl('Home');
         return;
       }
       setUser(userData);
 
-      try {
-        const [products, requests, categories, brands, tickets, users, topProducts, recentActivity, salesData] = await Promise.all([
-          api.entities.Product.list(),
-          api.entities.Request.list('-created_at', 100),
-          api.entities.Category.list(),
-          api.entities.Brand.list(),
-          api.entities.Ticket.list(),
-          api.entities.User.list(),
-          api.admin.getTopProducts(5),
-          api.admin.getRecentActivity(),
-          api.admin.getSalesData(7)
-        ]);
+      // 2. Real Data Fetching
+      // We process these concurrently for speed
+      const [
+        products,
+        requests,
+        categories,
+        brands,
+        tickets,
+        users,
+        topProductsArg,
+        recentActivityArg,
+        salesDataArg
+      ] = await Promise.all([
+        api.entities.Product.list(),
+        api.entities.Request.list('-created_at', 100),
+        api.entities.Category.list(),
+        api.entities.Brand.list(),
+        api.entities.Ticket.list(),
+        api.entities.User.list(),
+        api.admin.getTopProducts(5).catch(() => []),
+        api.admin.getRecentActivity().catch(() => ({ orders: [] })),
+        api.admin.getSalesData(7).catch(() => ({ data: [] }))
+      ]);
 
-        const vipUsers = users.filter(u => u.is_vip).length;
-        const openTickets = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
-        const totalRevenue = requests.reduce((sum, r) => sum + (r.total_sum || 0), 0);
+      // 3. Stats Calculation
+      const vipUsers = users.filter(u => u.is_vip).length;
+      const openTickets = tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+      const totalRevenue = requests.reduce((sum, r) => sum + (parseFloat(r.total_sum) || 0), 0);
 
-        setStats(prev => ({
-          ...prev,
-          products: products.length,
-          requests: requests.length,
-          categories: categories.length,
-          brands: brands.length,
-          tickets: openTickets || 0,
-          vipUsers: vipUsers || 0,
-          revenue: totalRevenue,
-          topProducts: topProducts || []
+      // 4. Update Stats State
+      setStats(prev => ({
+        ...prev,
+        products: products.length || 0,
+        requests: requests.length || 0,
+        categories: categories.length || 0,
+        brands: brands.length || 0,
+        tickets: openTickets || 0,
+        vipUsers: vipUsers || 0,
+        revenue: totalRevenue,
+        topProducts: topProductsArg || []
+      }));
+
+      // 5. Recent Activity
+      setRecentRequests(recentActivityArg?.orders || []);
+
+      // 6. Chart Data Transformation
+      if (salesDataArg && Array.isArray(salesDataArg.data)) {
+        const formattedChart = salesDataArg.data.map(d => ({
+          name: new Date(d.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }),
+          value: parseFloat(d.revenue) || 0
         }));
-
-        setRecentRequests(recentActivity?.orders || []);
-
-        // Format Sales Data for Chart
-        if (salesData && salesData.data) {
-          const formattedChart = salesData.data.map(d => ({
-            name: new Date(d.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }),
-            value: d.revenue
-          }));
-          setChartData(formattedChart.length > 0 ? formattedChart : DEMO_CHART_DATA);
-        } else {
-          setChartData(DEMO_CHART_DATA);
-        }
-
-      } catch (apiError) {
-        console.warn('API Error, loading Admin Demo Data', apiError);
-        // Fallback to Demo Data
-        setStats({
-          products: 124,
-          requests: 1243,
-          categories: 12,
-          brands: 8,
-          tickets: 5,
-          vipUsers: 128,
-          revenue: 45290.50,
-          activeVisitors: 32,
-          topProducts: []
-        });
-        setRecentRequests(DEMO_RECENT_REQUESTS);
-        setChartData(DEMO_CHART_DATA);
+        // If no sales data, show empty chart (flat line) to avoid breaking UI
+        setChartData(formattedChart.length > 0 ? formattedChart : [{ name: 'Keine Daten', value: 0 }]);
+      } else {
+        setChartData([{ name: 'Keine Daten', value: 0 }]);
       }
 
       setLoading(false);
+
     } catch (error) {
-      console.error('Critical Admin Error:', error);
+      console.error('Critical Admin Load Error:', error);
+      // In case of total failure, we still want to show the UI but maybe with error indicators
+      // For now, we just stop loading so the user doesn't see infinite spinner
       setLoading(false);
+      // Potentially redirect or show toast here
     }
   };
 
@@ -180,7 +174,7 @@ export default function Admin() {
   const adminSections = [
     { title: 'Analytics', icon: TrendingUp, count: '📊', description: 'Statistiken & Charts', color: 'from-indigo-500 to-purple-500', link: 'AdminAnalytics' },
     { title: 'Produkte', icon: Package, count: stats.products, description: 'Produkte verwalten', color: 'from-purple-500 to-pink-500', link: 'AdminProducts' },
-    { title: 'Bestellungen', icon: ShoppingBag, count: stats.requests, description: 'Kundenanfragen', color: 'from-blue-500 to-cyan-500', link: 'AdminRequests' },
+    { title: 'Bestellungen', icon: ShoppingBag, count: stats.requests, description: 'Offene Aufträge', color: 'from-blue-500 to-cyan-500', link: 'AdminRequests' },
     { title: 'Kategorien', icon: Tag, count: stats.categories, description: 'Struktur verwalten', color: 'from-green-500 to-emerald-500', link: 'AdminCategories' },
     { title: 'Marken', icon: Star, count: stats.brands, description: 'Marken Partner', color: 'from-orange-500 to-amber-500', link: 'AdminBrands' },
     { title: 'Support', icon: MessageCircle, count: stats.tickets, description: 'Offene Tickets', color: 'from-cyan-500 to-blue-500', link: 'AdminSupport' },

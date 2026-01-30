@@ -49,6 +49,7 @@ async function main() {
     { name: 'Darkside', slug: 'darkside', sort_order: 6 },
     { name: 'Moze', slug: 'moze', sort_order: 7 },
     { name: 'Aeon', slug: 'aeon', sort_order: 8 },
+    { name: 'Vyro', slug: 'vyro', sort_order: 9 },
     // Headshop
     { name: 'RAW', slug: 'raw', sort_order: 10 },
     { name: 'OCB', slug: 'ocb', sort_order: 11 },
@@ -200,6 +201,18 @@ async function main() {
       category_id: catMap['shishas'],
       cover_image: 'https://aeon-shisha.com/media/image/product/572/lg/aeon-shisha-edition-4-premium-frozen-clear.jpg',
       tags: ['High-End'],
+    },
+    {
+      sku: 'VYRO-SPC-RED',
+      name: 'Vyro Spectre - Carbon Red',
+      description: 'Kompakt, innovativ und mit einem einzigartigen Blow-Off System. Die perfekte Travel-Shisha mit Carbon-Elementen.',
+      price: 119.90,
+      stock: 8,
+      department_id: deptMap['shisha-world'],
+      brand_id: brandMap['vyro'],
+      category_id: catMap['shishas'], // Assuming 'travel-shishas' maps to 'shishas' or I should add category. 'shishas' is fine for now.
+      cover_image: '/images/products/vyro-spectre.png', // Keeping generic path or finding a web url. Used local for now to match frontend.
+      tags: ['Innovation', 'Premium', 'Shisha'],
     },
 
     // --- SHISHA KOHLE ---

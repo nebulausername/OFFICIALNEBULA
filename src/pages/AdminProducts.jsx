@@ -22,7 +22,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Save, X, ArrowLeft } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, X, ArrowLeft, Package, Activity, TrendingDown, Settings } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import DataTable from '@/components/admin/ui/DataTable';
 import { createPageUrl } from '@/utils';
@@ -265,21 +265,56 @@ export default function AdminProducts() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
       >
-        <DataTable
-          columns={columns}
-          data={products}
-          searchKey="name"
-          searchPlaceholder="Produktname, SKU..."
-          filters={[
-            { label: 'Kategorie', value: 'category' } // Needs implementation in DataTable eventually
-          ]}
-          actions={[
-            { label: 'Bearbeiten', icon: Pencil, onClick: (row) => window.location.href = createPageUrl('AdminProductEditor') + `?id=${row.id}` },
-            { label: 'Schnellbearbeitung', icon: Pencil, onClick: handleEdit }, // Opens modal
-            { label: 'Löschen', icon: Trash2, onClick: (row) => handleDelete(row.id) },
-          ]}
-        />
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-xs font-bold uppercase">Total Products</p>
+              <p className="text-2xl font-black text-white">{products.length}</p>
+            </div>
+            <Package className="w-8 h-8 text-zinc-700" />
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-xs font-bold uppercase">Active</p>
+              <p className="text-2xl font-black text-emerald-400">{products.filter(p => p.in_stock).length}</p>
+            </div>
+            <Activity className="w-8 h-8 text-emerald-900" />
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-between">
+            <div>
+              <p className="text-zinc-400 text-xs font-bold uppercase">Low Stock</p>
+              <p className="text-2xl font-black text-amber-400">0</p>
+            </div>
+            <TrendingDown className="w-8 h-8 text-amber-900" />
+          </div>
+          <div className="bg-gradient-to-br from-purple-900/50 to-pink-900/50 border border-purple-500/20 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-purple-500/40 transition-colors" onClick={handleNew}>
+            <div>
+              <p className="text-purple-200 text-xs font-bold uppercase">Quick Add</p>
+              <p className="text-lg font-bold text-white">New Item</p>
+            </div>
+            <Plus className="w-8 h-8 text-purple-400" />
+          </div>
+        </div>
+
+        <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl overflow-hidden glass">
+          <DataTable
+            columns={columns}
+            data={products}
+            searchKey="name"
+            searchPlaceholder="Search products by name, SKU or brand..."
+            filters={[
+              { label: 'Category', value: 'category', options: categories.map(c => ({ label: c.name, value: c.id })) }
+            ]}
+            actions={[
+              { label: 'Edit', icon: Pencil, onClick: (row) => window.location.href = createPageUrl('AdminProductEditor') + `?id=${row.id}` },
+              { label: 'Quick Edit', icon: Settings, onClick: handleEdit },
+              { label: 'Delete', icon: Trash2, onClick: (row) => handleDelete(row.id), variant: 'destructive' },
+            ]}
+          />
+        </div>
       </motion.div>
 
       {/* Edit Dialog */}

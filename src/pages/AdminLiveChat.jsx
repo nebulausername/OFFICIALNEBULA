@@ -5,7 +5,8 @@ import { useAuth } from '@/lib/AuthContext';
 import {
     Send, MoreVertical, Search,
     Phone, Paperclip, MessageCircle,
-    ArrowLeft, CheckCheck, User, Clock
+    ArrowLeft, CheckCheck, User, Clock,
+    Volume2, VolumeX
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,6 +27,7 @@ export default function AdminLiveChat() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [otherUserTyping, setOtherUserTyping] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
 
     const scrollRef = useRef(null);
     const typingTimeoutRef = useRef(null);
@@ -54,7 +56,7 @@ export default function AdminLiveChat() {
         const handleNewSession = (session) => {
             setSessions(prev => {
                 if (prev.find(s => s.id === session.id)) return prev;
-                playSuccess();
+                if (!isMuted) playSuccess();
                 return [session, ...prev];
             });
         };
@@ -86,7 +88,7 @@ export default function AdminLiveChat() {
             if (message.session_id === selectedSessionId) {
                 setMessages(prev => {
                     if (prev.find(m => m.id === message.id)) return prev;
-                    if (message.sender === 'user') playSuccess();
+                    if (message.sender === 'user' && !isMuted) playSuccess();
                     return [...prev, message];
                 });
                 scrollToBottom();
@@ -112,7 +114,7 @@ export default function AdminLiveChat() {
             socket.off('chat:message', handleActiveChatMessage);
             socket.off('typing', handleTyping);
         };
-    }, [socket, selectedSessionId, user, playSuccess]);
+    }, [socket, selectedSessionId, user, playSuccess, isMuted]);
 
     // Join Session Room when selected
     useEffect(() => {
@@ -233,7 +235,7 @@ export default function AdminLiveChat() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.05 }}
                                     onClick={() => {
-                                        playClick();
+                                        if (!isMuted) playClick();
                                         setSelectedSessionId(session.id);
                                     }}
                                     className={`p-4 border-b border-zinc-800/50 cursor-pointer hover:bg-zinc-800/30 transition-all ${selectedSessionId === session.id ? 'bg-purple-500/10 border-l-2 border-l-purple-500' : 'border-l-2 border-l-transparent'}`}
@@ -292,6 +294,15 @@ export default function AdminLiveChat() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 text-zinc-400">
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    onClick={() => setIsMuted(!isMuted)}
+                                    className="hover:bg-zinc-800 hover:text-white rounded-xl"
+                                    title={isMuted ? "Sound aktivieren" : "Sound stummschalten"}
+                                >
+                                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                </Button>
                                 <Button size="icon" variant="ghost" className="hover:bg-zinc-800 hover:text-white rounded-xl"><Phone className="w-5 h-5" /></Button>
                                 <Button size="icon" variant="ghost" className="hover:bg-zinc-800 hover:text-white rounded-xl"><MoreVertical className="w-5 h-5" /></Button>
                             </div>
