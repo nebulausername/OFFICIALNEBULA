@@ -5,7 +5,6 @@ import { Sparkles } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import SEO from '@/components/seo/SEO';
-import UnifiedProductModal from '../components/products/UnifiedProductModal';
 
 import ShopControlStrip from '../components/shop/ShopControlStrip';
 import ShopCategoryDrawer from '../components/shop/ShopCategoryDrawer';

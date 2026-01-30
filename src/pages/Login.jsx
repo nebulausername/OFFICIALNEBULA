@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Sparkles, Shield, ArrowRight, User } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Shield, ArrowRight, Loader2, Lock } from 'lucide-react';
 import { api } from '@/api';
 import { setToken } from '@/api/config';
 import { useTelegramWebApp, isTelegramWebApp, getTelegramUser, hapticFeedback, openTelegramLink } from '../lib/TelegramWebApp';
@@ -46,7 +46,8 @@ export default function Login() {
         await handleTelegramAuth();
       } else {
         // Not in Telegram - show demo/login options immediately
-        setLoading(false);
+        // Artificial delay for smooth transition effect
+        setTimeout(() => setLoading(false), 800);
       }
     } catch (error) {
       console.error('Auth check error:', error);
@@ -62,7 +63,6 @@ export default function Login() {
         return;
       }
 
-      // Try to authenticate via Telegram WebApp
       try {
         const tg = window.Telegram?.WebApp;
         const initData = tg?.initData;
@@ -79,14 +79,12 @@ export default function Login() {
               navigate(createPageUrl('Home'));
               return;
             } else {
-              // Load verification status
               await loadVerificationStatus(tgUser.id.toString());
             }
           }
         }
       } catch (error) {
         if (error.status === 403 && error.data?.verification_status) {
-          // User not verified
           await loadVerificationStatus(tgUser.id.toString());
         } else {
           console.error('Telegram auth error:', error);
@@ -118,37 +116,50 @@ export default function Login() {
 
   const handleRetry = () => {
     hapticFeedback('impact', 'medium');
-
     if (isTelegramWebApp()) {
-      // Open Telegram bot
       openTelegramLink('https://t.me/NebulaOrderBot');
     } else {
-      // For non-Telegram, show instructions
       window.open('https://t.me/NebulaOrderBot', '_blank');
     }
   };
 
-  // Skip loading screen if not in Telegram (instant access)
+  // Loading Screen
   if (loading && isTelegramWebApp()) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0C10]">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0C10] overflow-hidden relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-[#0A0C10] to-[#0A0C10]" />
+
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.5, 0.8, 0.5]
+          }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10"
+        />
+
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-transparent border-t-[#D6B25E] rounded-full mb-4"
-        />
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-sm text-white/70"
+          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+          className="relative z-10 w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-[#D6B25E] via-purple-500 to-transparent mb-6"
         >
-          Nebula wird geladen...
+          <div className="w-full h-full bg-[#0A0C10] rounded-full flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-[#D6B25E] animate-spin" />
+          </div>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative z-10 text-lg font-light tracking-[0.2em] text-white/50"
+        >
+          LOADING NEBULA
         </motion.p>
       </div>
     );
   }
 
-  // Show verification status if in Telegram
+  // Verification Status View
   if (isTelegramWebApp() && verificationStatus) {
     return (
       <div className="min-h-screen bg-[#0A0C10]">
@@ -164,139 +175,168 @@ export default function Login() {
     );
   }
 
-  // Guest / Login Page
+  // Main Login / Landing Page
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0A0C10] flex items-center justify-center">
-      {/* 🌌 Nebula Background Effects */}
+    <div className="min-h-screen relative overflow-hidden bg-[#0A0C10] flex items-center justify-center font-sans selection:bg-[#D6B25E]/30">
+
+      {/* 🌌 Advanced Nebula Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-5" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(17,24,39,1),_rgba(10,12,16,1))]" />
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.03]" />
+
+        {/* Animated Orbs */}
         <motion.div
           animate={{
+            x: [0, 50, 0],
+            y: [0, -30, 0],
             scale: [1, 1.2, 1],
-            opacity: [0.15, 0.25, 0.15]
+            opacity: [0.1, 0.2, 0.1]
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] rounded-full blur-[120px]"
-          style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.15), transparent 70%)' }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] bg-purple-600/20"
         />
         <motion.div
           animate={{
+            x: [0, -50, 0],
+            y: [0, 30, 0],
             scale: [1.2, 1, 1.2],
-            opacity: [0.2, 0.15, 0.2]
+            opacity: [0.1, 0.15, 0.1]
           }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] rounded-full blur-[120px]"
-          style={{ background: 'radial-gradient(circle, rgba(214, 178, 94, 0.1), transparent 70%)' }}
+          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[130px] bg-[#D6B25E]/10"
         />
       </div>
 
       <div className="relative z-10 w-full max-w-md px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          {/* Logo Section */}
+        <AnimatePresence>
           <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="text-center mb-12"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="relative inline-block">
+            {/* Logo Section */}
+            <div className="text-center mb-12 relative">
               <motion.div
-                className="absolute inset-0 rounded-3xl blur-2xl opacity-40"
-                animate={{ background: ['rgba(214,178,94,0)', 'rgba(214,178,94,0.3)', 'rgba(214,178,94,0)'] }}
-                transition={{ duration: 3, repeat: Infinity }}
-              />
-              <div className="w-28 h-28 mx-auto mb-6 rounded-[2rem] p-5 relative z-10"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  backdropFilter: 'blur(24px)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
-                }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 1 }}
+                className="relative inline-block group"
               >
-                <img
-                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
-                  alt="Nebula Supply"
-                  className="w-full h-full object-contain drop-shadow-xl"
-                />
-              </div>
+                {/* Glow behind logo */}
+                <div className="absolute inset-0 bg-[#D6B25E] rounded-[2rem] blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-1000" />
+
+                <div className="w-32 h-32 mx-auto mb-8 rounded-[2rem] p-6 relative z-10 bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-2xl shadow-2xl ring-1 ring-white/20">
+                  <img
+                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
+                    alt="Nebula Supply"
+                    className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,178,94,0.5)]"
+                  />
+                </div>
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-5xl font-black mb-3 tracking-tighter"
+              >
+                <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50 drop-shadow-sm">
+                  NEBULA
+                </span>
+              </motion.h1>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="flex items-center justify-center gap-3"
+              >
+                <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[#D6B25E]" />
+                <p className="text-[#D6B25E] font-bold tracking-[0.25em] text-xs uppercase">
+                  Premium Supply
+                </p>
+                <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-[#D6B25E]" />
+              </motion.div>
             </div>
 
-            <h1 className="text-5xl font-black mb-2 tracking-tight">
-              <span className="text-white drop-shadow-lg">
-                NEBULA
-              </span>
-            </h1>
-            <p className="text-[#D6B25E] font-bold tracking-[0.2em] text-sm uppercase">
-              Premium Lifestyle Supply
-            </p>
-          </motion.div>
-
-          {/* Action Card */}
-          <div className="space-y-4">
-            {/* Primary Action: Enter Shop */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(createPageUrl('Home'))}
-              className="w-full group relative overflow-hidden rounded-2xl p-[1px]"
+            {/* Action Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="space-y-4"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-[#D6B25E] via-[#F5D98B] to-[#D6B25E] opacity-70 group-hover:opacity-100 transition-opacity" />
-              <div className="relative bg-[#121212] rounded-2xl p-4 flex items-center justify-between group-hover:bg-[#1a1a1a] transition-colors">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#D6B25E]/10 flex items-center justify-center text-[#D6B25E]">
-                    <Sparkles className="w-6 h-6" />
+              {/* Primary Action: Enter Shop */}
+              <button
+                onClick={() => navigate(createPageUrl('Home'))}
+                className="group relative w-full"
+              >
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#D6B25E] via-[#F5D98B] to-[#D6B25E] rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition duration-500 group-hover:duration-200 animate-tilt" />
+                <div className="relative flex items-center justify-between bg-[#0A0C10] rounded-2xl p-4 leading-none border border-white/10 group-hover:border-[#D6B25E]/50 transition-colors">
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#D6B25E]/20 to-[#D6B25E]/5 flex items-center justify-center border border-[#D6B25E]/20 group-hover:scale-105 transition-transform duration-300">
+                      <Sparkles className="w-6 h-6 text-[#D6B25E]" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-white font-bold text-lg mb-1 group-hover:text-[#D6B25E] transition-colors">Shop betreten</div>
+                      <div className="text-zinc-500 text-xs font-medium tracking-wide">
+                        OHNE ANMELDUNG STÖBERN
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <div className="text-white font-bold text-lg">Shop betreten</div>
-                    <div className="text-white/50 text-xs">Ohne Anmeldung stöbern</div>
+                  <div className="pr-2">
+                    <ArrowRight className="w-5 h-5 text-zinc-500 group-hover:text-[#D6B25E] group-hover:translate-x-1 transition-all duration-300" />
                   </div>
                 </div>
-                <ArrowRight className="w-5 h-5 text-[#D6B25E] group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {/* Secondary: Login Options */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => {
+                    const botUsername = process.env.VITE_BOT_USERNAME || 'your_bot';
+                    window.open(`https://t.me/${botUsername}`, '_blank');
+                  }}
+                  className="group relative overflow-hidden rounded-2xl p-[1px]"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 group-hover:border-blue-500/50 rounded-2xl p-4 h-full flex flex-col items-center justify-center gap-2 transition-all">
+                    <Shield className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-blue-100/80 font-bold text-xs uppercase tracking-wider">Telegram</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate(createPageUrl('Admin'))}
+                  className="group relative overflow-hidden rounded-2xl p-[1px]"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 group-hover:border-purple-500/50 rounded-2xl p-4 h-full flex flex-col items-center justify-center gap-2 transition-all">
+                    <Lock className="w-6 h-6 text-purple-400 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-purple-100/80 font-bold text-xs uppercase tracking-wider">Admin</span>
+                  </div>
+                </button>
               </div>
-            </motion.button>
+            </motion.div>
 
-            {/* Secondary: Login */}
-            <div className="grid grid-cols-2 gap-4">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                  const botUsername = process.env.VITE_BOT_USERNAME || 'your_bot';
-                  window.open(`https://t.me/${botUsername}`, '_blank');
-                }}
-                className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-colors"
-              >
-                <Shield className="w-6 h-6 text-blue-400" />
-                <span className="text-blue-200 font-bold text-sm">Telegram Login</span>
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate(createPageUrl('Admin'))}
-                className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 transition-colors"
-              >
-                <User className="w-6 h-6 text-white/60" />
-                <span className="text-white/60 font-bold text-sm">Admin Login</span>
-              </motion.button>
-            </div>
-          </div>
-
-          {/* Footer Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-center mt-12"
-          >
-            <p className="text-xs text-white/30 font-medium">
-              &copy; 2026 Nebula Supply. All Rights Reserved.
-            </p>
+            {/* Footer Info */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="text-center mt-12 space-y-2"
+            >
+              <p className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase">
+                &copy; 2026 Nebula Supply
+              </p>
+              <div className="flex justify-center gap-4">
+                <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                <span className="w-1 h-1 rounded-full bg-zinc-800" />
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

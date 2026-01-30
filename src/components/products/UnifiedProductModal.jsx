@@ -5,14 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
     X, Heart, ShoppingBag, ChevronLeft, ChevronRight,
-    Check, AlertCircle, Plus, Minus, Zap,
-    ShieldCheck, ExternalLink, Truck
+    Check, AlertCircle, Plus, Minus, Zap
 } from 'lucide-react';
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
 import { useWishlist } from '../wishlist/WishlistContext';
-import { createPageUrl } from '../../utils';
-import { Link } from 'react-router-dom';
 import { useI18n } from '../i18n/I18nProvider';
 import confetti from 'canvas-confetti';
 

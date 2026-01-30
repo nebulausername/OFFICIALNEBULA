@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Menu, ShoppingBag, Star } from 'lucide-react';
+import { Menu, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '@/api';
 import SideDrawer from './SideDrawer';
-import { useWishlist } from '../wishlist/WishlistContext';
 
 export default function MobileHeader() {
   const [drawerOpen, setDrawerOpen] = useState(false);

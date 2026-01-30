@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Star, Instagram, Twitter, Facebook, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
+import { Instagram, Twitter, Facebook, Mail, Phone, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Footer({ theme = 'dark' }) {
@@ -45,6 +45,7 @@ export default function Footer({ theme = 'dark' }) {
                                 <motion.a
                                     key={i}
                                     href="#"
+                                    onClick={(e) => e.preventDefault()}
                                     whileHover={{ scale: 1.1, color: '#D6B25E' }}
                                     className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:bg-white/10 transition-colors"
                                 >

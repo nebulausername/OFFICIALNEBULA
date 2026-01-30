@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
@@ -35,7 +36,7 @@ const buttonVariants = cva(
   }
 )
 
-const Button = React.forwardRef(({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
+const Button = React.forwardRef(({ className, variant, size, asChild = false, onClick, children, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
   const soundContext = useNebulaSound ? useNebulaSound() : null;
   const playClick = soundContext?.playClick || (() => { });
@@ -52,7 +53,9 @@ const Button = React.forwardRef(({ className, variant, size, asChild = false, on
       ref={ref}
       onClick={handleClick}
       onMouseEnter={() => playHover()}
-      {...props} />)
+      {...props}>
+      {children}
+    </Comp>)
   );
 })
 Button.displayName = "Button"

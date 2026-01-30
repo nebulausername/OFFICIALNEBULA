@@ -3,7 +3,6 @@ import PremiumHeader from './components/layout/PremiumHeader';
 import Footer from './components/layout/Footer';
 import { WishlistProvider } from './components/wishlist/WishlistContext';
 import { I18nProvider } from './components/i18n/I18nProvider';
-import { Star } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
   const [theme, setTheme] = useState('dark');
