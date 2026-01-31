@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 export default function InfiniteMarquee() {
     const content = [
         "🚀 Blitzschneller Versand",
+        "✨ NEBULA 2.0 LIVE",
         "⭐ Premium Qualität",
         "🔒 Sicher Einkaufen",
         "🌌 Nebula Vibe",

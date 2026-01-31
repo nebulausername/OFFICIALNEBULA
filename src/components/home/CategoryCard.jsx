@@ -26,7 +26,7 @@ export default function CategoryCard({ department, index, productCount = 0, imag
         {image ? (
           <div className="absolute inset-0 overflow-hidden">
             <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 bg-gradient-to-br from-zinc-800 to-zinc-900"
               style={{ backgroundImage: `url(${image})` }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80 group-hover:opacity-70 transition-opacity duration-300" />
