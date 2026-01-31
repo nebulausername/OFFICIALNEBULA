@@ -19,6 +19,7 @@ export default function Checkout() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,6 +36,33 @@ export default function Checkout() {
 
   const { playSuccess, playError } = useNebulaSound();
 
+  // Mock Data for Auto-Complete
+  const MOCK_ZIPS = {
+    '10115': 'Berlin',
+    '20095': 'Hamburg',
+    '80331': 'München',
+    '50667': 'Köln',
+    '60311': 'Frankfurt am Main',
+    '70173': 'Stuttgart'
+  };
+
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 50 : -50,
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? 50 : -50,
+      opacity: 0
+    })
+  };
+
+  const calculateXP = (total) => Math.floor(total * 10);
+
   const steps = [
     { title: 'Warenkorb', icon: ShoppingBag },
     { title: 'Versand', icon: MapPin },
@@ -46,6 +74,12 @@ export default function Checkout() {
   useEffect(() => {
     loadCheckoutData();
   }, []);
+
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      calculateTotal().then(setTotalPrice);
+    }
+  }, [cartItems]);
 
   const loadCheckoutData = async () => {
     try {
@@ -109,6 +143,17 @@ export default function Checkout() {
       }
     }
     return total;
+  };
+
+  const handleZipChange = (e) => {
+    const val = e.target.value;
+    setFormData(prev => ({ ...prev, zip: val }));
+
+    // Mock Auto-Fill
+    if (MOCK_ZIPS[val]) {
+      setFormData(prev => ({ ...prev, zip: val, city: MOCK_ZIPS[val] }));
+      playSuccess(); // Subtle feedback
+    }
   };
 
   const handleSubmitOrder = async () => {
@@ -226,6 +271,22 @@ export default function Checkout() {
         </div>
       </div>
 
+      {/* Gamification Bar */}
+      <div className="bg-purple-900/20 border-b border-purple-500/20 py-3">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center gap-3 text-sm font-medium">
+          <span className="text-purple-300">Level Progress:</span>
+          <div className="w-32 h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: '70%' }}
+              className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+            />
+          </div>
+          <span className="text-white font-bold">+{calculateXP(totalPrice)} XP</span>
+          <span className="text-zinc-500 text-xs">(mit dieser Order)</span>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
         <div className="grid lg:grid-cols-12 gap-12">
           {/* Left Column: Form & Steps */}
@@ -249,13 +310,16 @@ export default function Checkout() {
               ))}
             </div>
 
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" custom={currentStep}>
               {currentStep === 0 && (
                 <motion.div
                   key="step0"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  custom={1}
+                  transition={{ duration: 0.3 }}
                   className="space-y-6"
                 >
                   <h2 className="text-3xl font-black mb-6">Versanddetails</h2>
@@ -292,7 +356,7 @@ export default function Checkout() {
                       <Input
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
                         placeholder="Max Mustermann"
                       />
                     </div>
@@ -301,7 +365,7 @@ export default function Checkout() {
                       <Input
                         value={formData.email}
                         onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
                         placeholder="max@example.com"
                       />
                     </div>
@@ -310,17 +374,17 @@ export default function Checkout() {
                       <Input
                         value={formData.address}
                         onChange={e => setFormData({ ...formData, address: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
                         placeholder="Musterstraße 123"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-400 ml-1">PLZ</label>
+                      <label className="text-sm font-bold text-zinc-400 ml-1">PLZ (Auto-Fill)</label>
                       <Input
                         value={formData.zip}
-                        onChange={e => setFormData({ ...formData, zip: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
-                        placeholder="12345"
+                        onChange={handleZipChange}
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
+                        placeholder="10115"
                       />
                     </div>
                     <div className="space-y-2">
@@ -328,7 +392,7 @@ export default function Checkout() {
                       <Input
                         value={formData.city}
                         onChange={e => setFormData({ ...formData, city: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
                         placeholder="Berlin"
                       />
                     </div>
@@ -339,7 +403,7 @@ export default function Checkout() {
                         <Input
                           value={formData.telegram}
                           onChange={e => setFormData({ ...formData, telegram: e.target.value })}
-                          className="h-12 pl-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl"
+                          className="h-12 pl-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
                           placeholder="@username"
                         />
                       </div>
@@ -352,7 +416,7 @@ export default function Checkout() {
                       disabled={!formData.name || !formData.email || !formData.address}
                       className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black text-lg rounded-xl"
                     >
-                      Weiter
+                      Weiter zum Versand
                     </Button>
                   </div>
                 </motion.div>
@@ -361,8 +425,12 @@ export default function Checkout() {
               {currentStep === 1 && (
                 <motion.div
                   key="step1"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  custom={1}
+                  transition={{ duration: 0.3 }}
                 >
                   <h2 className="text-3xl font-black mb-6">Zahlungsmethode</h2>
 
@@ -434,4 +502,3 @@ export default function Checkout() {
     </div>
   );
 }
-
