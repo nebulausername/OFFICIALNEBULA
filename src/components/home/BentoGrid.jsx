@@ -6,16 +6,18 @@ export default function BentoGrid({ departments, productCounts }) {
     // Helper to determine image (logic from old Home.jsx, moved here for cleaner code)
     const getDepartmentImage = (dept) => {
         const name = dept.name.toLowerCase();
-        if (name.includes('shisha') || name.includes('hookah')) {
-            return '/images/product-hookah.png';
-        } else if (name.includes('vape') || name.includes('e-zigarette')) {
-            return 'https://images.unsplash.com/photo-1536412597336-ade7b523ecfc?q=80&w=1587&auto=format&fit=crop';
+        if (!name) return '/images/hero-bg.jpg';
+
+        if (name.includes('shisha') || name.includes('hookah') || name.includes('pfeife')) {
+            return 'https://images.unsplash.com/photo-1517156943265-4f3b8b10f546?q=80&w=2070&auto=format&fit=crop';
+        } else if (name.includes('vape') || name.includes('dampf') || name.includes('e-zigarette')) {
+            return 'https://images.unsplash.com/photo-1610444583167-b844c205739c?q=80&w=2070&auto=format&fit=crop';
         } else if (name.includes('tabak') || name.includes('tobacco')) {
-            return 'https://cdn03.plentymarkets.com/b2nt0o88r126/frontend/Kategorien/Tabak-Kategoriebild.jpg';
+            return 'https://images.unsplash.com/photo-1629731633512-680c4314da5e?q=80&w=2070&auto=format&fit=crop';
         } else if (name.includes('kohle') || name.includes('coal')) {
-            return 'https://cdn03.plentymarkets.com/b2nt0o88r126/frontend/Kategorien/Kohle-Kategoriebild.jpg';
+            return 'https://images.unsplash.com/photo-1622323758558-8d0090887e5b?q=80&w=2070&auto=format&fit=crop';
         } else if (name.includes('zubehör') || name.includes('accessories')) {
-            return 'https://images.unsplash.com/photo-1523293182086-7651a899d60f?q=80&w=2068&auto=format&fit=crop';
+            return 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=2070&auto=format&fit=crop';
         }
         return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop';
     };

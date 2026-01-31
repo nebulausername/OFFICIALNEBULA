@@ -23,17 +23,20 @@ export default function InfiniteMarquee() {
                         repeat: Infinity
                     }}
                 >
-                    {/* Double text for seamless loop */}
+                    {/* Duplicated content for seamless loop */}
                     {[...content, ...content, ...content, ...content].map((item, i) => (
-                        <span
-                            key={i}
-                            className="text-lg md:text-xl font-bold uppercase tracking-widest bg-gradient-to-r from-zinc-400 to-zinc-600 bg-clip-text text-transparent opacity-80"
-                            style={{
-                                textShadow: '0 0 20px rgba(0,0,0,0.5)'
-                            }}
-                        >
-                            {item}
-                        </span>
+                        <div key={i} className="flex items-center gap-12">
+                            <span
+                                className="text-lg md:text-xl font-bold uppercase tracking-widest bg-gradient-to-r from-zinc-400 to-zinc-600 bg-clip-text text-transparent opacity-80"
+                                style={{
+                                    textShadow: '0 0 20px rgba(0,0,0,0.5)'
+                                }}
+                            >
+                                {item}
+                            </span>
+                            {/* Separator dot */}
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                        </div>
                     ))}
                 </motion.div>
             </div>
