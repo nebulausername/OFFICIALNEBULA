@@ -160,76 +160,19 @@ export default function Cart() {
       const total = calculateTotal();
 
       // Create request
+      // Create request (transactional)
       const request = await api.entities.Request.create({
-        user_id: user.id,
-        username: contactInfo.telegram,
+        contact_info: contactInfo,
         note: note,
-        status: 'pending',
-        total_sum: total,
-        contact_info: contactInfo
+        cart_items: cartItems.map(item => ({ id: item.id }))
       });
+      // Backend handles item creation, total calculation, notifications, and cart clearing.
 
-      // Create request items
-      const itemsList = [];
-      for (const item of cartItems) {
-        const product = products[item.product_id];
-        if (product) {
-          await api.entities.RequestItem.create({
-            request_id: request.id,
-            product_id: product.id,
-            sku_snapshot: product.sku,
-            name_snapshot: product.name,
-            price_snapshot: product.price,
-            quantity_snapshot: item.quantity,
-            selected_options_snapshot: item.selected_options || {}
-          });
-          itemsList.push(`${item.quantity}x ${product.name} (${product.price}€)`);
-        }
-      }
+      // Send notifications (handled by backend now, but if we want duplicate client-side calls we can keep them? 
+      // Actually backend controller sends email and telegram notifications. 
+      // See order.controller.js: await sendOrderConfirmation(order, req.user);
+      // So we should REMOVE manual email sending from client to avoid duplicates.)
 
-      // Send notifications
-      try {
-        const telegramMessage = `
-🌟 *NEUE BESTELLUNG - NEBULA SUPPLY* 🌟
-━━━━━━━━━━━━━━━━━━━━
-
-👤 *Kunde:* ${contactInfo.name}
-📞 *Telefon:* ${contactInfo.phone}
-${contactInfo.telegram ? `💬 *Telegram:* ${contactInfo.telegram}` : ''}
-
-🛍️ *Bestellung:*
-${itemsList.map(item => `  • ${item}`).join('\n')}
-
-💰 *Gesamtsumme:* ${total.toFixed(2)}€
-
-${note ? `📝 *Notiz:* ${note}` : ''}
-
-🆔 *Anfrage-ID:* ${request.id}
-📧 *User-Email:* ${user.email}
-
-━━━━━━━━━━━━━━━━━━━━
-⚡ Nebula Supply
-        `.trim();
-
-        await api.integrations.sendEmail({
-          to: user.email,
-          subject: '✨ Bestellung eingegangen - Nebula Supply',
-          html: `Hallo ${contactInfo.name},\n\nDeine Bestellung wurde erfolgreich aufgegeben!\n\nWir melden uns schnellstmöglich bei dir.\n\nGesamtsumme: ${total.toFixed(2)}€\n\nViele Grüße,\nDein Nebula Supply Team`
-        });
-
-        await api.integrations.sendEmail({
-          to: 'admin@nebulasupply.com',
-          subject: `🌟 Neue Bestellung #${request.id}`,
-          html: telegramMessage.replace(/\n/g, '<br>')
-        });
-      } catch (notificationError) {
-        console.error('Notification error:', notificationError);
-      }
-
-      // Clear cart
-      for (const item of cartItems) {
-        await api.entities.StarCartItem.delete(item.id);
-      }
 
       toast({
         title: '🎉 Bestellung erfolgreich aufgegeben!',

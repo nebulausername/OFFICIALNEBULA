@@ -105,8 +105,11 @@ export default function AdminRequests() {
     // Lazy load items for a request
     if (requestItems[requestId]) return;
     try {
-      const items = await api.entities.RequestItem.filter({ request_id: requestId });
-      setRequestItems(prev => ({ ...prev, [requestId]: items }));
+      // Use get() to fetch full details including nested request_items
+      const fullRequest = await api.entities.Request.get(requestId);
+      if (fullRequest && fullRequest.request_items) {
+        setRequestItems(prev => ({ ...prev, [requestId]: fullRequest.request_items }));
+      }
     } catch (err) {
       console.error("Failed to load items", err);
     }

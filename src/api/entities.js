@@ -8,26 +8,26 @@ const buildQueryParams = (filters = {}, sort = null, limit = null) => {
   // Add filters
   Object.keys(filters).forEach(key => {
     if (filters[key] !== undefined && filters[key] !== null) {
-      params[key] = filters[key];
+      params[key] = String(filters[key]);
     }
   });
 
   // Add sort
   if (sort) {
-    params.sort = sort;
+    params.sort = String(sort);
   }
 
   // Add limit
   if (limit) {
-    params.limit = limit;
+    params.limit = String(limit);
   }
 
   return params;
 };
 
 // Generic entity factory - optimized
-const createEntity = (entityName) => {
-  const basePath = `/${entityName.toLowerCase()}s`;
+const createEntity = (entityName, customBasePath = null) => {
+  const basePath = customBasePath || `/${entityName.toLowerCase()}s`;
 
   // Normalize response to always return array for list/filter
   const normalizeArray = (result) => {
@@ -85,14 +85,8 @@ const createEntity = (entityName) => {
           raw: result
         });
 
-        // Handle both array and object with data property
-        if (Array.isArray(result)) {
-          return result;
-        }
-        if (result && Array.isArray(result.data)) {
-          return result.data;
-        }
-        return [];
+        const normalized = normalizeArray(result);
+        return normalized;
       } catch (error) {
         console.error(`❌ API List Error (${entityName}):`, {
           url: fullUrl,
@@ -107,22 +101,11 @@ const createEntity = (entityName) => {
     // Filter items with optional sort and limit
     filter: async (filters = {}, sort = null, limit = null) => {
       const params = buildQueryParams(filters, sort, limit);
-      const fullUrl = `${API_BASE_URL}${basePath}?${new URLSearchParams(params).toString()}`;
-
-
 
       try {
         const result = await api.get(basePath, params);
-
-
-
-        const normalized = normalizeArray(result);
-
-
-
-        return normalized;
+        return normalizeArray(result);
       } catch (error) {
-
         throw error;
       }
     },
@@ -153,7 +136,7 @@ const createEntity = (entityName) => {
 export const entities = {
   Product: createEntity('product'),
   ProductImage: createEntity('product-image'),
-  Category: createEntity('category'),
+  Category: createEntity('category', '/categories'), // Fix pluralization
   Brand: createEntity('brand'),
   Department: createEntity('department'),
   User: createEntity('user'),

@@ -162,9 +162,6 @@ export default function Checkout() {
       const total = await calculateTotal();
 
       const request = await api.entities.Request.create({
-        user_id: user.id,
-        total_sum: total,
-        status: 'pending',
         contact_info: {
           name: formData.name,
           phone: formData.phone,
@@ -176,27 +173,12 @@ export default function Checkout() {
           country: formData.country,
           shippingMethod: formData.shippingMethod
         },
-        note: formData.notes
+        note: formData.notes,
+        cart_items: cartItems.map(item => ({ id: item.id }))
       });
 
-      for (const item of cartItems) {
-        const details = await getItemDetails(item);
-        if (details) {
-          await api.entities.RequestItem.create({
-            request_id: request.id,
-            product_id: item.product_id,
-            sku_snapshot: details.sku,
-            name_snapshot: details.name,
-            price_snapshot: details.price,
-            quantity_snapshot: item.quantity || 1,
-            selected_options_snapshot: item.selected_options || {}
-          });
-        }
-      }
-
-      for (const item of cartItems) {
-        await api.entities.StarCartItem.delete(item.id);
-      }
+      // Backend handles item creation and cart clearing transactionally
+      // We just need to wait for the response
 
       // Party Time! 🎉
       playSuccess();
