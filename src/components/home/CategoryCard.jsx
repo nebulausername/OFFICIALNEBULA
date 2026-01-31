@@ -4,7 +4,7 @@ import { createPageUrl } from '../../utils';
 import { motion } from 'framer-motion';
 import { ChevronRight, Sparkles } from 'lucide-react';
 
-export default function CategoryCard({ department, index, productCount = 0, image }) {
+export default function CategoryCard({ department, index, productCount = 0, image, className = "", featured = false }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -51,13 +51,13 @@ export default function CategoryCard({ department, index, productCount = 0, imag
 
           <div className="translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
             {/* Title */}
-            <h3 className="text-2xl font-black mb-1 text-white leading-tight group-hover:text-yellow-400 transition-colors">
+            <h3 className={`font-black mb-1 text-white leading-tight group-hover:text-yellow-400 transition-colors ${featured ? 'text-4xl md:text-5xl' : 'text-2xl'}`}>
               {department.name}
             </h3>
 
             {/* Subtitle / Product Count */}
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+              <p className={`font-medium text-zinc-300 group-hover:text-white transition-colors ${featured ? 'text-lg' : 'text-sm'}`}>
                 {productCount > 0 ? `${productCount} Produkte` : 'Jetzt entdecken'}
               </p>
 

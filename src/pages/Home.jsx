@@ -13,6 +13,9 @@ import CategoryProductsSection from '../components/home/CategoryProductsSection'
 import VideoSpotlight from '../components/home/VideoSpotlight';
 import TypewriterEffect from '@/components/ui/TypewriterEffect';
 import CosmicHeroBackground from '../components/home/CosmicHeroBackground';
+import BentoGrid from '../components/home/BentoGrid';
+import InfiniteMarquee from '../components/home/InfiniteMarquee';
+import MagneticButton from '@/components/ui/MagneticButton';
 import SEO from '@/components/seo/SEO';
 
 export default function Home() {
@@ -505,11 +508,7 @@ export default function Home() {
               className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
             >
               <Link to={createPageUrl('Products')}>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative"
-                >
+                <MagneticButton className="group relative">
                   <motion.div
                     animate={{
                       boxShadow: [
@@ -521,22 +520,18 @@ export default function Home() {
                     transition={{ duration: 2, repeat: Infinity }}
                     className="absolute inset-0 rounded-2xl blur-xl"
                   />
-                  <Button className="btn-gold relative h-16 px-12 text-lg rounded-2xl">
+                  <Button className="btn-gold relative h-16 px-12 text-lg rounded-2xl border-none">
                     <Sparkles className="w-6 h-6 mr-3 group-hover:rotate-180 transition-transform duration-500" />
                     Jetzt shoppen
                   </Button>
-                </motion.div>
+                </MagneticButton>
               </Link>
 
               <Link to={createPageUrl('VIP')}>
-                <motion.div
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  whileTap={{ scale: 0.95 }}
-                >
+                <MagneticButton>
                   <Button
-                    className="h-16 px-10 text-lg rounded-2xl font-black"
+                    className="h-16 px-10 text-lg rounded-2xl font-black bg-black/20 backdrop-blur-md"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(214, 178, 94, 0.15), rgba(214, 178, 94, 0.08))',
                       border: '2px solid rgba(214, 178, 94, 0.5)',
                       color: '#F5D98B',
                       boxShadow: '0 0 30px rgba(214, 178, 94, 0.2)'
@@ -545,7 +540,7 @@ export default function Home() {
                     <Star className="w-6 h-6 mr-2" style={{ color: '#E8C76A' }} fill="currentColor" />
                     VIP werden
                   </Button>
-                </motion.div>
+                </MagneticButton>
               </Link>
             </motion.div>
 
@@ -568,7 +563,7 @@ export default function Home() {
             >
               {[
                 { value: '500+', label: 'Produkte', icon: '📦', color: 'from-purple-500 to-pink-500' },
-                { value: '10k+', label: 'Happy Customers', icon: '⭐', color: 'from-amber-500 to-orange-500' },
+                { value: '10k+', label: 'Customers', icon: '⭐', color: 'from-amber-500 to-orange-500' },
                 { value: '24/7', label: 'Support', icon: '💬', color: 'from-cyan-500 to-blue-500' }
               ].map((stat, i) => (
                 <motion.div
@@ -596,6 +591,11 @@ export default function Home() {
               ))}
             </motion.div>
           </motion.div>
+        </div>
+
+        {/* Infinite Marquee Strip */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 transform translate-y-1/2">
+          <InfiniteMarquee />
         </div>
       </section>
 
@@ -673,49 +673,22 @@ export default function Home() {
             </motion.p>
           </motion.div>
 
-          {/* Category Grid - 2 cols mobile, 4 cols desktop */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {/* Bento Grid */}
+          <div className="min-h-[400px]">
             {loadingDepts ? (
               // Skeleton Loading
-              Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="rounded-[24px] h-[220px] bg-zinc-900/50 animate-pulse border border-zinc-800" />
-              ))
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-[500px] animate-pulse">
+                <div className="md:col-span-2 md:row-span-2 bg-zinc-900/50 rounded-3xl border border-zinc-800" />
+                <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800" />
+                <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800" />
+                <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800" />
+                <div className="bg-zinc-900/50 rounded-3xl border border-zinc-800" />
+              </div>
             ) : (
-              departments.map((dept, index) => {
-                // Dynamic Image Assignment
-                let bgImage = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop'; // Default Sneaker/Store vibe
-
-                const name = dept.name.toLowerCase();
-                if (name.includes('shisha') || name.includes('hookah')) {
-                  bgImage = '/images/product-hookah.png'; // Our premium hookahs
-                } else if (name.includes('vape') || name.includes('e-zigarette')) {
-                  bgImage = 'https://images.unsplash.com/photo-1536412597336-ade7b523ecfc?q=80&w=1587&auto=format&fit=crop'; // Vape smoke
-                } else if (name.includes('tabak') || name.includes('tobacco')) {
-                  bgImage = 'https://cdn03.plentymarkets.com/b2nt0o88r126/frontend/Kategorien/Tabak-Kategoriebild.jpg'; // Tobacco leaves/tins
-                } else if (name.includes('kohle') || name.includes('coal')) {
-                  bgImage = 'https://cdn03.plentymarkets.com/b2nt0o88r126/frontend/Kategorien/Kohle-Kategoriebild.jpg'; // Burning coals
-                } else if (name.includes('zubehör') || name.includes('accessories')) {
-                  bgImage = 'https://images.unsplash.com/photo-1523293182086-7651a899d60f?q=80&w=2068&auto=format&fit=crop';
-                }
-
-                return (
-                  <motion.div
-                    key={dept.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                    className="h-full"
-                  >
-                    <CategoryCard
-                      department={dept}
-                      index={index}
-                      productCount={departmentProductCounts[dept.id] || 0}
-                      image={bgImage}
-                    />
-                  </motion.div>
-                );
-              })
+              <BentoGrid
+                departments={departments}
+                productCounts={departmentProductCounts}
+              />
             )}
           </div>
 

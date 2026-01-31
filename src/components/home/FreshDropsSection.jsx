@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWishlist } from '../wishlist/WishlistContext';
+import TiltCard from '@/components/ui/TiltCard';
 
 function DropProductCard({ product, onQuickView }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -343,7 +344,9 @@ export default function FreshDropsSection({ products = [], loading = false, onQu
                     ease: "easeOut"
                   }}
                 >
-                  <DropProductCard product={product} onQuickView={onQuickView} />
+                  <TiltCard>
+                    <DropProductCard product={product} onQuickView={onQuickView} />
+                  </TiltCard>
                 </motion.div>
               ))
             ) : (
