@@ -40,6 +40,11 @@ export default function BentoGrid({ departments, productCounts }) {
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: i * 0.05 }}
                         className={`h-full ${gridClass}`}
+                        onMouseMove={(e) => {
+                            const { left, top } = e.currentTarget.getBoundingClientRect();
+                            e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - left}px`);
+                            e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - top}px`);
+                        }}
                     >
                         <CategoryCard
                             department={dept}

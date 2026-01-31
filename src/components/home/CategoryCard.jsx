@@ -35,6 +35,14 @@ export default function CategoryCard({ department, index, productCount = 0, imag
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 group-hover:from-zinc-700 group-hover:to-zinc-800 transition-colors duration-300" />
         )}
 
+        {/* Spotlight Effect */}
+        <div
+          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          style={{
+            background: 'radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06), transparent 40%)'
+          }}
+        />
+
         {/* Glass Border */}
         <div
           className="absolute inset-0 rounded-[24px] border border-white/10 group-hover:border-white/20 transition-colors z-20 pointer-events-none"
