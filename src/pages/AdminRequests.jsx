@@ -361,7 +361,7 @@ export default function AdminRequests() {
                   {/* Items Table */}
                   <div>
                     <h3 className="text-lg font-bold text-white mb-4">Positionen</h3>
-                    <div className="border border-zinc-800 rounded-2xl overflow-hidden">
+                    <div className="border border-zinc-800 rounded-2xl overflow-x-auto">
                       <table className="w-full text-sm text-left">
                         <thead className="bg-zinc-900 text-zinc-500 font-medium border-b border-zinc-800">
                           <tr>

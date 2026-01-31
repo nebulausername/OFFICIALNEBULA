@@ -4,6 +4,8 @@ import Footer from './components/layout/Footer';
 import { WishlistProvider } from './components/wishlist/WishlistContext';
 import { I18nProvider } from './components/i18n/I18nProvider';
 
+import GlobalSearch from "@/components/admin/GlobalSearch";
+
 export default function Layout({ children, currentPageName }) {
   const [theme, setTheme] = useState('dark');
 
@@ -42,6 +44,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Premium Header */}
           <PremiumHeader />
+          <GlobalSearch />
 
           {/* Main Content */}
           <main className="min-h-[calc(100vh-8rem)]">
