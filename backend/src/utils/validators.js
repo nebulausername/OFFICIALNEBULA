@@ -50,6 +50,11 @@ export const validateId = [
   validate,
 ];
 
+export const validateIdParam = (paramName) => [
+  param(paramName).isUUID().withMessage('Invalid ID format'),
+  validate,
+];
+
 // Pagination validators
 export const validatePagination = [
   query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),

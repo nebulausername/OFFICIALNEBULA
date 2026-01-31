@@ -2,7 +2,7 @@ import express from 'express';
 import * as adminController from '../controllers/admin.controller.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { requireAdmin } from '../middleware/admin.middleware.js';
-import { validateId, validatePagination } from '../utils/validators.js';
+import { validateId, validatePagination, validateIdParam } from '../utils/validators.js';
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.patch('/users/:id/vip', validateId, adminController.toggleVIP);
 router.post('/products/bulk-import', adminController.bulkImportProducts);
 
 router.get('/chats', adminController.getChatSessions);
-router.get('/chats/:sessionId/messages', validateId('sessionId'), adminController.getChatHistory);
+router.get('/chats/:sessionId/messages', validateIdParam('sessionId'), adminController.getChatHistory);
 
 export default router;
 
