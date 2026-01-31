@@ -36,7 +36,7 @@ export default function ProductCard({ product, onAddToCart }) {
         setIsHovered(false);
         setPreviewImage(null);
       }}
-      className="product-card group relative flex flex-col h-full bg-[#09090b] border border-zinc-800/50 rounded-2xl overflow-hidden hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500"
+      className="product-card group relative flex flex-col h-full glass-card rounded-2xl overflow-hidden hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500"
     >
       <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`} className="flex-1 flex flex-col">
         {/* Image Container */}

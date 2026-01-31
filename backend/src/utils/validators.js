@@ -17,9 +17,9 @@ export const validateProduct = [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('sku').trim().notEmpty().withMessage('SKU is required'),
   body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),
-  body('category_id').optional().isUUID().withMessage('Invalid category ID'),
-  body('brand_id').optional().isUUID().withMessage('Invalid brand ID'),
-  body('department_id').optional().isUUID().withMessage('Invalid department ID'),
+  body('category_id').optional({ checkFalsy: true }).isUUID().withMessage('Invalid category ID'),
+  body('brand_id').optional({ checkFalsy: true }).isUUID().withMessage('Invalid brand ID'),
+  body('department_id').optional({ checkFalsy: true }).isUUID().withMessage('Invalid department ID'),
   validate,
 ];
 

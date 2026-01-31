@@ -17,19 +17,19 @@ export const listProducts = async (req, res, next) => {
     } = req.query;
 
     const where = {};
-    
+
     if (category_id) where.category_id = category_id;
     if (brand_id) where.brand_id = brand_id;
     if (department_id) where.department_id = department_id;
     if (in_stock !== undefined) where.in_stock = in_stock === 'true';
-    
+
     // Price range filter
     if (min_price || max_price) {
       where.price = {};
       if (min_price) where.price.gte = parseFloat(min_price);
       if (max_price) where.price.lte = parseFloat(max_price);
     }
-    
+
     // Tags filter (array search in JSONB)
     if (tags) {
       const tagArray = Array.isArray(tags) ? tags : [tags];
@@ -37,7 +37,7 @@ export const listProducts = async (req, res, next) => {
         array_contains: tagArray,
       };
     }
-    
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -59,7 +59,7 @@ export const listProducts = async (req, res, next) => {
     // Optimized query with select to reduce data transfer
     // Only include relations if needed (for list view, we can skip some)
     const includeRelations = !req.query.minimal || req.query.minimal !== 'true';
-    
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
@@ -163,6 +163,12 @@ export const getProduct = async (req, res, next) => {
 export const createProduct = async (req, res, next) => {
   try {
     const productData = req.body;
+    console.log('📝 Creating Product with data:', JSON.stringify(productData, null, 2));
+
+    // Basic Validation Logging
+    if (!productData.name || !productData.sku || !productData.price) {
+      console.error('❌ Validation Failed: Missing required fields (name, sku, price)');
+    }
 
     const product = await prisma.product.create({
       data: productData,
@@ -173,8 +179,15 @@ export const createProduct = async (req, res, next) => {
       },
     });
 
+    console.log('✅ Product Created Successfully:', product.id);
     res.status(201).json(product);
   } catch (error) {
+    console.error('❌ Error creating product:', error);
+    // Send detailed prisma error if available
+    if (error.code) {
+      console.error('Prisma Error Code:', error.code);
+      console.error('Prisma Error Meta:', error.meta);
+    }
     next(error);
   }
 };

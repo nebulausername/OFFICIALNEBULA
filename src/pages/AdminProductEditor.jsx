@@ -118,10 +118,27 @@ export default function AdminProductEditor() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // 1. Sanitize Data
       const dataToSave = {
         ...formData,
-        // We only save basic data here. Variants are saved inside ProductVariantManager.
+        // Convert empty strings to null for optional foreign keys to avoid FK errors
+        department_id: formData.department_id || null,
+        category_id: formData.category_id || null,
+        brand_id: formData.brand_id || null,
+        // Ensure price is a number
+        price: Number(formData.price),
+        // Ensure drop_date is preserved or null
+        drop_date: formData.drop_date ? formData.drop_date.toISOString() : null
       };
+
+      // 2. Client-side Validation
+      if (!dataToSave.sku || !dataToSave.name || dataToSave.price < 0) {
+        toast.error('Bitte SKU, Name und gültigen Preis eingeben.');
+        setSaving(false);
+        return;
+      }
+
+      console.log('📤 Sending Product Data:', dataToSave);
 
       if (productId) {
         await api.entities.Product.update(productId, dataToSave);
@@ -133,7 +150,9 @@ export default function AdminProductEditor() {
       }
     } catch (error) {
       console.error('Error saving:', error);
-      toast.error('Fehler beim Speichern');
+      // Try to extract backend error message
+      const msg = error.response?.data?.message || error.message || 'Fehler beim Speichern';
+      toast.error(`Fehler: ${msg}`);
     } finally {
       setSaving(false);
     }
