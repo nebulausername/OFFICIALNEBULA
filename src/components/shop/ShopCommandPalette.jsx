@@ -6,8 +6,7 @@ import {
     CommandGroup,
     CommandInput,
     CommandItem,
-    CommandList,
-    CommandSeparator
+    CommandList
 } from "@/components/ui/command";
 import {
     Search,

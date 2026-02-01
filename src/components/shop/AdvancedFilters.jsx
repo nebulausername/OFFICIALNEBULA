@@ -91,13 +91,17 @@ export default function AdvancedFilters({
   );
 
   const CheckboxItem = ({ label, checked, onChange, count }) => (
-    <button
+    <motion.button
+      whileHover={{ x: 4 }}
       onClick={onChange}
-      className="w-full flex items-center justify-between py-2 px-2 rounded-lg transition-all hover:bg-white/5 group"
+      className="w-full flex items-center justify-between py-2 px-2 rounded-lg transition-all group"
+      style={{
+        background: checked ? 'rgba(214, 178, 94, 0.08)' : 'transparent',
+      }}
     >
       <div className="flex items-center gap-3">
         <div
-          className="w-5 h-5 rounded flex items-center justify-center transition-all"
+          className="w-5 h-5 rounded flex items-center justify-center transition-all shadow-sm"
           style={{
             background: checked ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' : 'rgba(255, 255, 255, 0.06)',
             border: checked ? 'none' : '1px solid rgba(255, 255, 255, 0.15)'
@@ -106,27 +110,29 @@ export default function AdvancedFilters({
           {checked && <Check className="w-3 h-3" style={{ color: '#0B0D12' }} />}
         </div>
         <span
-          className="text-sm font-medium"
+          className="text-sm font-medium transition-colors"
           style={{ color: checked ? '#F2D27C' : 'rgba(255, 255, 255, 0.75)' }}
         >
           {label}
         </span>
       </div>
       {count !== undefined && (
-        <span className="text-xs font-medium" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
+        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-white/5" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
           {count}
         </span>
       )}
-    </button>
+    </motion.button>
   );
 
   const ColorSwatch = ({ color, selected, onClick }) => (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.15 }}
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="relative w-8 h-8 rounded-full transition-all hover:scale-110"
+      className="relative w-8 h-8 rounded-full transition-all shadow-lg"
       style={{
         background: color.hex || '#888',
-        boxShadow: selected ? `0 0 0 2px var(--bg), 0 0 0 4px #D6B25E` : 'none'
+        boxShadow: selected ? `0 0 0 2px #050608, 0 0 0 4px #D6B25E` : '0 2px 4px rgba(0,0,0,0.2)'
       }}
       title={color.name}
     >
@@ -136,7 +142,7 @@ export default function AdvancedFilters({
           style={{ color: isLightColor(color.hex) ? '#000' : '#FFF' }}
         />
       )}
-    </button>
+    </motion.button>
   );
 
   const isLightColor = (hex) => {
@@ -150,10 +156,10 @@ export default function AdvancedFilters({
 
   // Extract inner content to reuse
   const FilterContent = () => (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full space-y-2">
       {/* Categories */}
       <FilterSection title="Kategorien" section="categories">
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {categories.map(cat => {
             const count = products.filter(p => p.category_id === cat.id).length;
             return (
@@ -177,7 +183,7 @@ export default function AdvancedFilters({
 
       {/* Brands */}
       <FilterSection title="Marken" section="brands">
-        <div className="space-y-1 max-h-48 overflow-y-auto custom-scrollbar">
+        <div className="space-y-0.5 max-h-56 overflow-y-auto custom-scrollbar pr-2">
           {brands.map(brand => {
             const count = products.filter(p => p.brand_id === brand.id).length;
             return (
@@ -201,7 +207,7 @@ export default function AdvancedFilters({
 
       {/* Price Range */}
       <FilterSection title="Preis" section="price">
-        <div className="space-y-4 pt-2">
+        <div className="space-y-6 pt-4 pb-2">
           <Slider
             value={filters.priceRange || [minPrice, maxPrice]}
             min={minPrice}
@@ -214,15 +220,15 @@ export default function AdvancedFilters({
           />
           <div className="flex items-center justify-between">
             <div
-              className="px-4 py-2 rounded-lg text-sm font-bold"
-              style={{ background: 'rgba(255, 255, 255, 0.06)', color: '#FFFFFF' }}
+              className="px-4 py-2 rounded-lg text-sm font-bold shadow-inner"
+              style={{ background: 'rgba(0, 0, 0, 0.3)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.05)' }}
             >
               {(filters.priceRange?.[0] || minPrice).toFixed(0)}€
             </div>
             <span style={{ color: 'rgba(255, 255, 255, 0.4)' }}>—</span>
             <div
-              className="px-4 py-2 rounded-lg text-sm font-bold"
-              style={{ background: 'rgba(255, 255, 255, 0.06)', color: '#FFFFFF' }}
+              className="px-4 py-2 rounded-lg text-sm font-bold shadow-inner"
+              style={{ background: 'rgba(0, 0, 0, 0.3)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.05)' }}
             >
               {(filters.priceRange?.[1] || maxPrice).toFixed(0)}€
             </div>
@@ -246,11 +252,12 @@ export default function AdvancedFilters({
                       : [...current, size];
                     onFiltersChange({ ...filters, sizes: updated });
                   }}
-                  className="px-3 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                  className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:scale-105 shadow-sm"
                   style={{
-                    background: selected ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' : 'rgba(255, 255, 255, 0.06)',
+                    background: selected ? 'linear-gradient(135deg, #D6B25E, #F2D27C)' : 'rgba(255, 255, 255, 0.04)',
                     color: selected ? '#0B0D12' : 'rgba(255, 255, 255, 0.75)',
-                    border: selected ? 'none' : '1px solid rgba(255, 255, 255, 0.1)'
+                    border: selected ? 'none' : '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: selected ? '0 4px 12px rgba(214, 178, 94, 0.3)' : 'none'
                   }}
                 >
                   {size}
@@ -264,7 +271,7 @@ export default function AdvancedFilters({
       {/* Colors */}
       {allColors.length > 0 && (
         <FilterSection title="Farben" section="colors">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 p-1">
             {allColors.map((color, idx) => (
               <ColorSwatch
                 key={idx}
@@ -285,22 +292,15 @@ export default function AdvancedFilters({
 
       {/* Availability */}
       <FilterSection title="Verfügbarkeit" section="availability">
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <CheckboxItem
-            label="Auf Lager"
+            label="Nur sofort verfügbar"
             checked={filters.inStock === true}
             onChange={() => {
               onFiltersChange({
                 ...filters,
                 inStock: filters.inStock === true ? null : true
               });
-            }}
-          />
-          <CheckboxItem
-            label="Alle anzeigen"
-            checked={filters.inStock === null}
-            onChange={() => {
-              onFiltersChange({ ...filters, inStock: null });
             }}
           />
         </div>
@@ -311,11 +311,11 @@ export default function AdvancedFilters({
         <Button
           onClick={onReset}
           variant="outline"
-          className="w-full h-10 rounded-lg text-xs font-bold uppercase tracking-wider"
+          className="w-full h-10 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-colors"
           style={{
-            background: 'rgba(255, 255, 255, 0.06)',
+            background: 'transparent',
             border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: '#FFFFFF'
+            color: 'rgba(255,255,255,0.7)'
           }}
         >
           <RotateCcw className="w-3 h-3 mr-2" />
@@ -327,11 +327,9 @@ export default function AdvancedFilters({
 
   if (variant === 'sidebar') {
     return (
-      <div className="w-full h-full">
-        <div className="flex items-center gap-3 mb-6">
-          <SlidersHorizontal className="w-5 h-5" style={{ color: '#D6B25E' }} />
-          <span className="text-lg font-bold text-white">Filter</span>
-        </div>
+      <div className="w-full h-full flex flex-col">
+        {/* We rely on parent to render header if needed, but here we can just render content */}
+        {/* Actually parent renders header. We just need content. */}
         <FilterContent />
       </div>
     );
@@ -347,7 +345,7 @@ export default function AdvancedFilters({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 lg:hidden" // Hide backdrop on desktop if we use sidebar, but here it's drawer mode
+            className="fixed inset-0 z-40 lg:hidden"
             style={{ background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)' }}
           />
 
@@ -398,11 +396,7 @@ export default function AdvancedFilters({
             <div className="p-6 border-t border-white/10 bg-black/20">
               <Button
                 onClick={onClose}
-                className="w-full h-12 rounded-xl font-bold"
-                style={{
-                  background: 'linear-gradient(135deg, #D6B25E, #F2D27C)',
-                  color: '#0B0D12'
-                }}
+                className="w-full h-12 rounded-xl font-bold btn-gold shadow-lg"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Ergebnisse anzeigen

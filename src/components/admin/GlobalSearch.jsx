@@ -7,21 +7,12 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-    CommandSeparator,
-    CommandShortcut,
 } from "@/components/ui/command";
 import {
     Calculator,
-    Calendar,
-    CreditCard,
-    Settings,
-    Smile,
     User,
     Package,
-    ShoppingBag,
-    Search,
-    Hash,
-    ArrowRight
+    ShoppingBag
 } from "lucide-react";
 import { api } from '@/api';
 import { useAuth } from '@/lib/AuthContext';

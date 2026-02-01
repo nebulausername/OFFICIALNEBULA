@@ -9,20 +9,17 @@ import {
 } from '@/components/ui/select';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle
+  DialogContent
 } from '@/components/ui/dialog';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Eye, ArrowLeft, Package, Clock, CheckCircle2, XCircle, Truck, AlertCircle, Search } from 'lucide-react';
+import { Eye, ArrowLeft, Package, Clock, CheckCircle2, XCircle, Truck, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { useToast } from '@/components/ui/use-toast';
 import StatusChangeDialog from '../components/admin/StatusChangeDialog';
 import DataTable from '@/components/admin/ui/DataTable';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AdminRequests() {
   const [requests, setRequests] = useState([]);

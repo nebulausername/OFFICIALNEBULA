@@ -5,7 +5,7 @@ import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Check, Package, CheckCircle2, MessageCircle, ShoppingBag, MapPin } from 'lucide-react';
+import { ArrowLeft, Check, Package, CheckCircle2, MessageCircle, ShoppingBag, MapPin, Sparkles, ShieldCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useNebulaSound } from '@/contexts/SoundContext';
 import CheckoutSummary from '@/components/checkout/CheckoutSummary';
@@ -64,9 +64,8 @@ export default function Checkout() {
   const calculateXP = (total) => Math.floor(total * 10);
 
   const steps = [
-    { title: 'Warenkorb', icon: ShoppingBag },
     { title: 'Versand', icon: MapPin },
-    { title: 'Bestätigung', icon: Check }
+    { title: 'Zahlung', icon: CheckCircle2 }
   ];
 
   const [productsMap, setProductsMap] = useState({});
@@ -117,7 +116,6 @@ export default function Checkout() {
         if (tgUser) {
           setFormData(prev => ({
             ...prev,
-            // Only fill if not already set (e.g. by Auth)
             name: prev.name || `${tgUser.first_name} ${tgUser.last_name || ''}`.trim(),
             telegram: prev.telegram || (tgUser.username ? `@${tgUser.username}` : '')
           }));
@@ -149,10 +147,9 @@ export default function Checkout() {
     const val = e.target.value;
     setFormData(prev => ({ ...prev, zip: val }));
 
-    // Mock Auto-Fill
     if (MOCK_ZIPS[val]) {
       setFormData(prev => ({ ...prev, zip: val, city: MOCK_ZIPS[val] }));
-      playSuccess(); // Subtle feedback
+      playSuccess();
     }
   };
 
@@ -177,22 +174,18 @@ export default function Checkout() {
         cart_items: cartItems.map(item => ({ id: item.id }))
       });
 
-      // Backend handles item creation and cart clearing transactionally
-      // We just need to wait for the response
-
-      // Party Time! 🎉
       playSuccess();
       const duration = 3000;
       const end = Date.now() + duration;
 
-      const colors = ['#E8C76A', '#F5D98B', '#FFFFFF'];
+      const colors = ['#D6B25E', '#F2D27C', '#FFFFFF'];
 
       (function frame() {
         const left = end - Date.now();
-        if (left <= 0) return; // Stop animation
+        if (left <= 0) return;
 
         confetti({
-          particleCount: 5,
+          particleCount: 3,
           angle: 60,
           spread: 55,
           origin: { x: 0 },
@@ -200,7 +193,7 @@ export default function Checkout() {
           zIndex: 9999
         });
         confetti({
-          particleCount: 5,
+          particleCount: 3,
           angle: 120,
           spread: 55,
           origin: { x: 1 },
@@ -212,8 +205,8 @@ export default function Checkout() {
       }());
 
       setTimeout(() => {
-        navigate(createPageUrl('OrderConfirmation') + `?orderId=${request.id}`);
-      }, 2000); // Slightly longer delay to enjoy the show
+        navigate(createPageUrl('Requests') + `?orderId=${request.id}`); // Corrected redirect
+      }, 2000);
     } catch (error) {
       console.error('Error submitting order:', error);
       playError();
@@ -224,67 +217,66 @@ export default function Checkout() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
-          />
-          <p className="text-zinc-400">Lädt Checkout...</p>
-        </div>
+      <div className="min-h-screen bg-[#050608] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-purple-500/30 font-sans pb-20">
+    <div className="min-h-screen bg-[#050608] text-white selection:bg-gold/30 font-sans pb-20">
       {/* Navbar Minimal */}
-      <div className="border-b border-zinc-800 bg-zinc-950/50 backdrop-blur-xl sticky top-0 z-50">
+      <div className="glass-panel sticky top-0 z-50 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div onClick={() => navigate(-1)} className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white transition-colors">
-            <ArrowLeft size={20} />
-            <span className="font-medium">Zurück</span>
+          <div onClick={() => navigate(-1)} className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white transition-colors group">
+            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            </div>
+            <span className="font-medium hidden sm:inline">Zurück</span>
           </div>
-          <div className="font-black text-xl tracking-tight bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            NEBULA CHECKOUT
+          <div className="font-black text-xl tracking-tight text-white flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-gold" />
+            SECURE CHECKOUT
           </div>
-          <div className="w-[70px]"></div> {/* Spacer */}
+          <div className="w-[70px]"></div>
         </div>
       </div>
 
       {/* Gamification Bar */}
-      <div className="bg-purple-900/20 border-b border-purple-500/20 py-3">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center gap-3 text-sm font-medium">
-          <span className="text-purple-300">Level Progress:</span>
-          <div className="w-32 h-2 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="bg-gradient-to-r from-purple-900/10 via-purple-900/20 to-purple-900/10 border-b border-purple-500/10 py-3 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center gap-4 text-sm font-medium">
+          <span className="text-purple-300 hidden sm:inline">Level Progress:</span>
+          <div className="w-32 sm:w-48 h-2 bg-black/40 rounded-full overflow-hidden border border-white/5 relative">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: '70%' }}
-              className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
             />
           </div>
-          <span className="text-white font-bold">+{calculateXP(totalPrice)} XP</span>
-          <span className="text-zinc-500 text-xs">(mit dieser Order)</span>
+          <span className="text-white font-bold flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-gold" />
+            +{calculateXP(totalPrice)} XP
+          </span>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
-        <div className="grid lg:grid-cols-12 gap-12">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Left Column: Form & Steps */}
           <div className="lg:col-span-7 space-y-8">
 
-            {/* Progress Steps (Simpler) */}
+            {/* Steps Indicator */}
             <div className="flex items-center gap-4 mb-8">
               {steps.map((step, i) => (
-                <div key={i} className={`flex items-center gap-2 ${i <= currentStep ? 'text-white' : 'text-zinc-600'}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors ${i < currentStep ? 'bg-emerald-500 border-emerald-500' :
-                    i === currentStep ? 'border-purple-500 text-purple-400' :
-                      'border-zinc-700 text-zinc-600'
+                <div key={i} className={`flex items-center gap-2 ${i <= currentStep ? 'opacity-100' : 'opacity-40'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${currentStep > i ? 'bg-gold border-gold text-black' :
+                      currentStep === i ? 'border-gold text-gold shadow-[0_0_10px_rgba(214,178,94,0.3)]' :
+                        'border-zinc-700 text-zinc-500'
                     }`}>
-                    {i < currentStep ? <Check size={14} /> : i + 1}
+                    {currentStep > i ? <Check size={14} /> : i + 1}
                   </div>
-                  <span className="hidden sm:inline font-bold text-sm">{step.title}</span>
+                  <span className={`hidden sm:inline font-bold text-sm ${currentStep === i ? 'text-white' : 'text-zinc-500'}`}>{step.title}</span>
                   {i < steps.length - 1 && (
                     <div className="w-8 h-0.5 bg-zinc-800 mx-2" />
                   )}
@@ -304,91 +296,89 @@ export default function Checkout() {
                   transition={{ duration: 0.3 }}
                   className="space-y-6"
                 >
-                  <h2 className="text-3xl font-black mb-6">Versanddetails</h2>
+                  <h2 className="text-3xl font-black mb-6 text-white">Versanddetails</h2>
 
                   {/* Express Shipping Option */}
                   <div
                     onClick={() => setFormData({ ...formData, shippingMethod: formData.shippingMethod === 'express' ? 'standard' : 'express' })}
-                    className={`cursor-pointer group relative overflow-hidden p-6 rounded-2xl border-2 transition-all ${formData.shippingMethod === 'express'
-                      ? 'border-purple-500 bg-purple-500/10'
-                      : 'border-zinc-800 bg-zinc-900 hover:border-zinc-700'
+                    className={`cursor-pointer group relative overflow-hidden p-6 rounded-2xl border transition-all ${formData.shippingMethod === 'express'
+                      ? 'border-gold bg-gold/5 shadow-[0_0_20px_rgba(214,178,94,0.1)]'
+                      : 'border-white/10 bg-white/5 hover:border-gold/30'
                       }`}
                   >
                     <div className="flex justify-between items-start relative z-10">
                       <div className="flex gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${formData.shippingMethod === 'express' ? 'bg-purple-500 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${formData.shippingMethod === 'express' ? 'bg-gold text-black' : 'bg-white/10 text-zinc-400'}`}>
                           <Package size={24} />
                         </div>
                         <div>
                           <h3 className="font-bold text-lg text-white">Express Lieferung</h3>
-                          <p className="text-zinc-400 text-sm">Direkt aus China (8-15 Tage)</p>
+                          <p className="text-zinc-400 text-sm">Bevorzugte Behandlung (2-4 Tage)</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="block font-bold text-emerald-400">-15% Rabatt</span>
-                        {formData.shippingMethod === 'express' && <CheckCircle2 className="text-purple-500 ml-auto mt-2" />}
+                        <span className="block font-bold text-emerald-400 text-sm bg-emerald-400/10 px-2 py-1 rounded">SCHNELLER</span>
+                        {formData.shippingMethod === 'express' && <CheckCircle2 className="text-gold ml-auto mt-2" />}
                       </div>
                     </div>
                   </div>
 
                   {/* Form Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-400 ml-1">Vollständiger Name</label>
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Name</label>
                       <Input
                         value={formData.name}
                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
                         placeholder="Max Mustermann"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-400 ml-1">E-Mail Adresse</label>
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">E-Mail</label>
                       <Input
                         value={formData.email}
                         onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
                         placeholder="max@example.com"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-bold text-zinc-400 ml-1">Adresse</label>
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Straße & Hausnummer</label>
                       <Input
                         value={formData.address}
                         onChange={e => setFormData({ ...formData, address: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
                         placeholder="Musterstraße 123"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-400 ml-1">PLZ (Auto-Fill)</label>
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1 flex items-center gap-2">PLZ <span className="text-gold text-[10px]">AUTO-FILL</span></label>
                       <Input
                         value={formData.zip}
                         onChange={handleZipChange}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
                         placeholder="10115"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-400 ml-1">Stadt</label>
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Stadt</label>
                       <Input
                         value={formData.city}
                         onChange={e => setFormData({ ...formData, city: e.target.value })}
-                        className="h-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
                         placeholder="Berlin"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-bold text-zinc-400 ml-1">Telegram (für Updates)</label>
-                      <div className="relative">
-                        <MessageCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                        <Input
-                          value={formData.telegram}
-                          onChange={e => setFormData({ ...formData, telegram: e.target.value })}
-                          className="h-12 pl-12 bg-zinc-900 border-zinc-800 focus:border-purple-500 rounded-xl transition-all"
-                          placeholder="@username"
-                        />
-                      </div>
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1 flex items-center gap-2"><MessageCircle className="w-3 h-3" /> Telegram</label>
+                      <Input
+                        value={formData.telegram}
+                        onChange={e => setFormData({ ...formData, telegram: e.target.value })}
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white pl-10 relative"
+                        placeholder="@username"
+                      />
+                      {/* Note: Icon positioning would be better with a wrapper in Input component or absolute div here, kept simple for now */}
                     </div>
                   </div>
 
@@ -396,9 +386,9 @@ export default function Checkout() {
                     <Button
                       onClick={() => setCurrentStep(1)}
                       disabled={!formData.name || !formData.email || !formData.address}
-                      className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black text-lg rounded-xl"
+                      className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                     >
-                      Weiter zum Versand
+                      Weiter zur Zahlung
                     </Button>
                   </div>
                 </motion.div>
@@ -414,16 +404,18 @@ export default function Checkout() {
                   custom={1}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-3xl font-black mb-6">Zahlungsmethode</h2>
+                  <h2 className="text-3xl font-black mb-6 text-white">Bezahlung</h2>
 
-                  <div className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl mb-8">
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                        <CheckCircle2 size={20} />
+                  <div className="p-6 glass-panel rounded-2xl mb-8 border border-gold/20 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+                    <div className="flex items-center gap-4 mb-4 relative z-10">
+                      <div className="w-12 h-12 rounded-full bg-gold/20 text-gold flex items-center justify-center border border-gold/30">
+                        <CheckCircle2 size={24} />
                       </div>
                       <div>
-                        <h3 className="font-bold text-white">Anfrage senden</h3>
-                        <p className="text-zinc-400 text-sm">Wir prüfen deine Bestellung und senden dir einen Zahlungslink (PayPal / Krypto).</p>
+                        <h3 className="font-bold text-white text-lg">Bestellung prüfen & absenden</h3>
+                        <p className="text-zinc-400 text-sm max-w-md">Deine Bestellung wird sicher übertragen. Du erhältst anschließend Details zur Zahlung (Krypto / PayPal).</p>
                       </div>
                     </div>
                   </div>
@@ -431,10 +423,16 @@ export default function Checkout() {
                   <Button
                     onClick={handleSubmitOrder}
                     disabled={submitting}
-                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-lg rounded-xl shadow-xl shadow-purple-500/20"
+                    className="w-full h-14 bg-gradient-to-r from-gold to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-black text-lg rounded-xl shadow-lg shadow-gold/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    {submitting ? 'Verarbeite...' : 'Kostenpflichtig Bestellen'}
+                    {submitting ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        Verarbeite...
+                      </span>
+                    ) : 'Kostenpflichtig Bestellen'}
                   </Button>
+
                   <Button
                     variant="ghost"
                     onClick={() => setCurrentStep(0)}
@@ -455,23 +453,26 @@ export default function Checkout() {
           {/* Right Column: Summary (Sticky) */}
           <div className="lg:col-span-5">
             <div className="sticky top-24 space-y-6">
-              <CheckoutSummary
-                cartItems={cartItems}
-                products={productsMap}
-                total={cartItems.reduce((sum, item) => {
-                  const p = productsMap[item.product_id];
-                  let price = p?.price || 0;
-
-                  // Handle price overrides
-                  if (item.selected_options?.price) price = item.selected_options.price;
-                  else if (item.selected_options?.variant_id) {
-                    const v = p?.variants?.find(v => v.id === item.selected_options.variant_id);
-                    if (v?.price_override) price = v.price_override;
-                  }
-
-                  return sum + (price * item.quantity);
-                }, 0)}
-              />
+              <div className="glass-panel p-6 rounded-2xl border border-white/5">
+                <h3 className="font-black text-xl text-white mb-6 flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-gold" />
+                  Zusammenfassung
+                </h3>
+                <CheckoutSummary
+                  cartItems={cartItems}
+                  products={productsMap}
+                  total={cartItems.reduce((sum, item) => {
+                    const p = productsMap[item.product_id];
+                    let price = p?.price || 0;
+                    if (item.selected_options?.price) price = item.selected_options.price;
+                    else if (item.selected_options?.variant_id) {
+                      const v = p?.variants?.find(v => v.id === item.selected_options.variant_id);
+                      if (v?.price_override) price = v.price_override;
+                    }
+                    return sum + (price * item.quantity);
+                  }, 0)}
+                />
+              </div>
 
               {/* Desktop Trust badges */}
               <div className="hidden lg:block">

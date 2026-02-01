@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Send, FileText, ThumbsUp, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Send, FileText, ThumbsUp } from 'lucide-react';
 import {
   Select,
   SelectContent,

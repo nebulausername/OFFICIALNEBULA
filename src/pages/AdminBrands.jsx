@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2, Save, ShoppingBag, Globe, Loader2, ArrowRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, ShoppingBag, Globe, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 

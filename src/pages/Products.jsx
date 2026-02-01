@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '@/api';
-import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SlidersHorizontal, PackageX } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import PremiumProductCard from '../components/products/PremiumProductCard';
 import SEO from '@/components/seo/SEO';
@@ -24,7 +24,6 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
 
-  /* Removed unused state: quickViewProduct, isQuickViewOpen */
   const [sortBy, setSortBy] = useState('newest');
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -230,70 +229,47 @@ export default function Products() {
   }, [products, searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen bg-[#050608]">
       <SEO
         title="Produkte"
         description="Entdecke unsere Premium Shisha, Vapes und Zubehör Auswahl."
         image="/images/hero-logo.png"
         url={window.location.href}
       />
-      {/* Shop Hero */}
-      <section className="relative pt-8 pb-10">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center top, rgba(214, 178, 94, 0.06) 0%, transparent 60%)'
-          }}
-        />
+      {/* Shop Hero - Condensed & Modern */}
+      <section className="relative pt-32 pb-8">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-[500px] h-[400px] bg-purple-900/10 rounded-full blur-[100px]" />
+          <div className="absolute top-20 left-20 w-[300px] h-[300px] bg-gold/5 rounded-full blur-[80px]" />
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center mb-6"
-          >
-            <div
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full"
-              style={{
-                background: 'rgba(214, 178, 94, 0.1)',
-                border: '1px solid rgba(214, 178, 94, 0.3)'
-              }}
-            >
-              <Sparkles className="w-4 h-4" style={{ color: '#D6B25E' }} />
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#D6B25E' }}>
-                {t('misc.premiumDrops')}
-              </span>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-2 mb-2"
+              >
+                <span className="w-10 h-0.5 bg-gradient-to-r from-gold to-transparent" />
+                <span className="text-gold font-bold text-xs uppercase tracking-widest">Premium Selection</span>
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-5xl md:text-6xl font-black text-white tracking-tight"
+              >
+                {t('shop.title')}
+              </motion.h1>
             </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-center mb-4"
-          >
-            <h1
-              className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight"
-              style={{ color: '#FFFFFF' }}
-            >
-              {t('shop.title')}
-            </h1>
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center text-lg md:text-xl font-medium mb-10"
-            style={{ color: 'rgba(255, 255, 255, 0.75)' }}
-          >
-            {t('misc.discoverPremium')}
-          </motion.p>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
+            className="glass-panel rounded-2xl p-2"
           >
             <ShopControlStrip
               searchQuery={searchQuery}
@@ -317,136 +293,82 @@ export default function Products() {
       </section>
 
       {/* Main Shop Layout */}
-      <section className="pb-20">
+      <section className="pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="flex flex-col lg:flex-row gap-8">
 
-            {/* Desktop Sidebar Filters */}
+            {/* Sticky Glass Sidebar */}
             <div className="hidden lg:block w-72 flex-shrink-0">
-              <div className="sticky top-24 p-6 rounded-2xl border border-white/10 bg-[#0F121A]/50 backdrop-blur-xl h-[calc(100vh-8rem)] overflow-hidden flex flex-col">
-                <AdvancedFilters
-                  variant="sidebar"
-                  isOpen={true} // Always open as sidebar
-                  onClose={() => { }}
-                  categories={categories}
-                  brands={brands}
-                  products={products}
-                  filters={advancedFilters}
-                  onFiltersChange={setAdvancedFilters}
-                  onReset={resetFilters}
-                />
-              </div>
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+                className="sticky top-28 h-[calc(100vh-9rem)]"
+              >
+                <div className="glass-panel rounded-2xl p-6 h-full overflow-hidden flex flex-col border-gold/10">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-white/5">
+                    <SlidersHorizontal className="w-5 h-5 text-gold" />
+                    <h3 className="font-bold text-lg text-white">Filter</h3>
+                  </div>
+
+                  <AdvancedFilters
+                    variant="sidebar"
+                    isOpen={true} // Always open as sidebar
+                    onClose={() => { }}
+                    categories={categories}
+                    brands={brands}
+                    products={products}
+                    filters={advancedFilters}
+                    onFiltersChange={setAdvancedFilters}
+                    onReset={resetFilters}
+                  />
+                </div>
+              </motion.div>
             </div>
 
             {/* Product Grid Area */}
-            <div className="flex-1">
+            <div className="flex-1 min-h-[600px]">
               {loading ? (
                 <ProductGridSkeleton count={8} />
               ) : filteredProducts.length === 0 ? (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-20 bg-white/5 rounded-3xl border border-white/10"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="glass-panel p-12 rounded-3xl text-center flex flex-col items-center justify-center min-h-[500px]"
                 >
-                  <div
-                    className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center"
-                    style={{ background: 'rgba(214, 178, 94, 0.1)', border: '1px solid rgba(214, 178, 94, 0.2)' }}
-                  >
-                    <Sparkles className="w-10 h-10" style={{ color: '#D6B25E' }} />
+                  <div className="w-24 h-24 mb-6 rounded-full bg-white/5 flex items-center justify-center">
+                    <PackageX className="w-12 h-12 text-zinc-600" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-3" style={{ color: '#FFFFFF' }}>
-                    {t('shop.noProducts')}
-                  </h3>
-                  <p className="text-base text-zinc-400 max-w-md mx-auto mb-8">
-                    Leider keine Ergebnisse für deine Auswahl. Versuche es mit weniger Filtern.
+                  <h3 className="text-3xl font-black mb-4 text-white">Keine Treffer</h3>
+                  <p className="text-lg text-zinc-400 max-w-md mx-auto mb-8">
+                    Leider keine Ergebnisse für deine Auswahl. Versuche es mit weniger Filtern oder einer anderen Kategorie.
                   </p>
                   <button
                     onClick={resetFilters}
-                    className="px-6 py-3 rounded-xl font-bold bg-[#D6B25E] text-black hover:bg-[#F2D27C] transition-colors"
+                    className="px-8 py-4 rounded-xl font-bold bg-[#D6B25E] text-black hover:bg-[#F2D27C] transition-colors shadow-lg shadow-gold/10"
                   >
-                    Filter zurücksetzen
+                    Alle Filter zurücksetzen
                   </button>
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredProducts.slice(0, visibleProducts).map((product, index) => (
-                    <motion.div
-                      key={product.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index % 8 * 0.05 }}
-                    >
-                      {/* Inject Quick View Handler via onClick or special prop if card supports it, 
-                        or wrap in div. But PremiumProductCard likely handles onClick for navigation. 
-                        We need to pass a "onQuickView" prop if we added it to PremiumProductCard (we didn't yet).
-                        Actually, PremiumProductCard uses useProductModal hook?
-                        
-                        CHECK: PremiumProductCard uses `useProductModal` context!
-                        Ah, if it uses useProductModal, then we might not need local state here if strict context is used.
-                        BUT, I wanted to use MY local state for QuickView.
-                        
-                        Let's check PremiumProductCard again.
-                        It uses `useProductModal`.
-                        
-                        If I want to use my local QuickView, I should use Context or pass props.
-                        However, PremiumProductCard imports `useProductModal` from `@/contexts/ProductModalContext`.
-                        
-                        If `Products.jsx` is NOT providing that context, it might be provided in App.jsx.
-                        
-                        Wait, `UnifiedProductModal` is the component.
-                        If I use `ProductModalContext`, I might not need to render `UnifiedProductModal` here manually if the context provider already has one.
-                        
-                        Let's check `App.jsx` or `ProductModalContext`.
-                        
-                        For now, I'll pass `onQuickView` to `PremiumProductCard` if I can modify it, OR rely on context.
-                        
-                        In PremiumProductCard (viewed in 328):
-                        `const { openProduct } = useProductModal();`
-                        `handleQuickView` calls `openProduct(product)`.
-                        
-                        So `PremiumProductCard` ALREADY triggers a global modal.
-                        
-                        If so, why did the plan say "Implement ProductQuickView"?
-                        Maybe the global modal isn't the "Quick View" glass modal?
-                        
-                        If I render `UnifiedProductModal` here manually, I might duplicate it.
-                        
-                        However, usually `openProduct` opens the global one.
-                        If I want a *specific* "Quick View" on the products page that is different (e.g. glass modal), I should handle it here.
-                        
-                        But `PremiumProductCard` calls `openProduct`.
-                        
-                        If `Products.jsx` is the only place we want this specific Quick View, maybe I should wrap `PremiumProductCard` with a Context Provider that overrides `openProduct`?
-                        
-                        Or simpler: Just rely on the global modal if it's good enough.
-                        But the plan says "ProductQuickView (Glass Modal)".
-                        `UnifiedProductModal` IS the glass modal.
-                        
-                        So enabling it via Context is arguably the right way.
-                        
-                        BUT, I see that I commented out `quickViewProduct` in Step 324.
-                        
-                        If `PremiumProductCard` is using `useProductModal`, then I don't need to pass anything. I just need to make sure the Context Provider exists and renders the Modal.
-                        
-                        If `App.jsx` renders `UnifiedProductModal` globally, then I don't need to do anything here!
-                        
-                        Let's check `App.jsx` again (Step 294 viewed it).
-                        It imports `ProductModalContext`.
-                        Does it render the modal?
-                        I need to check `src/contexts/ProductModalContext.jsx`.
-                        
-                        If the context PROVIDER renders the modal, then `Products.jsx` doesn't need to.
-                        
-                        If not, then I need to render it.
-                        
-                        Hypothesis: The context just manages state, and I need to render the modal somewhere (App or Page).
-                    */}
-                      <PremiumProductCard
-                        product={product}
-                      />
-                    </motion.div>
-                  ))}
+                  <AnimatePresence mode="popLayout">
+                    {filteredProducts.slice(0, visibleProducts).map((product, index) => (
+                      <motion.div
+                        key={product.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.3) }}
+                      >
+                        <PremiumProductCard
+                          product={product}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
 
                   {/* Infinite Scroll Trigger */}
                   {visibleProducts < filteredProducts.length && (
@@ -459,10 +381,13 @@ export default function Products() {
                           }, 300);
                         }
                       }}
-                      className="col-span-full py-10 flex justify-center w-full"
+                      className="col-span-full py-12 flex justify-center w-full"
                     >
                       <div className="flex flex-col items-center gap-2">
-                        <div className="w-8 h-8 border-4 border-[#D6B25E] border-t-transparent rounded-full animate-spin" />
+                        <div className="relative w-12 h-12">
+                          <div className="absolute inset-0 border-4 border-gold/20 rounded-full" />
+                          <div className="absolute inset-0 border-4 border-gold border-t-transparent rounded-full animate-spin" />
+                        </div>
                       </div>
                     </InView>
                   )}
@@ -494,8 +419,6 @@ export default function Products() {
         onFiltersChange={setAdvancedFilters}
         onReset={resetFilters}
       />
-
-
     </div>
   );
 }

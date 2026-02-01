@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { Eye, MapPin, Clock, Package, Timer } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import WishlistButton from '../wishlist/WishlistButton';
 import { useI18n } from '../i18n/I18nProvider';
 import { useProductModal } from '@/contexts/ProductModalContext';
@@ -37,8 +37,8 @@ function ProductImage({ src, alt }) {
         </div>
       )}
       <motion.img
-        whileHover={{ scale: 1.05 }}
-        transition={{ duration: 0.4 }}
+        whileHover={{ scale: 1.1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
         src={src}
         alt={alt}
         className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
@@ -112,6 +112,25 @@ export default function PremiumProductCard({ product }) {
   const { t, formatCurrency } = useI18n();
   const { openProduct } = useProductModal();
 
+  // 3D Tilt Logic
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useTransform(y, [-100, 100], [5, -5]);
+  const rotateY = useTransform(x, [-100, 100], [-5, 5]);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    x.set(e.clientX - centerX);
+    y.set(e.clientY - centerY);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   // Daily Drop Logic
   const isDrop = product.drop_date && new Date(product.drop_date) > new Date();
 
@@ -123,9 +142,6 @@ export default function PremiumProductCard({ product }) {
     if (product.colors?.length > 0 || product.sizes?.length > 0) {
       openProduct(product, 'quick');
     } else {
-      // If simple product, also open quick view instead of navigation for the eye button?
-      // "Quick View" usually means "Stay on page".
-      // So yes, open modal for all products when clicking Quick View.
       openProduct(product, 'quick');
     }
   };
@@ -135,154 +151,123 @@ export default function PremiumProductCard({ product }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={!isDrop ? { y: -6, scale: 1.01 } : {}}
-        className="group smooth-transition relative overflow-hidden rounded-2xl"
         style={{
-          background: 'var(--bg2)',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--shadow-subtle)'
+          perspective: 1000,
+          rotateX: isDrop ? 0 : rotateX,
+          rotateY: isDrop ? 0 : rotateY,
         }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="group relative h-full"
       >
-        {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden rounded-t-2xl"
-          style={{ background: 'var(--bg3)' }}
+        <div
+          className="relative overflow-hidden rounded-2xl h-full transition-shadow duration-300"
+          style={{
+            background: 'var(--bg2)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--shadow-subtle)'
+          }}
         >
-          <ProductImage
-            src={product.cover_image}
-            alt={product.name}
+          {/* Hover Glow Border */}
+          <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-0"
+            style={{ border: '1px solid rgba(var(--gold-rgb), 0.3)', boxShadow: 'inset 0 0 20px rgba(var(--gold-rgb), 0.1)' }}
           />
 
-          {/* Active Drop Countdown Overlay */}
-          {isDrop && <DropCountdown targetDate={product.drop_date} />}
+          {/* Image Container */}
+          <div className="relative aspect-square overflow-hidden rounded-t-2xl z-10"
+            style={{ background: 'var(--bg3)' }}
+          >
+            <ProductImage
+              src={product.cover_image}
+              alt={product.name}
+            />
 
-          {/* Gradient Overlay - always visible */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+            {/* Active Drop Countdown Overlay */}
+            {isDrop && <DropCountdown targetDate={product.drop_date} />}
 
+            {/* Gradient Overlay - always visible for legibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none" />
 
-          {/* Availability Badge - Hide if Drop */}
-          {!isDrop && (
-            <div className="absolute top-3 end-3 z-10">
-              {product.in_stock !== false ? (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="px-3.5 py-2 rounded-full backdrop-blur-xl text-xs font-bold flex items-center gap-2"
-                  style={{
-                    background: 'rgba(52, 211, 153, 0.18)',
-                    border: '1px solid rgba(52, 211, 153, 0.35)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                  }}
-                >
-                  <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'rgb(52, 211, 153)' }} />
-                  <span style={{ color: '#FFFFFF', fontWeight: 600 }}>{t('shop.available')}</span>
-                </motion.div>
-              ) : (
-                <div
-                  className="px-3.5 py-2 rounded-full backdrop-blur-xl text-xs font-bold flex items-center gap-2"
-                  style={{
-                    background: 'rgba(239, 68, 68, 0.2)',
-                    border: '1px solid rgba(239, 68, 68, 0.4)',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                  }}
-                >
-                  <div className="w-2 h-2 rounded-full" style={{ background: 'rgb(239, 68, 68)' }} />
-                  <span style={{ color: '#FFFFFF', fontWeight: 600 }}>{t('shop.soldOut')}</span>
-                </div>
-              )}
+            {/* Availability Badge */}
+            {!isDrop && (
+              <div className="absolute top-3 end-3 z-20">
+                {product.in_stock !== false ? (
+                  <div className="badge-available glass-panel backdrop-blur-md">
+                    <div className="w-1.5 h-1.5 rounded-full animate-pulse bg-emerald-400" />
+                    <span>Vorrat</span>
+                  </div>
+                ) : (
+                  <div className="badge-unavailable glass-panel backdrop-blur-md">
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <span>Ausverkauft</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Wishlist Button */}
+            <div className="absolute top-3 start-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <WishlistButton productId={product.id} size="sm" variant="glass" />
             </div>
-          )}
 
-          {/* Wishlist Button - Hide for drops? Maybe keep it. */}
-          <div className="absolute top-3 start-3 z-10">
-            <WishlistButton productId={product.id} size="md" variant="glass" />
+            {/* Quick View Button - Floating */}
+            {!isDrop && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                whileHover={{ opacity: 1, y: 0, scale: 1.05 }}
+                onClick={handleQuickView}
+                className="absolute bottom-4 left-4 right-4 h-10 opacity-0 group-hover:opacity-100 transition-all duration-300 btn-gold flex items-center justify-center gap-2 text-sm z-20 shadow-lg"
+              >
+                <div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+                <Eye className="w-4 h-4 relative z-10" />
+                <span className="relative z-10 font-bold">{t('shop.quickView')}</span>
+              </motion.button>
+            )}
           </div>
 
-          {/* Quick View Button - Hide for drops */}
-          {!isDrop && (
-            <motion.button
-              initial={{ opacity: 0, y: 10 }}
-              whileHover={{ opacity: 1, y: 0 }}
-              onClick={handleQuickView}
-              className="absolute bottom-4 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 opacity-0 group-hover:opacity-100 smooth-transition btn-gold font-black text-sm py-2.5 px-8 flex items-center gap-2"
-            >
-              <Eye className="w-4 h-4" />
-              {t('shop.quickView')}
-            </motion.button>
-          )}
-        </div>
+          {/* Content */}
+          <div className="p-4 space-y-3 relative z-10 bg-[#0E1015]">
+            {/* Product Name */}
+            <h3 className="font-bold text-sm md:text-base line-clamp-2 leading-tight min-h-[2.5rem] group-hover:text-gold transition-colors duration-300"
+              style={{ color: '#FFFFFF' }}>
+              {product.name}
+            </h3>
 
-        {/* Content */}
-        <div className="p-5 space-y-3" style={{ background: 'var(--bg2)' }}>
-          {/* Product Name */}
-          <h3 className="font-bold text-base line-clamp-2 leading-snug min-h-[2.5rem] smooth-transition group-hover:text-gold"
-            style={{ color: '#FFFFFF' }}>
-            {product.name}
-          </h3>
-
-          {/* Price & SKU Row */}
-          <div className="flex items-baseline justify-between gap-3">
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-2">
-                <div className="text-2xl font-black" style={{ color: isDrop ? '#9CA3AF' : '#F2D27C', filter: isDrop ? 'grayscale(1)' : 'none' }}>
+            {/* Price & Actions */}
+            <div className="flex items-end justify-between gap-2">
+              <div className="flex flex-col">
+                <div className="text-xl font-black tracking-tight" style={{ color: isDrop ? '#9CA3AF' : '#F2D27C' }}>
                   {formatCurrency(product.price)}
                 </div>
                 {product.min_order_quantity > 1 && (
-                  <span className="text-xs text-zinc-400 font-medium">/ Stk</span>
+                  <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">
+                    Ab {product.min_order_quantity} Stk
+                  </span>
                 )}
               </div>
-              {product.min_order_quantity > 1 && (
-                <div className="text-[10px] uppercase font-bold tracking-wider text-purple-400">
-                  Ab {product.min_order_quantity} Stück
+
+              {!isDrop && (
+                <div className="text-[10px] font-mono font-bold px-2 py-1 rounded bg-white/5 text-zinc-400 border border-white/10 group-hover:border-gold/20 group-hover:text-gold/80 transition-colors">
+                  {product.sku}
                 </div>
               )}
             </div>
 
+            {/* Delivery Info (Compact) */}
             {!isDrop && (
-              <div className="text-xs font-mono font-bold px-2.5 py-1.5 rounded-lg"
-                style={{
-                  color: '#D6B25E',
-                  background: 'rgba(214, 178, 94, 0.15)',
-                  border: '1px solid rgba(214, 178, 94, 0.3)'
-                }}
-              >
-                {product.sku}
-              </div>
-            )}
-            {isDrop && (
-              <div className="text-xs font-bold px-2.5 py-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                COMING SOON
+              <div className="pt-2 border-t border-white/5 flex items-center gap-3 text-[10px] text-zinc-500">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-zinc-600" />
+                  <span>8-17 Tage</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-zinc-600" />
+                  <span>Global</span>
+                </div>
               </div>
             )}
           </div>
-
-          {/* Delivery Info - Hide for drops */}
-          {!isDrop && (
-            <div className="space-y-2 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(214, 178, 94, 0.15)' }}
-                >
-                  <MapPin className="w-3 h-3" style={{ color: '#D6B25E' }} />
-                </div>
-                <span className="font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>🇨🇳 Lieferbar aus China</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.08)' }}
-                >
-                  <Clock className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.6)' }} />
-                </div>
-                <span className="font-medium" style={{ color: 'rgba(255,255,255,0.65)' }}>8–17 Tage Lieferzeit</span>
-              </div>
-            </div>
-          )}
         </div>
-
-        {/* Hover Glow Effect */}
-        <div
-          className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 smooth-transition pointer-events-none"
-          style={{ boxShadow: 'var(--shadow-glow)' }}
-        />
       </motion.div>
     </Link>
   );
