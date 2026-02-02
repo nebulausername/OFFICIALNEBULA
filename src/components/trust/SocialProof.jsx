@@ -11,7 +11,7 @@ const PRODUCTS = [
     'Aeon Vyro One',
     '187 Hamburg Haze',
     'Moze Breeze Two',
-    'O's Tobacco African Queen'
+    'O\'s Tobacco African Queen'
 ];
 
 export default function SocialProof() {
