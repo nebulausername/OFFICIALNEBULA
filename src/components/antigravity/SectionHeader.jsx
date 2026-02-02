@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function SectionHeader({
     title,
@@ -26,11 +27,13 @@ export default function SectionHeader({
 
             <div className="flex items-center gap-4 md:gap-8">
                 {linkTo && (
-                    <Link to={linkTo} className="hidden md:flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group text-sm font-bold uppercase tracking-wider">
-                        <span>{linkText}</span>
-                        <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:border-gold/50 group-hover:bg-gold/10 transition-all">
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                        </div>
+                    <Link to={linkTo}>
+                        <Button variant="ghost" className="hidden md:flex items-center gap-2 text-zinc-400 hover:text-gold hover:bg-white/5 transition-all group uppercase tracking-wider font-bold">
+                            <span>{linkText}</span>
+                            <div className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center group-hover:border-gold/50 transition-all">
+                                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                            </div>
+                        </Button>
                     </Link>
                 )}
 

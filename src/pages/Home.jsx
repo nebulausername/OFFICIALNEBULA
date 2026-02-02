@@ -22,6 +22,7 @@ import AntigravityProductCard from '../components/antigravity/AntigravityProduct
 import CategoryTile from '../components/antigravity/CategoryTile';
 import SectionHeader from '../components/antigravity/SectionHeader';
 import FeaturedDropList from '../components/home/FeaturedDropList';
+import ProductCardLite from '../components/antigravity/ProductCardLite';
 import { ProductCardSkeleton, CategoryTileSkeleton } from '../components/antigravity/Skeletons';
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -276,23 +277,34 @@ export default function Home() {
           <Carousel className="w-full">
             <CarouselContent className="-ml-4 pb-12">
               {loadingProducts ? Array(5).fill(0).map((_, i) => (
-                <CarouselItem key={i} className="pl-4 basis-[70%] sm:basis-[45%] lg:basis-[22%]">
+                <CarouselItem key={i} className="pl-4 basis-[70%] sm:basis-[45%] md:basis-[30%] lg:basis-[22%]">
                   <ProductCardSkeleton />
                 </CarouselItem>
-              )) : products.slice(0, 10).map((product) => (
-                <CarouselItem key={product.id} className="pl-4 basis-[70%] sm:basis-[45%] lg:basis-[22%]">
-                  <div className="h-full pr-2">
-                    <AntigravityProductCard
-                      product={product}
-                      onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
+              )) : products.length > 0 ? (
+                products.slice(0, 12).map((product) => (
+                  <CarouselItem key={product.id} className="pl-4 basis-[70%] sm:basis-[45%] md:basis-[30%] lg:basis-[22%]">
+                    <div className="h-full">
+                      <ProductCardLite
+                        product={product}
+                        onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))
+              ) : (
+                <div className="col-span-full w-full py-12 flex flex-col items-center justify-center text-center">
+                  <p className="text-zinc-500 mb-4">Gerade keine neuen Drops verfügbar.</p>
+                  <Link to="/products">
+                    <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-black">
+                      Alle Produkte ansehen
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CarouselContent>
             <div className="hidden md:block">
-              <CarouselPrevious className="left-0" />
-              <CarouselNext className="right-0" />
+              <CarouselPrevious className="left-0 bg-black/50 border-white/10 text-white hover:bg-gold hover:text-black" />
+              <CarouselNext className="right-0 bg-black/50 border-white/10 text-white hover:bg-gold hover:text-black" />
             </div>
           </Carousel>
         </div>
