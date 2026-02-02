@@ -216,9 +216,9 @@ export default function ProductDetail() {
         color_name: selectedColor?.name || null,
         color_hex: selectedColor?.hex || null,
         size: selectedSize || null,
-        image: selectedImage || product.cover_image,
+        image: selectedImage || product.cover_image || '/placeholder.png' || '/placeholder.png',
         price: price,
-        sku: variant?.sku || product.sku
+        sku: variant?.sku || product.sku || 'SKU-UNKNOWN'
       };
 
       await api.entities.StarCartItem.create({
@@ -265,9 +265,11 @@ export default function ProductDetail() {
       result.push(...selectedColor.images);
     } else {
       if (product.cover_image) result.push(product.cover_image);
-      images.forEach(img => {
-        if (img.url && !result.includes(img.url)) result.push(img.url);
-      });
+      if (images && images.length > 0) {
+        images.forEach(img => {
+          if (img?.url && !result.includes(img.url)) result.push(img.url);
+        });
+      }
     }
     return result.filter(Boolean);
   };

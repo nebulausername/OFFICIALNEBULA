@@ -24,7 +24,7 @@ export const products = [
         ]
     },
     {
-        id: 'demo-2',
+        id: 'product-2',
         name: 'Elfbar 600 - Premium Selection',
         description: 'Der Klassiker neu definiert. Intensiver Geschmack, perfektes Zugverhalten und bis zu 600 Züge. Wähle deinen Favoriten.',
         price: 7.90,

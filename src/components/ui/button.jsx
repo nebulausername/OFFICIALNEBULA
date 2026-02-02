@@ -4,6 +4,8 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils"
+// removed sound context import if not needed or will re-add if I see it's critical. 
+// actually let's keep it but handle the case where it might be missing gracefully as before.
 import { useNebulaSound } from "@/contexts/SoundContext";
 
 const buttonVariants = cva(
@@ -11,24 +13,23 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "bg-gradient-to-br from-[#E8C76A] to-[#F5D98B] text-[#1A1A1A] font-black shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.98]",
+        default: "btn-gold text-black", // utilizing our new class
         destructive:
           "bg-red-600 text-white shadow-sm hover:bg-red-500",
         outline:
-          "border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.06)] text-white shadow-sm hover:bg-[rgba(255,255,255,0.09)] backdrop-blur-xl",
+          "btn-outline", // utilizing our new class
         secondary:
           "bg-[rgba(255,255,255,0.06)] text-white shadow-sm hover:bg-[rgba(255,255,255,0.09)] backdrop-blur-xl",
-        ghost: "hover:bg-[rgba(255,255,255,0.06)] hover:text-white text-[rgba(255,255,255,0.62)]",
+        ghost: "btn-ghost",
         link: "text-[#D6B25E] underline-offset-4 hover:underline",
         glossy: "glass-gloss text-white hover:bg-white/10 active:scale-95 transition-all duration-300",
         nebula: "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-105 active:scale-95 transition-all duration-300",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        default: "h-11 px-6 min-w-[120px]", // Increased size for better touch
+        sm: "h-9 rounded-md px-3 text-xs",
+        lg: "h-14 rounded-full px-10 text-base", // Premium large
+        icon: "h-11 w-11",
       },
     },
     defaultVariants: {
@@ -40,12 +41,15 @@ const buttonVariants = cva(
 
 const Button = React.forwardRef(({ className, variant, size, asChild = false, onClick, children, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
+
+  // Safe sound access
   const soundContext = useNebulaSound ? useNebulaSound() : null;
   const playClick = soundContext?.playClick || (() => { });
   const playHover = soundContext?.playHover || (() => { });
 
   const handleClick = (e) => {
-    playClick();
+    // Only play sound if context exists
+    if (playClick) playClick();
     if (onClick) onClick(e);
   };
 
@@ -54,7 +58,7 @@ const Button = React.forwardRef(({ className, variant, size, asChild = false, on
       className={cn(buttonVariants({ variant, size, className }))}
       ref={ref}
       onClick={handleClick}
-      onMouseEnter={() => playHover()}
+      onMouseEnter={() => playHover && playHover()}
       {...props}>
       {children}
     </Comp>)

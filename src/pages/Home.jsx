@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { api } from '@/api';
-import { Crown, Sparkles, Zap, Package, Star, TrendingUp, Filter } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { Crown, Sparkles, Zap, Package, ArrowRight, LayoutGrid } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+
+// Components
 import UnifiedProductModal from '../components/products/UnifiedProductModal';
 import DeliveryBar from '../components/delivery/DeliveryBar';
 import VideoSpotlight from '../components/home/VideoSpotlight';
@@ -18,15 +20,18 @@ import SEO from '@/components/seo/SEO';
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import CategoryTile from '../components/antigravity/CategoryTile';
 import SectionHeader from '../components/antigravity/SectionHeader';
+import FeaturedDropPanel from '../components/home/FeaturedDropPanel';
+import { ProductCardSkeleton, CategoryTileSkeleton } from '../components/antigravity/Skeletons';
+
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const AnimatedSection = ({ children, className }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
       className={className}
     >
       {children}
@@ -37,6 +42,7 @@ const AnimatedSection = ({ children, className }) => {
 export default function Home() {
   const [departments, setDepartments] = useState([]);
   const [products, setProducts] = useState([]);
+  const [featuredProduct, setFeaturedProduct] = useState(null);
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
@@ -44,8 +50,8 @@ export default function Home() {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
-  // Bestseller Section State
-  const [activeTab, setActiveTab] = useState('all');
+  // Content Organization
+  const [activeTab, setActiveTab] = useState('bestseller');
 
   useEffect(() => {
     loadDepartments();
@@ -66,17 +72,19 @@ export default function Home() {
   const loadProducts = async () => {
     try {
       setLoadingProducts(true);
-      // Fetching more products to populate different sections
-      let prods = await api.entities.Product.list('-created_at', 24);
+      // Fetch decent amount to distribute across sections
+      let prods = await api.entities.Product.list('-created_at', 30);
 
       if (!Array.isArray(prods)) {
-        if (prods && Array.isArray(prods.data)) {
-          prods = prods.data;
-        } else {
-          prods = [];
-        }
+        prods = (prods && prods.data) ? prods.data : [];
       }
+
       setProducts(prods);
+
+      // Set Featured Product (First one or specific logic)
+      if (prods.length > 0) {
+        setFeaturedProduct(prods[0]);
+      }
     } catch (error) {
       console.error('❌ Error loading products:', error);
     } finally {
@@ -87,7 +95,7 @@ export default function Home() {
   const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
     try {
       const user = await api.auth.me();
-      if (!user) return; // Should likely redirect to login or show toast
+      if (!user) return;
 
       const existing = await api.entities.StarCartItem.filter({
         user_id: user.id,
@@ -108,24 +116,25 @@ export default function Home() {
         });
       }
       setIsQuickViewOpen(false);
-      window.location.reload(); // Simple reload for now
+      window.location.reload();
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
   };
 
-  // Filter Logic for Bestsellers
-  const getFilteredBestsellers = () => {
+  // Filter Logic
+  const getFilteredProducts = () => {
+    // Basic client-side filtering until backend endpoints are specific
     if (activeTab === 'under50') return products.filter(p => p.price < 50).slice(0, 8);
-    if (activeTab === 'trending') return products.slice(0, 8); // Mocking trending with just products for now
-    return products.slice(8, 16); // Different set for "All/Bestseller"
+    if (activeTab === 'trending') return products.slice(0, 8); // Mock trending
+    return products.slice(4, 12); // "Bestseller" offset to not show same as featured
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#050608]">
       <SEO
         title="Home"
-        description="Willkommen bei Nebula Shop - Dein Premium Store für Shisha, Vapes & Lifestyle."
+        description="Nebula - Experience the Future of Smoking. Premium Vapes, Shishas & Accessories."
         image="/images/hero-logo.png"
         url={window.location.href}
       />
@@ -135,226 +144,250 @@ export default function Home() {
       <div className="fixed inset-0 bg-gradient-radial from-transparent via-black/20 to-black/80 pointer-events-none z-0" />
 
       {/* --- HERO SECTION --- */}
-      <section className="relative z-10 min-h-[90vh] flex items-center justify-center overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 py-20 flex flex-col items-center text-center">
+      <section className="relative z-10 min-h-[90vh] flex items-center pt-24 pb-12 overflow-hidden">
+        <div className="max-w-[1400px] w-full mx-auto px-4 lg:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="mb-8 relative"
-          >
-            <div className="absolute inset-0 bg-gold/20 blur-[100px] rounded-full" />
-            <h1 className="text-6xl sm:text-8xl md:text-9xl font-black leading-none tracking-tighter text-white relative z-10 drop-shadow-2xl">
-              NEBULA
-            </h1>
-            <div className="text-2xl md:text-4xl font-bold text-gold tracking-[0.5em] mt-2 uppercase">
-              <TypewriterEffect words={['Future', 'Supply', 'Lifestyle']} />
-            </div>
-          </motion.div>
+            {/* Left: Text & Actions */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-8"
+            >
+              <div className="relative">
+                <div className="absolute -inset-10 bg-gold/10 blur-[80px] rounded-full pointer-events-none" />
+                <h1 className="text-6xl sm:text-8xl xl:text-9xl font-black leading-[0.9] tracking-tighter text-white drop-shadow-2xl">
+                  NEBULA
+                </h1>
+                <div className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-amber-600 tracking-[0.4em] mt-2 uppercase">
+                  <TypewriterEffect words={['Future', 'Supply', 'Lifestyle']} />
+                </div>
+              </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-6 mt-12 relative z-20"
-          >
-            <Link to={createPageUrl('Products')}>
-              <MagneticButton>
-                <Button className="h-16 px-12 text-lg rounded-full btn-gold font-black tracking-wider shadow-[0_0_40px_rgba(214,178,94,0.4)] hover:shadow-[0_0_60px_rgba(214,178,94,0.6)] transition-all">
-                  JETZT SHOPPEN
-                </Button>
-              </MagneticButton>
-            </Link>
-          </motion.div>
+              <p className="text-zinc-400 text-lg md:text-xl max-w-xl leading-relaxed">
+                Entdecke die exklusivste Auswahl an Premium Shishas, Vapes und Accessoires.
+                Qualität, die man spürt. Design, das bewegt.
+              </p>
 
-          {/* Delivery Bar moved here */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1 }}
-            className="mt-20 w-full max-w-3xl"
-          >
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <Link to={createPageUrl('Products')}>
+                  <MagneticButton>
+                    <Button className="btn-gold h-14 px-10 text-lg w-full sm:w-auto shadow-[0_0_40px_rgba(214,178,94,0.3)]">
+                      Shop Öffnen
+                    </Button>
+                  </MagneticButton>
+                </Link>
+                <Link to="/products?sort=newest">
+                  <Button variant="outline" className="h-14 px-10 text-lg w-full sm:w-auto border-white/20 hover:bg-white/10">
+                    New Drops
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Trust Row (Hero based) */}
+              <div className="pt-8 flex flex-wrap justify-center lg:justify-start gap-6 text-zinc-500 text-sm font-medium uppercase tracking-wider">
+                <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-gold" /> Blitzversand</span>
+                <span className="flex items-center gap-2"><Crown className="w-4 h-4 text-gold" /> Premium Selection</span>
+                <span className="flex items-center gap-2"><Package className="w-4 h-4 text-gold" /> Discreet Pkg</span>
+              </div>
+            </motion.div>
+
+            {/* Right: Featured Panel */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="lg:col-span-5 w-full h-full min-h-[400px] lg:min-h-[600px]"
+            >
+              <FeaturedDropPanel product={featuredProduct} />
+            </motion.div>
+          </div>
+
+          {/* Delivery Bar Helper */}
+          <div className="mt-16 w-full max-w-3xl mx-auto lg:mx-0">
             <DeliveryBar />
-          </motion.div>
+          </div>
         </div>
 
-        {/* Marquee at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 opacity-30">
+        {/* Marquee Background Element */}
+        <div className="absolute bottom-10 left-0 right-0 z-0 opacity-20 pointer-events-none">
           <InfiniteMarquee />
         </div>
       </section>
 
+      {/* --- SECTION: CATEGORIES --- */}
+      <section className="py-20 relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
+          <SectionHeader title="Explore Categories" subtitle="Find Your Vibe" linkTo={createPageUrl('Products')} />
 
-      {/* --- SECTION A: CATEGORIES --- */}
-      <section className="py-24 relative z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <AnimatedSection>
-            <SectionHeader
-              title="Kategorien"
-              subtitle="Explore Our Worlds"
-              linkTo={createPageUrl('Products')}
-            />
-
-            {/* Desktop Grid / Mobile Slider */}
-            <div className="hidden md:grid grid-cols-4 gap-6">
-              {/* If we have specific highlights, we can span cols. For now standard grid. */}
-              {departments.slice(0, 8).map((dept, i) => (
+          {/* Desktop Grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            {loadingDepts ? (
+              Array(8).fill(0).map((_, i) => <CategoryTileSkeleton key={i} />)
+            ) : (
+              departments.slice(0, 8).map((dept, index) => (
                 <CategoryTile
                   key={dept.id}
                   category={dept}
-                  className={i === 0 || i === 3 ? "col-span-2 aspect-[2/1]" : "aspect-square"}
+                  // Make first and last span nicely if multiple of 4
+                  className={(index === 0 || index === 3) ? "lg:col-span-2 aspect-[2/1]" : "aspect-square"}
                 />
-              ))}
-              {departments.length === 0 && Array(4).fill(0).map((_, i) => (
-                <div key={i} className="aspect-square bg-white/5 animate-pulse rounded-3xl" />
-              ))}
-            </div>
+              ))
+            )}
+          </div>
 
-            {/* Mobile Slider using Carousel */}
-            <div className="md:hidden">
-              <Carousel className="w-full">
-                <CarouselContent className="-ml-4">
-                  {departments.map(dept => (
-                    <CarouselItem key={dept.id} className="pl-4 basis-2/3">
-                      <CategoryTile category={dept} aspect="square" />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* --- SECTION B: FRESH DROPS --- */}
-      <section className="py-24 relative z-10 bg-[#0E1015]/50 border-y border-white/5 backdrop-blur-sm">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
-
-        <div className="max-w-7xl mx-auto px-4">
-          <AnimatedSection>
-            <SectionHeader
-              title="Fresh Drops"
-              subtitle="New Arrivals"
-              linkTo="/products?sort=newest"
-            />
-
+          {/* Mobile Carousel */}
+          <div className="md:hidden">
             <Carousel className="w-full">
-              <CarouselContent className="-ml-4 pb-10">
-                {products.slice(0, 10).map((product) => (
-                  <CarouselItem key={product.id} className="pl-4 basis-[80%] md:basis-[40%] lg:basis-[25%]">
-                    <div className="h-full pr-4"> {/* Padding for hover overflow safety/shadows */}
-                      <AntigravityProductCard
-                        product={product}
-                        onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
-                      />
-                    </div>
+              <CarouselContent className="-ml-4">
+                {loadingDepts ? Array(4).fill(0).map((_, i) => (
+                  <CarouselItem key={i} className="pl-4 basis-2/3"><CategoryTileSkeleton /></CarouselItem>
+                )) : departments.map(dept => (
+                  <CarouselItem key={dept.id} className="pl-4 basis-2/3">
+                    <CategoryTile category={dept} />
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <div className="hidden md:block">
-                <CarouselPrevious />
-                <CarouselNext />
-              </div>
             </Carousel>
-          </AnimatedSection>
+          </div>
         </div>
       </section>
 
-      {/* --- SECTION C: BESTSELLERS / TRENDING --- */}
-      <section className="py-24 relative z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <AnimatedSection>
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-8 h-[2px] bg-gold/50 shadow-[0_0_10px_#D6B25E]" />
-                  <span className="text-gold text-xs md:text-sm font-bold uppercase tracking-[0.2em]">Curated For You</span>
-                </div>
-                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none uppercase">
-                  Highlights
-                </h2>
-              </div>
-
-              {/* Filter Chips */}
-              <div className="flex flex-wrap gap-2">
-                {['all', 'trending', 'under50'].map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider border transition-all ${activeTab === tab
-                        ? 'bg-gold text-black border-gold shadow-[0_0_20px_rgba(214,178,94,0.3)]'
-                        : 'bg-transparent text-zinc-400 border-white/10 hover:border-gold/50 hover:text-white'
-                      }`}
-                  >
-                    {tab === 'all' ? 'Bestseller' : tab === 'under50' ? 'Under 50€' : 'Trending'}
-                  </button>
-                ))}
-              </div>
+      {/* --- SECTION: FRESH DROPS --- */}
+      <section className="py-24 relative z-10 bg-[#0E1015]/30 backdrop-blur-sm border-y border-white/5">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex flex-col">
+              <span className="text-gold font-bold uppercase tracking-widest text-sm mb-1">New Arrivals</span>
+              <h2 className="text-4xl md:text-5xl font-black text-white">Fresh Drops</h2>
             </div>
+            <div className="hidden md:flex gap-2">
+              {/* Carousel controls usually inside, but here independent */}
+            </div>
+          </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Highlight Banner (Left or Right - let's do Left for 1/4 width or Right?) */}
-              {/* Let's try: 3 cols grid + 1 col banner on the right? Or Banner First. */}
-
-              {/* Grid Logic */}
-              <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getFilteredBestsellers().map(product => (
-                  <AntigravityProductCard
-                    key={product.id}
-                    product={product}
-                    onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
-                  />
-                ))}
-              </div>
-
-              {/* Sticky/Fixed Highlight Banner */}
-              <div className="lg:col-span-1 hidden lg:block">
-                <div className="sticky top-24 h-[600px] rounded-3xl overflow-hidden relative group">
-                  <img
-                    src="/images/highlight-banner.jpg"
-                    onError={(e) => e.target.src = "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=1000&auto=format&fit=crop"} // Fallback
-                    alt="Highlight"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-                  <div className="absolute inset-0 p-8 flex flex-col justify-end text-center items-center pb-12">
-                    <span className="bg-gold text-black text-xs font-black uppercase px-3 py-1 rounded mb-4">
-                      Top Pick
-                    </span>
-                    <h3 className="text-3xl font-black text-white mb-4 leading-none">
-                      NEBULA<br />ELITE
-                    </h3>
-                    <Link to="/products?category=shishas">
-                      <Button className="btn-glass border-white/30 text-white hover:bg-white hover:text-black hover:border-white w-full">
-                        Entdecken
-                      </Button>
-                    </Link>
+          <Carousel className="w-full">
+            <CarouselContent className="-ml-4 pb-12">
+              {loadingProducts ? Array(5).fill(0).map((_, i) => (
+                <CarouselItem key={i} className="pl-4 basis-[70%] sm:basis-[45%] lg:basis-[22%]">
+                  <ProductCardSkeleton />
+                </CarouselItem>
+              )) : products.slice(0, 10).map((product) => (
+                <CarouselItem key={product.id} className="pl-4 basis-[70%] sm:basis-[45%] lg:basis-[22%]">
+                  <div className="h-full pr-2">
+                    <AntigravityProductCard
+                      product={product}
+                      onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
+                    />
                   </div>
-                </div>
-              </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="hidden md:block">
+              <CarouselPrevious className="left-0" />
+              <CarouselNext className="right-0" />
             </div>
-
-          </AnimatedSection>
+          </Carousel>
         </div>
       </section>
 
       {/* --- VIDEO SPOTLIGHT --- */}
-      <div className="relative z-10 my-20">
+      <div className="py-12">
         <VideoSpotlight />
       </div>
 
-      {/* --- TRUST ICONS --- */}
+      {/* --- SECTION: HIGHLIGHTS (Split View) --- */}
+      <section className="py-20 relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
+          <div className="flex flex-col lg:flex-row items-end justify-between mb-12 gap-8">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-black text-white mb-2">Editor's Picks</h2>
+              <p className="text-zinc-400">Unsere persönlichen Favoriten und Bestseller der Woche.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {['bestseller', 'trending', 'under50'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider border transition-all ${activeTab === tab
+                      ? 'bg-gold text-black border-gold shadow-[0_0_15px_rgba(214,178,94,0.4)]'
+                      : 'bg-transparent text-zinc-400 border-white/10 hover:border-gold/30 hover:text-white'
+                    }`}
+                >
+                  {tab === 'under50' ? 'Under 50€' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Product Grid (Left) */}
+            <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {loadingProducts ? Array(6).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
+                : getFilteredProducts().length > 0 ? (
+                  getFilteredProducts().map(product => (
+                    <AntigravityProductCard
+                      key={product.id}
+                      product={product}
+                      onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full py-20 text-center border border-white/5 rounded-2xl bg-white/5">
+                    <p className="text-zinc-500">No products found in this collection.</p>
+                    <Link to="/products"><Button variant="link" className="mt-2">View All Products</Button></Link>
+                  </div>
+                )}
+            </div>
+
+            {/* Sticky Highlight Card (Right) */}
+            <div className="lg:col-span-1 hidden lg:block">
+              <div className="sticky top-28 h-[600px] w-full rounded-3xl overflow-hidden relative group border border-white/10">
+                {/* Static image or dynamic from first bestseller */}
+                <div className="absolute inset-0 bg-[#0E1015]">
+                  <img
+                    src="/images/highlight-vertical.jpg"
+                    onError={(e) => e.target.src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1000&auto=format&fit=crop"}
+                    alt="Highlight"
+                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                </div>
+
+                <div className="absolute inset-0 p-8 flex flex-col justify-end text-center items-center pb-12">
+                  <span className="bg-gold text-black text-xs font-black uppercase px-3 py-1 rounded mb-4">
+                    Staff Pick
+                  </span>
+                  <h3 className="text-3xl font-black text-white leading-none mb-2">
+                    TOP<br />TIER
+                  </h3>
+                  <p className="text-zinc-300 text-sm mb-6 max-w-[200px]">
+                    Die beliebtesten Produkte der Woche.
+                  </p>
+                  <Link to="/products?sort=bestseller" className="w-full">
+                    <Button className="w-full glass-gloss border-white/30 text-white hover:bg-white hover:text-black">
+                      View Collection
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- TRUST FOOTER --- */}
       <section className="py-16 border-t border-white/5 bg-[#08090C]">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {[
-            { icon: Zap, label: "Blitzversand", sub: "1-3 Werktage" },
-            { icon: Crown, label: "Premium Quality", sub: "Certified Goods" },
-            { icon: Package, label: "Sicher verpackt", sub: "Discreet & Safe" },
-            { icon: Sparkles, label: "Exklusive Drops", sub: "Members Only" }
+            { icon: Zap, label: "24h Versand", sub: "Schnell & Zuverlässig" },
+            { icon: Crown, label: "Premium Quality", sub: "Verified Authentic" },
+            { icon: Package, label: "Sicher Verpackt", sub: "Neutraler Karton" },
+            { icon: LayoutGrid, label: "Grosse Auswahl", sub: "1000+ Produkte" }
           ].map((item, i) => (
             <div key={i} className="flex flex-col items-center gap-3 group">
-              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-gold/50 group-hover:bg-gold/10 transition-all duration-300">
+              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-gold/50 group-hover:bg-gold/10 transition-all duration-300 shadow-lg">
                 <item.icon className="w-8 h-8 text-zinc-400 group-hover:text-gold transition-colors" />
               </div>
               <div>
