@@ -96,13 +96,31 @@ export default function UnifiedProductModal({
     const currentImage = galleryImages[currentImageIndex] || product?.cover_image;
 
     // Get current variant
+    // Get current variant
     const getCurrentVariant = useCallback(() => {
         if (!product?.variants || !selectedColor) return null;
-        return product.variants.find(v =>
-            v.color_id === selectedColor.id &&
-            v.size === selectedSize &&
-            v.active !== false
-        );
+        return product.variants.find(v => {
+            // New Model based on options
+            if (v.options) {
+                const vColor = v.options.Color || v.options.color || v.options.Farbe;
+                const vSize = v.options.Size || v.options.size || v.options.Größe;
+
+                const colorMatch = !vColor || vColor === selectedColor.name;
+                const sizeMatch = !vSize || vSize === selectedSize;
+
+                // Strict checking
+                if (selectedSize && vSize && vSize !== selectedSize) return false;
+                if (!selectedSize && vSize) return false;
+                if (selectedColor && vColor && vColor !== selectedColor.name) return false;
+
+                return true;
+            }
+
+            // Legacy Model
+            return v.color_id === selectedColor.id &&
+                v.size === selectedSize &&
+                v.active !== false
+        });
     }, [product, selectedColor, selectedSize]);
 
     const currentVariant = getCurrentVariant();
@@ -112,17 +130,28 @@ export default function UnifiedProductModal({
     const currentPrice = expressDelivery ? basePrice + 4.90 : basePrice;
 
     // Stock checking
+    // Stock checking
     const getStockForSize = (size) => {
         if (!product?.variants || !selectedColor) return 0;
-        const variant = product.variants.find(v =>
-            v.color_id === selectedColor.id && v.size === size && v.active !== false
-        );
+        const variant = product.variants.find(v => {
+            if (v.options) {
+                const vColor = v.options.Color || v.options.color || v.options.Farbe;
+                const vSize = v.options.Size || v.options.size || v.options.Größe;
+                return (vColor === selectedColor.name) && (vSize === size);
+            }
+            return v.color_id === selectedColor.id && v.size === size && v.active !== false;
+        });
         return variant?.stock ?? 0;
     };
 
     const totalColorStock = selectedColor
-        ? product?.variants?.filter(v => v.color_id === selectedColor.id && v.active !== false)
-            .reduce((sum, v) => sum + (v.stock || 0), 0) || 0
+        ? product?.variants?.filter(v => {
+            if (v.options) {
+                const vColor = v.options.Color || v.options.color || v.options.Farbe;
+                return vColor === selectedColor.name;
+            }
+            return v.color_id === selectedColor.id && v.active !== false;
+        }).reduce((sum, v) => sum + (v.stock || 0), 0) || 0
         : 0;
 
     // Color change handler

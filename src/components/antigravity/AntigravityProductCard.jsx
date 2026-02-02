@@ -11,7 +11,10 @@ export default function AntigravityProductCard({ product, onQuickView }) {
 
     // Helper for safe image source
     const imageSrc = product.cover_image || (product.images && product.images[0]) || '/placeholder.png';
+
     const secondImageSrc = (product.images && product.images[1]) || imageSrc;
+    const hasSizes = product.sizes && product.sizes.length > 0;
+    const sizeLabel = hasSizes ? (product.sizes.length === 1 ? product.sizes[0] : `${product.sizes.length} Sizes`) : null;
 
     const isNew = new Date(product.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days
     const isSale = product.compare_at_price > product.price;
@@ -57,6 +60,11 @@ export default function AntigravityProductCard({ product, onQuickView }) {
                     {isSale && (
                         <div className="px-2 py-1 rounded bg-red-500/10 border border-red-500/30 text-[10px] font-bold text-red-400 uppercase tracking-wider backdrop-blur-sm">
                             -{discount}%
+                        </div>
+                    )}
+                    {hasSizes && (
+                        <div className="px-2 py-1 rounded bg-zinc-800/80 border border-white/10 text-[10px] font-bold text-zinc-300 uppercase tracking-wider backdrop-blur-sm">
+                            {sizeLabel}
                         </div>
                     )}
                 </div>

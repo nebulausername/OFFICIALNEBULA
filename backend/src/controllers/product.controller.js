@@ -95,6 +95,9 @@ export const listProducts = async (req, res, next) => {
             take: 5,
             select: { id: true, url: true, sort_order: true },
           },
+          variants: {
+            select: { id: true, options: true, price: true, stock: true, is_default: true },
+          },
         } : {
           id: true,
           sku: true,
@@ -144,6 +147,7 @@ export const getProduct = async (req, res, next) => {
         product_images: {
           orderBy: { sort_order: 'asc' },
         },
+        variants: true,
       },
     });
 
@@ -170,12 +174,36 @@ export const createProduct = async (req, res, next) => {
       console.error('❌ Validation Failed: Missing required fields (name, sku, price)');
     }
 
+    // Separate variants from other data
+    const { variants, ...restData } = productData;
+
+    // Prepare create data
+    const createData = {
+      ...restData,
+      variants_legacy: productData.variants, // Backward compatibility
+    };
+
+    // Add variants relation if provided in new format
+    if (variants && Array.isArray(variants) && variants.length > 0) {
+      createData.variants = {
+        create: variants.map(v => ({
+          sku: v.sku,
+          price: v.price || productData.price,
+          stock: v.stock || 0,
+          options: v.options, // Ensure this is JSON object
+          is_default: v.is_default || false,
+          media: v.media
+        }))
+      };
+    }
+
     const product = await prisma.product.create({
-      data: productData,
+      data: createData,
       include: {
         category: true,
         brand: true,
         department: true,
+        variants: true,
       },
     });
 
@@ -197,9 +225,32 @@ export const updateProduct = async (req, res, next) => {
     const { id } = req.params;
     const productData = req.body;
 
+    const { variants, ...restData } = productData;
+
+    // Prepare update data
+    const updateData = {
+      ...restData,
+    };
+
+    // Handle Variants Update (Sync Strategy: Delete all, Re-create)
+    // Only if variants are explicitly provided
+    if (variants && Array.isArray(variants)) {
+      updateData.variants = {
+        deleteMany: {},
+        create: variants.map(v => ({
+          sku: v.sku,
+          price: v.price !== undefined ? v.price : undefined,
+          stock: v.stock || 0,
+          options: v.options,
+          is_default: v.is_default || false,
+          media: v.media
+        })),
+      };
+    }
+
     const product = await prisma.product.update({
       where: { id },
-      data: productData,
+      data: updateData,
       include: {
         category: true,
         brand: true,
@@ -207,6 +258,7 @@ export const updateProduct = async (req, res, next) => {
         product_images: {
           orderBy: { sort_order: 'asc' },
         },
+        variants: true,
       },
     });
 

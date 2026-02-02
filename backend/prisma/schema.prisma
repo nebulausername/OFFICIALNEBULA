@@ -70,7 +70,14 @@ model Product {
   tags          Json?     // JSONB: Array of strings
   colors        Json?     // JSONB: Array of color objects
   sizes         Json?     // JSONB: Array of strings
-  variants      Json?     // JSONB: Array of variant objects
+  
+  // Legacy JSON fields (keep for now, but use relations preferred)
+  variants_legacy Json?   @map("variants") 
+  
+  // New Relation
+  variants      Variant[] 
+  options       Json?     // Definition: [{name: "Color", values: ["Red"]}, {name: "Size", values: ["S", "M"]}]
+
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
 
@@ -91,6 +98,29 @@ model Product {
   @@index([department_id, in_stock, created_at])
   @@index([category_id, in_stock])
   @@map("products")
+}
+
+model Variant {
+  id              String   @id @default(uuid())
+  product_id      String
+  sku             String?  
+  price           Decimal? @db.Decimal(10, 2)
+  compare_at_price Decimal? @db.Decimal(10, 2)
+  stock           Int      @default(0)
+  
+  // The resolved option values for this variant, e.g. { "Color": "Red", "Size": "M" }
+  options         Json
+  
+  media           Json?    // Variant specific images or overrides
+  is_default      Boolean  @default(false)
+  
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  product         Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id])
+  @@map("product_variants")
 }
 
 model ProductImage {

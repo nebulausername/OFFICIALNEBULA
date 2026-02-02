@@ -150,7 +150,11 @@ export default function ProductVariantManager({ product, onUpdate }) {
               stock: 0,
               price_override: null,
               active: true,
-              image: null // Explicit null for override
+              image: null,
+              options: {
+                Color: color.name,
+                Size: size
+              }
             });
           }
         });
@@ -165,7 +169,11 @@ export default function ProductVariantManager({ product, onUpdate }) {
           stock: 0,
           price_override: null,
           active: true,
-          image: null
+          image: null,
+          options: {
+            Color: color.name,
+            Size: null
+          }
         });
       }
     });
@@ -225,10 +233,22 @@ export default function ProductVariantManager({ product, onUpdate }) {
   const saveChanges = async () => {
     setSaving(true);
     try {
+      // Format variants for new backend model
+      const formattedVariants = variants.map(v => {
+        const color = colors.find(c => c.id === v.color_id);
+        return {
+          ...v,
+          options: {
+            Color: color?.name || 'Unknown',
+            Size: v.size || null
+          }
+        };
+      });
+
       await api.entities.Product.update(product.id, {
         colors,
         sizes,
-        variants
+        variants: formattedVariants
       });
 
       toast({ title: 'Varianten gespeichert ✓' });
@@ -363,8 +383,8 @@ export default function ProductVariantManager({ product, onUpdate }) {
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
                                   className={`relative w-24 h-24 rounded-xl overflow-hidden group border transition-all ${snapshot.isDragging
-                                      ? 'border-purple-500 shadow-lg scale-105 z-50'
-                                      : 'border-zinc-700 hover:border-zinc-500'
+                                    ? 'border-purple-500 shadow-lg scale-105 z-50'
+                                    : 'border-zinc-700 hover:border-zinc-500'
                                     }`}
                                 >
                                   <img src={img} alt="" className="w-full h-full object-cover" />
@@ -620,8 +640,8 @@ export default function ProductVariantManager({ product, onUpdate }) {
                     key={variant.id}
                     layout
                     className={`grid grid-cols-12 gap-4 items-center px-6 py-4 transition-colors ${selectedVariants.includes(variant.id)
-                        ? 'bg-amber-500/5'
-                        : 'hover:bg-amber-500/5'
+                      ? 'bg-amber-500/5'
+                      : 'hover:bg-amber-500/5'
                       }`}
                   >
                     <div className="col-span-1 flex items-center justify-center">
@@ -698,7 +718,7 @@ export default function ProductVariantManager({ product, onUpdate }) {
                         value={variant.stock || 0}
                         onChange={(e) => updateVariant(variant.id, 'stock', parseInt(e.target.value) || 0)}
                         className={`h-8 text-sm bg-zinc-800 border-zinc-700 font-bold ${variant.stock <= 0 ? 'text-red-400 border-red-900/50' :
-                            variant.stock <= 5 ? 'text-amber-400' : 'text-green-400'
+                          variant.stock <= 5 ? 'text-amber-400' : 'text-green-400'
                           }`}
                       />
                     </div>

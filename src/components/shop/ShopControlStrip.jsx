@@ -352,6 +352,21 @@ export default function ShopControlStrip({
         </div>
       )}
 
+      {/* Active Filters Chips */}
+      {activeFilters > 0 && (
+        <div className="flex flex-wrap items-center gap-2 pb-2">
+          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider mr-2">Aktive Filter:</span>
+
+          {/* Clear All Button */}
+          <button
+            onClick={() => onFiltersClick()}
+            className="px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold hover:bg-red-500/20 transition-colors"
+          >
+            Filter zurücksetzen
+          </button>
+        </div>
+      )}
+
       {/* Results Bar */}
       <div className="flex items-center justify-between py-2">
         <span className="text-sm font-medium text-zinc-500">

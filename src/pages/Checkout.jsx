@@ -65,8 +65,12 @@ export default function Checkout() {
 
   const steps = [
     { title: 'Versand', icon: MapPin },
-    { title: 'Zahlung', icon: CheckCircle2 }
+    { title: 'Versand', icon: MapPin },
+    { title: 'Zahlung', icon: CheckCircle2 },
+    { title: 'Handover', icon: MessageCircle }
   ];
+
+  const [completedOrder, setCompletedOrder] = useState(null);
 
   const [productsMap, setProductsMap] = useState({});
 
@@ -204,9 +208,8 @@ export default function Checkout() {
         requestAnimationFrame(frame);
       }());
 
-      setTimeout(() => {
-        navigate(createPageUrl('Requests') + `?orderId=${request.id}`); // Corrected redirect
-      }, 2000);
+      setCompletedOrder(request);
+      setCurrentStep(2); // Go to Handover Step
     } catch (error) {
       console.error('Error submitting order:', error);
       playError();
