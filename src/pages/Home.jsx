@@ -42,6 +42,7 @@ export default function Home() {
   const [loadingDeptProducts, setLoadingDeptProducts] = useState({});
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [categoryImages, setCategoryImages] = useState({});
 
   // 🖱️ Advanced Mouse Parallax System
   const mouseX = useMotionValue(0);
@@ -117,6 +118,7 @@ export default function Home() {
     try {
       const loadingStates = {};
       const productsByDept = {};
+      const catImages = {};
 
       departments.forEach(dept => {
         loadingStates[dept.id] = true;
@@ -132,6 +134,13 @@ export default function Home() {
               8
             );
             productsByDept[dept.id] = Array.isArray(prods) ? prods : [];
+
+            // Extract first valid image for category cover
+            if (Array.isArray(prods) && prods.length > 0) {
+              const cover = prods.find(p => p.cover_image)?.cover_image;
+              if (cover) catImages[dept.id] = cover;
+            }
+
           } catch (err) {
             // Fallback logic
             try {
@@ -147,6 +156,7 @@ export default function Home() {
       );
 
       setDepartmentProducts(productsByDept);
+      setCategoryImages(catImages); // Set extracted images
       setLoadingDeptProducts(loadingStates);
     } catch (error) {
       console.error('❌ Critical error loading department products:', error);
@@ -208,8 +218,10 @@ export default function Home() {
     }
   };
 
+  // Brightened Background Style
+  // Using a slightly lighter radial gradient in the center to lift the whole page
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#050608]">
+    <div className="min-h-screen relative overflow-hidden bg-[#0a0b0f]">
       <SEO
         title="Home"
         description="Willkommen bei Nebula Shop - Dein Premium Store für Shisha, Vapes & Lifestyle."
@@ -217,14 +229,15 @@ export default function Home() {
         url={window.location.href}
       />
 
-      {/* Living Cosmic Background */}
+      {/* Living Cosmic Background - with brightness layer */}
       <CosmicHeroBackground />
+      <div className="fixed inset-0 bg-gradient-radial from-transparent to-black/90 pointer-events-none z-0" />
 
       {/* --- HERO SECTION --- */}
       <section className="relative z-10 min-h-screen flex items-center justify-center overflow-hidden">
 
         {/* Animated Noise Overlay */}
-        <div className="absolute inset-0 noise-bg opacity-30 pointer-events-none" />
+        <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-32 flex flex-col items-center">
 
@@ -296,8 +309,8 @@ export default function Home() {
                 <div className="relative inline-block mt-2">
                   <TypewriterEffect
                     words={['SUPPLY', 'LUXURY', 'FUTURE', 'VIBES']}
-                    className="block text-gradient-gold drop-shadow-2xl"
-                    cursorClassName="bg-gold h-12 md:h-20 w-1 md:w-2"
+                    className="block text-gradient-gold drop-shadow-2xl h-[1.1em] overflow-visible"
+                    cursorClassName="bg-gold h-[0.8em] md:h-[0.8em] w-2 md:w-4 mb-2 md:mb-4"
                   />
                 </div>
               </h1>
@@ -322,8 +335,8 @@ export default function Home() {
           >
             <Link to={createPageUrl('Products')}>
               <MagneticButton className="group">
-                <Button className="btn-gold h-16 px-12 text-lg rounded-2xl relative overflow-hidden">
-                  <span className="relative z-10 flex items-center gap-3">
+                <Button className="btn-gold h-16 px-12 text-lg rounded-2xl relative overflow-hidden shadow-[0_0_30px_rgba(214,178,94,0.3)] hover:shadow-[0_0_50px_rgba(214,178,94,0.5)] transition-shadow duration-500">
+                  <span className="relative z-10 flex items-center gap-3 font-black">
                     <Sparkles className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
                     Jetzt Shoppen
                   </span>
@@ -334,7 +347,7 @@ export default function Home() {
 
             <Link to={createPageUrl('VIP')}>
               <MagneticButton>
-                <Button className="btn-glass h-16 px-10 text-lg rounded-2xl border-gold/30 text-gold hover:bg-gold/10">
+                <Button className="btn-glass h-16 px-10 text-lg rounded-2xl border-gold/30 text-gold hover:bg-gold/10 font-bold backdrop-blur-md">
                   <Crown className="w-5 h-5 mr-2" />
                   VIP Werden
                 </Button>
@@ -387,7 +400,7 @@ export default function Home() {
 
 
       {/* --- DEPARTMENTS SECTION --- */}
-      <section className="py-32 relative z-10 bg-[#050608]">
+      <section className="py-32 relative z-10 bg-[#0a0b0f]">
         {/* Ambient Glows */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
@@ -416,6 +429,7 @@ export default function Home() {
               <BentoGrid
                 departments={departments}
                 productCounts={departmentProductCounts}
+                departmentImages={categoryImages}
               />
             )}
           </div>

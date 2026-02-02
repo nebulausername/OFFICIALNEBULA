@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { cn } from "@/lib/utils";
 
 export default function TypewriterEffect({ words, className, cursorClassName }) {
     const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -39,12 +40,12 @@ export default function TypewriterEffect({ words, className, cursorClassName }) 
     }, [currentText, isDeleting, currentWordIndex, words]);
 
     return (
-        <span className={className}>
+        <span className={cn("inline-flex items-center", className)}>
             {currentText}
             <motion.span
                 animate={{ opacity: [0, 1, 0] }}
                 transition={{ duration: 0.8, repeat: Infinity }}
-                className={`inline-block w-[3px] h-[1em] bg-current ml-1 align-middle ${cursorClassName}`}
+                className={cn("inline-block w-[3px] h-[1em] bg-current ml-1 align-middle", cursorClassName)}
             />
         </span>
     );

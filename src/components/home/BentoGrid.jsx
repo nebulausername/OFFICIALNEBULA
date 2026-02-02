@@ -2,12 +2,10 @@ import React from 'react';
 import CategoryCard from './CategoryCard';
 import { motion } from 'framer-motion';
 
-export default function BentoGrid({ departments, productCounts }) {
-    // Helper to determine image (logic from old Home.jsx, moved here for cleaner code)
-    const getDepartmentImage = (dept) => {
+export default function BentoGrid({ departments, productCounts, departmentImages }) {
+    // Helper to determine image (fallback logic)
+    const getFallbackImage = (dept) => {
         const name = dept.name.toLowerCase();
-        if (!name) return '/images/hero-bg.jpg';
-
         if (name.includes('shisha') || name.includes('hookah') || name.includes('pfeife')) {
             return 'https://images.unsplash.com/photo-1517156943265-4f3b8b10f546?q=80&w=2070&auto=format&fit=crop';
         } else if (name.includes('vape') || name.includes('dampf') || name.includes('e-zigarette')) {
@@ -20,6 +18,15 @@ export default function BentoGrid({ departments, productCounts }) {
             return 'https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=2070&auto=format&fit=crop';
         }
         return 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop';
+    };
+
+    const getDepartmentImage = (dept) => {
+        // 1. Try real product image from props
+        if (departmentImages && departmentImages[dept.id]) {
+            return departmentImages[dept.id];
+        }
+        // 2. Fallback
+        return getFallbackImage(dept);
     };
 
     return (
