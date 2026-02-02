@@ -21,7 +21,7 @@ import SEO from '@/components/seo/SEO';
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import CategoryTile from '../components/antigravity/CategoryTile';
 import SectionHeader from '../components/antigravity/SectionHeader';
-import FeaturedDropPanel from '../components/home/FeaturedDropPanel';
+import FeaturedDropList from '../components/home/FeaturedDropList';
 import { ProductCardSkeleton, CategoryTileSkeleton } from '../components/antigravity/Skeletons';
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -62,7 +62,13 @@ export default function Home() {
   const loadDepartments = async () => {
     try {
       const depts = await api.entities.Department.list('sort_order');
-      setDepartments(depts);
+      // Enrich with mock data for "Live" feel
+      const enrichedDepts = (Array.isArray(depts) ? depts : []).map(d => ({
+        ...d,
+        product_count: Math.floor(Math.random() * 50) + 10,
+        description: "Premium Selection from the Nebula Universe."
+      }));
+      setDepartments(enrichedDepts);
     } catch (error) {
       console.error('❌ Error loading departments:', error);
     } finally {
@@ -73,8 +79,8 @@ export default function Home() {
   const loadProducts = async () => {
     try {
       setLoadingProducts(true);
-      // Fetch decent amount to distribute across sections
-      let prods = await api.entities.Product.list('-created_at', 30);
+      // Fetch more to populate all new sections densely
+      let prods = await api.entities.Product.list('-created_at', 40);
 
       if (!Array.isArray(prods)) {
         prods = (prods && prods.data) ? prods.data : [];
@@ -196,12 +202,12 @@ export default function Home() {
 
             {/* Right: Featured Panel */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="lg:col-span-5 w-full h-full min-h-[400px] lg:min-h-[600px]"
+              className="lg:col-span-5 w-full h-[500px] lg:h-[600px] bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm"
             >
-              <FeaturedDropPanel product={featuredProduct} />
+              <FeaturedDropList products={products} />
             </motion.div>
           </div>
 
@@ -231,8 +237,7 @@ export default function Home() {
                 <CategoryTile
                   key={dept.id}
                   category={dept}
-                  // Make first and last span nicely if multiple of 4
-                  className={(index === 0 || index === 3) ? "lg:col-span-2 aspect-[2/1]" : "aspect-square"}
+                  className="aspect-square"
                 />
               ))
             )}
@@ -246,7 +251,7 @@ export default function Home() {
                   <CarouselItem key={i} className="pl-4 basis-2/3"><CategoryTileSkeleton /></CarouselItem>
                 )) : departments.map(dept => (
                   <CarouselItem key={dept.id} className="pl-4 basis-2/3">
-                    <CategoryTile category={dept} />
+                    <CategoryTile category={dept} className="aspect-square" />
                   </CarouselItem>
                 ))}
               </CarouselContent>
