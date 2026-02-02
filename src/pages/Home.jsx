@@ -2,22 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { api } from '@/api';
-import { Star, Sparkles, Zap, Trophy, Crown, Package } from 'lucide-react';
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { Crown, Sparkles, Zap, Package, Star, TrendingUp, Filter } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import UnifiedProductModal from '../components/products/UnifiedProductModal';
 import DeliveryBar from '../components/delivery/DeliveryBar';
-import FreshDropsSection from '../components/home/FreshDropsSection';
-import CategoryProductsSection from '../components/home/CategoryProductsSection';
 import VideoSpotlight from '../components/home/VideoSpotlight';
 import TypewriterEffect from '@/components/ui/TypewriterEffect';
 import CosmicHeroBackground from '../components/home/CosmicHeroBackground';
-import BentoGrid from '../components/home/BentoGrid';
 import InfiniteMarquee from '../components/home/InfiniteMarquee';
 import MagneticButton from '@/components/ui/MagneticButton';
 import SEO from '@/components/seo/SEO';
 
-// Animated Section Wrapper
+// Antigravity Components
+import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
+import CategoryTile from '../components/antigravity/CategoryTile';
+import SectionHeader from '../components/antigravity/SectionHeader';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
 const AnimatedSection = ({ children, className }) => {
   return (
     <motion.div
@@ -35,56 +37,20 @@ const AnimatedSection = ({ children, className }) => {
 export default function Home() {
   const [departments, setDepartments] = useState([]);
   const [products, setProducts] = useState([]);
-  const [departmentProductCounts, setDepartmentProductCounts] = useState({});
-  const [departmentProducts, setDepartmentProducts] = useState({});
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [loadingDeptProducts, setLoadingDeptProducts] = useState({});
+
+  // Quick View State
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const [categoryImages, setCategoryImages] = useState({});
 
-  // 🖱️ Advanced Mouse Parallax System
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  // Smooth spring physics for mouse movement
-  const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
-  const springX = useSpring(mouseX, springConfig);
-  const springY = useSpring(mouseY, springConfig);
-
-  // Parallax transform values
-  const bgX = useTransform(springX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], [25, -25]);
-  const bgY = useTransform(springY, [0, typeof window !== 'undefined' ? window.innerHeight : 1000], [25, -25]);
-
-  const logoX = useTransform(springX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], [-35, 35]);
-  const logoY = useTransform(springY, [0, typeof window !== 'undefined' ? window.innerHeight : 1000], [-35, 35]);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      // Create a centralized coordinate system (-0.5 to 0.5)
-      const x = (e.clientX - window.innerWidth / 2);
-      const y = (e.clientY - window.innerHeight / 2);
-
-      mouseX.set(x);
-      mouseY.set(y);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  // Bestseller Section State
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     loadDepartments();
     loadProducts();
   }, []);
-
-  useEffect(() => {
-    if (departments.length > 0) {
-      loadDepartmentProductCounts();
-      loadDepartmentProducts();
-    }
-  }, [departments]);
 
   const loadDepartments = async () => {
     try {
@@ -97,81 +63,11 @@ export default function Home() {
     }
   };
 
-  const loadDepartmentProductCounts = async () => {
-    try {
-      const counts = {};
-      for (const dept of departments) {
-        try {
-          const deptProducts = await api.entities.Product.filter({ department_id: dept.id });
-          counts[dept.id] = Array.isArray(deptProducts) ? deptProducts.length : 0;
-        } catch (err) {
-          counts[dept.id] = 0;
-        }
-      }
-      setDepartmentProductCounts(counts);
-    } catch (error) {
-      console.error('❌ Error loading department product counts:', error);
-    }
-  };
-
-  const loadDepartmentProducts = async () => {
-    try {
-      const loadingStates = {};
-      const productsByDept = {};
-      const catImages = {};
-
-      departments.forEach(dept => {
-        loadingStates[dept.id] = true;
-      });
-      setLoadingDeptProducts(loadingStates);
-
-      await Promise.all(
-        departments.map(async (dept) => {
-          try {
-            const prods = await api.entities.Product.filter(
-              { department_id: dept.id },
-              '-created_at',
-              8
-            );
-            productsByDept[dept.id] = Array.isArray(prods) ? prods : [];
-
-            // Extract first valid image for category cover
-            if (Array.isArray(prods) && prods.length > 0) {
-              const cover = prods.find(p => p.cover_image)?.cover_image;
-              if (cover) catImages[dept.id] = cover;
-            }
-
-          } catch (err) {
-            // Fallback logic
-            try {
-              const fallbackProds = await api.entities.Product.list('-created_at', 8);
-              productsByDept[dept.id] = Array.isArray(fallbackProds) ? fallbackProds : [];
-            } catch (fallbackErr) {
-              productsByDept[dept.id] = [];
-            }
-          } finally {
-            loadingStates[dept.id] = false;
-          }
-        })
-      );
-
-      setDepartmentProducts(productsByDept);
-      setCategoryImages(catImages); // Set extracted images
-      setLoadingDeptProducts(loadingStates);
-    } catch (error) {
-      console.error('❌ Critical error loading department products:', error);
-      const loadingStates = {};
-      departments.forEach(dept => {
-        loadingStates[dept.id] = false;
-      });
-      setLoadingDeptProducts(loadingStates);
-    }
-  };
-
   const loadProducts = async () => {
     try {
       setLoadingProducts(true);
-      let prods = await api.entities.Product.list('-created_at', 12);
+      // Fetching more products to populate different sections
+      let prods = await api.entities.Product.list('-created_at', 24);
 
       if (!Array.isArray(prods)) {
         if (prods && Array.isArray(prods.data)) {
@@ -191,7 +87,7 @@ export default function Home() {
   const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
     try {
       const user = await api.auth.me();
-      if (!user) return;
+      if (!user) return; // Should likely redirect to login or show toast
 
       const existing = await api.entities.StarCartItem.filter({
         user_id: user.id,
@@ -212,16 +108,21 @@ export default function Home() {
         });
       }
       setIsQuickViewOpen(false);
-      window.location.reload();
+      window.location.reload(); // Simple reload for now
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
   };
 
-  // Brightened Background Style
-  // Using a slightly lighter radial gradient in the center to lift the whole page
+  // Filter Logic for Bestsellers
+  const getFilteredBestsellers = () => {
+    if (activeTab === 'under50') return products.filter(p => p.price < 50).slice(0, 8);
+    if (activeTab === 'trending') return products.slice(0, 8); // Mocking trending with just products for now
+    return products.slice(8, 16); // Different set for "All/Bestseller"
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0a0b0f]">
+    <div className="min-h-screen relative overflow-hidden bg-[#050608]">
       <SEO
         title="Home"
         description="Willkommen bei Nebula Shop - Dein Premium Store für Shisha, Vapes & Lifestyle."
@@ -229,301 +130,239 @@ export default function Home() {
         url={window.location.href}
       />
 
-      {/* Living Cosmic Background - with brightness layer */}
       <CosmicHeroBackground />
-      {/* 🌟 Global Brightness Overlay: Slightly lighter gradient to ensure visibility of dark elements */}
-      <div className="fixed inset-0 bg-gradient-radial from-white/5 via-transparent to-black/90 pointer-events-none z-0" />
+      {/* Global Vignette */}
+      <div className="fixed inset-0 bg-gradient-radial from-transparent via-black/20 to-black/80 pointer-events-none z-0" />
 
       {/* --- HERO SECTION --- */}
-      <section className="relative z-10 min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative z-10 min-h-[90vh] flex items-center justify-center overflow-hidden">
+        <div className="relative max-w-7xl mx-auto px-4 py-20 flex flex-col items-center text-center">
 
-        {/* Animated Noise Overlay - reduced opacity for cleanliness */}
-        <div className="absolute inset-0 noise-bg opacity-10 pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-32 flex flex-col items-center">
-
-          {/* Logo & Headline Wrapper */}
-          <div className="perspective-1000 mb-8 w-full text-center">
-            {/* Floating 3D Logo */}
-            <motion.div
-              style={{
-                x: logoX,
-                y: logoY,
-                rotateX: useTransform(logoY, [-35, 35], [5, -5]),
-                rotateY: useTransform(logoX, [-35, 35], [-5, 5])
-              }}
-              className="inline-block relative z-20 transform-preserve-3d"
-            >
-              <motion.div
-                animate={{
-                  boxShadow: [
-                    '0 0 50px rgba(var(--gold-rgb), 0.4)',
-                    '0 0 120px rgba(var(--gold-rgb), 0.7)',
-                    '0 0 50px rgba(var(--gold-rgb), 0.4)',
-                  ]
-                }}
-                transition={{ duration: 4, repeat: Infinity }}
-                className="w-32 h-32 md:w-48 md:h-48 rounded-[3rem] p-5 mx-auto relative glass-strong border-gold/50"
-              >
-                <div className="absolute inset-0 rounded-[3rem] overflow-hidden">
-                  <motion.div
-                    className="absolute inset-0 z-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent"
-                    animate={{ x: ['-200%', '200%'] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                  />
-                </div>
-
-                <img
-                  src="/images/hero-logo.png"
-                  alt="Nebula"
-                  className="relative w-full h-full object-contain drop-shadow-2xl z-10"
-                  style={{ filter: 'drop-shadow(0 0 60px rgba(var(--gold-rgb), 0.9)) hue-rotate(-10deg) brightness(1.4)' }}
-                />
-              </motion.div>
-
-              {/* Orbital Elements - Brighter */}
-              <motion.div
-                animate={{ rotateZ: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-12 border border-gold/40 rounded-full z-0"
-                style={{ rotateX: 65, scaleY: 0.4 }}
-              />
-              <motion.div
-                animate={{ rotateZ: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-24 border border-purple-500/40 rounded-full z-0"
-                style={{ rotateX: 65, scaleY: 0.4 }}
-              />
-            </motion.div>
-
-            {/* Typography */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.8, type: "spring" }}
-              className="mt-12"
-            >
-              <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-4 leading-none tracking-tighter">
-                <span className="block text-gradient-silver drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
-                  NEBULA
-                </span>
-                <div className="relative inline-block mt-2">
-                  <TypewriterEffect
-                    words={['SUPPLY', 'LUXURY', 'FUTURE', 'VIBES']}
-                    className="block text-gradient-gold drop-shadow-2xl h-[1.1em] overflow-visible"
-                    cursorClassName="bg-gold h-[0.8em] md:h-[0.8em] w-2 md:w-4 mb-2 md:mb-4"
-                  />
-                </div>
-              </h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="text-xl md:text-2xl mt-8 max-w-2xl mx-auto font-medium text-secondary"
-              >
-                Premium Lifestyle • <span className="text-gold font-bold">Exklusiv für dich</span> ✨
-              </motion.p>
-            </motion.div>
-          </div>
-
-          {/* CTA Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16 relative z-30"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="mb-8 relative"
           >
-            <Link to={createPageUrl('Products')}>
-              <MagneticButton className="group">
-                <Button className="btn-gold h-16 px-12 text-lg rounded-2xl relative overflow-hidden shadow-[0_0_30px_rgba(214,178,94,0.3)] hover:shadow-[0_0_50px_rgba(214,178,94,0.5)] transition-shadow duration-500">
-                  <span className="relative z-10 flex items-center gap-3 font-black">
-                    <Sparkles className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
-                    Jetzt Shoppen
-                  </span>
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                </Button>
-              </MagneticButton>
-            </Link>
-
-            <Link to={createPageUrl('VIP')}>
-              <MagneticButton>
-                <Button className="btn-glass h-16 px-10 text-lg rounded-2xl border-gold/30 text-gold hover:bg-gold/10 font-bold backdrop-blur-md">
-                  <Crown className="w-5 h-5 mr-2" />
-                  VIP Werden
-                </Button>
-              </MagneticButton>
-            </Link>
+            <div className="absolute inset-0 bg-gold/20 blur-[100px] rounded-full" />
+            <h1 className="text-6xl sm:text-8xl md:text-9xl font-black leading-none tracking-tighter text-white relative z-10 drop-shadow-2xl">
+              NEBULA
+            </h1>
+            <div className="text-2xl md:text-4xl font-bold text-gold tracking-[0.5em] mt-2 uppercase">
+              <TypewriterEffect words={['Future', 'Supply', 'Lifestyle']} />
+            </div>
           </motion.div>
 
-          {/* New Delivery Bar (Glass) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.0 }}
-            className="w-full max-w-4xl"
+            transition={{ delay: 0.5 }}
+            className="flex flex-col sm:flex-row gap-6 mt-12 relative z-20"
           >
-            <DeliveryBar />
+            <Link to={createPageUrl('Products')}>
+              <MagneticButton>
+                <Button className="h-16 px-12 text-lg rounded-full btn-gold font-black tracking-wider shadow-[0_0_40px_rgba(214,178,94,0.4)] hover:shadow-[0_0_60px_rgba(214,178,94,0.6)] transition-all">
+                  JETZT SHOPPEN
+                </Button>
+              </MagneticButton>
+            </Link>
           </motion.div>
 
-          {/* Trust Metrics */}
+          {/* Delivery Bar moved here */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 1 }}
-            className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 text-center w-full max-w-5xl"
+            transition={{ delay: 1 }}
+            className="mt-20 w-full max-w-3xl"
           >
-            {[
-              { val: "500+", label: "Produkte", icon: Package },
-              { val: "10k+", label: "Kunden", icon: Star },
-              { val: "24/7", label: "Support", icon: Zap },
-              { val: "100%", label: "Premium", icon: Trophy },
-            ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 group cursor-default">
-                <div className="p-3 rounded-2xl bg-white/5 border border-white/5 group-hover:border-gold/30 transition-colors">
-                  <stat.icon className="w-6 h-6 text-zinc-400 group-hover:text-gold transition-colors" />
-                </div>
-                <div>
-                  <div className="text-2xl font-black text-white">{stat.val}</div>
-                  <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{stat.label}</div>
-                </div>
-              </div>
-            ))}
+            <DeliveryBar />
           </motion.div>
-
         </div>
 
         {/* Marquee at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 z-20 translate-y-1/2 opacity-50 hover:opacity-100 transition-opacity duration-700">
+        <div className="absolute bottom-0 left-0 right-0 z-20 opacity-30">
           <InfiniteMarquee />
         </div>
       </section>
 
 
-      {/* --- DEPARTMENTS SECTION --- */}
-      <section className="py-32 relative z-10 bg-[#0a0b0f]">
-        {/* Ambient Glows */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* --- SECTION A: CATEGORIES --- */}
+      <section className="py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <AnimatedSection>
+            <SectionHeader
+              title="Kategorien"
+              subtitle="Explore Our Worlds"
+              linkTo={createPageUrl('Products')}
+            />
 
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <AnimatedSection className="mb-16 text-center">
-            <span className="vip-badge mb-6">Explore Our Worlds</span>
-            <h2 className="text-5xl md:text-7xl font-black mb-6 text-white tracking-tight">
-              Kategorien
-            </h2>
-            <p className="text-xl text-secondary max-w-2xl mx-auto">
-              Tauche ein in unsere kuratierten Kollektionen für das ultimative Erlebnis.
-            </p>
+            {/* Desktop Grid / Mobile Slider */}
+            <div className="hidden md:grid grid-cols-4 gap-6">
+              {/* If we have specific highlights, we can span cols. For now standard grid. */}
+              {departments.slice(0, 8).map((dept, i) => (
+                <CategoryTile
+                  key={dept.id}
+                  category={dept}
+                  className={i === 0 || i === 3 ? "col-span-2 aspect-[2/1]" : "aspect-square"}
+                />
+              ))}
+              {departments.length === 0 && Array(4).fill(0).map((_, i) => (
+                <div key={i} className="aspect-square bg-white/5 animate-pulse rounded-3xl" />
+              ))}
+            </div>
+
+            {/* Mobile Slider using Carousel */}
+            <div className="md:hidden">
+              <Carousel className="w-full">
+                <CarouselContent className="-ml-4">
+                  {departments.map(dept => (
+                    <CarouselItem key={dept.id} className="pl-4 basis-2/3">
+                      <CategoryTile category={dept} aspect="square" />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            </div>
           </AnimatedSection>
-
-          <div className="min-h-[500px]">
-            {loadingDepts ? (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-[500px]">
-                <div className="md:col-span-2 md:row-span-2 skeleton rounded-3xl" />
-                <div className="skeleton rounded-3xl" />
-                <div className="skeleton rounded-3xl" />
-                <div className="skeleton rounded-3xl" />
-                <div className="skeleton rounded-3xl" />
-              </div>
-            ) : (
-              <BentoGrid
-                departments={departments}
-                productCounts={departmentProductCounts}
-                departmentImages={categoryImages}
-                departmentProducts={departmentProducts}
-              />
-            )}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link to={createPageUrl('Products')}>
-              <Button className="btn-glass px-8 h-12 rounded-xl text-sm uppercase tracking-widest border-white/10 hover:border-gold/50">
-                Alle Produkte anzeigen
-              </Button>
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* --- CATEGORY PRODUCTS --- */}
-      {departments.map((department, index) => (
-        <AnimatedSection key={department.id} className="relative z-10">
-          <CategoryProductsSection
-            department={department}
-            products={departmentProducts[department.id] || []}
-            loading={loadingDeptProducts[department.id] || false}
-            onQuickView={(p) => {
-              setQuickViewProduct(p);
-              setIsQuickViewOpen(true);
-            }}
-            onRetry={() => loadDepartmentProducts()}
-          />
-        </AnimatedSection>
-      ))}
+      {/* --- SECTION B: FRESH DROPS --- */}
+      <section className="py-24 relative z-10 bg-[#0E1015]/50 border-y border-white/5 backdrop-blur-sm">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
 
-      {/* --- FRESH DROPS --- */}
-      <AnimatedSection className="relative z-10 py-10">
-        <FreshDropsSection
-          products={products}
-          loading={loadingProducts}
-          onQuickView={(p) => {
-            setQuickViewProduct(p);
-            setIsQuickViewOpen(true);
-          }}
-        />
-      </AnimatedSection>
+        <div className="max-w-7xl mx-auto px-4">
+          <AnimatedSection>
+            <SectionHeader
+              title="Fresh Drops"
+              subtitle="New Arrivals"
+              linkTo="/products?sort=newest"
+            />
+
+            <Carousel className="w-full">
+              <CarouselContent className="-ml-4 pb-10">
+                {products.slice(0, 10).map((product) => (
+                  <CarouselItem key={product.id} className="pl-4 basis-[80%] md:basis-[40%] lg:basis-[25%]">
+                    <div className="h-full pr-4"> {/* Padding for hover overflow safety/shadows */}
+                      <AntigravityProductCard
+                        product={product}
+                        onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="hidden md:block">
+                <CarouselPrevious />
+                <CarouselNext />
+              </div>
+            </Carousel>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* --- SECTION C: BESTSELLERS / TRENDING --- */}
+      <section className="py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-4">
+          <AnimatedSection>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-8 h-[2px] bg-gold/50 shadow-[0_0_10px_#D6B25E]" />
+                  <span className="text-gold text-xs md:text-sm font-bold uppercase tracking-[0.2em]">Curated For You</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none uppercase">
+                  Highlights
+                </h2>
+              </div>
+
+              {/* Filter Chips */}
+              <div className="flex flex-wrap gap-2">
+                {['all', 'trending', 'under50'].map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider border transition-all ${activeTab === tab
+                        ? 'bg-gold text-black border-gold shadow-[0_0_20px_rgba(214,178,94,0.3)]'
+                        : 'bg-transparent text-zinc-400 border-white/10 hover:border-gold/50 hover:text-white'
+                      }`}
+                  >
+                    {tab === 'all' ? 'Bestseller' : tab === 'under50' ? 'Under 50€' : 'Trending'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Highlight Banner (Left or Right - let's do Left for 1/4 width or Right?) */}
+              {/* Let's try: 3 cols grid + 1 col banner on the right? Or Banner First. */}
+
+              {/* Grid Logic */}
+              <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getFilteredBestsellers().map(product => (
+                  <AntigravityProductCard
+                    key={product.id}
+                    product={product}
+                    onQuickView={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
+                  />
+                ))}
+              </div>
+
+              {/* Sticky/Fixed Highlight Banner */}
+              <div className="lg:col-span-1 hidden lg:block">
+                <div className="sticky top-24 h-[600px] rounded-3xl overflow-hidden relative group">
+                  <img
+                    src="/images/highlight-banner.jpg"
+                    onError={(e) => e.target.src = "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=1000&auto=format&fit=crop"} // Fallback
+                    alt="Highlight"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                  <div className="absolute inset-0 p-8 flex flex-col justify-end text-center items-center pb-12">
+                    <span className="bg-gold text-black text-xs font-black uppercase px-3 py-1 rounded mb-4">
+                      Top Pick
+                    </span>
+                    <h3 className="text-3xl font-black text-white mb-4 leading-none">
+                      NEBULA<br />ELITE
+                    </h3>
+                    <Link to="/products?category=shishas">
+                      <Button className="btn-glass border-white/30 text-white hover:bg-white hover:text-black hover:border-white w-full">
+                        Entdecken
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </AnimatedSection>
+        </div>
+      </section>
 
       {/* --- VIDEO SPOTLIGHT --- */}
       <div className="relative z-10 my-20">
         <VideoSpotlight />
       </div>
 
-      {/* --- VIP CLUB TEASER --- */}
-      <section className="py-32 relative z-10 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 relative z-20">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="group relative rounded-[3rem] p-12 md:p-20 text-center overflow-hidden border border-gold/30"
-          >
-            {/* Glass Background */}
-            <div className="absolute inset-0 glass-strong opacity-80" />
-
-            {/* Animated Golden Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gold/5 via-transparent to-gold/5 opacity-50 group-hover:opacity-100 transition-opacity duration-1000" />
-
-            <div className="relative z-10">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="w-24 h-24 mx-auto mb-8 bg-gradient-to-br from-gold to-gold-light rounded-3xl flex items-center justify-center shadow-lg shadow-gold/20"
-              >
-                <Crown className="w-12 h-12 text-black" />
-              </motion.div>
-
-              <h2 className="text-5xl md:text-7xl font-black mb-6 text-gradient-gold">
-                NEBULA VIP
-              </h2>
-              <p className="text-xl text-secondary max-w-2xl mx-auto mb-10 leading-relaxed">
-                Werde Teil der Elite. Erhalte <span className="text-white font-bold">Early Access</span>, exklusive <span className="text-white font-bold">Drops</span> und <span className="text-white font-bold">Secret Deals</span>, die nur für Mitglieder sichtbar sind.
-              </p>
-
-              <div className="flex flex-wrap justify-center gap-4">
-                <Link to={createPageUrl('VIP')}>
-                  <Button className="btn-gold h-14 px-10 text-lg rounded-xl shadow-lg shadow-gold/20">
-                    Jetzt Beitreten
-                  </Button>
-                </Link>
-                <Link to={createPageUrl('Login')}>
-                  <Button className="h-14 px-10 text-lg rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold transition-all">
-                    Einloggen
-                  </Button>
-                </Link>
+      {/* --- TRUST ICONS --- */}
+      <section className="py-16 border-t border-white/5 bg-[#08090C]">
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[
+            { icon: Zap, label: "Blitzversand", sub: "1-3 Werktage" },
+            { icon: Crown, label: "Premium Quality", sub: "Certified Goods" },
+            { icon: Package, label: "Sicher verpackt", sub: "Discreet & Safe" },
+            { icon: Sparkles, label: "Exklusive Drops", sub: "Members Only" }
+          ].map((item, i) => (
+            <div key={i} className="flex flex-col items-center gap-3 group">
+              <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-gold/50 group-hover:bg-gold/10 transition-all duration-300">
+                <item.icon className="w-8 h-8 text-zinc-400 group-hover:text-gold transition-colors" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-lg">{item.label}</h4>
+                <p className="text-zinc-500 text-xs uppercase tracking-wider">{item.sub}</p>
               </div>
             </div>
-          </motion.div>
+          ))}
         </div>
       </section>
 
