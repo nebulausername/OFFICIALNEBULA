@@ -21,6 +21,8 @@ const buttonVariants = cva(
           "bg-[rgba(255,255,255,0.06)] text-white shadow-sm hover:bg-[rgba(255,255,255,0.09)] backdrop-blur-xl",
         ghost: "hover:bg-[rgba(255,255,255,0.06)] hover:text-white text-[rgba(255,255,255,0.62)]",
         link: "text-[#D6B25E] underline-offset-4 hover:underline",
+        glossy: "glass-gloss text-white hover:bg-white/10 active:scale-95 transition-all duration-300",
+        nebula: "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:scale-105 active:scale-95 transition-all duration-300",
       },
       size: {
         default: "h-9 px-4 py-2",

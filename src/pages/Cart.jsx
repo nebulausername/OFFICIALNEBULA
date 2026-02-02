@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { useToast } from '@/components/ui/use-toast';
 import CartItem from '@/components/cart/CartItem';
+import CartUpsell from '@/components/cart/CartUpsell';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
@@ -283,6 +284,9 @@ export default function Cart() {
                 />
               ))}
             </AnimatePresence>
+
+            {/* Smart Upsells 🧠 */}
+            <CartUpsell cartItems={cartItems} />
           </div>
 
           {/* Checkout Side Panel */}

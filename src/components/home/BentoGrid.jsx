@@ -2,7 +2,7 @@ import React from 'react';
 import CategoryCard from './CategoryCard';
 import { motion } from 'framer-motion';
 
-export default function BentoGrid({ departments, productCounts, departmentImages }) {
+export default function BentoGrid({ departments, productCounts, departmentImages, departmentProducts }) {
     // Helper to determine image (fallback logic)
     const getFallbackImage = (dept) => {
         const name = dept.name.toLowerCase();
@@ -60,6 +60,7 @@ export default function BentoGrid({ departments, productCounts, departmentImages
                             index={i}
                             productCount={productCounts[dept.id] || 0}
                             image={getDepartmentImage(dept)}
+                            products={departmentProducts ? departmentProducts[dept.id] : []}
                             featured={isLarge}
                             className="h-full"
                         />

@@ -8,7 +8,7 @@ export default function Footer({ theme = 'dark' }) {
     const isDark = theme === 'dark';
 
     return (
-        <footer className="relative pt-20 pb-10 overflow-hidden" style={{ background: '#0B0D12' }}>
+        <footer className="relative pt-20 pb-10 overflow-hidden bg-[#050608]">
             {/* Background Glows */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px]" />

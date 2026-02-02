@@ -242,22 +242,37 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* Gamification Bar */}
+      {/* Gamification Bar - Dynamic 🚀 */}
       <div className="bg-gradient-to-r from-purple-900/10 via-purple-900/20 to-purple-900/10 border-b border-purple-500/10 py-3 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-center gap-4 text-sm font-medium">
-          <span className="text-purple-300 hidden sm:inline">Level Progress:</span>
-          <div className="w-32 sm:w-48 h-2 bg-black/40 rounded-full overflow-hidden border border-white/5 relative">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '70%' }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
-            />
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-sm font-medium">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center border border-gold/30">
+              <Sparkles className="w-4 h-4 text-gold" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-white font-bold text-xs uppercase tracking-wider">Dein XP Boost</span>
+              <span className="text-purple-300 text-xs">+{calculateXP(totalPrice)} Punkte bei Abschluss</span>
+            </div>
           </div>
-          <span className="text-white font-bold flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-gold" />
-            +{calculateXP(totalPrice)} XP
-          </span>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex-1 sm:w-48 h-2.5 bg-black/40 rounded-full overflow-hidden border border-white/5 relative group">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min((totalPrice / 150) * 100, 100)}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] relative"
+              >
+                <div className="absolute inset-0 bg-white/20 animate-pulse" />
+              </motion.div>
+            </div>
+            <span className="text-zinc-400 text-xs whitespace-nowrap">
+              {totalPrice >= 150 ?
+                <span className="text-emerald-400 font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> VIP Status</span> :
+                <span>Noch <span className="text-white font-bold">{(150 - totalPrice).toFixed(2)}€</span> bis VIP</span>
+              }
+            </span>
+          </div>
         </div>
       </div>
 
@@ -271,8 +286,8 @@ export default function Checkout() {
               {steps.map((step, i) => (
                 <div key={i} className={`flex items-center gap-2 ${i <= currentStep ? 'opacity-100' : 'opacity-40'}`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${currentStep > i ? 'bg-gold border-gold text-black' :
-                      currentStep === i ? 'border-gold text-gold shadow-[0_0_10px_rgba(214,178,94,0.3)]' :
-                        'border-zinc-700 text-zinc-500'
+                    currentStep === i ? 'border-gold text-gold shadow-[0_0_10px_rgba(214,178,94,0.3)]' :
+                      'border-zinc-700 text-zinc-500'
                     }`}>
                     {currentStep > i ? <Check size={14} /> : i + 1}
                   </div>

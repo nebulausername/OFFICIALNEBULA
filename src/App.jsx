@@ -80,6 +80,7 @@ import AdminRealtimeListener from '@/components/admin/AdminRealtimeListener';
 import UserRealtimeListener from '@/components/UserRealtimeListener';
 import LiveChatWidget from '@/components/LiveChatWidget';
 import ScrollToTop from '@/components/ScrollToTop';
+import SocialProof from '@/components/trust/SocialProof';
 
 import { ProductModalProvider } from '@/contexts/ProductModalContext';
 import GlobalProductModal from '@/components/products/GlobalProductModal';
@@ -106,6 +107,7 @@ function App() {
                       <AuthenticatedApp />
                       <GlobalProductModal />
                       <LiveChatWidget />
+                      <SocialProof />
                       <ScrollToTop />
                     </Router>
                     <Toaster />

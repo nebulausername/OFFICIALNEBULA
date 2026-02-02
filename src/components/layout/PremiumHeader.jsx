@@ -115,15 +115,10 @@ export default function PremiumHeader() {
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'h-16' : 'h-20'
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/5 ${isScrolled
+          ? 'h-16 bg-background/80 backdrop-blur-xl shadow-2xl shadow-black/50'
+          : 'h-20 bg-transparent backdrop-blur-lg'
           }`}
-        style={{
-          background: 'rgba(11, 13, 18, 0.7)',
-          backdropFilter: 'blur(25px)',
-          WebkitBackdropFilter: 'blur(25px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          boxShadow: isScrolled ? '0 10px 40px rgba(0, 0, 0, 0.5)' : 'none'
-        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">

@@ -231,13 +231,14 @@ export default function Home() {
 
       {/* Living Cosmic Background - with brightness layer */}
       <CosmicHeroBackground />
-      <div className="fixed inset-0 bg-gradient-radial from-transparent to-black/90 pointer-events-none z-0" />
+      {/* 🌟 Global Brightness Overlay: Slightly lighter gradient to ensure visibility of dark elements */}
+      <div className="fixed inset-0 bg-gradient-radial from-white/5 via-transparent to-black/90 pointer-events-none z-0" />
 
       {/* --- HERO SECTION --- */}
       <section className="relative z-10 min-h-screen flex items-center justify-center overflow-hidden">
 
-        {/* Animated Noise Overlay */}
-        <div className="absolute inset-0 noise-bg opacity-20 pointer-events-none" />
+        {/* Animated Noise Overlay - reduced opacity for cleanliness */}
+        <div className="absolute inset-0 noise-bg opacity-10 pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 py-20 md:py-32 flex flex-col items-center">
 
@@ -256,17 +257,17 @@ export default function Home() {
               <motion.div
                 animate={{
                   boxShadow: [
-                    '0 0 50px rgba(var(--gold-rgb), 0.3)',
-                    '0 0 100px rgba(var(--gold-rgb), 0.5)',
-                    '0 0 50px rgba(var(--gold-rgb), 0.3)',
+                    '0 0 50px rgba(var(--gold-rgb), 0.4)',
+                    '0 0 120px rgba(var(--gold-rgb), 0.7)',
+                    '0 0 50px rgba(var(--gold-rgb), 0.4)',
                   ]
                 }}
                 transition={{ duration: 4, repeat: Infinity }}
-                className="w-32 h-32 md:w-48 md:h-48 rounded-[3rem] p-5 mx-auto relative glass-strong border-gold/30"
+                className="w-32 h-32 md:w-48 md:h-48 rounded-[3rem] p-5 mx-auto relative glass-strong border-gold/50"
               >
                 <div className="absolute inset-0 rounded-[3rem] overflow-hidden">
                   <motion.div
-                    className="absolute inset-0 z-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent"
+                    className="absolute inset-0 z-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent"
                     animate={{ x: ['-200%', '200%'] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                   />
@@ -276,21 +277,21 @@ export default function Home() {
                   src="/images/hero-logo.png"
                   alt="Nebula"
                   className="relative w-full h-full object-contain drop-shadow-2xl z-10"
-                  style={{ filter: 'drop-shadow(0 0 25px rgba(var(--gold-rgb), 0.4))' }}
+                  style={{ filter: 'drop-shadow(0 0 60px rgba(var(--gold-rgb), 0.9)) hue-rotate(-10deg) brightness(1.4)' }}
                 />
               </motion.div>
 
-              {/* Orbital Elements */}
+              {/* Orbital Elements - Brighter */}
               <motion.div
                 animate={{ rotateZ: 360 }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-12 border border-gold/20 rounded-full z-0"
+                className="absolute -inset-12 border border-gold/40 rounded-full z-0"
                 style={{ rotateX: 65, scaleY: 0.4 }}
               />
               <motion.div
                 animate={{ rotateZ: -360 }}
                 transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-24 border border-purple-500/20 rounded-full z-0"
+                className="absolute -inset-24 border border-purple-500/40 rounded-full z-0"
                 style={{ rotateX: 65, scaleY: 0.4 }}
               />
             </motion.div>
@@ -303,7 +304,7 @@ export default function Home() {
               className="mt-12"
             >
               <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-4 leading-none tracking-tighter">
-                <span className="block text-gradient-silver text-shadow-lg">
+                <span className="block text-gradient-silver drop-shadow-[0_0_25px_rgba(255,255,255,0.3)]">
                   NEBULA
                 </span>
                 <div className="relative inline-block mt-2">
@@ -430,6 +431,7 @@ export default function Home() {
                 departments={departments}
                 productCounts={departmentProductCounts}
                 departmentImages={categoryImages}
+                departmentProducts={departmentProducts}
               />
             )}
           </div>
