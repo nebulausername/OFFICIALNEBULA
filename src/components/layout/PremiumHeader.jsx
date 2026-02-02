@@ -116,7 +116,7 @@ export default function PremiumHeader() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/5 ${isScrolled
-          ? 'h-16 bg-background/80 backdrop-blur-xl shadow-2xl shadow-black/50'
+          ? 'h-16 bg-[#050608]/80 backdrop-blur-xl shadow-2xl shadow-black/50 supports-[backdrop-filter]:bg-[#050608]/60'
           : 'h-20 bg-transparent backdrop-blur-lg'
           }`}
       >
