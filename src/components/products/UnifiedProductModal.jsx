@@ -98,28 +98,35 @@ export default function UnifiedProductModal({
     // Get current variant
     // Get current variant
     const getCurrentVariant = useCallback(() => {
-        if (!product?.variants || !selectedColor) return null;
+        if (!product?.variants) return null; // Added safety check
+        // If no color selected and no sizes, maybe return first variant or null
+        if (!selectedColor && product.colors?.length > 0) return null;
+
         return product.variants.find(v => {
             // New Model based on options
             if (v.options) {
                 const vColor = v.options.Color || v.options.color || v.options.Farbe;
                 const vSize = v.options.Size || v.options.size || v.options.Größe;
 
-                const colorMatch = !vColor || vColor === selectedColor.name;
-                const sizeMatch = !vSize || vSize === selectedSize;
-
-                // Strict checking
-                if (selectedSize && vSize && vSize !== selectedSize) return false;
-                if (!selectedSize && vSize) return false;
+                // If we have a selected color, it must match
                 if (selectedColor && vColor && vColor !== selectedColor.name) return false;
+
+                // If we have a selected size, it must match
+                if (selectedSize && vSize && vSize !== selectedSize) return false;
+
+                // If variant has size but none selected, it is not the current refined variant (unless only 1 size exists?)
+                if (!selectedSize && vSize) return false;
 
                 return true;
             }
 
             // Legacy Model
-            return v.color_id === selectedColor.id &&
-                v.size === selectedSize &&
-                v.active !== false
+            if (selectedColor) {
+                return v.color_id === selectedColor.id &&
+                    v.size === selectedSize &&
+                    v.active !== false
+            }
+            return false;
         });
     }, [product, selectedColor, selectedSize]);
 
@@ -139,7 +146,10 @@ export default function UnifiedProductModal({
                 const vSize = v.options.Size || v.options.size || v.options.Größe;
                 return (vColor === selectedColor.name) && (vSize === size);
             }
-            return v.color_id === selectedColor.id && v.size === size && v.active !== false;
+            if (v.color_id && selectedColor) {
+                return v.color_id === selectedColor.id && v.size === size && v.active !== false;
+            }
+            return false;
         });
         return variant?.stock ?? 0;
     };
