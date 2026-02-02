@@ -1,3 +1,4 @@
+// Nebula Redesign
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
@@ -311,8 +312,8 @@ export default function Home() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider border transition-all ${activeTab === tab
-                      ? 'bg-gold text-black border-gold shadow-[0_0_15px_rgba(214,178,94,0.4)]'
-                      : 'bg-transparent text-zinc-400 border-white/10 hover:border-gold/30 hover:text-white'
+                    ? 'bg-gold text-black border-gold shadow-[0_0_15px_rgba(214,178,94,0.4)]'
+                    : 'bg-transparent text-zinc-400 border-white/10 hover:border-gold/30 hover:text-white'
                     }`}
                 >
                   {tab === 'under50' ? 'Under 50€' : tab.charAt(0).toUpperCase() + tab.slice(1)}
