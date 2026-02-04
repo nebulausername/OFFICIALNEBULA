@@ -258,6 +258,7 @@ export default function ProductDetail() {
   };
 
   const calculatePrice = () => {
+    if (!product) return 0;
     let basePrice = product.price;
     if (product.option_schema?.options) {
       product.option_schema.options.forEach(option => {

@@ -86,7 +86,7 @@ export const cleanupOldVerifications = async () => {
 export const cleanupOrphanedPhotos = async () => {
   try {
     const uploadsDir = path.join(__dirname, '../../uploads/verifications');
-    
+
     if (!fs.existsSync(uploadsDir)) {
       return { deletedOrphanedPhotos: 0 };
     }
@@ -117,11 +117,11 @@ export const cleanupOrphanedPhotos = async () => {
         try {
           const filePath = path.join(uploadsDir, file);
           const stats = fs.statSync(filePath);
-          
+
           // Only delete files older than 7 days
           const fileAge = Date.now() - stats.mtimeMs;
           const sevenDays = 7 * 24 * 60 * 60 * 1000;
-          
+
           if (fileAge > sevenDays) {
             fs.unlinkSync(filePath);
             deletedCount++;
@@ -180,10 +180,21 @@ export const initializeCleanupService = () => {
   });
 
   // Run cleanup on startup (after 1 minute delay)
+  // Run cleanup on startup (after 1 minute delay)
   const startupTimer = setTimeout(async () => {
-    botLogger.info('Running initial cleanup...');
-    await cleanupOldVerifications();
-    await cleanupOrphanedPhotos();
+    try {
+      botLogger.info('Running initial cleanup...');
+      // Check if DB is reachable before attempting cleanup to avoid log spam
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+        await cleanupOldVerifications();
+        await cleanupOrphanedPhotos();
+      } catch (dbError) {
+        botLogger.warn('Skipping initial cleanup: Database unreachable');
+      }
+    } catch (error) {
+      console.error('Cleanup startup failed gracefully:', error);
+    }
   }, 60 * 1000);
   // Don't keep the process alive if nothing else is running
   startupTimer.unref?.();

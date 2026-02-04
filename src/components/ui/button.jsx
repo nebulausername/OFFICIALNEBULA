@@ -39,31 +39,44 @@ const buttonVariants = cva(
   }
 )
 
-const Button = React.forwardRef(({ className, variant, size, asChild = false, onClick, children, ...props }, ref) => {
-  const Comp = asChild ? Slot : "button"
+const Button = React.forwardRef(
+  /**
+   * @param {Object} props
+   * @param {React.ReactNode} [props.children]
+   * @param {string} [props.className]
+   * @param {string} [props.variant]
+   * @param {string} [props.size]
+   * @param {boolean} [props.asChild]
+   * @param {function} [props.onClick]
+   * @param {boolean} [props.disabled]
+   * @param {Object} [props.style]
+   * @param {React.Ref<HTMLButtonElement>} ref
+   */
+  ({ className, variant, size, asChild = false, onClick, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button"
 
-  // Safe sound access
-  const soundContext = useNebulaSound ? useNebulaSound() : null;
-  const playClick = soundContext?.playClick || (() => { });
-  const playHover = soundContext?.playHover || (() => { });
+    // Safe sound access
+    const soundContext = useNebulaSound ? useNebulaSound() : null;
+    const playClick = soundContext?.playClick || (() => { });
+    const playHover = soundContext?.playHover || (() => { });
 
-  const handleClick = (e) => {
-    // Only play sound if context exists
-    if (playClick) playClick();
-    if (onClick) onClick(e);
-  };
+    const handleClick = (e) => {
+      // Only play sound if context exists
+      if (playClick) playClick();
+      if (onClick) onClick(e);
+    };
 
-  return (
-    (<Comp
-      className={cn(buttonVariants({ variant, size, className }))}
-      ref={ref}
-      onClick={handleClick}
-      onMouseEnter={() => playHover && playHover()}
-      {...props}>
-      {children}
-    </Comp>)
-  );
-})
+    return (
+      (<Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        onClick={handleClick}
+        onMouseEnter={() => playHover && playHover()}
+        {...props}>
+        {children}
+      </Comp>)
+    );
+  })
 Button.displayName = "Button"
 
 export { Button, buttonVariants }
