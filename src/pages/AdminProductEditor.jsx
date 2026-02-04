@@ -19,6 +19,7 @@ import { createPageUrl } from '../utils';
 import ProductVariantManager from '../components/admin/ProductVariantManager';
 import ProductMedia from '../components/admin/ProductMedia';
 import ProductSEO from '../components/admin/ProductSEO';
+import ProductCrossSellManager from '../components/admin/ProductCrossSellManager';
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import UnifiedProductModal from '../components/products/UnifiedProductModal';
 
@@ -49,7 +50,9 @@ export default function AdminProductEditor() {
     // Modal Config Fields
     lead_time_days: 3,
     min_order_quantity: 1,
-    ship_from: 'Deutschland'
+    ship_from: 'Deutschland',
+    // Cross-Sell
+    related_product_ids: []
   });
 
   // Media (Gallery)
@@ -107,7 +110,9 @@ export default function AdminProductEditor() {
             // Modal Config Fields
             lead_time_days: prod.lead_time_days || 3,
             min_order_quantity: prod.min_order_quantity || 1,
-            ship_from: prod.ship_from || 'Deutschland'
+            ship_from: prod.ship_from || 'Deutschland',
+            // Cross-Sell
+            related_product_ids: prod.related_product_ids || []
           });
           setProductImages(images.sort((a, b) => a.sort_order - b.sort_order));
 
@@ -206,14 +211,14 @@ export default function AdminProductEditor() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-zinc-900/50 p-1 border border-zinc-800">
-            {['basic', 'media', 'variants', 'seo', 'preview'].map(tab => (
+          <TabsList className="bg-zinc-900/50 p-1 border border-zinc-800 flex-wrap h-auto gap-1">
+            {['basic', 'media', 'variants', 'cross-sell', 'seo', 'preview'].map(tab => (
               <TabsTrigger
                 key={tab}
                 value={tab}
-                className={`data-[state=active]:bg-purple-600 data-[state=active]:text-white uppercase tracking-wider font-bold text-xs px-6 ${tab === 'preview' ? 'data-[state=active]:bg-emerald-600' : ''}`}
+                className={`flex-1 data-[state=active]:bg-purple-600 data-[state=active]:text-white uppercase tracking-wider font-bold text-xs px-4 py-2 ${tab === 'preview' ? 'data-[state=active]:bg-emerald-600' : ''}`}
               >
-                {tab === 'preview' ? '👁️ Live' : tab}
+                {tab === 'cross-sell' ? 'Cross-Sell' : tab === 'preview' ? '👁️ Live' : tab}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -454,6 +459,15 @@ export default function AdminProductEditor() {
                 Bitte speichere das Produkt zuerst.
               </div>
             )}
+          </TabsContent>
+
+          {/* Cross-Sell Tab */}
+          <TabsContent value="cross-sell">
+            <ProductCrossSellManager
+              currentProductId={productId}
+              relatedProductIds={formData.related_product_ids}
+              onChange={(newIds) => setFormData({ ...formData, related_product_ids: newIds })}
+            />
           </TabsContent>
 
           {/* SEO Tab */}

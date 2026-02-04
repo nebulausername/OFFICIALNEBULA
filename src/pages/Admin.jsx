@@ -320,7 +320,7 @@ export default function Admin() {
             </motion.div>
           </Link>
 
-          <div className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-3xl flex flex-col justify-between group overflow-hidden relative">
+          <Link to={createPageUrl('AdminSystemMonitor')} className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-3xl flex flex-col justify-between group overflow-hidden relative transition-colors hover:border-emerald-500/40">
             <div className="flex items-center gap-2 mb-4">
               <div className="relative">
                 <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
@@ -342,7 +342,7 @@ export default function Admin() {
               </div>
               <div className="font-mono text-emerald-400 font-bold">24ms</div>
             </div>
-          </div>
+          </Link>
 
           {/* New Row: Top Sellers & Live Chat */}
           <Link to={createPageUrl('AdminProducts')} className="col-span-1 md:col-span-2 group">
@@ -462,6 +462,6 @@ export default function Admin() {
         </div>
 
       </div>
-    </div>
+    </div >
   );
 }
