@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Shield, ArrowRight, Loader2, Lock } from 'lucide-react';
+import { Sparkles, Shield, ArrowRight, Loader2 } from 'lucide-react';
 import { api } from '@/api';
 import { setToken } from '@/api/config';
 import { useTelegramWebApp, isTelegramWebApp, getTelegramUser, hapticFeedback, openTelegramLink } from '../lib/TelegramWebApp';

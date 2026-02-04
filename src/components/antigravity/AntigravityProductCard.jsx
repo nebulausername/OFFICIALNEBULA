@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Eye, Heart, Star, Sparkles, Timer } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Eye, Heart, Star } from 'lucide-react';
 import { createPageUrl } from '../../utils';
 import { useI18n } from '../i18n/I18nProvider';
 

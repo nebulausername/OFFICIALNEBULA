@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
-import { Instagram, Twitter, Facebook, Mail, Phone, ArrowRight, Check, X, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { Instagram, Twitter, Facebook, Mail, ArrowRight, Check, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Footer({ theme = 'dark' }) {

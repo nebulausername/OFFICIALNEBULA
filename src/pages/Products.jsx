@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, PackageX, Sparkles } from 'lucide-react';
+import { SlidersHorizontal, PackageX } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import SEO from '@/components/seo/SEO';
@@ -15,7 +15,6 @@ import UnifiedProductModal from '../components/products/UnifiedProductModal';
 import { useI18n } from '../components/i18n/I18nProvider';
 import { products as staticProducts } from '../data/products';
 import { useToast } from '@/components/ui/use-toast';
-import { createPageUrl } from '../utils';
 
 export default function Products() {
   const { t } = useI18n();

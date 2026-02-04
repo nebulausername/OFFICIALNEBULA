@@ -1,5 +1,6 @@
 import api from './client';
 import { API_BASE_URL } from './config';
+import { getDemoData } from './demoData';
 
 // Helper to build query params for list/filter operations
 const buildQueryParams = (filters = {}, sort = null, limit = null) => {
@@ -94,6 +95,14 @@ const createEntity = (entityName, customBasePath = null) => {
           status: error.status,
           stack: error.stack
         });
+
+        // Fallback to demo data when API is unavailable
+        const demoData = getDemoData(entityName);
+        if (demoData.length > 0) {
+          console.warn(`📦 Using fallback demo data for ${entityName} (${demoData.length} items)`);
+          return demoData;
+        }
+
         throw error;
       }
     },
@@ -106,6 +115,18 @@ const createEntity = (entityName, customBasePath = null) => {
         const result = await api.get(basePath, params);
         return normalizeArray(result);
       } catch (error) {
+        // Fallback to demo data when API is unavailable
+        const demoData = getDemoData(entityName);
+        if (demoData.length > 0) {
+          console.warn(`📦 Using fallback demo data for ${entityName} filter`);
+          // Simple client-side filter
+          return demoData.filter(item => {
+            return Object.keys(filters).every(key => {
+              if (filters[key] === undefined || filters[key] === null) return true;
+              return String(item[key]) === String(filters[key]);
+            });
+          });
+        }
         throw error;
       }
     },

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, Heart, Sparkles } from 'lucide-react';
-import { createPageUrl } from '../../utils';
+import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function ProductCardLite({ product, onQuickView }) {

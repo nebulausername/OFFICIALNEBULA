@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api';
 import { motion } from 'framer-motion';
-import { Plus, Sparkles, TrendingUp } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 

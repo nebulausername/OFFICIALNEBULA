@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/api';
-import { Activity, Server, Database, CheckCircle, XCircle, AlertTriangle, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Activity, Server, Database, CheckCircle, XCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { createPageUrl } from '../utils';
