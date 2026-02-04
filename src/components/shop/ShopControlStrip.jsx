@@ -128,6 +128,7 @@ export default function ShopControlStrip({
   const sortOptions = [
     { value: 'newest', label: 'Neueste' },
     { value: 'popular', label: 'Beliebt' },
+    { value: 'delivery', label: 'Schnelle Lieferung' },
     { value: 'price_asc', label: 'Preis ↑' },
     { value: 'price_desc', label: 'Preis ↓' },
     { value: 'name_asc', label: 'A-Z' },

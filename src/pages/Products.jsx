@@ -233,6 +233,7 @@ export default function Products() {
         case 'price_desc': return (b.price || 0) - (a.price || 0);
         case 'name_asc': return (a.name || '').localeCompare(b.name || '');
         case 'name_desc': return (b.name || '').localeCompare(a.name || '');
+        case 'delivery': return (a.lead_time_days || 3) - (b.lead_time_days || 3); // Schnellste Lieferung zuerst
         case 'popular': return 0; // Needs popularity metric
         default: return new Date(b.created_at || b.created_date || 0).getTime() - new Date(a.created_at || a.created_date || 0).getTime();
       }

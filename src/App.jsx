@@ -13,12 +13,21 @@ const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
+// Routes that require verified access
+const PROTECTED_ROUTES = ['Cart', 'Checkout', 'Profile', 'ProfileSettings', 'Wishlist', 'Requests', 'OrderConfirmation'];
+// Routes that require admin access
+const ADMIN_ROUTES = ['Admin', 'AdminAnalytics', 'AdminUsers', 'AdminOrders', 'AdminBrands', 'AdminCategories',
+  'AdminNotificationTemplates', 'AdminProductEditor', 'AdminProducts', 'AdminRequests',
+  'AdminSupport', 'AdminLiveChat', 'AdminVerifications'];
+
+import ProtectedRoute, { AdminRoute } from '@/components/auth/ProtectedRoute';
+
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
 
   // Initialize Telegram WebApp if available
   useTelegramWebApp();
@@ -26,22 +35,44 @@ const AuthenticatedApp = () => {
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-[#0A0C10]">
+        <div className="w-8 h-8 border-4 border-[#D6B25E]/20 border-t-[#D6B25E] rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
-    }
+  // Handle critical authentication errors only
+  // Guest mode is allowed - no automatic redirect for browsing
+  if (authError && authError.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
+
+  // Helper to wrap page with appropriate protection
+  const wrapWithProtection = (path, Page) => {
+    if (ADMIN_ROUTES.includes(path)) {
+      return (
+        <AdminRoute>
+          <LayoutWrapper currentPageName={path}>
+            <Page />
+          </LayoutWrapper>
+        </AdminRoute>
+      );
+    }
+    if (PROTECTED_ROUTES.includes(path)) {
+      return (
+        <ProtectedRoute>
+          <LayoutWrapper currentPageName={path}>
+            <Page />
+          </LayoutWrapper>
+        </ProtectedRoute>
+      );
+    }
+    return (
+      <LayoutWrapper currentPageName={path}>
+        <Page />
+      </LayoutWrapper>
+    );
+  };
 
   // Render the main app
   return (
@@ -59,11 +90,7 @@ const AuthenticatedApp = () => {
           <Route
             key={path}
             path={`/${path}`}
-            element={
-              <LayoutWrapper currentPageName={path}>
-                <Page />
-              </LayoutWrapper>
-            }
+            element={wrapWithProtection(path, Page)}
           />
         );
       })}

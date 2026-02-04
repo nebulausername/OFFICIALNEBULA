@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
     X, Heart, ShoppingBag, ChevronLeft, ChevronRight,
-    Check, AlertCircle, Plus, Minus, Zap
+    Check, AlertCircle, Plus, Minus, Zap, Truck, MapPin, Package, Bell
 } from 'lucide-react';
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
@@ -93,7 +93,7 @@ export default function UnifiedProductModal({
     }, [product, selectedColor]);
 
     const galleryImages = getGalleryImages();
-    const currentImage = galleryImages[currentImageIndex] || product?.cover_image;
+    const currentImage = galleryImages[currentImageIndex] || product?.cover_image || '/placeholder.png';
 
     // Get current variant
     // Get current variant
@@ -132,8 +132,8 @@ export default function UnifiedProductModal({
 
     const currentVariant = getCurrentVariant();
 
-    // Calculate price
-    let basePrice = currentVariant?.price_override || product?.price || 0;
+    // Calculate price with safety guards
+    const basePrice = currentVariant?.price_override ?? product?.price ?? 0;
     const currentPrice = expressDelivery ? basePrice + 4.90 : basePrice;
 
     // Stock checking
@@ -295,11 +295,11 @@ export default function UnifiedProductModal({
 
     if (!product) return null;
 
-    const isVariantComplete = !product.sizes?.length || selectedSize;
-    const hasStock = product.in_stock && (currentVariant ? currentVariant.stock > 0 : totalColorStock > 0 || !product.variants?.length);
-    const currentStock = currentVariant?.stock || totalColorStock;
+    const isVariantComplete = !product?.sizes?.length || selectedSize;
+    const hasStock = product?.in_stock && (currentVariant ? currentVariant.stock > 0 : totalColorStock > 0 || !product?.variants?.length);
+    const currentStock = currentVariant?.stock ?? totalColorStock ?? 0;
     const isLowStock = hasStock && currentStock <= 5 && currentStock > 0;
-    const needsSizeSelection = product.sizes?.length > 0 && !selectedSize;
+    const needsSizeSelection = (product?.sizes?.length ?? 0) > 0 && !selectedSize;
     const canAddToCart = hasStock && isVariantComplete && !showSuccess;
 
     return (
@@ -566,7 +566,51 @@ export default function UnifiedProductModal({
                                                 </div>
                                             )}
 
-                                            {/* Minimal Quantity & Express for Full Mode */}
+                                            {/* Shipping & Delivery Info */}
+                                            <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-950/30 to-transparent border border-emerald-500/10">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <Truck className="w-4 h-4 text-emerald-400" />
+                                                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                                                        {t('product.delivery') || 'Lieferung'}
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {/* Delivery Time */}
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                                                            <Package className="w-4 h-4 text-zinc-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-zinc-500 uppercase">Lieferzeit</p>
+                                                            <p className="text-sm font-bold text-white">
+                                                                {product.lead_time_days
+                                                                    ? `${product.lead_time_days} Tage`
+                                                                    : expressDelivery ? '1 Tag' : '2-4 Tage'
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {/* Ship From */}
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
+                                                            <MapPin className="w-4 h-4 text-zinc-400" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-zinc-500 uppercase">Versand ab</p>
+                                                            <p className="text-sm font-bold text-white">
+                                                                {product.ship_from || 'Deutschland'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {/* Estimated Delivery Date */}
+                                                <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+                                                    <span className="text-xs text-zinc-500">Voraussichtlich bei dir:</span>
+                                                    <span className="text-sm font-bold text-emerald-400">{deliveryDate}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Quantity & Express Toggle */}
                                             <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
                                                 <div className="flex items-center gap-3">
                                                     <div className="flex items-center bg-black/30 rounded-lg p-1 border border-white/10">
@@ -584,8 +628,11 @@ export default function UnifiedProductModal({
                                                             <Plus className="w-3 h-3" />
                                                         </button>
                                                     </div>
-                                                    {product.min_order_quantity > 1 && (
-                                                        <span className="text-[10px] text-zinc-500 font-medium">min. {product.min_order_quantity} Stk.</span>
+                                                    {(product.min_order_quantity ?? 0) > 1 && (
+                                                        <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20">
+                                                            <AlertCircle className="w-3 h-3 text-amber-400" />
+                                                            <span className="text-[10px] text-amber-400 font-bold">Min. {product.min_order_quantity} Stk.</span>
+                                                        </div>
                                                     )}
                                                 </div>
 
@@ -598,7 +645,7 @@ export default function UnifiedProductModal({
                                                             <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${expressDelivery ? 'translate-x-4' : 'translate-x-0'}`} />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className={`text-xs font-bold transition-colors ${expressDelivery ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`}>Express</span>
+                                                            <span className={`text-xs font-bold transition-colors ${expressDelivery ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-300'}`}>Express +4,90€</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -679,8 +726,6 @@ export default function UnifiedProductModal({
                                         >
                                             {isAdding ? (
                                                 <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                                            ) : !hasStock ? (
-                                                t('shop.soldOut') || 'Ausverkauft'
                                             ) : (
                                                 <>
                                                     <ShoppingBag className="w-5 h-5" />
@@ -691,6 +736,22 @@ export default function UnifiedProductModal({
                                     )}
                                 </AnimatePresence>
                             </Button>
+
+                            {/* Notify Me Button for Out of Stock */}
+                            {!hasStock && (
+                                <Button
+                                    onClick={() => {
+                                        toast({
+                                            title: '🔔 Du wirst benachrichtigt!',
+                                            description: `Wir lassen es dich wissen, sobald "${product?.name}" wieder verfügbar ist.`,
+                                        });
+                                    }}
+                                    className="w-full h-12 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2"
+                                >
+                                    <Bell className="w-4 h-4" />
+                                    Benachrichtigen wenn verfügbar
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>

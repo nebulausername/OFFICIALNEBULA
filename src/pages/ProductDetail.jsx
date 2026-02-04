@@ -175,8 +175,22 @@ export default function ProductDetail() {
         setRelatedProducts(filteredRelated);
       }
     } catch (error) {
-      console.error('Error loading product:', error);
-      // Demo Fallback would go here (omitted for brevity, assume backend works or similar structure)
+      // Structured error logging for debugging
+      const errorContext = {
+        route: 'ProductDetail',
+        productId: new URLSearchParams(window.location.search).get('id'),
+        timestamp: new Date().toISOString(),
+        error: error.message || error,
+        stack: error.stack
+      };
+      console.error('[ProductDetail] Error loading product:', errorContext);
+
+      // Toast for user feedback
+      toast({
+        title: 'Fehler beim Laden',
+        description: 'Produkt konnte nicht geladen werden. Bitte versuche es erneut.',
+        variant: 'destructive'
+      });
       setLoading(false);
     } finally {
       setLoading(false);
@@ -295,8 +309,70 @@ export default function ProductDetail() {
   const currentPrice = calculatePrice();
   const isDrop = product?.drop_date && new Date(product.drop_date) > new Date();
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin" /></div>;
-  if (!product) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050608] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          {/* Back Button Skeleton */}
+          <div className="w-32 h-8 bg-white/5 rounded-lg animate-pulse mb-8" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+            {/* Gallery Skeleton */}
+            <div className="space-y-6">
+              <div className="aspect-square rounded-3xl bg-white/5 animate-pulse" />
+              <div className="flex gap-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-20 h-20 rounded-xl bg-white/5 animate-pulse" />
+                ))}
+              </div>
+            </div>
+
+            {/* Info Skeleton */}
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <div className="h-12 w-3/4 bg-white/5 rounded-lg animate-pulse" />
+                <div className="h-6 w-1/3 bg-white/5 rounded-lg animate-pulse" />
+              </div>
+              <div className="h-16 w-1/2 bg-gold/10 rounded-2xl animate-pulse" />
+              <div className="space-y-3">
+                <div className="h-4 w-full bg-white/5 rounded animate-pulse" />
+                <div className="h-4 w-5/6 bg-white/5 rounded animate-pulse" />
+                <div className="h-4 w-4/6 bg-white/5 rounded animate-pulse" />
+              </div>
+              <div className="flex gap-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="w-12 h-12 rounded-full bg-white/5 animate-pulse" />
+                ))}
+              </div>
+              <div className="h-14 w-full bg-gold/20 rounded-xl animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#050608] text-white px-4">
+        <div className="text-center space-y-6 max-w-md">
+          <div className="w-24 h-24 mx-auto rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+            <ShoppingBag className="w-12 h-12 text-red-400" />
+          </div>
+          <h1 className="text-3xl font-black">Produkt nicht gefunden</h1>
+          <p className="text-zinc-400 leading-relaxed">
+            Dieses Produkt existiert nicht oder wurde entfernt.
+            Vielleicht findest du etwas Ähnliches in unserem Shop.
+          </p>
+          <Link to={createPageUrl('Products')}>
+            <Button className="btn-gold h-12 px-8 text-lg shadow-lg shadow-gold/20">
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Zurück zum Shop
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050608] text-white selection:bg-gold/30">

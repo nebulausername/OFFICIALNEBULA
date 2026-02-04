@@ -19,6 +19,8 @@ import { createPageUrl } from '../utils';
 import ProductVariantManager from '../components/admin/ProductVariantManager';
 import ProductMedia from '../components/admin/ProductMedia';
 import ProductSEO from '../components/admin/ProductSEO';
+import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
+import UnifiedProductModal from '../components/products/UnifiedProductModal';
 
 export default function AdminProductEditor() {
   const [searchParams] = useSearchParams();
@@ -27,6 +29,7 @@ export default function AdminProductEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   // Basic Info
   const [formData, setFormData] = useState({
@@ -42,7 +45,11 @@ export default function AdminProductEditor() {
     tags: [],
     cover_image: '',
     product_type: 'other',
-    drop_date: null
+    drop_date: null,
+    // Modal Config Fields
+    lead_time_days: 3,
+    min_order_quantity: 1,
+    ship_from: 'Deutschland'
   });
 
   // Media (Gallery)
@@ -96,7 +103,11 @@ export default function AdminProductEditor() {
             tags: prod.tags || [],
             cover_image: prod.cover_image || '',
             product_type: prod.product_type || 'other',
-            drop_date: prod.drop_date ? new Date(prod.drop_date) : null
+            drop_date: prod.drop_date ? new Date(prod.drop_date) : null,
+            // Modal Config Fields
+            lead_time_days: prod.lead_time_days || 3,
+            min_order_quantity: prod.min_order_quantity || 1,
+            ship_from: prod.ship_from || 'Deutschland'
           });
           setProductImages(images.sort((a, b) => a.sort_order - b.sort_order));
 
@@ -196,13 +207,13 @@ export default function AdminProductEditor() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-zinc-900/50 p-1 border border-zinc-800">
-            {['basic', 'media', 'variants', 'seo'].map(tab => (
+            {['basic', 'media', 'variants', 'seo', 'preview'].map(tab => (
               <TabsTrigger
                 key={tab}
                 value={tab}
-                className="data-[state=active]:bg-purple-600 data-[state=active]:text-white uppercase tracking-wider font-bold text-xs px-6"
+                className={`data-[state=active]:bg-purple-600 data-[state=active]:text-white uppercase tracking-wider font-bold text-xs px-6 ${tab === 'preview' ? 'data-[state=active]:bg-emerald-600' : ''}`}
               >
-                {tab}
+                {tab === 'preview' ? '👁️ Live' : tab}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -369,6 +380,47 @@ export default function AdminProductEditor() {
                 />
                 <Label>Produkt ist Veröffentlicht & Auf Lager</Label>
               </div>
+
+              {/* Modal Config Section */}
+              <div className="p-4 bg-emerald-950/20 rounded-xl border border-emerald-500/20">
+                <Label className="text-emerald-400 mb-4 block uppercase text-xs font-bold tracking-wider flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  Modal & Shop Konfiguration
+                </Label>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-zinc-400 text-xs">Lieferzeit (Tage)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={30}
+                      value={formData.lead_time_days}
+                      onChange={(e) => setFormData({ ...formData, lead_time_days: parseInt(e.target.value) || 3 })}
+                      className="bg-zinc-900 border-zinc-700 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-zinc-400 text-xs">Mindestbestellung</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={formData.min_order_quantity}
+                      onChange={(e) => setFormData({ ...formData, min_order_quantity: parseInt(e.target.value) || 1 })}
+                      className="bg-zinc-900 border-zinc-700 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-zinc-400 text-xs">Versand ab</Label>
+                    <Input
+                      value={formData.ship_from}
+                      onChange={(e) => setFormData({ ...formData, ship_from: e.target.value })}
+                      placeholder="Deutschland"
+                      className="bg-zinc-900 border-zinc-700"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-600 mt-3">Diese Felder werden im Produkt-Modal angezeigt.</p>
+              </div>
             </div>
           </TabsContent>
 
@@ -410,6 +462,75 @@ export default function AdminProductEditor() {
               name={formData.name}
               description={formData.description}
               slug={formData.name?.toLowerCase().replace(/ /g, '-')}
+            />
+          </TabsContent>
+
+          {/* Live Preview Tab */}
+          <TabsContent value="preview">
+            <div className="glass-panel rounded-2xl p-6 border border-zinc-800 bg-zinc-900/30">
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-white mb-2">👁️ Live Vorschau</h3>
+                <p className="text-sm text-zinc-500">So wird dein Produkt im Shop und im Modal angezeigt.</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Card Preview */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-xs text-zinc-400 font-bold uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    Product Card
+                  </div>
+                  <div className="max-w-[280px]">
+                    <AntigravityProductCard
+                      product={{
+                        id: productId || 'preview',
+                        name: formData.name || 'Produktname',
+                        price: formData.price || 0,
+                        cover_image: formData.cover_image || '/placeholder.png',
+                        in_stock: formData.in_stock,
+                        tags: formData.tags,
+                        ...initialVariantData
+                      }}
+                      onQuickView={() => setPreviewModalOpen(true)}
+                    />
+                  </div>
+                </div>
+
+                {/* Modal Preview Trigger */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-xs text-zinc-400 font-bold uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    Quick View Modal
+                  </div>
+                  <button
+                    onClick={() => setPreviewModalOpen(true)}
+                    className="w-full p-8 rounded-xl border-2 border-dashed border-zinc-700 hover:border-emerald-500/50 transition-colors flex flex-col items-center justify-center gap-3 group"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <span className="text-3xl">????</span>
+                    </div>
+                    <span className="text-zinc-400 group-hover:text-white font-bold">Modal Preview öffnen</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Modal */}
+            <UnifiedProductModal
+              product={{
+                id: productId || 'preview',
+                name: formData.name || 'Produktname',
+                description: formData.description || 'Keine Beschreibung',
+                price: formData.price || 0,
+                cover_image: formData.cover_image || '/placeholder.png',
+                in_stock: formData.in_stock,
+                tags: formData.tags,
+                min_order_quantity: 1,
+                ...initialVariantData
+              }}
+              open={previewModalOpen}
+              onClose={() => setPreviewModalOpen(false)}
+              mode="full"
             />
           </TabsContent>
         </Tabs>

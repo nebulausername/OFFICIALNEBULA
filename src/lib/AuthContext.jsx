@@ -4,6 +4,13 @@ import { setToken, getToken } from '@/api/config';
 
 const AuthContext = createContext();
 
+// Access levels: 'guest' (browser, no auth), 'limited' (pending verification), 'verified' (full access)
+export const ACCESS_LEVELS = {
+  GUEST: 'guest',
+  LIMITED: 'limited',
+  VERIFIED: 'verified'
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,7 +19,15 @@ export const AuthProvider = ({ children }) => {
   const [authError, setAuthError] = useState(null);
   const [appPublicSettings, setAppPublicSettings] = useState(null);
 
+  // New: Access level and Telegram detection
+  const [accessLevel, setAccessLevel] = useState(ACCESS_LEVELS.GUEST);
+  const [isTelegram, setIsTelegram] = useState(false);
+
   useEffect(() => {
+    // Detect Telegram WebApp environment
+    const inTelegram = typeof window !== 'undefined' && !!window.Telegram?.WebApp?.initData;
+    setIsTelegram(inTelegram);
+
     checkAppState();
   }, []);
 
@@ -28,6 +43,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         setIsLoadingAuth(false);
         setIsAuthenticated(false);
+        setAccessLevel(ACCESS_LEVELS.GUEST);
         console.log('No token found, defaulting to guest mode');
       }
       setIsLoadingPublicSettings(false);
@@ -39,6 +55,7 @@ export const AuthProvider = ({ children }) => {
       });
       setIsLoadingPublicSettings(false);
       setIsLoadingAuth(false);
+      setAccessLevel(ACCESS_LEVELS.GUEST);
     }
   };
 
@@ -48,20 +65,42 @@ export const AuthProvider = ({ children }) => {
       const currentUser = await api.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
+
+      // Determine access level based on verification status
+      if (currentUser.verification_status === 'verified') {
+        setAccessLevel(ACCESS_LEVELS.VERIFIED);
+      } else if (currentUser.verification_status === 'pending') {
+        setAccessLevel(ACCESS_LEVELS.LIMITED);
+      } else {
+        setAccessLevel(ACCESS_LEVELS.LIMITED);
+      }
+
       setIsLoadingAuth(false);
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);
       setIsAuthenticated(false);
+      setAccessLevel(ACCESS_LEVELS.GUEST);
 
       // If user auth fails, it might be an expired token, but we allow guest access
-      // so we don't set a blocking error unless specifically required by a protected route
       if (error.status === 401 || error.status === 403) {
         console.log('Guest mode active');
-        // Clear token if invalid
         setToken(null);
       }
     }
+  };
+
+  // Helper to check if user has required access level
+  const hasAccess = (requiredLevel) => {
+    const levels = [ACCESS_LEVELS.GUEST, ACCESS_LEVELS.LIMITED, ACCESS_LEVELS.VERIFIED];
+    const currentIndex = levels.indexOf(accessLevel);
+    const requiredIndex = levels.indexOf(requiredLevel);
+    return currentIndex >= requiredIndex;
+  };
+
+  // Helper to check if verification is required for action
+  const requiresVerification = () => {
+    return accessLevel !== ACCESS_LEVELS.VERIFIED;
   };
 
   const logout = async (shouldRedirect = true) => {
@@ -94,7 +133,12 @@ export const AuthProvider = ({ children }) => {
       appPublicSettings,
       logout,
       navigateToLogin,
-      checkAppState
+      checkAppState,
+      // New access control values
+      accessLevel,
+      isTelegram,
+      hasAccess,
+      requiresVerification
     }}>
       {children}
     </AuthContext.Provider>

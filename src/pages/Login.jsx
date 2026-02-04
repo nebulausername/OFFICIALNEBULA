@@ -259,28 +259,31 @@ export default function Login() {
               </motion.div>
             </div>
 
-            {/* Action Card */}
+            {/* Action Card - Telegram First */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              {/* Primary Action: Enter Shop */}
+              {/* Primary Action: Telegram Verification */}
               <button
-                onClick={() => navigate(createPageUrl('Home'))}
+                onClick={() => {
+                  const botUsername = import.meta.env.VITE_BOT_USERNAME || 'NebulaOrderBot';
+                  window.open(`https://t.me/${botUsername}`, '_blank');
+                }}
                 className="group relative w-full"
               >
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-[#D6B25E] via-[#F5D98B] to-[#D6B25E] rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition duration-500 group-hover:duration-200 animate-tilt" />
-                <div className="relative flex items-center justify-between bg-[#0A0C10] rounded-2xl p-4 leading-none border border-white/10 group-hover:border-[#D6B25E]/50 transition-colors">
+                <div className="relative flex items-center justify-between bg-[#0A0C10] rounded-2xl p-5 leading-none border border-white/10 group-hover:border-[#D6B25E]/50 transition-colors">
                   <div className="flex items-center gap-5">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#D6B25E]/20 to-[#D6B25E]/5 flex items-center justify-center border border-[#D6B25E]/20 group-hover:scale-105 transition-transform duration-300">
-                      <Sparkles className="w-6 h-6 text-[#D6B25E]" />
+                      <Shield className="w-6 h-6 text-[#D6B25E]" />
                     </div>
                     <div className="text-left">
-                      <div className="text-white font-bold text-lg mb-1 group-hover:text-[#D6B25E] transition-colors">Shop betreten</div>
+                      <div className="text-white font-bold text-lg mb-1 group-hover:text-[#D6B25E] transition-colors">Via Telegram öffnen</div>
                       <div className="text-zinc-500 text-xs font-medium tracking-wide">
-                        OHNE ANMELDUNG STÖBERN
+                        SOFORTIGER VOLLER ZUGANG
                       </div>
                     </div>
                   </div>
@@ -290,32 +293,43 @@ export default function Login() {
                 </div>
               </button>
 
-              {/* Secondary: Login Options */}
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => {
-                    const botUsername = process.env.VITE_BOT_USERNAME || 'your_bot';
-                    window.open(`https://t.me/${botUsername}`, '_blank');
-                  }}
-                  className="group relative overflow-hidden rounded-2xl p-[1px]"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 group-hover:border-blue-500/50 rounded-2xl p-4 h-full flex flex-col items-center justify-center gap-2 transition-all">
-                    <Shield className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-blue-100/80 font-bold text-xs uppercase tracking-wider">Telegram</span>
-                  </div>
-                </button>
+              {/* Divider */}
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                <span className="text-zinc-600 text-xs uppercase tracking-widest">oder</span>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              </div>
 
-                <button
-                  onClick={() => navigate(createPageUrl('Admin'))}
-                  className="group relative overflow-hidden rounded-2xl p-[1px]"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 group-hover:border-purple-500/50 rounded-2xl p-4 h-full flex flex-col items-center justify-center gap-2 transition-all">
-                    <Lock className="w-6 h-6 text-purple-400 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-purple-100/80 font-bold text-xs uppercase tracking-wider">Admin</span>
+              {/* Secondary: Limited Preview */}
+              <button
+                onClick={() => navigate(createPageUrl('Home'))}
+                className="group relative w-full overflow-hidden rounded-2xl p-[1px]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 group-hover:border-white/20 rounded-2xl p-4 flex items-center justify-center gap-3 transition-all">
+                  <Sparkles className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+                  <div className="text-left">
+                    <span className="text-zinc-300 font-semibold group-hover:text-white transition-colors">
+                      Vorschau ansehen
+                    </span>
+                    <span className="text-zinc-600 text-xs ml-2">(eingeschränkter Zugang)</span>
                   </div>
-                </button>
+                </div>
+              </button>
+
+              {/* Benefits List */}
+              <div className="grid grid-cols-2 gap-3 pt-4">
+                {[
+                  { icon: '🔓', text: 'Alle Preise sehen' },
+                  { icon: '🛒', text: 'Produkte kaufen' },
+                  { icon: '⭐', text: 'VIP Rewards' },
+                  { icon: '💬', text: 'Premium Support' }
+                ].map((benefit, i) => (
+                  <div key={i} className="flex items-center gap-2 text-zinc-500 text-xs">
+                    <span>{benefit.icon}</span>
+                    <span>{benefit.text}</span>
+                  </div>
+                ))}
               </div>
             </motion.div>
 
