@@ -18,6 +18,7 @@ export const errorHandler = (err, req, res, next) => {
 
   const errorDetails = {
     message: err.message,
+    code: err.code || undefined,
     stack: isDev ? err.stack : undefined,
     path: req.path,
     method: req.method,
@@ -27,10 +28,38 @@ export const errorHandler = (err, req, res, next) => {
     query: safeQuery,
   };
 
-  console.error('Error Details:', JSON.stringify(errorDetails, null, 2));
-  
+  console.error('❌ Error Details:', JSON.stringify(errorDetails, null, 2));
+
   // Log to error aggregation service (if available)
   // In production, you might want to send this to Sentry, LogRocket, etc.
+
+  // Database connection errors
+  if (err.code === 'P1001') {
+    console.error('🔴 Database connection error: Cannot reach database server');
+    return res.status(503).json({
+      error: 'Service Unavailable',
+      message: 'Cannot connect to database',
+      hint: 'Please check DATABASE_URL and database server status',
+    });
+  }
+
+  if (err.code === 'P1002') {
+    console.error('🔴 Database connection timeout');
+    return res.status(503).json({
+      error: 'Service Unavailable',
+      message: 'Database connection timeout',
+      hint: 'Database server is taking too long to respond',
+    });
+  }
+
+  if (err.code === 'P1003') {
+    console.error('🔴 Database does not exist');
+    return res.status(503).json({
+      error: 'Service Unavailable',
+      message: 'Database does not exist',
+      hint: 'Please run prisma db push or check DATABASE_URL',
+    });
+  }
 
   // Prisma errors
   if (err.code === 'P2002') {
@@ -79,7 +108,10 @@ export const errorHandler = (err, req, res, next) => {
   res.status(status).json({
     error: err.name || 'Error',
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...(process.env.NODE_ENV === 'development' && {
+      stack: err.stack,
+      code: err.code,
+    }),
   });
 };
 
@@ -89,4 +121,3 @@ export const notFound = (req, res) => {
     message: `Route ${req.method} ${req.path} not found`,
   });
 };
-

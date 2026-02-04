@@ -118,6 +118,46 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Database health check
+app.get('/health/db', async (req, res) => {
+  try {
+    const { default: prisma } = await import('./config/database.js');
+
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`;
+
+    // Get database info
+    const userCount = await prisma.user.count();
+    const productCount = await prisma.product.count();
+
+    res.json({
+      status: 'healthy',
+      database: {
+        connected: true,
+        url: process.env.DATABASE_URL?.replace(/:([^:@]*|[^@]*)@/, ':****@') || 'NOT_SET',
+        stats: {
+          users: userCount,
+          products: productCount,
+        },
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('🔴 Database health check failed:', error);
+    res.status(503).json({
+      status: 'unhealthy',
+      database: {
+        connected: false,
+        error: error.message,
+        code: error.code,
+        url: process.env.DATABASE_URL?.replace(/:([^:@]*|[^@]*)@/, ':****@') || 'NOT_SET',
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+
 // Telegram webhook route (before rate limiting for faster processing)
 app.use('/api/telegram', telegramRoutes);
 
