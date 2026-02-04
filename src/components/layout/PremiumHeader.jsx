@@ -93,8 +93,10 @@ export default function PremiumHeader() {
         <Icon className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.92)' }} />
         {count > 0 && (
           <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
+            key={count}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 15 }}
             className="absolute -top-1.5 -right-1.5 min-w-[1.25rem] h-5 px-1.5 text-[0.7rem] font-black rounded-full flex items-center justify-center"
             style={{
               background: '#D6B25E',

@@ -274,6 +274,7 @@ export default function ProductDetail() {
   };
 
   const getGalleryImages = () => {
+    if (!product) return [];
     const result = [];
     if (selectedColor?.images?.length > 0) {
       result.push(...selectedColor.images);
@@ -288,7 +289,21 @@ export default function ProductDetail() {
     return result.filter(Boolean);
   };
 
-  const allImages = getGalleryImages();
+  // Early return if product not loaded yet
+  if (!product && !loading) {
+    return (
+      <div className="min-h-screen bg-[#050608] text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Produkt nicht gefunden</h1>
+          <Link to={createPageUrl('Products')} className="text-[#D6B25E] underline">
+            Zurück zum Shop
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const allImages = product ? getGalleryImages() : [];
 
   // Ensure selected image is in gallery
   if (selectedImage && !allImages.includes(selectedImage) && allImages.length > 0) {
