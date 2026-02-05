@@ -243,8 +243,8 @@ export default function AdminLiveChat() {
                                         setSelectedSessionId(session.id);
                                     }}
                                     className={`p-3 rounded-xl cursor-pointer transition-all border ${selectedSessionId === session.id
-                                            ? 'bg-purple-500/10 border-purple-500/30 shadow-lg shadow-purple-500/5'
-                                            : 'bg-transparent border-transparent hover:bg-white/5'
+                                        ? 'bg-purple-500/10 border-purple-500/30 shadow-lg shadow-purple-500/5'
+                                        : 'bg-transparent border-transparent hover:bg-white/5'
                                         }`}
                                 >
                                     <div className="flex justify-between mb-1.5">
@@ -306,7 +306,6 @@ export default function AdminLiveChat() {
                                     variant="ghost"
                                     onClick={() => setIsMuted(!isMuted)}
                                     className="hover:bg-white/5 hover:text-white rounded-xl transition-all"
-                                    title={isMuted ? "Sound aktivieren" : "Sound stummschalten"}
                                 >
                                     {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                                 </Button>

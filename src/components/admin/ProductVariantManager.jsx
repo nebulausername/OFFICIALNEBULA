@@ -217,7 +217,7 @@ export default function ProductVariantManager({ product, onUpdate }) {
       if (bulkEdit.field === 'price_override' && value === 0) value = null;
     }
     if (bulkEdit.field === 'active') {
-      value = bulkEdit.value === 'true';
+      value = String(bulkEdit.value) === 'true';
     }
 
     setVariants(variants.map(v =>

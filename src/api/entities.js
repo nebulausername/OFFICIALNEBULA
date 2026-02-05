@@ -66,7 +66,8 @@ const createEntity = (entityName, customBasePath = null) => {
     // List all items with optional sort and limit
     list: async (sort = null, limit = null) => {
       const params = buildQueryParams({}, sort, limit);
-      const fullUrl = `${API_BASE_URL}${basePath}?${new URLSearchParams(params).toString()}`;
+      const queryString = new URLSearchParams(params).toString();
+      const fullUrl = `${API_BASE_URL}${basePath}${queryString ? `?${queryString}` : ''}`;
 
       console.log(`🌐 API List Request:`, {
         entity: entityName,

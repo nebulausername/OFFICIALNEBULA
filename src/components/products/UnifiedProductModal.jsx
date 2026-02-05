@@ -17,12 +17,6 @@ import confetti from 'canvas-confetti';
 
 /**
  * UnifiedProductModal - A single premium modal for all product views
- * 
- * @param {Object} product - Product data object
- * @param {boolean} open - Modal open state
- * @param {Function} onClose - Callback when modal closes
- * @param {Function} onAddToCart - Callback when item is added to cart
- * @param {'full'|'quick'|'minimal'} mode - Display mode
  */
 export default function UnifiedProductModal({
     product,

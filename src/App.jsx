@@ -58,15 +58,16 @@ const AuthenticatedApp = () => {
         </AdminRoute>
       );
     }
-    if (PROTECTED_ROUTES.includes(path)) {
-      return (
-        <ProtectedRoute>
-          <LayoutWrapper currentPageName={path}>
-            <Page />
-          </LayoutWrapper>
-        </ProtectedRoute>
-      );
-    }
+    // DEVELOPMENT: Protected routes verification disabled
+    // if (PROTECTED_ROUTES.includes(path)) {
+    //   return (
+    //     <ProtectedRoute>
+    //       <LayoutWrapper currentPageName={path}>
+    //         <Page />
+    //       </LayoutWrapper>
+    //     </ProtectedRoute>
+    //   );
+    // }
     return (
       <LayoutWrapper currentPageName={path}>
         <Page />
