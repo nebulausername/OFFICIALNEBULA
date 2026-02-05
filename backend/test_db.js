@@ -1,8 +1,8 @@
 import pg from 'pg';
 const { Client } = pg;
 
-// Using the AWS Pooler Host on Port 5432 (Direct Mode) as per user metadata
-const connectionString = 'postgres://postgres.vohqlxprlznmoiszakje:1SoiZy3R9KTYlNxp@aws-1-us-east-1.pooler.supabase.com:5432/postgres?sslmode=require';
+// Using the Direct Database Connection with new password
+const connectionString = 'postgresql://postgres:HEkuAqgImA1OTwlR@db.vohqlxprlznmoiszakje.supabase.co:5432/postgres';
 
 const client = new Client({
     connectionString: connectionString,
@@ -12,7 +12,7 @@ console.log(`Testing connection to: ${connectionString.replace(/:[^:@]*@/, ':***
 
 client.connect()
     .then(() => {
-        console.log('✅ Connected successfully to Supabase (AWS Host)!');
+        console.log('✅ Connected successfully to Supabase!');
         return client.end();
     })
     .catch(err => {

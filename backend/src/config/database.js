@@ -14,7 +14,19 @@ const prisma = new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   datasources: isSQLite ? undefined : {
     db: {
-      url: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.SUPABASE_DB_URL,
+      // Add optimized connection pooling for Supabase
+      url: (() => {
+        const baseUrl = process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL || process.env.SUPABASE_DB_URL;
+        if (!baseUrl) return undefined;
+
+        // Add connection pooling parameters if not already present
+        const url = new URL(baseUrl);
+        if (!url.searchParams.has('connection_limit')) url.searchParams.set('connection_limit', '10');
+        if (!url.searchParams.has('pool_timeout')) url.searchParams.set('pool_timeout', '20');
+        if (!url.searchParams.has('statement_cache_size')) url.searchParams.set('statement_cache_size', '100');
+
+        return url.toString();
+      })(),
     },
   },
   // Connection pool optimization (nur für PostgreSQL relevant)
