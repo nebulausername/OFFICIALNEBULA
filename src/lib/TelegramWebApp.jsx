@@ -1,9 +1,25 @@
 import { useEffect } from 'react';
 
-// Telegram WebApp SDK Integration
+// Type declaration for Telegram WebApp SDK
+/** @typedef {Window & { Telegram?: { WebApp: any } }} TelegramWindow */
+
+
+/**
+ * React hook to initialize and configure the Telegram WebApp SDK.
+ * Automatically expands the app, sets theme colors, and handles back button.
+ * Should be called once in the root component (e.g., App.jsx).
+ * 
+ * @example
+ * function App() {
+ *   useTelegramWebApp();
+ *   return <div>...</div>;
+ * }
+ */
 export const useTelegramWebApp = () => {
   useEffect(() => {
+    // @ts-ignore - Telegram WebApp SDK is injected by Telegram
     if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+      // @ts-ignore
       const tg = window.Telegram.WebApp;
 
       // Expand WebApp to full height
@@ -59,16 +75,27 @@ export const useTelegramWebApp = () => {
   }, []);
 };
 
-// Get Telegram WebApp instance
+/**
+ * Gets the Telegram WebApp SDK instance.
+ * 
+ * @returns {object|null} Telegram WebApp object or null if not in Telegram environment
+ */
 export const getTelegramWebApp = () => {
+  // @ts-ignore - Telegram WebApp SDK is injected by Telegram
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+    // @ts-ignore
     return window.Telegram.WebApp;
   }
   return null;
 };
 
-// Check if running in Telegram WebApp
+/**
+ * Checks if the app is running inside Telegram WebApp.
+ * 
+ * @returns {boolean} True if running in Telegram WebApp, false otherwise
+ */
 export const isTelegramWebApp = () => {
+  // @ts-ignore - Telegram WebApp SDK is injected by Telegram
   return typeof window !== 'undefined' && !!window.Telegram?.WebApp?.initData;
 };
 
@@ -81,7 +108,12 @@ export const getTelegramUser = () => {
   return null;
 };
 
-// Haptic feedback
+/**
+ * Trigger haptic feedback on supported devices.
+ * 
+ * @param {'impact' | 'notification' | 'selection'} type - Type of haptic feedback
+ * @param {'light' | 'medium' | 'heavy'} style - Intensity style (for impact type)
+ */
 export const hapticFeedback = (type = 'impact', style = 'medium') => {
   const tg = getTelegramWebApp();
   if (tg?.HapticFeedback) {
@@ -212,25 +244,7 @@ export const closeWebApp = () => {
   }
 };
 
-// Show confirm (existing function)
-export const showTelegramConfirmOld = (message) => {
-  return new Promise((resolve) => {
-    const tg = getTelegramWebApp();
-    if (tg?.showConfirm) {
-      tg.showConfirm(message, resolve);
-    } else {
-      resolve(confirm(message));
-    }
-  });
-};
-
-// Close WebApp
-export const closeTelegramWebApp = () => {
-  const tg = getTelegramWebApp();
-  if (tg?.close) {
-    tg.close();
-  }
-};
+// Removed duplicate functions - closeWebApp() and showTelegramConfirm() are the canonical versions
 
 // Back button handler
 export const setupTelegramBackButton = (onBack) => {

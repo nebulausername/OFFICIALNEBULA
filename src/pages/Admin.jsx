@@ -53,6 +53,7 @@ export default function Admin() {
     topProducts: []
   });
   const [recentRequests, setRecentRequests] = useState([]);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
   const [notifications, setNotifications] = useState(generateDemoNotifications());
@@ -127,6 +128,10 @@ export default function Admin() {
       // 5. Recent Activity
       setRecentRequests(recentActivityArg?.orders || []);
 
+      // 6. Low Stock Products (stock < 10)
+      const lowStock = products.filter(p => (p.stock ?? 0) < 10 && (p.stock ?? 0) > 0).slice(0, 5);
+      setLowStockProducts(lowStock);
+
       // 6. Chart Data Transformation
       if (salesDataArg && Array.isArray(salesDataArg.data)) {
         const formattedChart = salesDataArg.data.map(d => ({
@@ -180,6 +185,7 @@ export default function Admin() {
     { title: 'Support', icon: MessageCircle, count: stats.tickets, description: 'Offene Tickets', color: 'from-cyan-500 to-blue-500', link: 'AdminSupport' },
     { title: 'Live Chat', icon: MessageCircle, count: '💬', description: 'Real-time', color: 'from-green-500 to-emerald-500', link: 'AdminLiveChat' },
     { title: 'VIP User', icon: Crown, count: stats.vipUsers, description: 'Premium Mitglieder', color: 'from-yellow-500 to-amber-500', link: 'AdminSupport' },
+    { title: 'Telegram', icon: MessageCircle, count: '🤖', description: 'Bot Settings', color: 'from-blue-500 to-indigo-500', link: 'AdminTelegramSettings' },
   ];
 
   return (
@@ -403,6 +409,37 @@ export default function Admin() {
             </motion.div>
           </Link>
         </div>
+
+        {/* ⚠️ Low Stock Alerts */}
+        {lowStockProducts.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-950/20 border border-red-500/30 rounded-2xl p-4 mb-6"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <Package className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-bold text-red-400">Low Stock Alert</h3>
+                <p className="text-xs text-red-300/60">{lowStockProducts.length} Produkte mit niedrigem Bestand</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {lowStockProducts.map((p) => (
+                <Link
+                  key={p.id}
+                  to={createPageUrl('AdminProductEditor') + `?id=${p.id}`}
+                  className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  <span className="text-sm text-white truncate max-w-[150px]">{p.name}</span>
+                  <span className="text-xs font-mono bg-red-500/30 px-1.5 rounded text-red-300">{p.stock ?? 0}</span>
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* 📊 Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">

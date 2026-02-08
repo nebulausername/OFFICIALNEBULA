@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { validatePhoto, validatePhotoBuffer } from '../utils/photoValidator.js';
-import { hasSupabaseStorageConfig, uploadObject } from '../services/supabase-storage.service.js';
+import { uploadVerificationPhoto } from '../services/storage.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -91,6 +91,25 @@ export const submitVerification = async (req, res, next) => {
       },
     });
 
+    // Notify admins via Socket.io
+    try {
+      const { getIO } = await import('../services/socket.service.js');
+      const io = getIO();
+      if (io) {
+        io.to('admin').emit('verification:new', {
+          id: updatedRequest.id,
+          user: {
+            id: user.id,
+            full_name: user.full_name,
+            telegram_id: user.telegram_id?.toString(),
+          },
+          submitted_at: new Date(),
+        });
+      }
+    } catch (error) {
+      console.error('Failed to emit socket event:', error);
+    }
+
     res.json({
       message: 'Verification photo submitted successfully',
       request: updatedRequest,
@@ -100,20 +119,107 @@ export const submitVerification = async (req, res, next) => {
   }
 };
 
+// Submit photo verification via Browser (Multer upload)
+export const submitBrowserVerification = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Bad Request', message: 'No photo uploaded' });
+    }
+
+    const { hand_gesture } = req.body;
+    const user = req.user;
+
+    // Validate photo buffer
+    if (!validatePhotoBuffer(req.file.buffer)) {
+      return res.status(400).json({ error: 'Invalid Photo', message: 'Photo validation failed' });
+    }
+
+    // Upload to InsForge
+    const fileName = `verifications/${user.id}_${Date.now()}.jpg`;
+    const uploadResult = await uploadVerificationPhoto(req.file.buffer, fileName);
+
+    if (!uploadResult) {
+      throw new Error('Failed to upload photo to InsForge');
+    }
+
+    // Check existing request
+    const existingRequest = await prisma.verificationRequest.findFirst({
+      where: { user_id: user.id, status: 'pending' },
+    });
+
+    let updatedRequest;
+    if (existingRequest) {
+      updatedRequest = await prisma.verificationRequest.update({
+        where: { id: existingRequest.id },
+        data: {
+          photo_url: uploadResult.url,
+          hand_gesture: hand_gesture || existingRequest.hand_gesture,
+          submitted_at: new Date(),
+        },
+      });
+    } else {
+      const gesture = hand_gesture || getRandomHandGesture();
+      updatedRequest = await prisma.verificationRequest.create({
+        data: {
+          user_id: user.id,
+          photo_url: uploadResult.url,
+          hand_gesture: gesture,
+          status: 'pending',
+          submitted_at: new Date(),
+        },
+      });
+    }
+
+    // Update user status
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verification_status: 'pending',
+        verification_submitted_at: new Date(),
+        rejection_reason: null,
+      },
+    });
+
+    // Notify admins (Socket)
+    try {
+      const { getIO } = await import('../services/socket.service.js');
+      const io = getIO();
+      if (io) {
+        io.to('role_admin').emit('verification:new', {
+          id: updatedRequest.id,
+          user: { id: user.id, full_name: user.full_name, telegram_id: user.telegram_id?.toString() },
+          submitted_at: new Date(),
+          photo_url: uploadResult.url
+        });
+      }
+    } catch (e) { console.error('Socket emit failed:', e); }
+
+    res.json({ message: 'Verification photo submitted successfully', request: updatedRequest });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Get verification status
 export const getVerificationStatus = async (req, res, next) => {
   try {
     const { telegram_id } = req.query;
+    let userId;
+    let telegramIdBigInt;
 
-    if (!telegram_id) {
+    if (req.user) {
+      userId = req.user.id;
+    } else if (telegram_id) {
+      telegramIdBigInt = BigInt(telegram_id);
+    } else {
       return res.status(400).json({
         error: 'Bad Request',
-        message: 'Telegram ID is required',
+        message: 'Telegram ID or Authentication is required',
       });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { telegram_id: BigInt(telegram_id) },
+    const user = await prisma.user.findFirst({
+      where: userId ? { id: userId } : { telegram_id: telegramIdBigInt },
       include: {
         verification_requests: {
           orderBy: { submitted_at: 'desc' },
@@ -239,6 +345,47 @@ export const approveVerification = async (req, res, next) => {
       },
     });
 
+    // Notify user via Telegram
+    try {
+      const { default: botService } = await import('../services/telegram-bot.service.js');
+      const telegramId = verificationRequest.user.telegram_id;
+      if (telegramId) {
+        await botService.sendTelegramMessage(
+          telegramId.toString(),
+          `✅ *Verifizierung erfolgreich!*\n\n` +
+          `Willkommen bei Nebula Supply. Dein Account wurde freigeschaltet.\n\n` +
+          `Du hast nun vollen Zugriff auf alle Produkte und Preise.\n\n` +
+          `Viel Spaß beim Shoppen! 🛍️`,
+          { parse_mode: 'Markdown' }
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send approval notification:', error);
+    }
+
+    // Emit socket event to admins AND user
+    try {
+      const { getIO } = await import('../services/socket.service.js');
+      const io = getIO();
+      if (io) {
+        // Notify Admins
+        io.to('admin').emit('verification:approved', {
+          id: verificationRequest.id,
+          user_id: verificationRequest.user_id,
+          admin_id: req.user.id
+        });
+
+        // Notify User
+        io.to(`user:${verificationRequest.user_id}`).emit('verification:updated', {
+          status: 'verified',
+          title: 'Verifizierung erfolgreich',
+          message: 'Dein Account wurde freigeschaltet. Viel Spaß beim Shoppen!'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to emit socket event:', error);
+    }
+
     res.json({
       message: 'Verification approved successfully',
       user: {
@@ -302,6 +449,47 @@ export const rejectVerification = async (req, res, next) => {
         rejection_reason: reason,
       },
     });
+
+    // Notify user via Telegram
+    try {
+      const { default: botService } = await import('../services/telegram-bot.service.js');
+      const telegramId = verificationRequest.user.telegram_id;
+      if (telegramId) {
+        await botService.sendTelegramMessage(
+          telegramId.toString(),
+          `❌ *Verifizierung abgelehnt*\n\n` +
+          `Grund: ${reason}\n\n` +
+          `Du kannst einen neuen Versuch starten, indem du /start tippst.`,
+          { parse_mode: 'Markdown' }
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send rejection notification:', error);
+    }
+
+    // Emit socket event to admins AND user
+    try {
+      const { getIO } = await import('../services/socket.service.js');
+      const io = getIO();
+      if (io) {
+        // Notify Admins
+        io.to('admin').emit('verification:rejected', {
+          id: verificationRequest.id,
+          user_id: verificationRequest.user_id,
+          admin_id: req.user.id
+        });
+
+        // Notify User
+        io.to(`user:${verificationRequest.user_id}`).emit('verification:updated', {
+          status: 'rejected',
+          title: 'Verifizierung abgelehnt',
+          message: `Grund: ${reason}`,
+          reason: reason
+        });
+      }
+    } catch (error) {
+      console.error('Failed to emit socket event:', error);
+    }
 
     res.json({
       message: 'Verification rejected successfully',
@@ -381,120 +569,31 @@ export const createVerificationRequest = async (telegramId) => {
   }
 };
 
-// Download photo from Telegram and save locally
+// Download photo from Telegram and save to InsForge
 export const downloadTelegramPhoto = async (bot, fileId) => {
-  const TIMEOUT_MS = 30000; // 30 seconds
-  let timeoutId;
-
   try {
-    // Generate unique filename
-    const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-    const relativePath = `/uploads/verifications/${filename}`;
-    const useSupabase = hasSupabaseStorageConfig();
+    const file = await bot.getFile(fileId);
+    const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
 
-    // Get file info from Telegram with timeout
-    const filePromise = bot.getFile(fileId);
-    const timeoutPromise = new Promise((_, reject) => {
-      timeoutId = setTimeout(() => reject(new Error('File download timeout')), TIMEOUT_MS);
-    });
+    // Download
+    const response = await fetch(fileUrl);
+    if (!response.ok) throw new Error(`Failed to download: ${response.statusText}`);
 
-    const file = await Promise.race([filePromise, timeoutPromise]);
-    clearTimeout(timeoutId);
+    // Buffer
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    const filePath = file.file_path;
-    console.log(`[PHOTO] Downloading file: ${filePath}`);
+    // Upload to InsForge
+    const filename = `verifications/tg_${fileId}_${Date.now()}.jpg`;
+    const uploadResult = await uploadVerificationPhoto(buffer, filename);
 
-    // Download file from Telegram with timeout
-    const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${filePath}`;
-
-    const downloadPromise = fetch(fileUrl);
-    const downloadTimeoutPromise = new Promise((_, reject) => {
-      timeoutId = setTimeout(() => reject(new Error('Download timeout')), TIMEOUT_MS);
-    });
-
-    const response = await Promise.race([downloadPromise, downloadTimeoutPromise]);
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error(`Failed to download photo: ${response.statusText}`);
+    if (!uploadResult) {
+      throw new Error('Upload to InsForge failed');
     }
 
-    // Stream-based download with progress tracking
-    const contentLength = parseInt(response.headers.get('content-length') || '0');
-    let downloadedBytes = 0;
-
-    const reader = response.body.getReader();
-    const chunks = [];
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      chunks.push(value);
-      downloadedBytes += value.length;
-
-      // Log progress every 10%
-      if (contentLength > 0) {
-        const progress = Math.floor((downloadedBytes / contentLength) * 100);
-        if (progress % 10 === 0) {
-          console.log(`[PHOTO] Download progress: ${progress}%`);
-        }
-      }
-    }
-
-    // Combine chunks into buffer
-    const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-    const buffer = Buffer.concat(chunks, totalLength);
-    const fileSize = buffer.length;
-
-    console.log(`[PHOTO] Downloaded ${(fileSize / 1024).toFixed(2)}KB`);
-
-    // Validate photo (buffer-based for Supabase mode, file-based for local mode)
-    if (useSupabase) {
-      const validation = validatePhotoBuffer(buffer, filename);
-      if (!validation.valid) {
-        throw new Error(validation.error || 'Foto-Validierung fehlgeschlagen');
-      }
-    } else {
-      const uploadsDir = path.join(__dirname, '../../uploads/verifications');
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      const localPath = path.join(uploadsDir, filename);
-      fs.writeFileSync(localPath, buffer);
-
-      const validation = validatePhoto(localPath, fileSize);
-      if (!validation.valid) {
-        try {
-          fs.unlinkSync(localPath);
-        } catch {
-          // ignore
-        }
-        throw new Error(validation.error || 'Foto-Validierung fehlgeschlagen');
-      }
-    }
-
-    if (useSupabase) {
-      const bucket = process.env.SUPABASE_STORAGE_BUCKET || 'verifications';
-      const objectPath = `verifications/${filename}`;
-      await uploadObject({
-        bucket,
-        objectPath,
-        body: buffer,
-        contentType: 'image/jpeg',
-      });
-
-      console.log(`[PHOTO] Photo uploaded to Supabase Storage: ${bucket}/${objectPath}`);
-    } else {
-      console.log(`[PHOTO] Photo validated and saved locally: ${filename}`);
-    }
-
-    return { url: relativePath, buffer };
+    return { url: uploadResult.url, buffer };
   } catch (error) {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    console.error('Error downloading Telegram photo:', error);
+    console.error('Error downloading/uploading Telegram photo:', error);
     throw error;
   }
 };

@@ -15,6 +15,31 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import confetti from 'canvas-confetti';
 
+// Shipping Origin Configuration
+const SHIPPING_ORIGINS = {
+    DE: { flag: '🇩🇪', name: 'Deutschland', defaultLeadTime: '1-3 Tage' },
+    EU: { flag: '🇪🇺', name: 'Europa', defaultLeadTime: '3-7 Tage' },
+    CN: { flag: '🇨🇳', name: 'China', defaultLeadTime: '7-15 Tage' },
+};
+
+/**
+ * Calculate the unit price based on bulk pricing tiers
+ */
+const getUnitPriceForQuantity = (product, quantity) => {
+    if (!product?.bulk_pricing || !Array.isArray(product.bulk_pricing) || product.bulk_pricing.length === 0) {
+        return product?.price ?? 0;
+    }
+    // bulk_pricing is expected to be sorted by qty_from ascending
+    const sortedTiers = [...product.bulk_pricing].sort((a, b) => (a.qty_from ?? 0) - (b.qty_from ?? 0));
+    let applicablePrice = product.price ?? 0;
+    for (const tier of sortedTiers) {
+        if (quantity >= (tier.qty_from ?? 1)) {
+            applicablePrice = tier.price;
+        }
+    }
+    return applicablePrice;
+};
+
 /**
  * UnifiedProductModal - A single premium modal for all product views
  */
@@ -41,6 +66,26 @@ export default function UnifiedProductModal({
     const [showSuccess, setShowSuccess] = useState(false);
     const [relatedProducts, setRelatedProducts] = useState([]);
     const [loadingRelated, setLoadingRelated] = useState(false);
+
+    // Zoom State
+    const [zoomStyle, setZoomStyle] = useState({ transformOrigin: 'center center', transform: 'scale(1)' });
+
+    const handleImageMouseMove = (e) => {
+        const { left, top, width, height } = e.target.getBoundingClientRect();
+        const x = ((e.pageX - left) / width) * 100;
+        const y = ((e.pageY - top) / height) * 100;
+        setZoomStyle({
+            transformOrigin: `${x}% ${y}%`,
+            transform: 'scale(2)', // 2x Zoom
+        });
+    };
+
+    const handleImageMouseLeave = () => {
+        setZoomStyle({
+            transformOrigin: 'center center',
+            transform: 'scale(1)',
+        });
+    };
 
     // Initialize state when product changes
     useEffect(() => {
@@ -131,9 +176,20 @@ export default function UnifiedProductModal({
 
     const currentVariant = getCurrentVariant();
 
-    // Calculate price with safety guards
-    const basePrice = currentVariant?.price_override ?? product?.price ?? 0;
+    // Calculate price with safety guards (now supports bulk pricing)
+    const basePriceFromVariant = currentVariant?.price_override ?? product?.price ?? 0;
+    const bulkUnitPrice = getUnitPriceForQuantity(product, quantity);
+    // Use lower of variant price or bulk tier price, or just bulk if no variant
+    const basePrice = currentVariant?.price_override ? basePriceFromVariant : bulkUnitPrice;
     const currentPrice = expressDelivery ? basePrice + 4.90 : basePrice;
+    const totalPrice = currentPrice * quantity;
+
+    // Shipping Origin Info
+    const shipFromCode = product?.ship_from?.toUpperCase() || 'DE';
+    const originInfo = SHIPPING_ORIGINS[shipFromCode] || SHIPPING_ORIGINS.DE;
+    const displayLeadTime = product?.lead_time_days
+        ? `${product.lead_time_days} Tage`
+        : originInfo.defaultLeadTime;
 
     // Stock checking
     // Stock checking
@@ -345,7 +401,10 @@ export default function UnifiedProductModal({
                                     <img
                                         src={currentImage || ''}
                                         alt={product.name}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover transition-transform duration-200 ease-out cursor-zoom-in"
+                                        style={zoomStyle}
+                                        onMouseMove={handleImageMouseMove}
+                                        onMouseLeave={handleImageMouseLeave}
                                     />
                                     {/* Vignette Overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
@@ -384,12 +443,12 @@ export default function UnifiedProductModal({
                             {/* Tags / Badges */}
                             <div className="absolute top-5 left-16 flex gap-2">
                                 {product.tags?.includes('Premium') && (
-                                    <Badge className="bg-[#D6B25E]/90 text-black backdrop-blur-md border border-[#D6B25E]/50 shadow-lg">
+                                    <Badge variant="default" className="bg-[#D6B25E]/90 text-black backdrop-blur-md border border-[#D6B25E]/50 shadow-lg">
                                         Premium
                                     </Badge>
                                 )}
                                 {product.tags?.includes('Bestseller') && (
-                                    <Badge className="bg-purple-500/90 text-white backdrop-blur-md border border-purple-500/50 shadow-lg">
+                                    <Badge variant="default" className="bg-purple-500/90 text-white backdrop-blur-md border border-purple-500/50 shadow-lg">
                                         Bestseller
                                     </Badge>
                                 )}
@@ -422,9 +481,29 @@ export default function UnifiedProductModal({
                             {/* Header */}
                             <div className="mb-8">
                                 <div className="flex items-center justify-between mb-3">
-                                    <span className="text-xs font-bold tracking-widest text-[#D6B25E] uppercase bg-[#D6B25E]/10 px-2 py-1 rounded">
-                                        {product.brand_id || 'Nebula Premium'}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-bold tracking-widest text-[#D6B25E] uppercase bg-[#D6B25E]/10 px-2 py-1 rounded">
+                                            {product.brand_id || 'Nebula Premium'}
+                                        </span>
+                                        {product.sku && (
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(product.sku);
+                                                    // Show a brief "Copied!" feedback
+                                                    const btn = document.getElementById('sku-copy-btn');
+                                                    if (btn) {
+                                                        btn.textContent = '✓ Kopiert';
+                                                        setTimeout(() => { btn.textContent = product.sku; }, 1500);
+                                                    }
+                                                }}
+                                                id="sku-copy-btn"
+                                                className="font-mono text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded text-zinc-400 hover:text-white border border-zinc-700 transition-all cursor-pointer"
+                                                title="SKU kopieren"
+                                            >
+                                                {product.sku}
+                                            </button>
+                                        )}
+                                    </div>
                                     {hasStock ? (
                                         <span className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -487,6 +566,51 @@ export default function UnifiedProductModal({
                                         <p className="text-zinc-400 leading-relaxed text-sm md:text-base">
                                             {product.description || 'Keine Beschreibung verfügbar.'}
                                         </p>
+
+                                        {/* Bulk Pricing Table */}
+                                        {product.bulk_pricing && Array.isArray(product.bulk_pricing) && product.bulk_pricing.length > 0 && (
+                                            <div className="p-4 rounded-xl bg-gradient-to-br from-amber-950/20 to-transparent border border-amber-500/20 space-y-3">
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <span className="text-lg">💰</span>
+                                                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Staffelpreise</span>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {[...product.bulk_pricing]
+                                                        .sort((a, b) => (a.qty_from ?? 0) - (b.qty_from ?? 0))
+                                                        .map((tier, idx) => {
+                                                            const isActive = quantity >= (tier.qty_from ?? 1) &&
+                                                                (idx === product.bulk_pricing.length - 1 || quantity < (product.bulk_pricing[idx + 1]?.qty_from ?? Infinity));
+                                                            return (
+                                                                <div
+                                                                    key={idx}
+                                                                    className={`flex items-center justify-between p-3 rounded-lg transition-all ${isActive
+                                                                        ? 'bg-amber-500/20 border border-amber-500/40 shadow-lg shadow-amber-500/10'
+                                                                        : 'bg-white/5 border border-white/5 hover:bg-white/10'
+                                                                        }`}
+                                                                >
+                                                                    <div className="flex items-center gap-3">
+                                                                        <span className={`text-sm font-bold ${isActive ? 'text-amber-400' : 'text-zinc-400'}`}>
+                                                                            {tier.qty_from ?? 1}+ Stück
+                                                                        </span>
+                                                                        {isActive && (
+                                                                            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500 text-black font-bold animate-pulse">AKTIV</span>
+                                                                        )}
+                                                                    </div>
+                                                                    <span className={`text-lg font-black ${isActive ? 'text-amber-400' : 'text-white'}`}>
+                                                                        {tier.price?.toFixed(2)}€ <span className="text-xs font-normal opacity-60">/ Stk.</span>
+                                                                    </span>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    }
+                                                </div>
+                                                {/* Total Price Calculation */}
+                                                <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
+                                                    <span className="text-xs text-zinc-400">Gesamt ({quantity} Stück):</span>
+                                                    <span className="text-xl font-black text-white">{totalPrice.toFixed(2)}€</span>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Configuration Area */}
                                         <div className="space-y-6">
@@ -589,15 +713,15 @@ export default function UnifiedProductModal({
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    {/* Ship From */}
+                                                    {/* Ship From - Enhanced with Flag */}
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
-                                                            <MapPin className="w-4 h-4 text-zinc-400" />
+                                                        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xl">
+                                                            {originInfo.flag}
                                                         </div>
                                                         <div>
                                                             <p className="text-[10px] text-zinc-500 uppercase">Versand ab</p>
                                                             <p className="text-sm font-bold text-white">
-                                                                {product.ship_from || 'Deutschland'}
+                                                                {originInfo.name}
                                                             </p>
                                                         </div>
                                                     </div>

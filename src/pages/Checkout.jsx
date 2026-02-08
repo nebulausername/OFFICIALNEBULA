@@ -177,6 +177,21 @@ export default function Checkout() {
         cart_items: cartItems.map(item => ({ id: item.id }))
       });
 
+      // Create a Ticket for real-time order tracking
+      await api.entities.Ticket.create({
+        user_id: user?.id,
+        type: 'order',
+        subject: `Bestellung #${request.id?.slice(0, 8) || 'NEU'}`,
+        message: `Neue Bestellung eingegangen!\n\nKunde: ${formData.name}\nE-Mail: ${formData.email}\nTelegram: ${formData.telegram || '-'}\nAdresse: ${formData.address}, ${formData.zip} ${formData.city}\n\nGesamtsumme: ${total.toFixed(2)}€\nVersand: ${formData.shippingMethod === 'express' ? 'Express' : 'Standard'}`,
+        status: 'open',
+        priority: formData.shippingMethod === 'express' ? 'high' : 'normal',
+        metadata: {
+          order_id: request.id,
+          total: total,
+          items_count: cartItems.length
+        }
+      });
+
       playSuccess();
       const duration = 3000;
       const end = Date.now() + duration;

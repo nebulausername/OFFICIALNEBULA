@@ -2,6 +2,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { Tilt } from 'react-tilt';
+
+const defaultTiltOptions = {
+    reverse: false,  // reverse the tilt direction
+    max: 15,     // max tilt rotation (degrees)
+    perspective: 1000,   // Transform perspective, the lower the more extreme the tilt gets.
+    scale: 1.02,    // 2 = 200%, 1.5 = 150%, etc..
+    speed: 1000,   // Speed of the enter/exit transition
+    transition: true,   // Set a transition on enter/exit.
+    axis: null,   // What axis should be disabled. Can be X or Y.
+    reset: true,    // If the tilt effect has to be reset on exit.
+    easing: "cubic-bezier(.03,.98,.52,.99)",    // Easing on enter/exit.
+};
 
 export default function CategoryTile({ category, className, aspect = "square" }) {
     // Safe image fallback
@@ -12,51 +25,56 @@ export default function CategoryTile({ category, className, aspect = "square" })
     const description = category.description || "Premium Selection";
 
     return (
-        <Link to={`/products?category=${category.id}`} className={`block relative group overflow-hidden rounded-3xl ${className}`}>
-            {/* Background Image with Zoom */}
-            <motion.div
-                whileHover={{ scale: 1.1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="absolute inset-0 bg-cover bg-center origin-center"
-                style={{ backgroundImage: `url(${bgImage})` }}
-            />
+        <Tilt options={defaultTiltOptions} className={`block relative group overflow-hidden rounded-3xl ${className}`}>
+            <Link to={`/products?category=${category.id}`} className="block w-full h-full">
+                {/* Background Image with Zoom */}
+                <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="absolute inset-0 bg-cover bg-center origin-center"
+                    style={{ backgroundImage: `url(${bgImage})` }}
+                />
 
-            {/* Premium Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-            <div className="absolute inset-0 bg-[#000000] opacity-0 group-hover:opacity-30 transition-opacity duration-300 mix-blend-multiply" />
+                {/* Premium Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-[#000000] opacity-0 group-hover:opacity-30 transition-opacity duration-300 mix-blend-multiply" />
 
-            {/* Border Glow */}
-            <div className="absolute inset-0 rounded-3xl border border-white/10 group-hover:border-gold/50 transition-colors duration-300 pointer-events-none z-20" />
+                {/* Holographic Sheen on Hover */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transform transition-transform duration-1000 ease-in-out" />
 
-            {/* Content */}
-            <div className="absolute inset-0 p-6 flex flex-col justify-end items-start z-10">
-                <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out w-full">
+                {/* Border Glow */}
+                <div className="absolute inset-0 rounded-3xl border border-white/10 group-hover:border-gold/50 transition-colors duration-300 pointer-events-none z-20" />
 
-                    {/* Top Meta (Count) - Fades in on hover */}
-                    <div className="overflow-hidden h-0 group-hover:h-6 transition-all duration-300 mb-1 opacity-0 group-hover:opacity-100">
-                        <span className="text-gold text-[10px] font-black uppercase tracking-[0.2em]">
-                            {count} Products
-                        </span>
-                    </div>
+                {/* Content */}
+                <div className="absolute inset-0 p-6 flex flex-col justify-end items-start z-10">
+                    <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out w-full">
 
-                    {/* Title */}
-                    <h3 className="text-2xl md:text-3xl font-black text-white italic tracking-tighter mb-1 group-hover:text-shadow-gold transition-all duration-300">
-                        {category.name}
-                    </h3>
+                        {/* Top Meta (Count) - Fades in on hover */}
+                        <div className="overflow-hidden h-0 group-hover:h-6 transition-all duration-300 mb-1 opacity-0 group-hover:opacity-100">
+                            <span className="text-gold text-[10px] font-black uppercase tracking-[0.2em]">
+                                {count} Products
+                            </span>
+                        </div>
 
-                    {/* Description - Reveals on hover */}
-                    <div className="max-h-0 group-hover:max-h-20 overflow-hidden transition-all duration-500 ease-out">
-                        <p className="text-zinc-400 text-xs md:text-sm leading-relaxed mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100">
-                            {description}
-                        </p>
+                        {/* Title */}
+                        <h3 className="text-2xl md:text-3xl font-black text-white italic tracking-tighter mb-1 group-hover:text-shadow-gold transition-all duration-300" style={{ transform: 'translateZ(20px)' }}>
+                            {category.name}
+                        </h3>
 
-                        <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
-                            <span className="border-b border-gold/50 pb-0.5">Explore</span>
-                            <ArrowRight className="w-3 h-3 text-gold" />
+                        {/* Description - Reveals on hover */}
+                        <div className="max-h-0 group-hover:max-h-20 overflow-hidden transition-all duration-500 ease-out">
+                            <p className="text-zinc-400 text-xs md:text-sm leading-relaxed mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100" style={{ transform: 'translateZ(10px)' }}>
+                                {description}
+                            </p>
+
+                            <div className="flex items-center gap-2 text-xs font-bold text-white uppercase tracking-wider">
+                                <span className="border-b border-gold/50 pb-0.5">Explore</span>
+                                <ArrowRight className="w-3 h-3 text-gold" />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </Link>
+            </Link>
+        </Tilt>
     );
 }

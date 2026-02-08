@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { api } from '@/api';
 import { setToken, getToken } from '@/api/config';
+import { insforge, db } from '@/lib/insforge';
 
 const AuthContext = createContext();
 
@@ -30,6 +31,31 @@ export const AuthProvider = ({ children }) => {
 
     checkAppState();
   }, []);
+
+  // Realtime Subscription
+  useEffect(() => {
+    let subscription;
+    if (user?.id && isAuthenticated) {
+      console.log('🔌 Subscribing to user updates:', user.id);
+      subscription = db
+        .channel(`user:${user.id}`)
+        .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${user.id}` },
+          (payload) => {
+            console.log('🔄 User profile updated:', payload);
+            checkUserAuth();
+          }
+        )
+        .subscribe();
+    }
+
+    return () => {
+      if (subscription) {
+        console.log('🔌 Unsubscribing from user updates');
+        db.removeChannel(subscription);
+      }
+    };
+  }, [user?.id, isAuthenticated]);
 
   const checkAppState = async () => {
     try {

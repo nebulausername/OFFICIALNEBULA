@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { api } from '@/api';
 import { Crown, Sparkles, Zap, Package, LayoutGrid, Bell } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
   getMockProducts,
@@ -58,6 +58,35 @@ export default function Home() {
   // Quick View State
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  // Mouse Parallax for Hero
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const handleMouseMove = (e) => {
+    const { clientX, clientY } = e;
+    const moveX = clientX - window.innerWidth / 2;
+    const moveY = clientY - window.innerHeight / 2;
+    setMousePosition({ x: moveX, y: moveY });
+  };
+
+  // Smooth Parallax Springs
+  const springConfig = { damping: 25, stiffness: 150 };
+  const moveX = useSpring(0, springConfig);
+  const moveY = useSpring(0, springConfig);
+
+  useEffect(() => {
+    moveX.set(mousePosition.x * 0.05);
+    moveY.set(mousePosition.y * 0.05);
+  }, [mousePosition, moveX, moveY]);
+
+  // Scroll Animations
+  const { scrollY } = useScroll();
+  const heroTextY = useTransform(scrollY, [0, 500], [0, 200]);
+  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   // Content Organization
   const [activeTab, setActiveTab] = useState('bestseller');
@@ -205,15 +234,18 @@ export default function Home() {
               transition={{ duration: 0.8 }}
               className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-8"
             >
-              <div className="relative">
+              <motion.div className="relative" style={{ y: heroTextY, opacity: heroOpacity }}>
                 <div className="absolute -inset-10 bg-gold/10 blur-[80px] rounded-full pointer-events-none" />
-                <h1 className="text-6xl sm:text-8xl xl:text-9xl font-black leading-[0.9] tracking-tighter text-white drop-shadow-2xl">
+                <motion.h1
+                  className="text-6xl sm:text-8xl xl:text-9xl font-black leading-[0.9] tracking-tighter text-white drop-shadow-2xl"
+                  style={{ x: moveX, y: moveY }}
+                >
                   NEBULA
-                </h1>
+                </motion.h1>
                 <div className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-amber-600 tracking-[0.4em] mt-2 uppercase">
                   <TypewriterEffect words={['Future', 'Supply', 'Lifestyle']} />
                 </div>
-              </div>
+              </motion.div>
 
               <p className="text-zinc-400 text-lg md:text-xl max-w-xl leading-relaxed">
                 Entdecke die exklusivste Auswahl an Premium Shishas, Vapes und Accessoires.
@@ -418,7 +450,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-[#0E1015]">
                   <img
                     src="https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=800&auto=format&fit=crop"
-                    onError={(e) => e.target.src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop"}
+                    onError={(e) => e.currentTarget.src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop"}
                     alt="Nebula Premium Collection"
                     className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
                   />

@@ -56,7 +56,7 @@ export default function ProtectedRoute({
                         window.history.back();
                     }}
                     title="Zugang gesperrt"
-                    message="Diese Seite ist nur für verifizierte Mitglieder zugänglich. Verifiziere dich über Telegram um fortzufahren."
+                    message="Diese Seite ist nur für verifizierte Mitglieder zugänglich. Verifiziere dich jetzt, um fortzufahren."
                 />
             </>
         );

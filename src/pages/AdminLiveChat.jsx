@@ -210,11 +210,12 @@ export default function AdminLiveChat() {
                     {/* Search */}
                     <div className="relative group">
                         <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500 group-focus-within:text-purple-400 transition-colors" />
-                        <Input
+                        <input
+                            type="text"
                             placeholder="Suchen..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-zinc-900/50 border-white/5 pl-9 focus:ring-purple-500/30 focus:border-purple-500/30 transition-all rounded-xl"
+                            className="w-full bg-zinc-900/50 border border-white/5 pl-9 px-3 py-2 rounded-xl text-sm text-white placeholder:text-zinc-500 focus:ring-1 focus:ring-purple-500/30 focus:border-purple-500/30 transition-all outline-none"
                         />
                     </div>
                 </div>

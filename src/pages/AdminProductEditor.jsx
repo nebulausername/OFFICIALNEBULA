@@ -50,7 +50,8 @@ export default function AdminProductEditor() {
     // Modal Config Fields
     lead_time_days: 3,
     min_order_quantity: 1,
-    ship_from: 'Deutschland',
+    ship_from: 'DE',
+    bulk_pricing: [], // Array of { qty_from, price }
     // Cross-Sell
     related_product_ids: []
   });
@@ -110,7 +111,8 @@ export default function AdminProductEditor() {
             // Modal Config Fields
             lead_time_days: prod.lead_time_days || 3,
             min_order_quantity: prod.min_order_quantity || 1,
-            ship_from: prod.ship_from || 'Deutschland',
+            ship_from: prod.ship_from || 'DE',
+            bulk_pricing: prod.bulk_pricing || [],
             // Cross-Sell
             related_product_ids: prod.related_product_ids || []
           });
@@ -416,14 +418,92 @@ export default function AdminProductEditor() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-zinc-400 text-xs">Versand ab</Label>
-                    <Input
-                      value={formData.ship_from}
-                      onChange={(e) => setFormData({ ...formData, ship_from: e.target.value })}
-                      placeholder="Deutschland"
-                      className="bg-zinc-900 border-zinc-700"
-                    />
+                    <Select value={formData.ship_from} onValueChange={(val) => setFormData({ ...formData, ship_from: val })}>
+                      <SelectTrigger className="bg-zinc-900 border-zinc-700">
+                        <SelectValue placeholder="Region wählen..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="DE">🇩🇪 Deutschland</SelectItem>
+                        <SelectItem value="EU">🇪🇺 Europa</SelectItem>
+                        <SelectItem value="CN">🇨🇳 China</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
+
+                {/* Bulk Pricing Editor */}
+                <div className="mt-6 pt-6 border-t border-emerald-500/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <Label className="text-amber-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                      <span>💰</span> Staffelpreise
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFormData({
+                        ...formData,
+                        bulk_pricing: [...(formData.bulk_pricing || []), { qty_from: 10, price: formData.price * 0.9 }]
+                      })}
+                      className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                    >
+                      + Preisstufe
+                    </Button>
+                  </div>
+
+                  {(!formData.bulk_pricing || formData.bulk_pricing.length === 0) ? (
+                    <p className="text-xs text-zinc-500 italic">Keine Staffelpreise definiert. Klicke '+ Preisstufe' um Mengenrabatte anzubieten.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {formData.bulk_pricing.map((tier, idx) => (
+                        <div key={idx} className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                          <div className="flex-1 flex items-center gap-2">
+                            <span className="text-xs text-zinc-500">Ab</span>
+                            <Input
+                              type="number"
+                              min={1}
+                              value={tier.qty_from || 1}
+                              onChange={(e) => {
+                                const newTiers = [...formData.bulk_pricing];
+                                newTiers[idx] = { ...newTiers[idx], qty_from: parseInt(e.target.value) || 1 };
+                                setFormData({ ...formData, bulk_pricing: newTiers });
+                              }}
+                              className="w-20 bg-zinc-800 border-zinc-700 font-mono text-center"
+                            />
+                            <span className="text-xs text-zinc-500">Stück →</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              value={tier.price || 0}
+                              onChange={(e) => {
+                                const newTiers = [...formData.bulk_pricing];
+                                newTiers[idx] = { ...newTiers[idx], price: parseFloat(e.target.value) || 0 };
+                                setFormData({ ...formData, bulk_pricing: newTiers });
+                              }}
+                              className="w-24 bg-zinc-800 border-zinc-700 font-mono text-amber-400 text-right"
+                            />
+                            <span className="text-xs text-zinc-400">€</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              const newTiers = formData.bulk_pricing.filter((_, i) => i !== idx);
+                              setFormData({ ...formData, bulk_pricing: newTiers });
+                            }}
+                            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          >
+                            ✕
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <p className="text-xs text-zinc-600 mt-3">Diese Felder werden im Produkt-Modal angezeigt.</p>
               </div>
             </div>

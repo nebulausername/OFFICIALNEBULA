@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, X, SlidersHorizontal, ChevronDown, Store, Command, Clock, TrendingUp, Sparkles } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ChevronDown, Store, Command, Clock, TrendingUp, Sparkles, LayoutGrid, Grid3X3, Grid2X2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,7 +23,9 @@ export default function ShopControlStrip({
   sortBy,
   onSortChange,
   productCount = 0,
-  products = [] // For search suggestions
+  products = [], // For search suggestions
+  viewMode = 4,
+  onViewModeChange
 }) {
   const { t } = useI18n();
   const [isFocused, setIsFocused] = useState(false);
@@ -375,6 +377,33 @@ export default function ShopControlStrip({
         </span>
 
         <div className="flex items-center gap-4">
+          {/* Layout Switcher */}
+          {onViewModeChange && (
+            <div className="hidden md:flex items-center gap-1 bg-zinc-900/50 p-1 rounded-lg border border-white/5">
+              <button
+                onClick={() => onViewModeChange(2)}
+                className={`p-1.5 rounded-md transition-all ${viewMode === 2 ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                title="2 Columns"
+              >
+                <Grid2X2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onViewModeChange(3)}
+                className={`p-1.5 rounded-md transition-all ${viewMode === 3 ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                title="3 Columns"
+              >
+                <Grid3X3 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onViewModeChange(4)}
+                className={`p-1.5 rounded-md transition-all ${viewMode === 4 ? 'bg-zinc-700 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                title="4 Columns"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Sort Dropdown - Minimalist */}
           <div className="relative group">
             <select

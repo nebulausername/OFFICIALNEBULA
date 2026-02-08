@@ -18,7 +18,7 @@ const PROTECTED_ROUTES = ['Cart', 'Checkout', 'Profile', 'ProfileSettings', 'Wis
 // Routes that require admin access
 const ADMIN_ROUTES = ['Admin', 'AdminAnalytics', 'AdminUsers', 'AdminOrders', 'AdminBrands', 'AdminCategories',
   'AdminNotificationTemplates', 'AdminProductEditor', 'AdminProducts', 'AdminRequests',
-  'AdminSupport', 'AdminLiveChat', 'AdminVerifications'];
+  'AdminSupport', 'AdminLiveChat', 'AdminVerifications', 'AdminTelegramSettings'];
 
 import ProtectedRoute, { AdminRoute } from '@/components/auth/ProtectedRoute';
 
@@ -109,6 +109,8 @@ import UserRealtimeListener from '@/components/UserRealtimeListener';
 import LiveChatWidget from '@/components/LiveChatWidget';
 import ScrollToTop from '@/components/ScrollToTop';
 import SocialProof from '@/components/trust/SocialProof';
+import SmoothScroll from '@/components/ui/SmoothScroll';
+import CustomCursor from '@/components/ui/CustomCursor';
 
 import { ProductModalProvider } from '@/contexts/ProductModalContext';
 import GlobalProductModal from '@/components/products/GlobalProductModal';
@@ -137,8 +139,10 @@ function App() {
                       <LiveChatWidget />
                       <SocialProof />
                       <ScrollToTop />
+                      <SmoothScroll />
                     </Router>
                     <Toaster />
+                    <CustomCursor />
                   </QueryClientProvider>
                 </HelmetProvider>
               </I18nProvider>

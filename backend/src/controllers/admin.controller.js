@@ -1,4 +1,6 @@
 import prisma from '../config/database.js';
+import { getBot } from '../services/telegram-bot.service.js';
+import { sendNotification, NotificationChannels } from '../services/notification.service.js';
 
 // Helper to normalize JSON inputs (supports both arrays/objects and JSON-strings)
 const toJsonValue = (value) => {
@@ -601,6 +603,64 @@ export const getChatHistory = async (req, res, next) => {
       orderBy: { created_at: 'asc' }
     });
     res.json(messages);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTelegramConfig = async (req, res, next) => {
+  try {
+    const bot = getBot();
+    let botInfo = null;
+    try {
+      if (bot) botInfo = await bot.getMe();
+    } catch (e) {
+      console.error('Error fetching bot info:', e);
+    }
+
+    res.json({
+      enabled: !!process.env.TELEGRAM_BOT_TOKEN,
+      botName: botInfo ? botInfo.username : null,
+      botId: botInfo ? botInfo.id : null,
+      webhookUrl: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/api/telegram/webhook` : null,
+      status: bot ? 'online' : 'offline',
+      adminChatId: process.env.ADMIN_CHAT_ID || '',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sendTestNotification = async (req, res, next) => {
+  try {
+    const { userId, type } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID required' });
+    }
+
+    // Try to find user by ID or Telegram ID
+    let user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { id: userId },
+          { telegram_id: BigInt(userId) } // If userId is numeric string
+        ]
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const result = await sendNotification({
+      userId: user.id,
+      title: 'Test Notification',
+      message: 'This is a test message from Nebula Admin.\nSystem is operational.',
+      channels: [NotificationChannels.TELEGRAM]
+    });
+
+    res.json({ success: true, result });
   } catch (error) {
     next(error);
   }

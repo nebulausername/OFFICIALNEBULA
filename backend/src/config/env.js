@@ -8,13 +8,13 @@ const requiredEnvVars = {
     required: true,
     description: 'Database connection URL',
   },
-  
+
   // Telegram
   TELEGRAM_BOT_TOKEN: {
     required: true,
     description: 'Telegram Bot API token',
   },
-  
+
   // JWT
   JWT_SECRET: {
     required: true,
@@ -28,38 +28,38 @@ const optionalEnvVars = {
     default: '8000',
     description: 'Server port',
   },
-  
+
   NODE_ENV: {
     default: 'development',
     description: 'Node environment (development/production)',
   },
-  
+
   // CORS
   CORS_ORIGIN: {
     default: 'http://localhost:3000',
     description: 'CORS allowed origin',
   },
-  
+
   // WebApp
   WEBAPP_URL: {
-    default: process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
+    default: process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
       : 'https://officialnebula.vercel.app',
     description: 'Frontend WebApp URL',
     requiredInProduction: true,
   },
-  
+
   // Telegram Webhook
   USE_WEBHOOK: {
     default: 'false',
     description: 'Use webhook mode for Telegram bot (true/false)',
   },
-  
+
   TELEGRAM_WEBHOOK_URL: {
     default: null,
     description: 'Telegram webhook URL (auto-generated if not set)',
   },
-  
+
   // Logging
   BOT_LOG_LEVEL: {
     default: 'INFO',
@@ -87,6 +87,25 @@ const optionalEnvVars = {
   SUPABASE_STORAGE_BUCKET: {
     default: 'verifications',
     description: 'Supabase Storage bucket name for verification photos',
+  },
+
+  // InsForge Backend-as-a-Service
+  INSFORGE_BASE_URL: {
+    default: 'https://p5nhx8uz.eu-central.insforge.app',
+    description: 'InsForge API Base URL',
+  },
+  INSFORGE_API_KEY: {
+    default: null,
+    description: 'InsForge Service Role Key (for server-side operations)',
+    requiredInProduction: false,
+  },
+  INSFORGE_ANON_KEY: {
+    default: null,
+    description: 'InsForge Anonymous Key (public)',
+  },
+  INSFORGE_BUCKET_VERIFICATIONS: {
+    default: 'verifications',
+    description: 'Storage bucket for verification photos',
   },
 };
 
@@ -119,6 +138,9 @@ export const validateEnv = () => {
     }
   }
 
+  // InsForge Backend-as-a-Service
+
+
   // Validate specific formats
   if (process.env.TELEGRAM_BOT_TOKEN) {
     // Telegram bot tokens are in format: number:alphanumeric
@@ -129,9 +151,9 @@ export const validateEnv = () => {
   }
 
   if (process.env.DATABASE_URL) {
-    if (!process.env.DATABASE_URL.startsWith('file:') && 
-        !process.env.DATABASE_URL.startsWith('postgresql://') &&
-        !process.env.DATABASE_URL.startsWith('mysql://')) {
+    if (!process.env.DATABASE_URL.startsWith('file:') &&
+      !process.env.DATABASE_URL.startsWith('postgresql://') &&
+      !process.env.DATABASE_URL.startsWith('mysql://')) {
       warnings.push('DATABASE_URL format might be invalid');
     }
   }

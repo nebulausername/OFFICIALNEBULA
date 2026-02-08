@@ -211,13 +211,15 @@ export default function ProductVariantManager({ product, onUpdate }) {
   const applyBulkEdit = () => {
     if (!bulkEdit.field || selectedVariants.length === 0) return;
 
-    let value = bulkEdit.value;
-    if (bulkEdit.field === 'stock' || bulkEdit.field === 'price_override') {
-      value = parseFloat(value) || 0;
-      if (bulkEdit.field === 'price_override' && value === 0) value = null;
-    }
-    if (bulkEdit.field === 'active') {
+    let value;
+    if (bulkEdit.field === 'stock') {
+      value = parseInt(String(bulkEdit.value)) || 0;
+    } else if (bulkEdit.field === 'price_override') {
+      value = parseFloat(String(bulkEdit.value)) || null;
+    } else if (bulkEdit.field === 'active') {
       value = String(bulkEdit.value) === 'true';
+    } else {
+      value = bulkEdit.value;
     }
 
     setVariants(variants.map(v =>
@@ -304,7 +306,7 @@ export default function ProductVariantManager({ product, onUpdate }) {
                 {/* Color Definitions */}
                 <div className="w-64 flex-shrink-0 space-y-4">
                   <div>
-                    <Label className="text-xs text-zinc-400 mb-1.5 block">Bezeichnung</Label>
+                    <label className="text-xs text-zinc-400 mb-1.5 block">Bezeichnung</label>
                     <div className="flex gap-2">
                       <div
                         className="w-10 h-10 rounded-lg border border-white/10 flex-shrink-0"
@@ -320,7 +322,7 @@ export default function ProductVariantManager({ product, onUpdate }) {
                   </div>
 
                   <div>
-                    <Label className="text-xs text-zinc-400 mb-1.5 block">Farbwert (Hex)</Label>
+                    <label className="text-xs text-zinc-400 mb-1.5 block">Farbwert (Hex)</label>
                     <div className="flex gap-2">
                       <div className="relative">
                         <input
@@ -358,10 +360,10 @@ export default function ProductVariantManager({ product, onUpdate }) {
                 {/* Image Manager */}
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-3">
-                    <Label className="text-sm font-medium text-white flex items-center gap-2">
+                    <label className="text-sm font-medium text-white flex items-center gap-2">
                       <ImageIcon className="w-4 h-4 text-zinc-400" />
                       Galerie & Thumbnails
-                    </Label>
+                    </label>
                     <span className="text-xs text-zinc-500">
                       Das erste Bild wird als Hauptbild für diese Farbe verwendet.
                     </span>

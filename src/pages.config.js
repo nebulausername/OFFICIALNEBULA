@@ -12,6 +12,7 @@ import AdminSupport from './pages/AdminSupport';
 import AdminLiveChat from './pages/AdminLiveChat';
 import AdminVerifications from './pages/AdminVerifications';
 import AdminSystemMonitor from './pages/AdminSystemMonitor';
+import AdminTelegramSettings from './pages/AdminTelegramSettings';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 
@@ -46,6 +47,7 @@ export const PAGES = {
     "AdminLiveChat": AdminLiveChat,
     "AdminVerifications": AdminVerifications,
     "AdminSystemMonitor": AdminSystemMonitor,
+    "AdminTelegramSettings": AdminTelegramSettings,
     "Cart": Cart,
 
     "Checkout": Checkout,

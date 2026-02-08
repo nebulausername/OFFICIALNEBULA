@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -21,7 +21,7 @@ model User {
   
   // Nebula Progression System 🌌
   rank          String    @default("nutzer") // nutzer, kunde, vip, vip_plus, nebula
-  lifetime_spend Decimal  @default(0.00) @db.Decimal(10, 2)
+  lifetime_spend Decimal  @default(0.00)
   xp            Int       @default(0) // Legacy support / Secondary metric
 
   is_vip        Boolean   @default(false) // Deprecated: Use rank instead
@@ -43,6 +43,12 @@ model User {
   wishlist_items WishlistItem[]
   verification_requests VerificationRequest[]
   chat_sessions ChatSession[]
+  auth_sessions AuthSession[]
+  auth_link_codes AuthLinkCode[]
+
+  // Login tracking
+  last_login_at DateTime?
+  login_count   Int       @default(0)
 
   @@index([telegram_id])
   @@index([role, rank])
@@ -55,7 +61,7 @@ model Product {
   sku           String    @unique
   name          String
   description   String?
-  price         Decimal   @db.Decimal(10, 2)
+  price         Decimal
   min_order_quantity Int  @default(1)
   currency      String    @default("EUR")
   department_id String?
@@ -66,16 +72,16 @@ model Product {
   drop_date     DateTime? // For Daily Drops
   cover_image   String?
   product_type  String?   @default("other")
-  tags          Json?     // JSONB: Array of strings
-  colors        Json?     // JSONB: Array of color objects
-  sizes         Json?     // JSONB: Array of strings
+  tags          String?     // JSONB: Array of strings
+  colors        String?     // JSONB: Array of color objects
+  sizes         String?     // JSONB: Array of strings
   
   // Legacy JSON fields (keep for now, but use relations preferred)
-  variants_legacy Json?   @map("variants") 
+  variants_legacy String?   @map("variants") 
   
   // New Relation
   variants      Variant[] 
-  options       Json?     // Definition: [{name: "Color", values: ["Red"]}, {name: "Size", values: ["S", "M"]}]
+  options       String?     // Definition: [{name: "Color", values: ["Red"]}, {name: "Size", values: ["S", "M"]}]
 
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
@@ -103,14 +109,14 @@ model Variant {
   id              String   @id @default(uuid())
   product_id      String
   sku             String?  
-  price           Decimal? @db.Decimal(10, 2)
-  compare_at_price Decimal? @db.Decimal(10, 2)
+  price           Decimal?
+  compare_at_price Decimal?
   stock           Int      @default(0)
   
   // The resolved option values for this variant, e.g. { "Color": "Red", "Size": "M" }
-  options         Json
+  options         String
   
-  media           Json?    // Variant specific images or overrides
+  media           String?    // Variant specific images or overrides
   is_default      Boolean  @default(false)
   
   created_at      DateTime @default(now())
@@ -185,7 +191,7 @@ model CartItem {
   user_id         String
   product_id      String
   quantity        Int      @default(1)
-  selected_options Json?   // JSONB: Variant options
+  selected_options String?   // JSONB: Variant options
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
@@ -202,8 +208,8 @@ model Request {
   id            String    @id @default(uuid())
   user_id       String
   status        String    @default("pending") // pending, confirmed, processing, shipped, completed, cancelled
-  total_sum     Decimal   @db.Decimal(10, 2)
-  contact_info  Json      // JSONB: Contact information object
+  total_sum     Decimal
+  contact_info  String      // JSONB: Contact information object
   note          String?
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
@@ -225,9 +231,9 @@ model RequestItem {
   product_id              String?
   sku_snapshot            String
   name_snapshot           String
-  price_snapshot          Decimal   @db.Decimal(10, 2)
+  price_snapshot          Decimal
   quantity_snapshot       Int
-  selected_options_snapshot Json?   // JSONB
+  selected_options_snapshot String?   // JSONB
   created_at              DateTime @default(now())
 
   request                 Request  @relation(fields: [request_id], references: [id], onDelete: Cascade)
@@ -264,7 +270,7 @@ model TicketMessage {
   ticket_id       String
   user_id         String
   message         String
-  attachments     Json?    // JSONB: Array of file URLs
+  attachments     String?    // JSONB: Array of file URLs
   read_by_user    Boolean  @default(false)
   read_by_admin   Boolean  @default(false)
   created_at      DateTime @default(now())
@@ -280,9 +286,9 @@ model TicketMessage {
 model VIPPlan {
   id            String    @id @default(uuid())
   name          String
-  price         Decimal   @db.Decimal(10, 2)
+  price         Decimal
   duration_days Int
-  benefits      Json?     // JSONB: Array of benefit strings
+  benefits      String?     // JSONB: Array of benefit strings
   is_active     Boolean   @default(true)
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
@@ -366,3 +372,42 @@ model ChatMessage {
   @@map("chat_messages")
 }
 
+// ==========================================
+// 🔐 Cross-Platform Authentication System
+// ==========================================
+
+model AuthSession {
+  id              String    @id @default(uuid())
+  user_id         String
+  token_hash      String    @unique  // SHA-256 hash of the JWT token
+  device_type     String              // 'browser', 'telegram', 'mobile'
+  device_info     String?             // User Agent or Telegram client info
+  ip_address      String?
+  is_active       Boolean   @default(true)
+  last_used_at    DateTime  @default(now())
+  expires_at      DateTime
+  created_at      DateTime  @default(now())
+
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, is_active])
+  @@index([token_hash])
+  @@index([expires_at])
+  @@map("auth_sessions")
+}
+
+model AuthLinkCode {
+  id              String    @id @default(uuid())
+  user_id         String
+  code            String    @unique   // 6-digit code for cross-platform login
+  purpose         String              // 'login', 'link_session', 'verify'
+  expires_at      DateTime
+  used_at         DateTime?
+  created_at      DateTime  @default(now())
+
+  user            User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([code, expires_at])
+  @@index([user_id])
+  @@map("auth_link_codes")
+}

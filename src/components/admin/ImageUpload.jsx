@@ -3,7 +3,7 @@ import { Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { apiClient } from '@/api';
+import { storage } from '@/lib/insforge';
 
 export default function ImageUpload({ value, onChange, className }) {
     const [isDragOver, setIsDragOver] = useState(false);
@@ -47,27 +47,19 @@ export default function ImageUpload({ value, onChange, className }) {
 
         try {
             setUploading(true);
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('bucket', 'products');
+            const timestamp = Date.now();
+            const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const path = `uploads/${timestamp}-${safeName}`;
 
-            // Assuming we have a general upload endpoint. 
-            // If not, we might need to use the supabase client directly or a specific endpoint.
-            // Based on previous context, user has backend/src/routes/upload.routes.js
+            // Upload to 'products' bucket
+            const { error: uploadError } = await storage.from('products').upload(path, file);
+            if (uploadError) throw uploadError;
 
-            const response = await apiClient.post('/upload', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    // Note: axios/fetch typically handles boundary automatically if we pass FormData, 
-                    // but our api wrapper might need care.
-                }
-            });
+            // Get Public URL
+            const { data: { publicUrl } } = storage.from('products').getPublicUrl(path);
 
-            // Adjust based on actual API response structure
-            const url = response.url || response.data?.url;
-
-            if (url) {
-                onChange(url);
+            if (publicUrl) {
+                onChange(publicUrl);
             }
         } catch (error) {
             console.error('Upload failed:', error);

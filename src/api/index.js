@@ -12,7 +12,7 @@ export const api = {
 
 // Also export individual modules
 export { auth, entities, integrations, admin };
-export { default as apiClient } from './client';
+
 
 export default api;
 

@@ -47,6 +47,9 @@ export default function Products() {
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
+  // Grid View State
+  const [viewMode, setViewMode] = useState(4); // 2, 3, or 4
+
   const loadData = async () => {
     try {
       const [prods, cats, brds, depts] = await Promise.all([
@@ -318,7 +321,7 @@ export default function Products() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="glass-panel rounded-2xl p-2 border-white/5 bg-black/40 backdrop-blur-xl"
+            className="glass-panel rounded-2xl p-2 border-white/5 bg-black/40 backdrop-blur-xl sticky top-24 z-30 transition-all duration-300 shadow-2xl shadow-black/50"
           >
             <ShopControlStrip
               searchQuery={searchQuery}
@@ -336,6 +339,8 @@ export default function Products() {
               onSortChange={setSortBy}
               productCount={filteredProducts.length}
               products={products}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
             />
           </motion.div>
         </div>
@@ -401,7 +406,10 @@ export default function Products() {
                   </button>
                 </motion.div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                <div className={`grid gap-4 md:gap-6 ${viewMode === 2 ? 'grid-cols-2' :
+                    viewMode === 3 ? 'grid-cols-2 md:grid-cols-3' :
+                      'grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
+                  }`}>
                   <AnimatePresence mode="popLayout">
                     {filteredProducts.slice(0, visibleProducts).map((product, index) => (
                       <motion.div

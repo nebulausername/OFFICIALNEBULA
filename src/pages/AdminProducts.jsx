@@ -48,6 +48,7 @@ export default function AdminProducts() {
     cover_image: ''
   });
   const [tagInput, setTagInput] = useState('');
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -215,6 +216,19 @@ export default function AdminProducts() {
       }
     },
     {
+      header: 'Stock',
+      accessorKey: 'stock',
+      sortable: true,
+      cell: (row) => (
+        <InlineEditableField
+          value={row.stock ?? 0}
+          type="number"
+          onSave={(value) => handleInlineUpdate(row.id, 'stock', parseInt(value) || 0)}
+          className={`font-mono ${(row.stock ?? 0) < 10 ? 'text-red-400' : 'text-zinc-300'}`}
+        />
+      )
+    },
+    {
       header: 'Status',
       accessorKey: 'in_stock',
       sortable: true,
@@ -238,6 +252,30 @@ export default function AdminProducts() {
       )
     }
   ];
+
+  // Bulk Actions
+  const handleBulkDelete = async () => {
+    if (!confirm(`Wirklich ${selectedProducts.length} Produkte löschen?`)) return;
+    try {
+      await Promise.all(selectedProducts.map(id => api.entities.Product.delete(id)));
+      toast({ title: 'Gelöscht', description: `${selectedProducts.length} Produkte gelöscht` });
+      setSelectedProducts([]);
+      loadData();
+    } catch (error) {
+      toast({ title: 'Fehler', description: 'Löschen fehlgeschlagen', variant: 'destructive' });
+    }
+  };
+
+  const handleBulkStock = async (inStock) => {
+    try {
+      await Promise.all(selectedProducts.map(id => api.entities.Product.update(id, { in_stock: inStock })));
+      toast({ title: 'Aktualisiert', description: `${selectedProducts.length} Produkte auf ${inStock ? 'Verfügbar' : 'Ausverkauft'} gesetzt` });
+      setSelectedProducts([]);
+      loadData();
+    } catch (error) {
+      toast({ title: 'Fehler', description: 'Update fehlgeschlagen', variant: 'destructive' });
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -286,7 +324,7 @@ export default function AdminProducts() {
           <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex items-center justify-between">
             <div>
               <p className="text-zinc-400 text-xs font-bold uppercase">Low Stock</p>
-              <p className="text-2xl font-black text-amber-400">0</p>
+              <p className="text-2xl font-black text-amber-400">{products.filter(p => (p.stock ?? 0) < 10 && (p.stock ?? 0) > 0).length}</p>
             </div>
             <TrendingDown className="w-8 h-8 text-amber-900" />
           </div>
@@ -298,6 +336,29 @@ export default function AdminProducts() {
             <Plus className="w-8 h-8 text-purple-400" />
           </div>
         </div>
+
+        {/* Bulk Actions Bar */}
+        {selectedProducts.length > 0 && (
+          <div className="bg-purple-900/30 border border-purple-500/30 rounded-2xl p-4 flex items-center justify-between">
+            <span className="text-purple-200 font-bold">
+              {selectedProducts.length} Produkt{selectedProducts.length > 1 ? 'e' : ''} ausgewählt
+            </span>
+            <div className="flex gap-2">
+              <Button onClick={() => handleBulkStock(true)} size="sm" className="bg-emerald-600 hover:bg-emerald-500">
+                ✓ Verfügbar
+              </Button>
+              <Button onClick={() => handleBulkStock(false)} size="sm" className="bg-amber-600 hover:bg-amber-500">
+                ✗ Ausverkauft
+              </Button>
+              <Button onClick={handleBulkDelete} size="sm" variant="destructive">
+                <Trash2 className="w-4 h-4 mr-1" /> Löschen
+              </Button>
+              <Button onClick={() => setSelectedProducts([])} size="sm" variant="outline" className="border-zinc-600">
+                Abbrechen
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl overflow-hidden glass">
           <DataTable

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Shield, ArrowRight, Loader2 } from 'lucide-react';
+import { Sparkles, Shield, ArrowRight, Loader2, Key, Smartphone, Github, Chrome, Fingerprint } from 'lucide-react'; // Added icons
 import { api } from '@/api';
 import { setToken } from '@/api/config';
+import { insforge } from '@/lib/insforge'; // Import InsForge client
 import { useTelegramWebApp, isTelegramWebApp, getTelegramUser, hapticFeedback, openTelegramLink } from '../lib/TelegramWebApp';
 import VerificationStatus from '../components/auth/VerificationStatus';
+import CodeLoginModal from '../components/auth/CodeLoginModal';
+import BiometricGate from '../components/auth/BiometricGate'; // Import BiometricGate
 import { createPageUrl } from '../utils';
 
 export default function Login() {
@@ -16,6 +19,8 @@ export default function Login() {
   const [verificationHandGesture, setVerificationHandGesture] = useState(null);
   const [rejectionReason, setRejectionReason] = useState(null);
   const [user, setUser] = useState(null);
+  const [showCodeLogin, setShowCodeLogin] = useState(false);
+  const [bioVerified, setBioVerified] = useState(false); // New state
 
   useTelegramWebApp();
 
@@ -123,38 +128,38 @@ export default function Login() {
     }
   };
 
+  const handleSocialLogin = async (provider) => {
+    try {
+      const redirectUrl = `${window.location.origin}/login`;
+      const { error } = await insforge.auth.signInWithOAuth({
+        provider,
+        redirectTo: redirectUrl,
+        // @ts-ignore
+        options: {
+          queryParams: {
+            redirect_to: redirectUrl
+          }
+        }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Social login error:', error);
+    }
+  };
+
   // Loading Screen
   if (loading && isTelegramWebApp()) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0C10] overflow-hidden relative">
+        {/* ... existing loading content ... */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-[#0A0C10] to-[#0A0C10]" />
-
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.5, 0.8, 0.5]
-          }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10"
-        />
-
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-          className="relative z-10 w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-[#D6B25E] via-purple-500 to-transparent mb-6"
-        >
+        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className="relative z-10 w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-[#D6B25E] via-purple-500 to-transparent mb-6">
           <div className="w-full h-full bg-[#0A0C10] rounded-full flex items-center justify-center">
             <Loader2 className="w-8 h-8 text-[#D6B25E] animate-spin" />
           </div>
         </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 text-lg font-light tracking-[0.2em] text-white/50"
-        >
-          LOADING NEBULA
-        </motion.p>
+        <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 text-lg font-light tracking-[0.2em] text-white/50">LOADING NEBULA</motion.p>
       </div>
     );
   }
@@ -168,11 +173,19 @@ export default function Login() {
             verificationStatus={verificationStatus}
             verificationHandGesture={verificationHandGesture}
             rejectionReason={rejectionReason}
+            verificationSubmittedAt={user?.verification_submitted_at}
             onRetry={handleRetry}
           />
         </div>
       </div>
     );
+  }
+
+  // BIOMETRIC GATE - BLOCKS LOGIN UNTIL VERIFIED
+  // Only show if NOT loading, and NOT in Telegram Web App (users there are auth'd via TG)
+  // If user explicitly asks for Google/Github, they presumably are on web.
+  if (!loading && !isTelegramWebApp() && !bioVerified) {
+    return <BiometricGate onVerified={() => setBioVerified(true)} />;
   }
 
   // Main Login / Landing Page
@@ -183,28 +196,9 @@ export default function Login() {
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(17,24,39,1),_rgba(10,12,16,1))]" />
         <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.03]" />
-
         {/* Animated Orbs */}
-        <motion.div
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.2, 0.1]
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] bg-purple-600/20"
-        />
-        <motion.div
-          animate={{
-            x: [0, -50, 0],
-            y: [0, 30, 0],
-            scale: [1.2, 1, 1.2],
-            opacity: [0.1, 0.15, 0.1]
-          }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[130px] bg-[#D6B25E]/10"
-        />
+        <motion.div animate={{ x: [0, 50, 0], y: [0, -30, 0], scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] bg-purple-600/20" />
+        <motion.div animate={{ x: [0, -50, 0], y: [0, 30, 0], scale: [1.2, 1, 1.2], opacity: [0.1, 0.15, 0.1] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[130px] bg-[#D6B25E]/10" />
       </div>
 
       <div className="relative z-10 w-full max-w-md px-6">
@@ -216,142 +210,112 @@ export default function Login() {
           >
             {/* Logo Section */}
             <div className="text-center mb-12 relative">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, duration: 1 }}
-                className="relative inline-block group"
-              >
-                {/* Glow behind logo */}
+              {/* ... (Logo code unchanged) ... */}
+              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative inline-block group">
                 <div className="absolute inset-0 bg-[#D6B25E] rounded-[2rem] blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-1000" />
-
                 <div className="w-32 h-32 mx-auto mb-8 rounded-[2rem] p-6 relative z-10 bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-2xl shadow-2xl ring-1 ring-white/20">
-                  <img
-                    src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png"
-                    alt="Nebula Supply"
-                    className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,178,94,0.5)]"
-                  />
+                  <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png" alt="Nebula Supply" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,178,94,0.5)]" />
                 </div>
               </motion.div>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-5xl font-black mb-3 tracking-tighter"
-              >
-                <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50 drop-shadow-sm">
-                  NEBULA
-                </span>
+              <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="text-5xl font-black mb-3 tracking-tighter">
+                <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50 drop-shadow-sm">NEBULA</span>
               </motion.h1>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="flex items-center justify-center gap-3"
-              >
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="flex items-center justify-center gap-3">
                 <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[#D6B25E]" />
-                <p className="text-[#D6B25E] font-bold tracking-[0.25em] text-xs uppercase">
-                  Premium Supply
-                </p>
+                <p className="text-[#D6B25E] font-bold tracking-[0.25em] text-xs uppercase">Premium Supply</p>
                 <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-[#D6B25E]" />
+              </motion.div>
+
+              {/* Verified Badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-4 flex items-center justify-center gap-2"
+              >
+                <Fingerprint className="w-4 h-4 text-green-500" />
+                <span className="text-green-500 text-[10px] font-mono tracking-widest uppercase">Biometric Verified</span>
               </motion.div>
             </div>
 
-            {/* Action Card - Telegram First */}
+            {/* Action Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               className="space-y-6"
             >
-              {/* Primary Action: Telegram Verification */}
-              <button
-                onClick={() => {
-                  const botUsername = import.meta.env.VITE_BOT_USERNAME || 'NebulaOrderBot';
-                  window.open(`https://t.me/${botUsername}`, '_blank');
-                }}
-                className="group relative w-full"
-              >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-[#D6B25E] via-[#F5D98B] to-[#D6B25E] rounded-2xl opacity-75 blur-sm group-hover:opacity-100 transition duration-500 group-hover:duration-200 animate-tilt" />
-                <div className="relative flex items-center justify-between bg-[#0A0C10] rounded-2xl p-5 leading-none border border-white/10 group-hover:border-[#D6B25E]/50 transition-colors">
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#D6B25E]/20 to-[#D6B25E]/5 flex items-center justify-center border border-[#D6B25E]/20 group-hover:scale-105 transition-transform duration-300">
-                      <Shield className="w-6 h-6 text-[#D6B25E]" />
+              {/* Social Login Buttons - Revealed after Biometric */}
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => handleSocialLogin('google')}
+                  className="flex items-center justify-center gap-3 bg-white text-black p-4 rounded-xl font-bold hover:bg-zinc-200 transition-colors"
+                >
+                  <Chrome className="w-5 h-5" />
+                  Google
+                </button>
+                <button
+                  onClick={() => handleSocialLogin('github')}
+                  className="flex items-center justify-center gap-3 bg-[#24292e] text-white p-4 rounded-xl font-bold hover:bg-[#2f363d] transition-colors border border-white/10"
+                >
+                  <Github className="w-5 h-5" />
+                  GitHub
+                </button>
+              </div>
+
+              <div className="relative flex items-center gap-4 py-2">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-zinc-500 uppercase tracking-widest">Or Classic Login</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
+              {/* Telegram Login */}
+              <button onClick={() => { const botUsername = import.meta.env.VITE_BOT_USERNAME || 'NebulaOrderBot'; window.open(`https://t.me/${botUsername}`, '_blank'); }} className="group relative w-full overflow-hidden rounded-2xl">
+                <div className="relative bg-[#0088cc]/10 hover:bg-[#0088cc]/20 border border-[#0088cc]/30 rounded-2xl p-4 flex items-center justify-between transition-all duration-300">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#0088cc]/20 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-[#0088cc]" />
                     </div>
                     <div className="text-left">
-                      <div className="text-white font-bold text-lg mb-1 group-hover:text-[#D6B25E] transition-colors">Via Telegram öffnen</div>
-                      <div className="text-zinc-500 text-xs font-medium tracking-wide">
-                        SOFORTIGER VOLLER ZUGANG
-                      </div>
+                      <div className="text-white font-semibold text-base mb-0.5">Telegram Login</div>
+                      <div className="text-zinc-500 text-xs font-medium">Auto-Sync</div>
                     </div>
                   </div>
-                  <div className="pr-2">
-                    <ArrowRight className="w-5 h-5 text-zinc-500 group-hover:text-[#D6B25E] group-hover:translate-x-1 transition-all duration-300" />
-                  </div>
+                  <ArrowRight className="w-4 h-4 text-[#0088cc]/50 group-hover:text-[#0088cc] transition-colors" />
                 </div>
               </button>
 
-              {/* Divider */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                <span className="text-zinc-600 text-xs uppercase tracking-widest">oder</span>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              </div>
-
-              {/* Secondary: Limited Preview */}
-              <button
-                onClick={() => navigate(createPageUrl('Home'))}
-                className="group relative w-full overflow-hidden rounded-2xl p-[1px]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 group-hover:border-white/20 rounded-2xl p-4 flex items-center justify-center gap-3 transition-all">
-                  <Sparkles className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
-                  <div className="text-left">
-                    <span className="text-zinc-300 font-semibold group-hover:text-white transition-colors">
-                      Vorschau ansehen
-                    </span>
-                    <span className="text-zinc-600 text-xs ml-2">(eingeschränkter Zugang)</span>
+              {/* Code Login */}
+              <button onClick={() => setShowCodeLogin(true)} className="group relative w-full overflow-hidden rounded-2xl">
+                <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 flex items-center justify-between transition-all duration-300">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
+                      <Key className="w-5 h-5 text-zinc-400" />
+                    </div>
+                    <div className="text-left">
+                      <div className="text-white font-semibold text-base mb-0.5">Passcode Login</div>
+                      <div className="text-zinc-500 text-xs font-medium">Legacy Access</div>
+                    </div>
                   </div>
+                  <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
                 </div>
               </button>
 
-              {/* Benefits List */}
-              <div className="grid grid-cols-2 gap-3 pt-4">
-                {[
-                  { icon: '🔓', text: 'Alle Preise sehen' },
-                  { icon: '🛒', text: 'Produkte kaufen' },
-                  { icon: '⭐', text: 'VIP Rewards' },
-                  { icon: '💬', text: 'Premium Support' }
-                ].map((benefit, i) => (
-                  <div key={i} className="flex items-center gap-2 text-zinc-500 text-xs">
-                    <span>{benefit.icon}</span>
-                    <span>{benefit.text}</span>
-                  </div>
-                ))}
-              </div>
+              {/* Preview Button */}
+              <button onClick={() => navigate(createPageUrl('Home'))} className="w-full text-center text-zinc-500 hover:text-white text-xs uppercase tracking-widest transition-colors pt-4">
+                Continue as Guest
+              </button>
+
             </motion.div>
 
-            {/* Footer Info */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="text-center mt-12 space-y-2"
-            >
-              <p className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase">
-                &copy; 2026 Nebula Supply
-              </p>
-              <div className="flex justify-center gap-4">
-                <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                <span className="w-1 h-1 rounded-full bg-zinc-800" />
-              </div>
+            {/* Footer */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center mt-12 space-y-2">
+              <p className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase">&copy; 2026 Nebula Supply</p>
             </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <CodeLoginModal isOpen={showCodeLogin} onClose={() => setShowCodeLogin(false)} onSuccess={(userData) => { setUser(userData); navigate(createPageUrl('Home')); }} />
     </div>
   );
 }

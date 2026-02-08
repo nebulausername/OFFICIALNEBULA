@@ -147,6 +147,10 @@ export const me = async (req, res, next) => {
         is_vip: true,
         vip_expires_at: true,
         created_at: true,
+        verification_status: true,
+        verification_submitted_at: true,
+        verification_hand_gesture: true,
+        rejection_reason: true,
       },
     });
 
@@ -223,22 +227,22 @@ export const telegramWebAppAuth = async (req, res, next) => {
       const params = new URLSearchParams(initData);
       const hash = params.get('hash');
       params.delete('hash');
-      
+
       const dataCheckString = Array.from(params.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([key, value]) => `${key}=${value}`)
         .join('\n');
-      
+
       const secretKey = crypto
         .createHmac('sha256', 'WebAppData')
         .update(botToken)
         .digest();
-      
+
       const calculatedHash = crypto
         .createHmac('sha256', secretKey)
         .update(dataCheckString)
         .digest('hex');
-      
+
       if (hash !== calculatedHash) {
         return res.status(401).json({
           error: 'Unauthorized',

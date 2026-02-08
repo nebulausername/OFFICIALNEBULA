@@ -412,6 +412,69 @@ async function main() {
       cover_image: 'https://cdn.shopify.com/s/files/1/0564/6368/7862/products/CBD-Blueten-Super-Lemon-Haze_1024x1024.jpg',
       tags: ['Relax'],
       variants: [{ size: '1g', price_override: 10.00 }, { size: '5g', price_override: 45.00 }]
+    },
+
+    // --- B2B WHOLESALE ---
+    {
+      sku: 'B2B-VAPE-140K',
+      name: 'Mega Vape 140.000 Puffs - Mixed Flavors',
+      description: 'Großhandel-Vape mit 140.000 Zügen. Perfekt für den Wiederverkauf. Mindestbestellmenge: 20 Stück.',
+      price: 20.00,
+      stock: 1000,
+      department_id: deptMap['vapes'],
+      brand_id: brandMap['elfbar'],
+      category_id: catMap['einweg-vapes'],
+      cover_image: 'https://images.unsplash.com/photo-1560024802-fe458e6f92a1?w=800',
+      tags: ['B2B', 'Wholesale', 'Bulk'],
+      min_order_quantity: 20,
+      ship_from: 'CN',
+      lead_time_days: 14,
+      bulk_pricing: [
+        { qty_from: 20, price: 15.00 },
+        { qty_from: 50, price: 12.00 },
+        { qty_from: 100, price: 10.00 },
+        { qty_from: 500, price: 8.00 }
+      ]
+    },
+    {
+      sku: 'B2B-SHISHA-PACK',
+      name: 'Shisha Tabak Sortiment (50x 200g)',
+      description: 'Gemischtes Paket mit den beliebtesten Tabaksorten. Mindestbestellmenge: 10 Pakete.',
+      price: 800.00,
+      stock: 50,
+      department_id: deptMap['shisha-world'],
+      brand_id: brandMap['187-strassenbande'],
+      category_id: catMap['shisha-tabak'],
+      cover_image: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=800',
+      tags: ['B2B', 'Bundle'],
+      min_order_quantity: 10,
+      ship_from: 'DE',
+      lead_time_days: 3,
+      bulk_pricing: [
+        { qty_from: 10, price: 750.00 },
+        { qty_from: 25, price: 700.00 },
+        { qty_from: 50, price: 650.00 }
+      ]
+    },
+    {
+      sku: 'B2B-GROW-LED',
+      name: 'LED Grow Panel 1000W (Großhandel)',
+      description: 'Profi-LED für Großkunden. Versand aus EU-Lager.',
+      price: 299.00,
+      stock: 100,
+      department_id: deptMap['grow'],
+      brand_id: brandMap['mars-hydro'],
+      category_id: catMap['beleuchtung'],
+      cover_image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800',
+      tags: ['B2B', 'Pro'],
+      min_order_quantity: 5,
+      ship_from: 'EU',
+      lead_time_days: 5,
+      bulk_pricing: [
+        { qty_from: 5, price: 269.00 },
+        { qty_from: 20, price: 249.00 },
+        { qty_from: 50, price: 229.00 }
+      ]
     }
   ];
 
@@ -423,8 +486,24 @@ async function main() {
       continue;
     }
 
+    // Extract relations and non-schema fields
+    const {
+      variants, colors, department_id, category_id, brand_id,
+      bulk_pricing, ship_from, lead_time_days, // These don't exist in schema
+      ...baseData
+    } = p;
+
+    // Build Prisma-compatible data with connect syntax for relations
+    const productData = {
+      ...baseData,
+      tags: baseData.tags ? JSON.stringify(baseData.tags) : null,
+      department: department_id ? { connect: { id: department_id } } : undefined,
+      category: category_id ? { connect: { id: category_id } } : undefined,
+      brand: brand_id ? { connect: { id: brand_id } } : undefined
+    };
+
     await prisma.product.create({
-      data: p
+      data: productData
     });
     console.log(`+ Added: ${p.sku} | ${p.name}`);
   }
@@ -440,3 +519,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

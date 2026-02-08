@@ -23,5 +23,9 @@ router.post('/products/bulk-import', adminController.bulkImportProducts);
 router.get('/chats', adminController.getChatSessions);
 router.get('/chats/:sessionId/messages', validateIdParam('sessionId'), adminController.getChatHistory);
 
+// Telegram Settings
+router.get('/telegram/config', adminController.getTelegramConfig);
+router.post('/telegram/test-notification', adminController.sendTestNotification);
+
 export default router;
 

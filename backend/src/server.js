@@ -19,7 +19,6 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Validate environment variables
-// Validate environment variables
 let startupError = null;
 try {
   const { validateEnv } = await import('./config/env.js');
@@ -69,7 +68,6 @@ app.use((req, res, next) => {
 app.use(helmet());
 app.use(compression());
 
-// CORS configuration
 // CORS configuration
 const corsOptions = {
   origin: process.env.CORS_ORIGIN
@@ -187,10 +185,10 @@ app.use(errorHandler);
 if (!process.env.VERCEL) {
   // Initialize Telegram Bot (after server setup to avoid circular dependencies)
   import('./services/telegram-bot.service.js')
-    .then(({ initializeBot }) => {
+    .then(async ({ initializeBot }) => {
       if (process.env.TELEGRAM_BOT_TOKEN) {
         console.log('🤖 Initializing Telegram Bot...');
-        const bot = initializeBot();
+        const bot = await initializeBot();
         if (bot) {
           console.log('✅ Telegram Bot initialized successfully!');
         } else {
@@ -225,15 +223,33 @@ if (!process.env.VERCEL) {
   });
 }
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  process.exit(0);
-});
+// Graceful shutdown with bot cleanup
+const gracefulShutdown = async (signal) => {
+  console.log(`${signal} signal received: starting graceful shutdown`);
 
-process.on('SIGINT', () => {
-  console.log('SIGINT signal received: closing HTTP server');
-  process.exit(0);
-});
+  try {
+    // Shutdown Telegram bot first
+    const { shutdownBot } = await import('./services/telegram-bot.service.js');
+    await shutdownBot();
+    console.log('✅ Telegram bot shutdown complete');
+  } catch (err) {
+    console.error('⚠️  Error during bot shutdown:', err.message);
+  }
+
+  // Close HTTP server
+  httpServer.close(() => {
+    console.log('✅ HTTP server closed');
+    process.exit(0);
+  });
+
+  // Force exit after 10 seconds
+  setTimeout(() => {
+    console.warn('⚠️  Forcing exit after timeout');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 export default app;

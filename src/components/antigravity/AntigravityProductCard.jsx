@@ -94,6 +94,15 @@ export default function AntigravityProductCard({ product, onQuickView }) {
                         Quick Add
                     </button>
                 </div>
+
+                {/* SKU Badge */}
+                {product.sku && (
+                    <div className="absolute bottom-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="font-mono text-[9px] bg-black/70 backdrop-blur-sm px-1.5 py-0.5 rounded text-zinc-300 border border-white/10">
+                            {product.sku}
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* --- CONTENT AREA --- */}

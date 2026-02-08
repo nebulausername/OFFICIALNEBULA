@@ -1,155 +1,147 @@
-import api from './client';
-import { API_BASE_URL } from './config';
-import { getDemoData } from './demoData';
+import { db } from '@/lib/insforge';
+// Removed api import as we are bypassing the proxy
 
-// Helper to build query params for list/filter operations
-const buildQueryParams = (filters = {}, sort = null, limit = null) => {
-  const params = {};
-
-  // Add filters
-  Object.keys(filters).forEach(key => {
-    if (filters[key] !== undefined && filters[key] !== null) {
-      params[key] = String(filters[key]);
-    }
-  });
-
-  // Add sort
-  if (sort) {
-    params.sort = String(sort);
-  }
-
-  // Add limit
-  if (limit) {
-    params.limit = String(limit);
-  }
-
-  return params;
+// Map entity names to table names
+const TABLE_MAP = {
+  'product': 'products',
+  'product-image': 'product_images',
+  'category': 'categories',
+  'brand': 'brands',
+  'department': 'departments',
+  'user': 'users', // Public users table
+  'cart-item': 'cart_items',
+  'request': 'requests',
+  'request-item': 'request_items',
+  'ticket': 'tickets',
+  'ticket-message': 'ticket_messages',
+  'vip-plan': 'vip_plans',
+  'notification-template': 'notification_templates',
+  'wishlist-item': 'wishlist_items',
+  'verification-request': 'verification_requests'
 };
 
-// Generic entity factory - optimized
+// Generic entity factory - optimized for InsForge
 const createEntity = (entityName, customBasePath = null) => {
-  const basePath = customBasePath || `/${entityName.toLowerCase()}s`;
-
-  // Normalize response to always return array for list/filter
-  const normalizeArray = (result) => {
-    // Handle Array directly
-    if (Array.isArray(result)) return result;
-
-    // Handle Object with data property (most common case for paginated responses)
-    if (result?.data !== undefined) {
-      return Array.isArray(result.data) ? result.data : (result.data ? [result.data] : []);
-    }
-
-    // Handle Object with products property (fallback)
-    if (result?.products && Array.isArray(result.products)) {
-      return result.products;
-    }
-
-    // Handle empty/null/undefined
-    if (!result || result === null || result === undefined) {
-      return [];
-    }
-
-    // Last resort: if it's an object but not an array, wrap it
-    // This handles cases where a single object is returned instead of array
-    if (typeof result === 'object' && !Array.isArray(result)) {
-      // Only wrap if it looks like a product/item object (has id or similar)
-      if (result.id || result.sku || result.name) {
-        return [result];
-      }
-    }
-
-    return [];
-  };
+  const tableName = TABLE_MAP[entityName] || entityName + 's';
 
   return {
     // List all items with optional sort and limit
     list: async (sort = null, limit = null) => {
-      const params = buildQueryParams({}, sort, limit);
-      const queryString = new URLSearchParams(params).toString();
-      const fullUrl = `${API_BASE_URL}${basePath}${queryString ? `?${queryString}` : ''}`;
+      let query = db.from(tableName).select('*');
 
-      console.log(`🌐 API List Request:`, {
-        entity: entityName,
-        url: fullUrl,
-        sort,
-        limit,
-        params
-      });
-
-      try {
-        const result = await api.get(basePath, params);
-        console.log(`📥 API List Response (${entityName}):`, {
-          type: typeof result,
-          isArray: Array.isArray(result),
-          hasData: !!result?.data,
-          length: Array.isArray(result) ? result.length : (result?.data?.length || 0),
-          raw: result
-        });
-
-        const normalized = normalizeArray(result);
-        return normalized;
-      } catch (error) {
-        console.error(`❌ API List Error (${entityName}):`, {
-          url: fullUrl,
-          error: error.message,
-          status: error.status,
-          stack: error.stack
-        });
-
-        // Fallback to demo data when API is unavailable
-        const demoData = getDemoData(entityName);
-        if (demoData.length > 0) {
-          console.warn(`📦 Using fallback demo data for ${entityName} (${demoData.length} items)`);
-          return demoData;
+      // Sorting
+      if (sort) {
+        // "price_asc" -> column: price, ascending: true
+        // "created_at_desc" -> column: created_at, ascending: false
+        const parts = sort.split('_');
+        const direction = parts.pop(); // 'asc' or 'desc'
+        const column = parts.join('_');
+        query = query.order(column, { ascending: direction === 'asc' });
+      } else {
+        // Default sort
+        if (tableName === 'products' || tableName === 'requests') {
+          query = query.order('created_at', { ascending: false });
+        } else if (['categories', 'departments', 'brands'].includes(tableName)) {
+          query = query.order('sort_order', { ascending: true });
         }
-
-        throw error;
       }
+
+      // Limit
+      if (limit) {
+        query = query.limit(Number(limit));
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error(`InsForge List Error (${tableName}):`, error);
+        throw error; // Or return []
+      }
+      return data || [];
     },
 
     // Filter items with optional sort and limit
     filter: async (filters = {}, sort = null, limit = null) => {
-      const params = buildQueryParams(filters, sort, limit);
+      let query = db.from(tableName).select('*');
 
-      try {
-        const result = await api.get(basePath, params);
-        return normalizeArray(result);
-      } catch (error) {
-        // Fallback to demo data when API is unavailable
-        const demoData = getDemoData(entityName);
-        if (demoData.length > 0) {
-          console.warn(`📦 Using fallback demo data for ${entityName} filter`);
-          // Simple client-side filter
-          return demoData.filter(item => {
-            return Object.keys(filters).every(key => {
-              if (filters[key] === undefined || filters[key] === null) return true;
-              return String(item[key]) === String(filters[key]);
-            });
-          });
+      // Apply Filters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          // Check for helpers like "min_price" or ranges?
+          // For now, assume direct equality or simple mapping
+          // Special handling for legacy filters might be needed
+          query = query.eq(key, value);
         }
+      });
+
+      // Sorting (Same as list)
+      if (sort) {
+        const parts = sort.split('_');
+        const direction = parts.pop();
+        const column = parts.join('_');
+        query = query.order(column, { ascending: direction === 'asc' });
+      }
+
+      // Limit
+      if (limit) {
+        query = query.limit(Number(limit));
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error(`InsForge Filter Error (${tableName}):`, error);
         throw error;
       }
+      return data || [];
     },
 
     // Get single item by ID
     get: async (id) => {
-      return await api.get(`${basePath}/${id}`);
+      const { data, error } = await db
+        .from(tableName)
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data;
     },
 
     // Create new item
     create: async (data) => {
-      return await api.post(basePath, data);
+      const { data: created, error } = await db
+        .from(tableName)
+        .insert(data)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return created;
     },
 
     // Update item
     update: async (id, data) => {
-      return await api.patch(`${basePath}/${id}`, data);
+      const { data: updated, error } = await db
+        .from(tableName)
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return updated;
     },
 
     // Delete item
     delete: async (id) => {
-      return await api.delete(`${basePath}/${id}`);
+      const { error } = await db
+        .from(tableName)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
     },
   };
 };
@@ -170,6 +162,7 @@ export const entities = {
   VIPPlan: createEntity('vip-plan'),
   NotificationTemplate: createEntity('notification-template'),
   WishlistItem: createEntity('wishlist-item'),
+  VerificationRequest: createEntity('verification-request'),
 };
 
 export default entities;
