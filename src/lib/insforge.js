@@ -18,5 +18,7 @@ export const insforge = createClient({
 export const db = insforge.database;
 export const storage = insforge.storage;
 export const auth = insforge.auth;
+export const realtime = insforge.realtime;
+export const ai = insforge.ai;
 
 export default insforge;

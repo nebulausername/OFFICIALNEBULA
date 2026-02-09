@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, XCircle, Clock, RefreshCw, Sparkles, User, Mail, Phone, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';

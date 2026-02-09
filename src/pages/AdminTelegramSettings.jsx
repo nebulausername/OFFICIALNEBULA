@@ -3,20 +3,16 @@ import { motion } from 'framer-motion';
 import {
     Bot,
     Send,
-    Settings,
     Info,
     ShieldCheck,
     Radio,
-    Copy,
-    CheckCircle2,
-    AlertCircle
+    Copy
 } from 'lucide-react';
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AdminTelegramSettings() {

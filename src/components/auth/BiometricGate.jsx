@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Scan, ShieldCheck, Fingerprint, Lock, Cpu, Globe, AlertTriangle, Terminal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useNebulaSound } from '@/contexts/SoundContext';
 
 const BiometricGate = ({ onVerified }) => {
@@ -15,7 +14,7 @@ const BiometricGate = ({ onVerified }) => {
     const [noCameraMode, setNoCameraMode] = useState(false);
 
     // Sound effects
-    const soundContext = useNebulaSound ? useNebulaSound() : null;
+    const soundContext = useNebulaSound();
     const playHover = soundContext?.playHover || (() => { });
     const playClick = soundContext?.playClick || (() => { });
 

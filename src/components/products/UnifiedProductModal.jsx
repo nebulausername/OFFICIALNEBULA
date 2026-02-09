@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
     X, Heart, ShoppingBag, ChevronLeft, ChevronRight,
-    Check, AlertCircle, Plus, Minus, Zap, Truck, MapPin, Package, Bell
+    Check, AlertCircle, Plus, Minus, Zap, Truck, Package, Bell
 } from 'lucide-react';
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';

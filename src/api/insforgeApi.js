@@ -21,16 +21,33 @@ export const productApi = {
     `);
 
         if (filters.categoryId) {
-            query = query.eq('category_id', filters.categoryId);
+            // Support array or single value
+            if (Array.isArray(filters.categoryId)) {
+                query = query.in('category_id', filters.categoryId);
+            } else {
+                query = query.eq('category_id', filters.categoryId);
+            }
         }
         if (filters.departmentId) {
             query = query.eq('department_id', filters.departmentId);
         }
         if (filters.brandId) {
-            query = query.eq('brand_id', filters.brandId);
+            if (Array.isArray(filters.brandId)) {
+                query = query.in('brand_id', filters.brandId);
+            } else {
+                query = query.eq('brand_id', filters.brandId);
+            }
         }
-        if (filters.inStock !== undefined) {
+        if (filters.inStock !== undefined && filters.inStock !== null) {
             query = query.eq('in_stock', filters.inStock);
+        }
+
+        // Price Range
+        if (filters.minPrice !== undefined) {
+            query = query.gte('price', filters.minPrice);
+        }
+        if (filters.maxPrice !== undefined) {
+            query = query.lte('price', filters.maxPrice);
         }
 
         // Pagination

@@ -24,6 +24,9 @@ import InfiniteMarquee from '../components/home/InfiniteMarquee';
 import MagneticButton from '@/components/ui/MagneticButton';
 import SEO from '@/components/seo/SEO';
 
+import { aiService } from '@/services/AIService';
+import { realtimeService } from '@/services/RealtimeService';
+
 // Antigravity Components
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import CategoryTile from '../components/antigravity/CategoryTile';
@@ -58,6 +61,10 @@ export default function Home() {
   // Quick View State
   const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  // AI & Realtime State
+  const [aiHypeText, setAiHypeText] = useState("");
+  const [activeViewers, setActiveViewers] = useState(0);
 
   // Mouse Parallax for Hero
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -142,11 +149,27 @@ export default function Home() {
         prods = [...prods, ...mocks];
       }
 
+
+      // ... (existing imports)
+
+      // Inside loadProducts function, after setting products:
       setProducts(prods);
 
-      // Set Featured Product
+      // Set Featured Product and generate AI Hype
       if (prods.length > 0) {
         setFeaturedProduct(prods[0]);
+        // Trigger AI Hype generation
+        aiService.getProductHype(prods[0]).then(hype => {
+          setAiHypeText(hype);
+        });
+
+        // Subscribe to live viewers for the homepage (simulated "store traffic")
+        realtimeService.subscribeToProduct('homepage-traffic', (data) => {
+          if (data.type === 'viewers') {
+            // Multiply for "store wide" feeling
+            setActiveViewers(prev => Math.max(prev, data.count * 12 + 42));
+          }
+        });
       }
     } catch (error) {
       console.error('❌ Error loading products, using fallback:', error);
@@ -247,10 +270,23 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              <p className="text-zinc-400 text-lg md:text-xl max-w-xl leading-relaxed">
-                Entdecke die exklusivste Auswahl an Premium Shishas, Vapes und Accessoires.
-                Qualität, die man spürt. Design, das bewegt.
-              </p>
+              <div className="flex flex-col gap-2">
+                <p className="text-zinc-400 text-lg md:text-xl max-w-xl leading-relaxed">
+                  {aiHypeText || "Entdecke die exklusivste Auswahl an Premium Shishas, Vapes und Accessoires. Qualität, die man spürt. Design, das bewegt."}
+                </p>
+                {activeViewers > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    className="inline-flex items-center gap-2 text-green-400 text-sm font-mono bg-green-900/20 px-3 py-1 rounded-full w-fit border border-green-500/30"
+                  >
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    {activeViewers} Citizens online exploring
+                  </motion.div>
+                )}
+              </div>
 
               <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                 <Link to={createPageUrl('Products')}>

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Smartphone, Key, CheckCircle2, XCircle, Loader2, Sparkles, Send, Shield, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Key, CheckCircle2, XCircle, Loader2, Sparkles, Send, Shield, Clock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@/components/ui/input-otp';
 import { api } from '@/api';

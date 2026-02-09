@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal, PackageX } from 'lucide-react';
+import { SlidersHorizontal, PackageX, Sparkles } from 'lucide-react';
 import { InView } from 'react-intersection-observer';
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import SEO from '@/components/seo/SEO';
@@ -407,11 +407,11 @@ export default function Products() {
                 </motion.div>
               ) : (
                 <div className={`grid gap-4 md:gap-6 ${viewMode === 2 ? 'grid-cols-2' :
-                    viewMode === 3 ? 'grid-cols-2 md:grid-cols-3' :
-                      'grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
+                  viewMode === 3 ? 'grid-cols-2 md:grid-cols-3' :
+                    'grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
                   }`}>
                   <AnimatePresence mode="popLayout">
-                    {filteredProducts.slice(0, visibleProducts).map((product, index) => (
+                    {filteredProducts.map((product, index) => (
                       <motion.div
                         key={product.id}
                         layout
@@ -429,14 +429,12 @@ export default function Products() {
                   </AnimatePresence>
 
                   {/* Infinite Scroll Trigger */}
-                  {visibleProducts < filteredProducts.length && (
+                  {hasMore && (
                     <InView
                       as="div"
                       onChange={(inView) => {
-                        if (inView) {
-                          setTimeout(() => {
-                            setVisibleProducts(prev => prev + 12);
-                          }, 300);
+                        if (inView && !loading) {
+                          loadProducts(false);
                         }
                       }}
                       className="col-span-full py-12 flex justify-center w-full"
@@ -477,6 +475,22 @@ export default function Products() {
         onFiltersChange={setAdvancedFilters}
         onReset={resetFilters}
       />
+
+      {/* AI Assistant Floating Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-8 right-8 z-50 w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white shadow-2xl flex items-center justify-center border-2 border-white/20"
+        onClick={() => {
+          toast({
+            title: "Nebula AI",
+            description: "Hey! Ich bin dein Shopping Assistant. (Coming Soon: Personalized Picks!)",
+            className: "bg-indigo-950 border-indigo-500/30 text-white"
+          });
+        }}
+      >
+        <Sparkles className="w-6 h-6 animate-pulse" />
+      </motion.button>
 
       {/* --- MODALS --- */}
       <UnifiedProductModal

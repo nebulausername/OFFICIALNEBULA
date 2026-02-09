@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Shield, ArrowRight, Loader2, Key, Smartphone, Github, Chrome, Fingerprint } from 'lucide-react'; // Added icons
+import { Shield, ArrowRight, Loader2, Key, Github, Chrome, Fingerprint } from 'lucide-react'; // Added icons
 import { api } from '@/api';
 import { setToken } from '@/api/config';
 import { insforge } from '@/lib/insforge'; // Import InsForge client

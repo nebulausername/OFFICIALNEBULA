@@ -639,13 +639,20 @@ export const sendTestNotification = async (req, res, next) => {
       return res.status(400).json({ error: 'User ID required' });
     }
 
-    // Try to find user by ID or Telegram ID
+    const whereConditions = [{ id: userId }];
+
+    // Only add telegram_id check if userId is numeric
+    if (/^\d+$/.test(userId)) {
+      try {
+        whereConditions.push({ telegram_id: BigInt(userId) });
+      } catch (e) {
+        // Ignore BigInt errors
+      }
+    }
+
     let user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { id: userId },
-          { telegram_id: BigInt(userId) } // If userId is numeric string
-        ]
+        OR: whereConditions
       }
     });
 

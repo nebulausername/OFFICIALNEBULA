@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Monitor, Smartphone, Tablet, LogOut, RefreshCw,
-    Shield, Clock, MapPin, Calendar, AlertTriangle,
-    CheckCircle2, Loader2, Trash2, Globe
+    Shield, Clock, MapPin, AlertTriangle, Loader2, Trash2, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

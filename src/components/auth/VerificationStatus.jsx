@@ -16,6 +16,9 @@ export default function VerificationStatus({
 }) {
   const navigate = useNavigate();
 
+  // State for FaceCaptureModal
+  const [showFaceCapture, setShowFaceCapture] = React.useState(false);
+
   if (verificationStatus === 'verified') {
     return (
       <motion.div
@@ -145,8 +148,7 @@ export default function VerificationStatus({
     );
   }
 
-  // State for FaceCaptureModal
-  const [showFaceCapture, setShowFaceCapture] = React.useState(false);
+
 
   // Determine if photo needs to be taken (pending status but no submission time recorded)
   // Or if we just want to allow retrying/updating the photo even whilst pending?
