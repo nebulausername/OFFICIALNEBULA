@@ -281,45 +281,51 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="mt-12 flex flex-col md:flex-row gap-6 items-center justify-center"
+              className="mt-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center"
             >
-              <MagneticButton className="min-w-[180px]" onClick={() => window.location.href = '/products'}>
-                <Link to="/products" className="w-full h-full flex items-center justify-center">
-                  <span className="relative z-10 flex items-center gap-2 font-bold text-black">
-                    SHOP DROPS <Zap className="w-4 h-4 fill-black" />
-                  </span>
-                  {/* Trust Row (Hero based) */}
-                  <div className="pt-8 flex flex-wrap justify-center lg:justify-start gap-6 text-zinc-500 text-sm font-medium uppercase tracking-wider">
-                    <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-gold" /> Blitzversand</span>
-                    <span className="flex items-center gap-2"><Crown className="w-4 h-4 text-gold" /> Premium Selection</span>
-                    <span className="flex items-center gap-2"><Package className="w-4 h-4 text-gold" /> Discreet Pkg</span>
-                  </div>
-                </motion.div>
+              {/* Left Column: CTA & Trust */}
+              <div className="lg:col-span-7 flex flex-col items-center lg:items-start gap-8 order-2 lg:order-1">
+                <MagneticButton className="min-w-[200px]" onClick={() => window.location.href = '/products'}>
+                  <Link to="/products" className="w-full h-full flex items-center justify-center px-8 py-4">
+                    <span className="relative z-10 flex items-center gap-3 font-bold text-black text-lg">
+                      SHOP DROPS <Zap className="w-5 h-5 fill-black" />
+                    </span>
+                  </Link>
+                </MagneticButton>
 
-                {/* Right: Featured Panel */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="lg:col-span-5 w-full min-h-[450px] lg:h-[600px] bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm flex flex-col"
-                >
-                  <FeaturedDropList
-                    products={products}
-                    onQuickAdd={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
-                  />
-                </motion.div>
+                {/* Trust Row */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-4 text-zinc-500 text-sm font-medium uppercase tracking-wider">
+                  <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-gold" /> Blitzversand</span>
+                  <span className="flex items-center gap-2"><Crown className="w-4 h-4 text-gold" /> Premium Selection</span>
+                  <span className="flex items-center gap-2"><Package className="w-4 h-4 text-gold" /> Discreet Pkg</span>
+                </div>
               </div>
 
-              {/* Delivery Bar Helper */}
-              <div className="mt-16 w-full max-w-3xl mx-auto lg:mx-0">
-                <DeliveryBar />
-              </div>
-          </div>
+              {/* Right Column: Featured Panel */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="lg:col-span-5 w-full min-h-[400px] lg:h-[500px] bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm flex flex-col order-1 lg:order-2"
+              >
+                <FeaturedDropList
+                  products={products}
+                  onQuickAdd={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
+                />
+              </motion.div>
+            </motion.div>
 
-          {/* Marquee Background Element */}
-          <div className="absolute bottom-10 left-0 right-0 z-0 opacity-20 pointer-events-none">
-            <InfiniteMarquee />
+            {/* Delivery Bar Helper */}
+            <div className="mt-16 w-full max-w-3xl mx-auto lg:mx-0">
+              <DeliveryBar />
+            </div>
           </div>
+        </div>
+
+        {/* Marquee Background Element */}
+        <div className="absolute bottom-10 left-0 right-0 z-0 opacity-20 pointer-events-none">
+          <InfiniteMarquee />
+        </div>
       </section>
 
       {/* --- SECTION: CATEGORIES --- */}
