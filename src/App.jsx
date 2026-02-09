@@ -26,8 +26,13 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
+import { AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
+import MotionWrapper from '@/components/ui/MotionWrapper';
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+  const location = useLocation();
 
   // Initialize Telegram WebApp if available
   useTelegramWebApp();
@@ -47,56 +52,59 @@ const AuthenticatedApp = () => {
     return <UserNotRegisteredError />;
   }
 
-  // Helper to wrap page with appropriate protection
+  // Helper to wrap page with appropriate protection and animation
   const wrapWithProtection = (path, Page) => {
-    if (ADMIN_ROUTES.includes(path)) {
-      return (
-        <AdminRoute>
-          <LayoutWrapper currentPageName={path}>
-            <Page />
-          </LayoutWrapper>
-        </AdminRoute>
-      );
-    }
-    // DEVELOPMENT: Protected routes verification disabled
-    // if (PROTECTED_ROUTES.includes(path)) {
-    //   return (
-    //     <ProtectedRoute>
-    //       <LayoutWrapper currentPageName={path}>
-    //         <Page />
-    //       </LayoutWrapper>
-    //     </ProtectedRoute>
-    //   );
-    // }
-    return (
+    let Content = (
       <LayoutWrapper currentPageName={path}>
         <Page />
       </LayoutWrapper>
+    );
+
+    if (ADMIN_ROUTES.includes(path)) {
+      Content = (
+        <AdminRoute>
+          {Content}
+        </AdminRoute>
+      );
+    }
+
+    return (
+      <MotionWrapper className="w-full h-full">
+        {Content}
+      </MotionWrapper>
     );
   };
 
   // Render the main app
   return (
-    <Routes>
-      <Route path="/login" element={<Pages.Login />} />
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => {
-        // Skip Login as it's already handled above
-        if (path === 'Login') return null;
-        return (
-          <Route
-            key={path}
-            path={`/${path}`}
-            element={wrapWithProtection(path, Page)}
-          />
-        );
-      })}
-      <Route path="*" element={<PageNotFound />} />
-    </Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/login" element={
+          <MotionWrapper className="w-full h-full">
+            <Pages.Login />
+          </MotionWrapper>
+        } />
+        <Route path="/" element={
+          <MotionWrapper className="w-full h-full">
+            <LayoutWrapper currentPageName={mainPageKey}>
+              <MainPage />
+            </LayoutWrapper>
+          </MotionWrapper>
+        } />
+        {Object.entries(Pages).map(([path, Page]) => {
+          // Skip Login as it's already handled above
+          if (path === 'Login') return null;
+          return (
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={wrapWithProtection(path, Page)}
+            />
+          );
+        })}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+    </AnimatePresence>
   );
 };
 

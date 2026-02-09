@@ -91,6 +91,7 @@ export default function Home() {
   const { scrollY } = useScroll();
   const heroTextY = useTransform(scrollY, [0, 500], [0, 200]);
   const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
 
   useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
