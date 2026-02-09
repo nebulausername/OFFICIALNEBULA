@@ -99,10 +99,28 @@ export default function UnifiedProductModal({
             setQuantity(product.min_order_quantity || 1);
             setExpressDelivery(false);
             setShowSuccess(false);
-            setRelatedProducts([]); // Reset related products on new product/open
+            setRelatedProducts([]);
 
             // Calculate delivery date
             updateDeliveryDate(false);
+
+            // Fetch related products
+            const fetchRelated = async () => {
+                setLoadingRelated(true);
+                try {
+                    // Fetch latest products to recommend (simple mock logic for now)
+                    const res = await api.entities.Product.list('-created_at', 20);
+                    const allProducts = Array.isArray(res) ? res : (res.data || []);
+                    const others = allProducts.filter(p => p.id !== product.id);
+                    // Shuffle and pick 2
+                    setRelatedProducts(others.sort(() => 0.5 - Math.random()).slice(0, 2));
+                } catch (err) {
+                    console.error("Error fetching related products", err);
+                } finally {
+                    setLoadingRelated(false);
+                }
+            };
+            fetchRelated();
         }
     }, [product, open]);
 

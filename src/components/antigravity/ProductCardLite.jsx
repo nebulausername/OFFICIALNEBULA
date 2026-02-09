@@ -21,7 +21,7 @@ export default function ProductCardLite({ product, onQuickView }) {
             viewport={{ once: true }}
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
-            className="group relative flex flex-col h-full bg-[#0E1015] rounded-xl border border-white/5 hover:border-gold/30 transition-all duration-300"
+            className="group relative flex flex-col h-full glass-card rounded-xl p-0 hover:-translate-y-1 transition-all duration-300"
         >
             {/* Image Area */}
             <div

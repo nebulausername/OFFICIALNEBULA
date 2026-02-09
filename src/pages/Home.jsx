@@ -1,26 +1,238 @@
-// ... imports
+// Nebula Redesign - Premium Homepage
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '../utils';
+import { api } from '@/api';
+import { Crown, Sparkles, Zap, Package, LayoutGrid, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import {
+  getMockProducts,
+  MOCK_CATEGORIES,
+  BESTSELLERS,
+  TRENDING,
+  UNDER_50
+} from '../utils/mockData';
+
+// Components
+import UnifiedProductModal from '../components/products/UnifiedProductModal';
+import DeliveryBar from '../components/delivery/DeliveryBar';
+import VideoSpotlight from '../components/home/VideoSpotlight';
+import TypewriterEffect from '@/components/ui/TypewriterEffect';
+import CosmicHeroBackground from '../components/home/CosmicHeroBackground';
+import InfiniteMarquee from '../components/home/InfiniteMarquee';
+import MagneticButton from '@/components/ui/MagneticButton';
+import SEO from '@/components/seo/SEO';
 import MotionWrapper from '@/components/ui/MotionWrapper';
 
-// ... (keep other imports)
+import { aiService } from '@/services/AIService';
+import { realtimeService } from '@/services/RealtimeService';
 
-// Removed local AnimatedSection definition
+// Antigravity Components
+import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
+import CategoryTile from '../components/antigravity/CategoryTile';
+import SectionHeader from '../components/antigravity/SectionHeader';
+import FeaturedDropList from '../components/home/FeaturedDropList';
+import ProductCardLite from '../components/antigravity/ProductCardLite';
+import { ProductCardSkeleton, CategoryTileSkeleton } from '../components/antigravity/Skeletons';
+
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function Home() {
-  // ... (keep existing state and logic)
+  const [departments, setDepartments] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [categoryApi, setCategoryApi] = useState(null); // Added for carousel API
+  const [freshDropsApi, setFreshDropsApi] = useState(null); // Added for Fresh Drops API
+  const [featuredProduct, setFeaturedProduct] = useState(null);
+  const [loadingDepts, setLoadingDepts] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  // Quick View State
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  // AI & Realtime State
+  const [aiHypeText, setAiHypeText] = useState("");
+  const [activeViewers, setActiveViewers] = useState(0);
+
+  // Mouse Parallax for Hero
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const handleMouseMove = (e) => {
+    const { clientX, clientY } = e;
+    const moveX = clientX - window.innerWidth / 2;
+    const moveY = clientY - window.innerHeight / 2;
+    setMousePosition({ x: moveX, y: moveY });
+  };
+
+  // Smooth Parallax Springs
+  const springConfig = { damping: 25, stiffness: 150 };
+  const moveX = useSpring(0, springConfig);
+  const moveY = useSpring(0, springConfig);
+
+  useEffect(() => {
+    moveX.set(mousePosition.x * 0.05);
+    moveY.set(mousePosition.y * 0.05);
+  }, [mousePosition, moveX, moveY]);
+
+  // Scroll Animations
+  const { scrollY } = useScroll();
+  const heroTextY = useTransform(scrollY, [0, 500], [0, 200]);
+  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Content Organization
+  const [activeTab, setActiveTab] = useState('bestseller');
+
+  useEffect(() => {
+    loadDepartments();
+    loadProducts();
+  }, []);
+
+  const loadDepartments = async () => {
+    try {
+      const depts = await api.entities.Department.list('sort_order');
+      // Enrich with mock data for "Live" feel
+      const enrichedDepts = (Array.isArray(depts) ? depts : []).map(d => ({
+        ...d,
+        product_count: Math.floor(Math.random() * 50) + 10,
+        description: "Premium Selection from the Nebula Universe."
+      }));
+
+      // FALLBACK: If no departments, use MOCK_CATEGORIES
+      if (enrichedDepts.length < 4) {
+        setDepartments(MOCK_CATEGORIES);
+      } else {
+        setDepartments(enrichedDepts);
+      }
+    } catch (error) {
+      console.error('❌ Error loading departments:', error);
+      // Use mock categories on error
+      setDepartments(MOCK_CATEGORIES);
+    } finally {
+      setLoadingDepts(false);
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      setLoadingProducts(true);
+      // Fetch more to populate all new sections densely
+      let prods = await api.entities.Product.list('-created_at', 40);
+
+      if (!Array.isArray(prods)) {
+        prods = (prods && prods.data) ? prods.data : [];
+      }
+
+      // AGGRESSIVE FALLBACK / HYBRID MODE
+      // If we have very few products, the homepage looks broken. 
+      // We will ensure we always have at least 12 products for the layout.
+      if (prods.length < 12) {
+        console.log('⚠️ Low product count (' + prods.length + '), augmenting with Mock Data.');
+        const missingCount = 12 - prods.length;
+        const mocks = getMockProducts(20).slice(0, 15); // Get enough mocks
+        // Filter out mocks that might conflict by ID if necessary, but mocks have 'mock-' prefix
+        prods = [...prods, ...mocks];
+      }
+
+      setProducts(prods);
+
+      // Set Featured Product and generate AI Hype
+      if (prods.length > 0) {
+        setFeaturedProduct(prods[0]);
+        // Trigger AI Hype generation
+        aiService.getProductHype(prods[0]).then(hype => {
+          setAiHypeText(hype);
+        });
+
+        // Subscribe to live viewers for the homepage (simulated "store traffic")
+        realtimeService.subscribeToProduct('homepage-traffic', (data) => {
+          if (data.type === 'viewers') {
+            // Multiply for "store wide" feeling
+            setActiveViewers(prev => Math.max(prev, data.count * 12 + 42));
+          }
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error loading products, using fallback:', error);
+      setProducts(getMockProducts(20));
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
+
+  const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
+    try {
+      const user = await api.auth.me();
+      if (!user) {
+        // Allow mock add to cart (or redirect to login)
+        console.warn('User not logged in or using mock product');
+        return;
+      }
+
+      const existing = await api.entities.StarCartItem.filter({
+        user_id: user.id,
+        product_id: product.id
+      });
+
+      if (existing.length > 0) {
+        await api.entities.StarCartItem.update(existing[0].id, {
+          quantity: existing[0].quantity + quantity,
+          selected_options: selectedOptions
+        });
+      } else {
+        await api.entities.StarCartItem.create({
+          user_id: user.id,
+          product_id: product.id,
+          quantity: quantity,
+          selected_options: selectedOptions
+        });
+      }
+      setIsQuickViewOpen(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
+
+  // Filter Logic - using proper mock collections as fallback
+  const getFilteredProducts = () => {
+    if (activeTab === 'under50') {
+      const filtered = products.filter(p => parseFloat(p.price) < 50);
+      return filtered.length > 0 ? filtered.slice(0, 6) : UNDER_50.slice(0, 6);
+    }
+    if (activeTab === 'trending') {
+      return products.length > 0 ? products.slice(0, 6) : TRENDING.slice(0, 6);
+    }
+    // "Bestseller" default
+    if (products.length >= 6) {
+      return products.slice(0, 6);
+    }
+    return BESTSELLERS.slice(0, 6);
+  };
 
   return (
-    <div className="relative min-h-screen bg-[#050608] text-white overflow-x-hidden selection:bg-gold/30">
+    <MotionWrapper className="relative min-h-screen bg-[#050608] text-white overflow-x-hidden selection:bg-gold/30">
 
       {/* SEO */}
       <SEO
         title="Nebula | Future Culture Supply"
         description="Discover the future of streetwear. Premium drops, exclusive designs, and a culture that defines tomorrow."
+        image="/og-image.jpg"
+        url={window.location.href}
       />
 
       {/* --- HERO SECTION --- */}
       <section className="relative w-full h-screen min-h-[800px] flex items-center justify-center overflow-hidden">
         {/* Live Cosmic Background */}
-        <CosmicHeroBackground />
+        <ErrorBoundary>
+          <CosmicHeroBackground />
+        </ErrorBoundary>
 
         <div className="absolute inset-0 z-10 container mx-auto px-4 flex flex-col justify-center items-center text-center">
           <div className="relative z-20">
@@ -124,7 +336,7 @@ export default function Home() {
 
           {/* Mobile Carousel */}
           <div className="md:hidden">
-            <Carousel className="w-full">
+            <Carousel setApi={setCategoryApi} className="w-full">
               <CarouselContent className="-ml-4">
                 {loadingDepts ? Array(4).fill(0).map((_, i) => (
                   <CarouselItem key={i} className="pl-4 basis-2/3"><CategoryTileSkeleton /></CarouselItem>
@@ -148,10 +360,18 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-black text-white">Fresh Drops</h2>
             </div>
             <div className="hidden md:flex gap-2">
-              <button onClick={() => freshDropsApi?.scrollPrev()} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all">
+              <button
+                onClick={() => freshDropsApi?.scrollPrev()}
+                className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all"
+                aria-label="Previous Slide"
+              >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              <button onClick={() => freshDropsApi?.scrollNext()} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all">
+              <button
+                onClick={() => freshDropsApi?.scrollNext()}
+                className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all"
+                aria-label="Next Slide"
+              >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
@@ -185,7 +405,6 @@ export default function Home() {
                 </div>
               )}
             </CarouselContent>
-            {/* Native arrows hidden as we use custom header controls */}
           </Carousel>
         </div>
       </section>
@@ -232,7 +451,7 @@ export default function Home() {
                     />
                   ))
                 ) : (
-                  /* Premium Empty State - shouldn't happen with fallbacks but just in case */
+                  /* Premium Empty State */
                   <div className="col-span-full py-16 text-center border border-gold/20 rounded-3xl bg-gradient-to-b from-gold/5 to-transparent">
                     <Sparkles className="w-12 h-12 text-gold mx-auto mb-4 opacity-50" />
                     <p className="text-zinc-400 mb-2">Gerade keine Produkte in dieser Kollektion.</p>
@@ -252,7 +471,6 @@ export default function Home() {
             {/* Sticky Highlight Card (Right) */}
             <div className="lg:col-span-1 hidden lg:block">
               <div className="sticky top-28 h-[600px] w-full rounded-3xl overflow-hidden relative group border border-white/10">
-                {/* Static image or dynamic from first bestseller */}
                 <div className="absolute inset-0 bg-[#0E1015]">
                   <img
                     src="https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=800&auto=format&fit=crop"
@@ -316,6 +534,6 @@ export default function Home() {
         onSwitchProduct={(p) => setQuickViewProduct(p)}
         mode="full"
       />
-    </div>
+    </MotionWrapper>
   );
 }

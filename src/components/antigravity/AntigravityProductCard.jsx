@@ -25,7 +25,7 @@ export default function AntigravityProductCard({ product, onQuickView }) {
             viewport={{ once: true, margin: "-50px" }}
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
-            className="group relative flex flex-col h-full bg-[#0E1015]/80 backdrop-blur-md rounded-2xl border border-white/5 hover:border-gold/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(214,178,94,0.1)]"
+            className="group relative flex flex-col h-full glass-card rounded-2xl p-0 hover:-translate-y-1 transition-all duration-300"
         >
             {/* --- IMAGE AREA --- */}
             <div className="relative aspect-[4/5] overflow-hidden rounded-t-2xl bg-[#050608]">

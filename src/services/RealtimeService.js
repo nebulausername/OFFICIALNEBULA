@@ -39,7 +39,14 @@ class RealtimeService {
         callback({ type: 'viewers', count: mockViewers });
 
         return () => {
-            // Cleanup logic if needed (unsubscribe when no listeners)
+            // Cleanup: Unsubscribe if no more listeners (simplified for now)
+            // In a real app, we would track listener count per channel
+            try {
+                // Optional: this.subscriptions.get(channelId)?.unsubscribe();
+                // keeping channel open for now for shared state
+            } catch (e) {
+                console.warn('Realtime cleanup error:', e);
+            }
         };
     }
 
