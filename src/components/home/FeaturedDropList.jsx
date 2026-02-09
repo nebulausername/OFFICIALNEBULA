@@ -56,10 +56,11 @@ const MiniProductCard = ({ product, index, onQuickAdd }) => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 * index, duration: 0.5 }}
-            className="group relative flex items-center gap-4 bg-[#0E1015] border border-white/10 hover:border-gold/30 p-3 rounded-2xl transition-all duration-300 hover:bg-white/5"
+            className="group relative flex items-center gap-4 glass-card p-3 rounded-2xl cursor-pointer"
+            onClick={(e) => { e.preventDefault(); onQuickAdd?.(product); }}
         >
             {/* Image */}
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-[#050608] rounded-xl overflow-hidden">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-[#050608] rounded-xl overflow-hidden glass-gloss">
                 <img
                     src={imageSrc}
                     alt={product.name}
@@ -68,8 +69,8 @@ const MiniProductCard = ({ product, index, onQuickAdd }) => {
                 />
                 {/* Quick Add Button */}
                 <button
-                    onClick={(e) => { e.preventDefault(); onQuickAdd?.(product); }}
-                    className="absolute bottom-1 right-1 w-6 h-6 bg-gold text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:scale-110"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onQuickAdd?.(product); }}
+                    className="absolute bottom-1 right-1 w-6 h-6 bg-gold text-black rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:scale-110 z-10"
                 >
                     <Plus className="w-3.5 h-3.5" />
                 </button>
@@ -79,40 +80,29 @@ const MiniProductCard = ({ product, index, onQuickAdd }) => {
             <div className="flex-grow min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                     {index === 0 && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-black bg-red-500 px-1.5 py-0.5 rounded flex items-center gap-1 shadow-[0_0_10px_rgba(239,68,68,0.4)]">
                             <Flame className="w-3 h-3" /> Hot
                         </span>
                     )}
                     {product.badges?.includes('Drop') && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-black bg-purple-400 px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(192,132,252,0.4)]">
                             Drop
-                        </span>
-                    )}
-                    {product.badges?.includes('Neu') && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gold bg-gold/10 px-1.5 py-0.5 rounded">
-                            Neu
-                        </span>
-                    )}
-                    {product.badges?.includes('Limitiert') && (
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">
-                            Limitiert
                         </span>
                     )}
                 </div>
                 <h4 className="text-white font-bold truncate pr-2 group-hover:text-gold transition-colors">{product.name}</h4>
                 <div className="flex items-center justify-between mt-1">
                     <div className="flex flex-col">
-                        <span className="text-gold font-bold">{product.price}€</span>
+                        <span className="text-gold font-black text-lg drop-shadow-sm">{product.price}€</span>
                         {stockLow && (
                             <span className="text-[10px] text-red-400 font-medium">{product.stock_status}</span>
                         )}
                     </div>
-                    <button
-                        onClick={(e) => { e.preventDefault(); onQuickAdd?.(product); }}
-                        className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-gold group-hover:text-black transition-all"
+                    <div
+                        className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-gold group-hover:text-black transition-all border border-white/10 group-hover:border-gold"
                     >
                         <ArrowRight className="w-4 h-4" />
-                    </button>
+                    </div>
                 </div>
             </div>
         </motion.div>
