@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '@/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, PackageX, Sparkles } from 'lucide-react';
-import { InView } from 'react-intersection-observer';
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import SEO from '@/components/seo/SEO';
 import CosmicHeroBackground from '../components/home/CosmicHeroBackground';
@@ -429,24 +428,7 @@ export default function Products() {
                   </AnimatePresence>
 
                   {/* Infinite Scroll Trigger */}
-                  {hasMore && (
-                    <InView
-                      as="div"
-                      onChange={(inView) => {
-                        if (inView && !loading) {
-                          loadProducts(false);
-                        }
-                      }}
-                      className="col-span-full py-12 flex justify-center w-full"
-                    >
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="relative w-12 h-12">
-                          <div className="absolute inset-0 border-4 border-gold/20 rounded-full" />
-                          <div className="absolute inset-0 border-4 border-gold border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      </div>
-                    </InView>
-                  )}
+                  {/* Infinite Scroll Trigger - Removed dead code referencing undefined hasMore variable */}
                 </div>
               )}
             </div>
@@ -498,6 +480,7 @@ export default function Products() {
         open={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
+        onSwitchProduct={(p) => setQuickViewProduct(p)}
         mode="quick"
       />
     </div>

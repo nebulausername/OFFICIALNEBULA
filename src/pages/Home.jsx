@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { api } from '@/api';
-import { Crown, Sparkles, Zap, Package, LayoutGrid, Bell } from 'lucide-react';
+import { Crown, Sparkles, Zap, Package, LayoutGrid, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,6 +54,8 @@ const AnimatedSection = ({ children, className }) => {
 export default function Home() {
   const [departments, setDepartments] = useState([]);
   const [products, setProducts] = useState([]);
+  const [categoryApi, setCategoryApi] = useState(null); // Added for carousel API
+  const [freshDropsApi, setFreshDropsApi] = useState(null); // Added for Fresh Drops API
   const [featuredProduct, setFeaturedProduct] = useState(null);
   const [loadingDepts, setLoadingDepts] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -213,125 +215,98 @@ export default function Home() {
     }
   };
 
-  // Filter Logic - using proper mock collections as fallback
-  const getFilteredProducts = () => {
-    if (activeTab === 'under50') {
-      const filtered = products.filter(p => parseFloat(p.price) < 50);
-      // Use UNDER_50 mock collection if no products found
-      return filtered.length > 0 ? filtered.slice(0, 6) : UNDER_50.slice(0, 6);
-    }
-    if (activeTab === 'trending') {
-      // Use TRENDING mock collection if products array is empty
-      return products.length > 0 ? products.slice(0, 6) : TRENDING.slice(0, 6);
-    }
-    // "Bestseller" default
-    if (products.length >= 6) {
-      return products.slice(0, 6);
-    }
-    // Fallback to BESTSELLERS mock
-    return BESTSELLERS.slice(0, 6);
-  };
+  const heroY = useTransform(scrollY, [0, 500], [0, 200]);
+  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+
+  const heroTextY = useTransform(scrollY, [0, 300], [0, 100]);
+  const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#050608]">
+    <div className="relative min-h-screen bg-[#050608] text-white overflow-x-hidden selection:bg-gold/30">
+
+      {/* SEO */}
       <SEO
-        title="Home"
-        description="Nebula - Experience the Future of Smoking. Premium Vapes, Shishas & Accessories."
-        image="/images/hero-logo.png"
-        url={window.location.href}
+        title="Nebula | Future Culture Supply"
+        description="Discover the future of streetwear. Premium drops, exclusive designs, and a culture that defines tomorrow."
       />
 
-      <CosmicHeroBackground />
-      {/* Global Vignette */}
-      <div className="fixed inset-0 bg-gradient-radial from-transparent via-black/20 to-black/80 pointer-events-none z-0" />
-
       {/* --- HERO SECTION --- */}
-      <section className="relative z-10 min-h-[90vh] flex items-center pt-24 pb-12 overflow-hidden">
-        <div className="max-w-[1400px] w-full mx-auto px-4 lg:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <section className="relative w-full h-screen min-h-[800px] flex items-center justify-center overflow-hidden">
+        {/* Live Cosmic Background */}
+        <CosmicHeroBackground />
 
-            {/* Left: Text & Actions */}
+        <div className="absolute inset-0 z-10 container mx-auto px-4 flex flex-col justify-center items-center text-center">
+          <div className="relative z-20">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-8"
+              style={{ y: heroTextY, scale: heroScale, opacity: heroOpacity }}
+              className="flex flex-col items-center"
             >
-              <motion.div className="relative" style={{ y: heroTextY, opacity: heroOpacity }}>
-                <div className="absolute -inset-10 bg-gold/10 blur-[80px] rounded-full pointer-events-none" />
-                <motion.h1
-                  className="text-6xl sm:text-8xl xl:text-9xl font-black leading-[0.9] tracking-tighter text-white drop-shadow-2xl"
-                  style={{ x: moveX, y: moveY }}
+              <div className="flex items-center gap-3 mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <span className="h-[1px] w-12 bg-gradient-to-r from-transparent to-gold" />
+                <span className="text-gold font-bold tracking-[0.3em] text-xs uppercase glow-gold">Official Supply</span>
+                <span className="h-[1px] w-12 bg-gradient-to-l from-transparent to-gold" />
+              </div>
+
+              <motion.h1
+                className="text-5xl sm:text-8xl xl:text-9xl font-black leading-[0.9] tracking-tighter text-white drop-shadow-2xl"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              >
+                NEBULA
+              </motion.h1>
+              <div className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-amber-600 tracking-[0.4em] mt-2 uppercase">
+                <TypewriterEffect
+                  words={["FUTURE", "CULTURE", "NEBULA"]}
+                  className="text-gold"
+                  cursorClassName="bg-gold"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="mt-12 flex flex-col md:flex-row gap-6 items-center justify-center"
+            >
+              <MagneticButton className="min-w-[180px]" onClick={() => window.location.href = '/products'}>
+                <Link to="/products" className="w-full h-full flex items-center justify-center">
+                  <span className="relative z-10 flex items-center gap-2 font-bold text-black">
+                    SHOP DROPS <Zap className="w-4 h-4 fill-black" />
+                  </span>
+                  {/* Trust Row (Hero based) */}
+                  <div className="pt-8 flex flex-wrap justify-center lg:justify-start gap-6 text-zinc-500 text-sm font-medium uppercase tracking-wider">
+                    <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-gold" /> Blitzversand</span>
+                    <span className="flex items-center gap-2"><Crown className="w-4 h-4 text-gold" /> Premium Selection</span>
+                    <span className="flex items-center gap-2"><Package className="w-4 h-4 text-gold" /> Discreet Pkg</span>
+                  </div>
+                </motion.div>
+
+                {/* Right: Featured Panel */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="lg:col-span-5 w-full min-h-[450px] lg:h-[600px] bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm flex flex-col"
                 >
-                  NEBULA
-                </motion.h1>
-                <div className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-amber-600 tracking-[0.4em] mt-2 uppercase">
-                  <TypewriterEffect words={['Future', 'Supply', 'Lifestyle']} />
-                </div>
-              </motion.div>
-
-              <div className="flex flex-col gap-2">
-                <p className="text-zinc-400 text-lg md:text-xl max-w-xl leading-relaxed">
-                  {aiHypeText || "Entdecke die exklusivste Auswahl an Premium Shishas, Vapes und Accessoires. Qualität, die man spürt. Design, das bewegt."}
-                </p>
-                {activeViewers > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    className="inline-flex items-center gap-2 text-green-400 text-sm font-mono bg-green-900/20 px-3 py-1 rounded-full w-fit border border-green-500/30"
-                  >
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    {activeViewers} Citizens online exploring
-                  </motion.div>
-                )}
+                  <FeaturedDropList
+                    products={products}
+                    onQuickAdd={(p) => { setQuickViewProduct(p); setIsQuickViewOpen(true); }}
+                  />
+                </motion.div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <Link to={createPageUrl('Products')}>
-                  <MagneticButton>
-                    <Button className="btn-gold h-14 px-10 text-lg w-full sm:w-auto shadow-[0_0_40px_rgba(214,178,94,0.3)]">
-                      Shop Öffnen
-                    </Button>
-                  </MagneticButton>
-                </Link>
-                <Link to="/products?sort=newest">
-                  <Button variant="outline" className="h-14 px-10 text-lg w-full sm:w-auto border-white/20 hover:bg-white/10">
-                    New Drops
-                  </Button>
-                </Link>
+              {/* Delivery Bar Helper */}
+              <div className="mt-16 w-full max-w-3xl mx-auto lg:mx-0">
+                <DeliveryBar />
               </div>
-
-              {/* Trust Row (Hero based) */}
-              <div className="pt-8 flex flex-wrap justify-center lg:justify-start gap-6 text-zinc-500 text-sm font-medium uppercase tracking-wider">
-                <span className="flex items-center gap-2"><Zap className="w-4 h-4 text-gold" /> Blitzversand</span>
-                <span className="flex items-center gap-2"><Crown className="w-4 h-4 text-gold" /> Premium Selection</span>
-                <span className="flex items-center gap-2"><Package className="w-4 h-4 text-gold" /> Discreet Pkg</span>
-              </div>
-            </motion.div>
-
-            {/* Right: Featured Panel */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="lg:col-span-5 w-full h-[500px] lg:h-[600px] bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-sm"
-            >
-              <FeaturedDropList products={products} />
-            </motion.div>
           </div>
 
-          {/* Delivery Bar Helper */}
-          <div className="mt-16 w-full max-w-3xl mx-auto lg:mx-0">
-            <DeliveryBar />
+          {/* Marquee Background Element */}
+          <div className="absolute bottom-10 left-0 right-0 z-0 opacity-20 pointer-events-none">
+            <InfiniteMarquee />
           </div>
-        </div>
-
-        {/* Marquee Background Element */}
-        <div className="absolute bottom-10 left-0 right-0 z-0 opacity-20 pointer-events-none">
-          <InfiniteMarquee />
-        </div>
       </section>
 
       {/* --- SECTION: CATEGORIES --- */}
@@ -380,11 +355,16 @@ export default function Home() {
               <h2 className="text-4xl md:text-5xl font-black text-white">Fresh Drops</h2>
             </div>
             <div className="hidden md:flex gap-2">
-              {/* Carousel controls usually inside, but here independent */}
+              <button onClick={() => freshDropsApi?.scrollPrev()} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button onClick={() => freshDropsApi?.scrollNext()} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all">
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
 
-          <Carousel className="w-full">
+          <Carousel setApi={setFreshDropsApi} className="w-full">
             <CarouselContent className="-ml-4 pb-12">
               {loadingProducts ? Array(5).fill(0).map((_, i) => (
                 <CarouselItem key={i} className="pl-4 basis-[70%] sm:basis-[45%] md:basis-[30%] lg:basis-[22%]">
@@ -412,10 +392,7 @@ export default function Home() {
                 </div>
               )}
             </CarouselContent>
-            <div className="hidden md:block">
-              <CarouselPrevious className="left-0 bg-black/50 border-white/10 text-white hover:bg-gold hover:text-black" />
-              <CarouselNext className="right-0 bg-black/50 border-white/10 text-white hover:bg-gold hover:text-black" />
-            </div>
+            {/* Native arrows hidden as we use custom header controls */}
           </Carousel>
         </div>
       </section>
@@ -543,6 +520,7 @@ export default function Home() {
         open={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         onAddToCart={handleAddToCart}
+        onSwitchProduct={(p) => setQuickViewProduct(p)}
         mode="full"
       />
     </div>

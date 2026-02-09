@@ -11,8 +11,6 @@ import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
 import { useWishlist } from '../wishlist/WishlistContext';
 import { useI18n } from '../i18n/I18nProvider';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '../../utils';
 import confetti from 'canvas-confetti';
 
 // Shipping Origin Configuration
@@ -48,6 +46,7 @@ export default function UnifiedProductModal({
     open,
     onClose,
     onAddToCart,
+    onSwitchProduct,
     mode = 'full'
 }) {
     const { t, formatCurrency, isRTL } = useI18n();
@@ -739,11 +738,18 @@ export default function UnifiedProductModal({
                                                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">Passt perfekt dazu</h3>
                                                     <div className="grid grid-cols-2 gap-3">
                                                         {relatedProducts.map(relProd => (
-                                                            <Link
+                                                            <div
                                                                 key={relProd.id}
-                                                                to={createPageUrl('ProductDetail') + `?id=${relProd.id}`}
-                                                                onClick={onClose} // Close modal when navigating
-                                                                className="flex items-center gap-3 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group border border-transparent hover:border-white/10"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    if (onSwitchProduct) {
+                                                                        onSwitchProduct(relProd);
+                                                                    } else {
+                                                                        onClose(); // Fallback if no switcher provided
+                                                                        // Navigate manually if needed, or rely on parent
+                                                                    }
+                                                                }}
+                                                                className="flex items-center gap-3 p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors group border border-transparent hover:border-white/10 cursor-pointer"
                                                             >
                                                                 <div className="w-12 h-12 rounded-lg bg-zinc-800 overflow-hidden flex-shrink-0">
                                                                     {relProd.cover_image && (
@@ -756,7 +762,7 @@ export default function UnifiedProductModal({
                                                                         {relProd.price?.toFixed(2)}€
                                                                     </p>
                                                                 </div>
-                                                            </Link>
+                                                            </div>
                                                         ))}
                                                     </div>
                                                 </div>

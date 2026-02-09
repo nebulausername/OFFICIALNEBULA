@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from "react"
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowLeft, ArrowRight } from "lucide-react"
@@ -112,7 +113,7 @@ const Carousel = React.forwardRef((
 })
 Carousel.displayName = "Carousel"
 
-const CarouselContent = React.forwardRef(({ className, ...props }, ref) => {
+const CarouselContent = React.forwardRef(({ className, children, ...props }, ref) => {
   const { carouselRef, orientation } = useCarousel()
 
   return (
@@ -124,13 +125,15 @@ const CarouselContent = React.forwardRef(({ className, ...props }, ref) => {
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className
         )}
-        {...props} />
+        {...props}>
+        {children}
+      </div>
     </div>)
   );
 })
 CarouselContent.displayName = "CarouselContent"
 
-const CarouselItem = React.forwardRef(({ className, ...props }, ref) => {
+const CarouselItem = React.forwardRef(({ className, children, ...props }, ref) => {
   const { orientation } = useCarousel()
 
   return (
@@ -143,12 +146,14 @@ const CarouselItem = React.forwardRef(({ className, ...props }, ref) => {
         orientation === "horizontal" ? "pl-4" : "pt-4",
         className
       )}
-      {...props} />)
+      {...props}>
+      {children}
+    </div>)
   );
 })
 CarouselItem.displayName = "CarouselItem"
 
-const CarouselPrevious = React.forwardRef(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+const CarouselPrevious = React.forwardRef(({ className, variant = "outline", size = "icon", children, ...props }, ref) => {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
   return (
@@ -164,12 +169,13 @@ const CarouselPrevious = React.forwardRef(({ className, variant = "outline", siz
       {...props}>
       <ArrowLeft className="h-4 w-4" />
       <span className="sr-only">Previous slide</span>
+      {children}
     </Button>)
   );
 })
 CarouselPrevious.displayName = "CarouselPrevious"
 
-const CarouselNext = React.forwardRef(({ className, variant = "outline", size = "icon", ...props }, ref) => {
+const CarouselNext = React.forwardRef(({ className, variant = "outline", size = "icon", children, ...props }, ref) => {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
 
   return (
@@ -185,6 +191,7 @@ const CarouselNext = React.forwardRef(({ className, variant = "outline", size = 
       {...props}>
       <ArrowRight className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
+      {children}
     </Button>)
   );
 })

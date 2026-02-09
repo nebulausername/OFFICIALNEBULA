@@ -8,8 +8,8 @@ export default function SectionHeader({
     subtitle,
     linkTo,
     linkText = "View All",
-    onPrev,
-    onNext
+    onPrev = undefined,
+    onNext = undefined
 }) {
     return (
         <div className="flex items-end justify-between mb-8 md:mb-12 px-2">

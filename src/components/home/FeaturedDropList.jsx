@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Flame, Clock, ShoppingBag, Plus } from 'lucide-react';
-import { createPageUrl } from '../../utils';
 
 // Countdown Timer Component
 const CountdownTimer = () => {
@@ -60,7 +59,7 @@ const MiniProductCard = ({ product, index, onQuickAdd }) => {
             className="group relative flex items-center gap-4 bg-[#0E1015] border border-white/10 hover:border-gold/30 p-3 rounded-2xl transition-all duration-300 hover:bg-white/5"
         >
             {/* Image */}
-            <div className="relative w-20 h-20 shrink-0 bg-[#050608] rounded-xl overflow-hidden">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-[#050608] rounded-xl overflow-hidden">
                 <img
                     src={imageSrc}
                     alt={product.name}
@@ -108,11 +107,12 @@ const MiniProductCard = ({ product, index, onQuickAdd }) => {
                             <span className="text-[10px] text-red-400 font-medium">{product.stock_status}</span>
                         )}
                     </div>
-                    <Link to={`${createPageUrl('ProductDetail')}?id=${product.id}`}>
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-gold group-hover:text-black transition-all">
-                            <ArrowRight className="w-4 h-4" />
-                        </div>
-                    </Link>
+                    <button
+                        onClick={(e) => { e.preventDefault(); onQuickAdd?.(product); }}
+                        className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-gold group-hover:text-black transition-all"
+                    >
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
         </motion.div>
