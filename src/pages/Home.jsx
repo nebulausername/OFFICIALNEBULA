@@ -215,11 +215,24 @@ export default function Home() {
     }
   };
 
-  const heroY = useTransform(scrollY, [0, 500], [0, 200]);
-  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
-
-  const heroTextY = useTransform(scrollY, [0, 300], [0, 100]);
-  const heroScale = useTransform(scrollY, [0, 300], [1, 0.95]);
+  // Filter Logic - using proper mock collections as fallback
+  const getFilteredProducts = () => {
+    if (activeTab === 'under50') {
+      const filtered = products.filter(p => parseFloat(p.price) < 50);
+      // Use UNDER_50 mock collection if no products found
+      return filtered.length > 0 ? filtered.slice(0, 6) : UNDER_50.slice(0, 6);
+    }
+    if (activeTab === 'trending') {
+      // Use TRENDING mock collection if products array is empty
+      return products.length > 0 ? products.slice(0, 6) : TRENDING.slice(0, 6);
+    }
+    // "Bestseller" default
+    if (products.length >= 6) {
+      return products.slice(0, 6);
+    }
+    // Fallback to BESTSELLERS mock
+    return BESTSELLERS.slice(0, 6);
+  };
 
   return (
     <div className="relative min-h-screen bg-[#050608] text-white overflow-x-hidden selection:bg-gold/30">
