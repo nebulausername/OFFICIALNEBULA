@@ -47,19 +47,30 @@ export default function ImageUpload({ value, onChange, className }) {
 
         try {
             setUploading(true);
-            const timestamp = Date.now();
-            const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-            const path = `uploads/${timestamp}-${safeName}`;
+            const formData = new FormData();
+            formData.append('file', file);
 
-            // Upload to 'products' bucket
-            const { error: uploadError } = await storage.from('products').upload(path, file);
-            if (uploadError) throw uploadError;
+            // Use backend API for upload
+            // The axios instance is available via 'api' or we can import apiClient
+            // Assuming api.upload.upload(formData) exists or using raw axios
 
-            // Get Public URL
-            const { data: { publicUrl } } = storage.from('products').getPublicUrl(path);
+            // We need to import api from '@/api' if not already imported or use apiClient from config
+            const response = await fetch('/api/upload', { // Using fetch for simplicity or import axios
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('nebula_auth_token')}`
+                },
+                body: formData
+            });
 
-            if (publicUrl) {
-                onChange(publicUrl);
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const data = await response.json();
+
+            if (data.url) {
+                onChange(data.url);
             }
         } catch (error) {
             console.error('Upload failed:', error);

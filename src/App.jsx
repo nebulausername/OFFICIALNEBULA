@@ -22,8 +22,19 @@ const ADMIN_ROUTES = ['Admin', 'AdminAnalytics', 'AdminUsers', 'AdminOrders', 'A
 
 import ProtectedRoute, { AdminRoute } from '@/components/auth/ProtectedRoute';
 
+import { Suspense } from 'react';
+
+// Helper to wrap page with appropriate protection and animation
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
+  <Layout currentPageName={currentPageName}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0C10]">
+        <div className="w-8 h-8 border-4 border-[#D6B25E]/20 border-t-[#D6B25E] rounded-full animate-spin"></div>
+      </div>
+    }>
+      {children}
+    </Suspense>
+  </Layout>
   : <>{children}</>;
 
 import { AnimatePresence } from 'framer-motion';
@@ -102,6 +113,8 @@ const AuthenticatedApp = () => {
             />
           );
         })}
+        {/* Manual Route for Ticket Details with ID */}
+        <Route path="/ticket/:id" element={wrapWithProtection('TicketDetail', Pages.TicketDetail)} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </AnimatePresence>
@@ -125,6 +138,8 @@ import GlobalProductModal from '@/components/products/GlobalProductModal';
 import { I18nProvider } from '@/components/i18n/I18nProvider';
 import { WishlistProvider } from '@/components/wishlist/WishlistContext';
 import { HelmetProvider } from 'react-helmet-async';
+import { CartProvider } from '@/contexts/CartContext';
+import GlobalCartDrawer from '@/components/cart/GlobalCartDrawer';
 
 function App() {
 
@@ -134,26 +149,29 @@ function App() {
         <SoundProvider>
           <ProductModalProvider>
             <WishlistProvider>
-              <I18nProvider>
-                <HelmetProvider>
-                  <QueryClientProvider client={queryClientInstance}>
-                    <Router>
-                      <NavigationTracker />
-                      <TelegramRealtimeListener />
-                      <AdminRealtimeListener />
-                      <UserRealtimeListener />
-                      <AuthenticatedApp />
-                      <GlobalProductModal />
-                      <LiveChatWidget />
-                      <SocialProof />
-                      <ScrollToTop />
-                      <SmoothScroll />
-                    </Router>
-                    <Toaster />
-                    <CustomCursor />
-                  </QueryClientProvider>
-                </HelmetProvider>
-              </I18nProvider>
+              <CartProvider>
+                <I18nProvider>
+                  <HelmetProvider>
+                    <QueryClientProvider client={queryClientInstance}>
+                      <Router>
+                        <NavigationTracker />
+                        <TelegramRealtimeListener />
+                        <AdminRealtimeListener />
+                        <UserRealtimeListener />
+                        <AuthenticatedApp />
+                        <GlobalCartDrawer />
+                        <GlobalProductModal />
+                        <LiveChatWidget />
+                        <SocialProof />
+                        <ScrollToTop />
+                        <SmoothScroll />
+                      </Router>
+                      <Toaster />
+                      <CustomCursor />
+                    </QueryClientProvider>
+                  </HelmetProvider>
+                </I18nProvider>
+              </CartProvider>
             </WishlistProvider>
           </ProductModalProvider>
         </SoundProvider>

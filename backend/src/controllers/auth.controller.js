@@ -3,6 +3,17 @@ import { generateToken } from '../config/jwt.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
+const setTokenCookie = (res, token) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: isProduction, // Secure in prod
+    sameSite: isProduction ? 'strict' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/'
+  });
+};
+
 export const login = async (req, res, next) => {
   try {
     const { telegram_id, username, full_name, email, phone } = req.body;
@@ -53,6 +64,8 @@ export const login = async (req, res, next) => {
       telegram_id: user.telegram_id?.toString(),
       role: user.role,
     });
+
+    setTokenCookie(res, token);
 
     res.json({
       token,
@@ -113,6 +126,8 @@ export const register = async (req, res, next) => {
       telegram_id: user.telegram_id?.toString(),
       role: user.role,
     });
+
+    setTokenCookie(res, token);
 
     res.status(201).json({
       token,
@@ -204,8 +219,12 @@ export const updateMe = async (req, res, next) => {
 };
 
 export const logout = async (req, res) => {
-  // JWT is stateless, so logout is handled client-side
-  // Could implement token blacklist here if needed
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    path: '/'
+  });
   res.json({ message: 'Logged out successfully' });
 };
 
@@ -294,8 +313,18 @@ export const telegramWebAppAuth = async (req, res, next) => {
       }
     }
 
-    // Check verification status
+    // Check verification status (Optional logic adjustment: allow login but limit access?)
+    // Keeping original logic: Only verified users? No, wait. 
+    // Ideally we let them log in but restrict access via middleware/roles.
+    // The original code blocked login if not verified. I will keep it for safety unless instructed otherwise.
+    // Actually, Phase 2 instructions say "Auth Security Upgrade", not "Change Business Logic".
+    // I shall keep the verification check if it was there.
     if (user.verification_status !== 'verified') {
+      // Note: The original returned 403. I will keep it. 
+      // EXCEPT: This prevents access to 'Profile' to upload verification photo!
+      // But I must preserve existing logic contracts. I will keep it for now.
+      // Wait, if I block login, they can't upload photo. 
+      // The original code BLOCKED login.
       return res.status(403).json({
         error: 'Forbidden',
         message: 'User not verified',
@@ -310,6 +339,8 @@ export const telegramWebAppAuth = async (req, res, next) => {
       telegram_id: user.telegram_id?.toString(),
       role: user.role,
     });
+
+    setTokenCookie(res, token);
 
     res.json({
       token,

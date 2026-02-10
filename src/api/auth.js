@@ -1,41 +1,45 @@
-import { auth as insforgeAuth, db } from '@/lib/insforge';
-import { setToken, removeToken } from './config';
+import { apiClient, setToken, removeToken } from './config';
 
 export const auth = {
-  // Get current authenticated user (MERGE Auth User + Public Profile)
+  // Get current authenticated user
   me: async () => {
-    // 1. Get Auth User
-    const { data: { user: authUser }, error: authError } = await insforgeAuth.getUser();
-    if (authError || !authUser) throw authError || new Error('Not authenticated');
-
-    // 2. Get Public Profile
-    const { data: profile, error: profileError } = await db
-      .from('users')
-      .select('*')
-      .eq('id', authUser.id)
-      .single();
-
-    // If profile missing (sync issue), return authUser basics
-    if (profileError) {
-      // console.warn('Profile fetch error:', profileError);
-      return {
-        ...authUser,
-        id: authUser.id,
-        email: authUser.email,
-        role: 'user',
-        rank: 'nutzer',
-        verification_status: 'unverified'
-      };
+    try {
+      const response = await apiClient.get('/auth/me');
+      return response.data;
+    } catch (error) {
+      // console.error('Auth Check Error:', error);
+      throw error;
     }
-
-    // Merge: profile takes precedence for shared fields, but id/email from auth are source of truth
-    return { ...authUser, ...profile };
   },
 
-  // Logout current user
+  // Login (Email/Password or Telegram) - supports legacy
+  login: async (credentials) => {
+    try {
+      const response = await apiClient.post('/auth/login', credentials);
+      const { token, user } = response.data;
+      if (token) setToken(token);
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Register
+  register: async (data) => {
+    try {
+      const response = await apiClient.post('/auth/register', data);
+      const { token, user } = response.data;
+      if (token) setToken(token);
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Logout
   logout: async (redirectUrl = null) => {
     try {
-      await insforgeAuth.signOut();
+      await apiClient.post('/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -48,18 +52,12 @@ export const auth = {
 
   // Update current user
   updateMe: async (data) => {
-    const { data: { user } } = await insforgeAuth.getUser();
-    if (!user) throw new Error('No user');
-
-    const { data: updated, error } = await db
-      .from('users')
-      .update(data)
-      .eq('id', user.id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return updated;
+    try {
+      const response = await apiClient.put('/auth/me', data);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Redirect to login page
@@ -68,13 +66,17 @@ export const auth = {
     window.location.href = `/login?returnUrl=${encodeURIComponent(url)}`;
   },
 
-  // Telegram WebApp authentication (Still requires Backend or Edge Function!)
-  // For now, we keep the signature, but it might fail if backend is down.
+  // Telegram WebApp authentication
   telegramWebApp: async (initData) => {
-    // TODO: Move to Edge Function
-    // return await api.post('/auth/telegram-webapp', { initData });
-    console.warn('Telegram Auth requires Edge Function migration');
-    return { error: 'Not implemented yet in serverless mode' };
+    try {
+      const response = await apiClient.post('/auth/telegram-webapp', { initData });
+      const { token, user } = response.data;
+      if (token) setToken(token);
+      return user;
+    } catch (error) {
+      console.error('Telegram Auth Error:', error);
+      return { error: 'Authentication failed' };
+    }
   },
 };
 

@@ -2,12 +2,14 @@ import express from 'express';
 import * as authController from '../controllers/auth.controller.js';
 import { authenticate, optionalAuth } from '../middleware/auth.middleware.js';
 import * as sessionService from '../services/session.service.js';
+import { validateRequest } from '../middleware/validate.middleware.js';
+import { loginSchema, registerSchema } from '../schemas/auth.schema.js';
 
 const router = express.Router();
 
 // Standard auth routes
-router.post('/login', authController.login);
-router.post('/register', authController.register);
+router.post('/login', validateRequest(loginSchema), authController.login);
+router.post('/register', validateRequest(registerSchema), authController.register);
 router.post('/telegram-webapp', authController.telegramWebAppAuth);
 router.get('/me', authenticate, authController.me);
 router.patch('/me', authenticate, authController.updateMe);

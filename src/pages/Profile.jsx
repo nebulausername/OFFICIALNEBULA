@@ -44,13 +44,28 @@ export default function Profile() {
     try {
       setLoading(true);
       const userData = await api.auth.me();
+
+      if (!userData) {
+        // Handle case where auth.me returns null but doesn't throw
+        throw new Error("User not authenticated");
+      }
+
       setUser(userData);
 
-      // Load stats in parallel for better performance
+      // Load stats in parallel for better performance with individual error handling
       const [requests, cartItems, tickets] = await Promise.all([
-        api.entities.Request.filter({ user_id: userData.id }).catch(() => []),
-        api.entities.StarCartItem.filter({ user_id: userData.id }).catch(() => []),
-        api.entities.Ticket.filter({ user_id: userData.id }).catch(() => [])
+        api.entities.Request.filter({ user_id: userData.id }).catch(e => {
+          console.warn('Failed to load requests:', e);
+          return [];
+        }),
+        api.entities.StarCartItem.filter({ user_id: userData.id }).catch(e => {
+          console.warn('Failed to load cart:', e);
+          return [];
+        }),
+        api.entities.Ticket.filter({ user_id: userData.id }).catch(e => {
+          console.warn('Failed to load tickets:', e);
+          return [];
+        })
       ]);
 
       const openTickets = tickets.filter(t =>
@@ -65,11 +80,17 @@ export default function Profile() {
       });
     } catch (error) {
       console.error('Error loading user data:', error);
-      // Don't show error if it's just a network issue - user might be offline
+      // If auth fails, redirect to login instead of setting dummy user
+      // unless it's a network error
+      if (error.message === "User not authenticated" || error.status === 401) {
+        navigate(createPageUrl('Login'));
+        return;
+      }
+
       if (error.networkError) {
-        // Set default user for offline mode
+        // Set default user for offline mode only if strictly network error
         setUser({
-          full_name: 'Gast',
+          full_name: 'Offline Gast',
           email: 'offline@nebula.supply',
           role: 'user'
         });
@@ -77,7 +98,7 @@ export default function Profile() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     loadUserData();
@@ -105,7 +126,7 @@ export default function Profile() {
         description: t('profile.ordersDescription'),
         icon: Package,
         color: 'from-blue-500 to-cyan-500',
-        link: createPageUrl('Requests'),
+        link: createPageUrl('Tickets'),
         stat: stats.requestCount,
         adminOnly: false
       },

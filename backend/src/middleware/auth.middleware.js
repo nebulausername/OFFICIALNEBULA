@@ -3,59 +3,79 @@ import { getInsForgeClient } from '../config/insforge.js';
 
 export const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    let token;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // 0. Try Cookie First (HttpOnly)
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    }
+    // 1. Try Header (Bearer)
+    else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.substring(7);
+    }
+
+    if (!token) {
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'No token provided'
       });
     }
 
-    const token = authHeader.substring(7);
-
+    // 2. Verify Token (Local JWT or InsForge)
     try {
-      // 1. Try Local JWT
       const decoded = verifyToken(token);
       req.user = decoded;
       return next();
     } catch (jwtError) {
-      // 2. Try InsForge JWT
-      const insforge = getInsForgeClient();
-      if (insforge) {
+      // 3. Try InsForge JWT
+      // console.log('Local JWT failed, trying InsForge...', jwtError.message);
+
+      try {
+        const insforge = getInsForgeClient();
+        if (!insforge) throw new Error('InsForge client not initialized');
+
         const { data: { user }, error } = await insforge.auth.getUser(token);
 
-        if (user && !error) {
-          // Map InsForge user to local user structure
-          // Note: You might need to check if user exists in local DB or sync
-          req.user = {
-            id: user.id,
-            email: user.email,
-            role: user.user_metadata?.role || 'user',
-            ...user.user_metadata
-          };
-          return next();
+        if (error || !user) {
+          // console.error('InsForge Auth Failed:', error?.message);
+          throw new Error('Invalid token');
         }
+
+        // Map InsForge user
+        req.user = {
+          id: user.id,
+          email: user.email,
+          role: user.user_metadata?.role || 'user',
+          ...user.user_metadata
+        };
+        return next();
+      } catch (insforgeError) {
+        // console.error('All auth methods failed');
+        return res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Invalid or expired token'
+        });
       }
-
-      throw jwtError; // Re-throw if both fail
     }
-
   } catch (error) {
-    console.error('Auth Error:', error.message);
+    console.error('Auth Middleware Error:', error.message);
     return res.status(401).json({
       error: 'Unauthorized',
-      message: 'Invalid or expired token'
+      message: 'Server auth error'
     });
   }
 };
 
 export const optionalAuth = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    let token;
+    if (req.cookies && req.cookies.token) {
+      token = req.cookies.token;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.substring(7);
+    }
 
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
+    if (token) {
       const decoded = verifyToken(token);
       req.user = decoded;
     }

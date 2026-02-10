@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   X, ChevronRight, ChevronLeft, Search, Check,
-  ShoppingBag, Shirt, Watch, Footprints, Briefcase, 
+  ShoppingBag, Shirt, Watch, Footprints, Briefcase,
   Crown, Sparkles, Star, Grid3X3
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -38,15 +38,15 @@ const quickChips = [
   { id: 'guertel', label: 'Gürtel', icon: '🎗️' },
 ];
 
-export default function ShopCategoryDrawer({ 
-  isOpen, 
-  onClose, 
-  categories = [], 
+export default function ShopCategoryDrawer({
+  isOpen,
+  onClose,
+  categories = [],
   brands = [],
   departments = [],
   onSelectCategory,
   onSelectBrand,
-  selectedCategory 
+  selectedCategory
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMainCategory, setActiveMainCategory] = useState(null);
@@ -98,22 +98,22 @@ export default function ShopCategoryDrawer({
   };
 
   // Group categories by department
-  const groupedCategories = departments.map(dept => ({
+  const groupedCategories = (Array.isArray(departments) ? departments : []).map(dept => ({
     ...dept,
-    categories: categories.filter(cat => cat.department_id === dept.id)
+    categories: (Array.isArray(categories) ? categories : []).filter(cat => cat.department_id === dept.id)
   }));
 
   // Filter categories based on search
   const filteredCategories = searchQuery
-    ? categories.filter(cat => 
-        cat.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    ? categories.filter(cat =>
+      cat.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : categories;
 
   const filteredBrands = searchQuery
     ? brands.filter(brand =>
-        brand.name?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      brand.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
     : brands;
 
   // Mobile Bottom Sheet
@@ -166,7 +166,7 @@ export default function ShopCategoryDrawer({
       {/* Search */}
       <div className="px-5 pb-4">
         <div className="relative">
-          <Search 
+          <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5"
             style={{ color: 'rgba(255, 255, 255, 0.4)' }}
           />
@@ -193,7 +193,7 @@ export default function ShopCategoryDrawer({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="absolute top-20 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full flex items-center gap-2 z-50"
-            style={{ 
+            style={{
               background: 'rgba(52, 211, 153, 0.2)',
               border: '1px solid rgba(52, 211, 153, 0.4)'
             }}
@@ -232,8 +232,8 @@ export default function ShopCategoryDrawer({
               onClick={handleSelectAll}
               className="w-full flex items-center justify-between p-4 rounded-xl mb-3 transition-all"
               style={{
-                background: selectedCategory === 'all' 
-                  ? 'rgba(214, 178, 94, 0.15)' 
+                background: selectedCategory === 'all'
+                  ? 'rgba(214, 178, 94, 0.15)'
                   : 'rgba(255, 255, 255, 0.04)',
                 border: selectedCategory === 'all'
                   ? '1px solid rgba(214, 178, 94, 0.4)'
@@ -241,7 +241,7 @@ export default function ShopCategoryDrawer({
               }}
             >
               <div className="flex items-center gap-3">
-                <div 
+                <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center"
                   style={{ background: 'rgba(214, 178, 94, 0.15)' }}
                 >
@@ -264,15 +264,15 @@ export default function ShopCategoryDrawer({
               {(searchQuery ? filteredCategories : categories).map(category => {
                 const IconComponent = getCategoryIcon(category.name);
                 const isSelected = selectedCategory === category.id;
-                
+
                 return (
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id, category.name)}
                     className="w-full flex items-center justify-between p-4 rounded-xl transition-all"
                     style={{
-                      background: isSelected 
-                        ? 'rgba(214, 178, 94, 0.15)' 
+                      background: isSelected
+                        ? 'rgba(214, 178, 94, 0.15)'
                         : 'rgba(255, 255, 255, 0.04)',
                       border: isSelected
                         ? '1px solid rgba(214, 178, 94, 0.4)'
@@ -280,7 +280,7 @@ export default function ShopCategoryDrawer({
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <div 
+                      <div
                         className="w-12 h-12 rounded-xl flex items-center justify-center"
                         style={{ background: 'rgba(255, 255, 255, 0.08)' }}
                       >
@@ -388,7 +388,7 @@ export default function ShopCategoryDrawer({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="absolute top-16 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full flex items-center gap-2 z-50"
-            style={{ 
+            style={{
               background: 'rgba(52, 211, 153, 0.2)',
               border: '1px solid rgba(52, 211, 153, 0.4)'
             }}
@@ -421,7 +421,7 @@ export default function ShopCategoryDrawer({
             const IconComponent = getCategoryIcon(category.name);
             const isActive = activeMainCategory?.id === category.id;
             const isSelected = selectedCategory === category.id;
-            
+
             return (
               <button
                 key={category.id}
@@ -494,7 +494,7 @@ export default function ShopCategoryDrawer({
             Featured
           </h3>
           <div className="space-y-3">
-            <div 
+            <div
               className="p-4 rounded-xl"
               style={{
                 background: 'linear-gradient(135deg, rgba(214, 178, 94, 0.15), rgba(214, 178, 94, 0.05))',
@@ -509,7 +509,7 @@ export default function ShopCategoryDrawer({
                 Entdecke die neuesten Drops
               </p>
             </div>
-            <div 
+            <div
               className="p-4 rounded-xl"
               style={{
                 background: 'rgba(139, 92, 246, 0.1)',
@@ -524,7 +524,7 @@ export default function ShopCategoryDrawer({
                 Die beliebtesten Produkte
               </p>
             </div>
-            <div 
+            <div
               className="p-4 rounded-xl"
               style={{
                 background: 'rgba(236, 72, 153, 0.1)',

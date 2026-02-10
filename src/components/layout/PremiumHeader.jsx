@@ -10,13 +10,14 @@ import ProfileDrawer from '../drawer/ProfileDrawer';
 import { useWishlist } from '../wishlist/WishlistContext';
 import { LanguageSwitcherPopover } from '../i18n/LanguageSwitcher';
 import { useI18n } from '../i18n/I18nProvider';
+import { useCart } from '@/contexts/CartContext';
 
 export default function PremiumHeader() {
   const location = useLocation();
   const { count: wishlistCount } = useWishlist();
+  const { cartItems, openCart, totalItems } = useCart();
   const { t } = useI18n();
   const [user, setUser] = useState(null);
-  const [cartCount, setCartCount] = useState(0);
   const [isMainDrawerOpen, setIsMainDrawerOpen] = useState(false);
   const [isShopDrawerOpen, setIsShopDrawerOpen] = useState(false);
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
@@ -36,9 +37,6 @@ export default function PremiumHeader() {
     try {
       const userData = await api.auth.me();
       setUser(userData);
-
-      const cartItems = await api.entities.StarCartItem.filter({ user_id: userData.id });
-      setCartCount(cartItems.length);
     } catch (error) {
       // User not logged in
     }
@@ -262,8 +260,12 @@ export default function PremiumHeader() {
               <IconButton
                 icon={ShoppingCart}
                 label={t('nav.cart')}
-                count={cartCount}
-                to={createPageUrl('Cart')}
+                count={totalItems}
+                to="#" // Prevent navigation
+                onClick={(e) => {
+                  e.preventDefault();
+                  openCart();
+                }}
               />
 
               <motion.button
@@ -293,7 +295,7 @@ export default function PremiumHeader() {
         isOpen={isMainDrawerOpen}
         onClose={handleCloseAll}
         user={user}
-        cartCount={cartCount}
+        cartCount={totalItems}
         wishlistCount={wishlistCount}
         onOpenShopCategories={handleOpenShopCategories}
         onOpenProfile={handleOpenProfile}

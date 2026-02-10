@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -10,6 +10,7 @@ import {
 import { api } from '@/api';
 import { useToast } from '@/components/ui/use-toast';
 import { useWishlist } from '../wishlist/WishlistContext';
+import { useAuth } from '@/lib/AuthContext';
 import { useI18n } from '../i18n/I18nProvider';
 import confetti from 'canvas-confetti';
 
@@ -52,6 +53,7 @@ export default function UnifiedProductModal({
     const { t, formatCurrency, isRTL } = useI18n();
     const { toast } = useToast();
     const { isInWishlist, toggleWishlist } = useWishlist();
+    const { user } = useAuth();
 
     // State
     const [selectedColor, setSelectedColor] = useState(null);
@@ -298,14 +300,13 @@ export default function UnifiedProductModal({
         });
 
         try {
-            const user = await api.auth.me();
-
+            // Prepare cart data
             const cartData = {
-                user_id: user.id,
+                user_id: user?.id,
                 product_id: product.id,
                 quantity: quantity,
                 selected_options: {
-                    variant_id: currentVariant?.id || null,
+                    variant_id: currentVariant?.id || null, // Ensure ID is passed
                     color_id: selectedColor?.id || null,
                     color_name: selectedColor?.name || null,
                     color_hex: selectedColor?.hex || null,
@@ -317,16 +318,40 @@ export default function UnifiedProductModal({
                 }
             };
 
-            await api.entities.StarCartItem.create(cartData);
+            // If onAddToCart is provided, delegate to it (e.g. context)
+            if (onAddToCart) {
+                await onAddToCart(cartData);
+            } else {
+                // Fallback: Direct API call if no handler provided (and user logged in)
+                if (!user) {
+                    toast({
+                        title: t('auth.required') || 'Anmeldung erforderlich',
+                        description: t('auth.pleaseLogin') || 'Bitte melde dich an.',
+                        variant: 'destructive'
+                    });
+                    setIsAdding(false);
+                    return;
+                }
+                const res = await api.entities.StarCartItem.create({
+                    ...cartData,
+                    selected_options: cartData.selected_options // Ensure object is passed
+                });
+            }
 
             setShowSuccess(true);
 
-            toast({
-                title: t('product.added') || 'Hinzugefügt! ✓',
-                description: `${quantity}x ${product.name}${expressDelivery ? ' (EXPRESS)' : ''}`,
-            });
+            // If onAddToCart handled it, we assume it showed a toast, but we can show one here too if we want "Unified" UX.
+            // CartContext usually shows a toast. Let's rely on that to avoid double toasts? 
+            // Actually, UnifiedProductModal showing "Hinzugefügt" is nice. 
+            // CartContext shows "Zum Warenkorb hinzugefügt".
+            // Let's rely on Context for the toast if we delegated.
 
-            if (onAddToCart) onAddToCart(cartData);
+            if (!onAddToCart) {
+                toast({
+                    title: t('product.added') || 'Hinzugefügt! ✓',
+                    description: `${quantity}x ${product.name}${expressDelivery ? ' (EXPRESS)' : ''}`,
+                });
+            }
 
             setTimeout(() => {
                 setShowSuccess(false);
@@ -382,6 +407,7 @@ export default function UnifiedProductModal({
                     animationDuration: '0.4s'
                 }}
             >
+                <DialogTitle className="sr-only">Produktdetails: {product.name}</DialogTitle>
                 <div
                     className="relative w-full flex flex-col md:flex-row overflow-hidden rounded-3xl"
                     style={{
@@ -416,7 +442,8 @@ export default function UnifiedProductModal({
                                     className="w-full h-full"
                                 >
                                     <img
-                                        src={currentImage || ''}
+                                        src={currentImage || '/placeholder.png'}
+                                        onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }}
                                         alt={product.name}
                                         className="w-full h-full object-cover transition-transform duration-200 ease-out cursor-zoom-in"
                                         style={zoomStyle}

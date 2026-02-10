@@ -126,7 +126,7 @@ export const submitBrowserVerification = async (req, res, next) => {
       return res.status(400).json({ error: 'Bad Request', message: 'No photo uploaded' });
     }
 
-    const { hand_gesture } = req.body;
+    const { hand_gesture, is_simulation } = req.body;
     const user = req.user;
 
     // Validate photo buffer
@@ -134,12 +134,19 @@ export const submitBrowserVerification = async (req, res, next) => {
       return res.status(400).json({ error: 'Invalid Photo', message: 'Photo validation failed' });
     }
 
-    // Upload to InsForge
-    const fileName = `verifications/${user.id}_${Date.now()}.jpg`;
-    const uploadResult = await uploadVerificationPhoto(req.file.buffer, fileName);
+    // Upload to InsForge OR Simulation
+    let photoUrl = '';
 
-    if (!uploadResult) {
-      throw new Error('Failed to upload photo to InsForge');
+    if (is_simulation === 'true') {
+      photoUrl = 'https://placehold.co/600x400/000000/FFF?text=DEMO+SIMULATION';
+    } else {
+      const fileName = `verifications/${user.id}_${Date.now()}.jpg`;
+      const uploadResult = await uploadVerificationPhoto(req.file.buffer, fileName);
+
+      if (!uploadResult) {
+        throw new Error('Failed to upload photo to InsForge');
+      }
+      photoUrl = uploadResult.url;
     }
 
     // Check existing request
@@ -152,7 +159,7 @@ export const submitBrowserVerification = async (req, res, next) => {
       updatedRequest = await prisma.verificationRequest.update({
         where: { id: existingRequest.id },
         data: {
-          photo_url: uploadResult.url,
+          photo_url: photoUrl,
           hand_gesture: hand_gesture || existingRequest.hand_gesture,
           submitted_at: new Date(),
         },
@@ -162,7 +169,7 @@ export const submitBrowserVerification = async (req, res, next) => {
       updatedRequest = await prisma.verificationRequest.create({
         data: {
           user_id: user.id,
-          photo_url: uploadResult.url,
+          photo_url: photoUrl,
           hand_gesture: gesture,
           status: 'pending',
           submitted_at: new Date(),
@@ -189,7 +196,7 @@ export const submitBrowserVerification = async (req, res, next) => {
           id: updatedRequest.id,
           user: { id: user.id, full_name: user.full_name, telegram_id: user.telegram_id?.toString() },
           submitted_at: new Date(),
-          photo_url: uploadResult.url
+          photo_url: photoUrl
         });
       }
     } catch (e) { console.error('Socket emit failed:', e); }
@@ -595,5 +602,154 @@ export const downloadTelegramPhoto = async (bot, fileId) => {
   } catch (error) {
     console.error('Error downloading/uploading Telegram photo:', error);
     throw error;
+  }
+};
+
+/**
+ * Check verification status by email (Gate Check)
+ */
+export const checkGateStatus = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Bad Request', message: 'Email is required' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        verification_status: true,
+        verification_submitted_at: true,
+        rejection_reason: true
+      }
+    });
+
+    if (!user) {
+      return res.json({ status: 'new' });
+    }
+
+    res.json({
+      status: user.verification_status,
+      submitted_at: user.verification_submitted_at,
+      rejection_reason: user.rejection_reason
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Register new applicant with photo verification
+ */
+export const registerApplicant = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Bad Request', message: 'No photo uploaded' });
+    }
+
+    const { email, hand_gesture, is_simulation } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Bad Request', message: 'Email is required' });
+    }
+
+    // Validate photo buffer
+    if (!validatePhotoBuffer(req.file.buffer)) {
+      return res.status(400).json({ error: 'Invalid Photo', message: 'Photo validation failed' });
+    }
+
+    // Check if user already exists
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (user) {
+      // If user exists, check status
+      if (user.verification_status === 'verified') {
+        return res.status(400).json({ error: 'Already Verified', message: 'User is already verified' });
+      }
+    } else {
+      // Create new user (pending)
+      user = await prisma.user.create({
+        data: {
+          email,
+          role: 'user',
+          verification_status: 'pending',
+          verification_hand_gesture: hand_gesture,
+          verification_submitted_at: new Date()
+        }
+      });
+    }
+
+    // Upload to InsForge OR Simulation
+    let photoUrl = '';
+
+    if (is_simulation === 'true') {
+      photoUrl = 'https://placehold.co/600x400/000000/FFF?text=DEMO+SIMULATION';
+    } else {
+      const fileName = `verifications/${user.id}_${Date.now()}.jpg`;
+      const uploadResult = await uploadVerificationPhoto(req.file.buffer, fileName);
+
+      if (!uploadResult) {
+        throw new Error('Failed to upload photo to InsForge');
+      }
+      photoUrl = uploadResult.url;
+    }
+
+    // Check existing request
+    const existingRequest = await prisma.verificationRequest.findFirst({
+      where: { user_id: user.id, status: 'pending' }
+    });
+
+    let request;
+    if (existingRequest) {
+      request = await prisma.verificationRequest.update({
+        where: { id: existingRequest.id },
+        data: {
+          photo_url: photoUrl,
+          hand_gesture: hand_gesture || existingRequest.hand_gesture,
+          submitted_at: new Date()
+        }
+      });
+    } else {
+      request = await prisma.verificationRequest.create({
+        data: {
+          user_id: user.id,
+          photo_url: photoUrl,
+          hand_gesture: hand_gesture || 'N/A',
+          status: 'pending',
+          submitted_at: new Date()
+        }
+      });
+    }
+
+    // Ensure user status is pending
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verification_status: 'pending',
+        verification_submitted_at: new Date(),
+        rejection_reason: null
+      }
+    });
+
+    // Notify admins (Socket)
+    try {
+      const { getIO } = await import('../services/socket.service.js');
+      const io = getIO();
+      if (io) {
+        const payload = {
+          id: request.id,
+          user: { id: user.id, email: user.email, full_name: user.full_name },
+          submitted_at: new Date(),
+          photo_url: photoUrl
+        };
+        io.to('role_admin').emit('verification:new', payload);
+        io.to('admin').emit('verification:new', payload);
+      }
+    } catch (e) { console.error('Socket emit failed:', e); }
+
+    res.json({ message: 'Application submitted successfully', status: 'pending' });
+
+  } catch (error) {
+    next(error);
   }
 };

@@ -36,12 +36,14 @@ export default function AntigravityProductCard({ product, onQuickView }) {
                     {/* Primary Image */}
                     <motion.img
                         src={imageSrc}
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }}
                         alt={product.name}
                         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isHovered ? 'lg:opacity-0' : 'opacity-100'}`}
                     />
                     {/* Secondary Image (Hover - Desktop Only) */}
                     <motion.img
                         src={secondImageSrc}
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/placeholder.png'; }}
                         alt={product.name}
                         className={`hidden lg:block absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
                         style={{ filter: 'contrast(1.1)' }}

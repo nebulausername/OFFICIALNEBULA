@@ -22,6 +22,8 @@ import ProductSEO from '../components/admin/ProductSEO';
 import ProductCrossSellManager from '../components/admin/ProductCrossSellManager';
 import AntigravityProductCard from '../components/antigravity/AntigravityProductCard';
 import UnifiedProductModal from '../components/products/UnifiedProductModal';
+import confetti from 'canvas-confetti';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminProductEditor() {
   const [searchParams] = useSearchParams();
@@ -82,14 +84,14 @@ export default function AdminProductEditor() {
         api.entities.Brand.list('sort_order'),
         api.entities.Department.list('sort_order')
       ]);
-      setCategories(cats);
-      setBrands(brds);
-      setDepartments(depts);
+      setCategories(Array.isArray(cats) ? cats : (cats.data || []));
+      setBrands(Array.isArray(brds) ? brds : (brds.data || []));
+      setDepartments(Array.isArray(depts) ? depts : (depts.data || []));
 
       if (productId) {
         const [prods, images] = await Promise.all([
           api.entities.Product.filter({ id: productId }),
-          api.entities.ProductImage.filter({ product_id: productId })
+          api.entities.Product.getImages(productId)
         ]);
 
         if (prods.length > 0) {
@@ -139,6 +141,11 @@ export default function AdminProductEditor() {
       // 1. Sanitize Data
       const dataToSave = {
         ...formData,
+        // Include Variants Data (managed by ProductVariantManager)
+        variants: initialVariantData.variants || [],
+        colors: initialVariantData.colors || [],
+        sizes: initialVariantData.sizes || [],
+
         // Convert empty strings to null for optional foreign keys to avoid FK errors
         department_id: formData.department_id || null,
         category_id: formData.category_id || null,
@@ -146,7 +153,9 @@ export default function AdminProductEditor() {
         // Ensure price is a number
         price: Number(formData.price),
         // Ensure drop_date is preserved or null
-        drop_date: formData.drop_date ? formData.drop_date.toISOString() : null
+        drop_date: formData.drop_date ? formData.drop_date.toISOString() : null,
+        // REQUIRED: Stock (Legacy field, required by Schema)
+        stock: 0 // Default to 0, or sum variants if we had them accessible synchronously
       };
 
       // 2. Client-side Validation
@@ -161,16 +170,41 @@ export default function AdminProductEditor() {
       if (productId) {
         await api.entities.Product.update(productId, dataToSave);
         toast.success('Basis-Daten gespeichert');
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.8 },
+          colors: ['#A020F0', '#FF00FF'] // Purple/Pink
+        });
       } else {
         const created = await api.entities.Product.create(dataToSave);
-        toast.success('Produkt erstellt');
-        navigate(createPageUrl('AdminProductEditor') + `?id=${created.id}`);
+        toast.success('Produkt erstellt! 🚀');
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#A020F0', '#FF00FF', '#FFFFFF']
+        });
+        // Short delay before Nav to let toast show
+        setTimeout(() => {
+          navigate(createPageUrl('AdminProductEditor') + `?id=${created.id}`);
+        }, 500);
       }
     } catch (error) {
       console.error('Error saving:', error);
+
       // Try to extract backend error message
-      const msg = error.response?.data?.message || error.message || 'Fehler beim Speichern';
-      toast.error(`Fehler: ${msg}`);
+      const responseData = error.response?.data;
+      const msg = responseData?.message || error.message || 'Fehler beim Speichern';
+
+      // Validation error details (Zod)
+      if (responseData?.error === 'Validation failed' && responseData?.details) {
+        // Create a list of validation errors
+        const errors = responseData.details.map(err => `${err.path.join('.')}: ${err.message}`).join('\n');
+        toast.error(`Validierungsfehler:\n${errors}`, { duration: 5000 });
+      } else {
+        toast.error(`Fehler: ${msg}`);
+      }
     } finally {
       setSaving(false);
     }
@@ -178,8 +212,25 @@ export default function AdminProductEditor() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-        <Loader2 className="w-12 h-12 text-purple-500 animate-spin" />
+      <div className="min-h-screen bg-zinc-950 p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-64 bg-zinc-900" />
+              <Skeleton className="h-4 w-32 bg-zinc-900" />
+            </div>
+            <Skeleton className="h-10 w-32 bg-zinc-900" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 space-y-4">
+              <Skeleton className="h-[400px] w-full rounded-2xl bg-zinc-900" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-[200px] w-full rounded-2xl bg-zinc-900" />
+              <Skeleton className="h-[150px] w-full rounded-2xl bg-zinc-900" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -625,6 +676,8 @@ export default function AdminProductEditor() {
               open={previewModalOpen}
               onClose={() => setPreviewModalOpen(false)}
               mode="full"
+              onAddToCart={(variant) => toast.success(`Added ${variant.id} to cart (Preview)`)}
+              onSwitchProduct={() => { }}
             />
           </TabsContent>
         </Tabs>

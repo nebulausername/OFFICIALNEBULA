@@ -160,8 +160,8 @@ export default function AdvancedFilters({
       {/* Categories */}
       <FilterSection title="Kategorien" section="categories">
         <div className="space-y-0.5">
-          {categories.map(cat => {
-            const count = products.filter(p => p.category_id === cat.id).length;
+          {(Array.isArray(categories) ? categories : []).map(cat => {
+            const count = (Array.isArray(products) ? products : []).filter(p => p.category_id === cat.id).length;
             return (
               <CheckboxItem
                 key={cat.id}
@@ -184,8 +184,8 @@ export default function AdvancedFilters({
       {/* Brands */}
       <FilterSection title="Marken" section="brands">
         <div className="space-y-0.5 max-h-56 overflow-y-auto custom-scrollbar pr-2">
-          {brands.map(brand => {
-            const count = products.filter(p => p.brand_id === brand.id).length;
+          {(Array.isArray(brands) ? brands : []).map(brand => {
+            const count = (Array.isArray(products) ? products : []).filter(p => p.brand_id === brand.id).length;
             return (
               <CheckboxItem
                 key={brand.id}

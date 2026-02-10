@@ -363,6 +363,19 @@ export default function AdminLiveChat() {
 
                         {/* Input Area */}
                         <div className="p-4 border-t border-white/5 glass bg-zinc-900/60">
+                            {/* Quick Replies */}
+                            <div className="flex gap-2 mb-3 overflow-x-auto pb-2 scrollbar-hide">
+                                {["👋 Hallo, wie kann ich helfen?", "📦 Bestellung ist unterwegs!", "✅ Wir prüfen das.", "🕒 Einen Moment bitte."].map((reply, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setInputText(reply)}
+                                        className="whitespace-nowrap px-3 py-1.5 rounded-full bg-zinc-800/50 border border-white/10 text-xs text-zinc-300 hover:bg-purple-500/20 hover:border-purple-500/30 hover:text-purple-200 transition-colors"
+                                    >
+                                        {reply}
+                                    </button>
+                                ))}
+                            </div>
+
                             <div className="flex items-center gap-3 bg-black/40 p-2 rounded-2xl border border-white/5 focus-within:border-purple-500/30 focus-within:ring-1 focus-within:ring-purple-500/20 transition-all shadow-inner">
                                 <Button size="icon" variant="ghost" className="text-zinc-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
                                     <Paperclip className="w-5 h-5" />

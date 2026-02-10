@@ -1,36 +1,43 @@
-import Admin from './pages/Admin';
-import AdminAnalytics from './pages/AdminAnalytics';
-import AdminUsers from './pages/AdminUsers';
-import AdminOrders from './pages/AdminOrders';
-import AdminBrands from './pages/AdminBrands';
-import AdminCategories from './pages/AdminCategories';
-import AdminNotificationTemplates from './pages/AdminNotificationTemplates';
-import AdminProductEditor from './pages/AdminProductEditor';
-import AdminProducts from './pages/AdminProducts';
-import AdminRequests from './pages/AdminRequests';
-import AdminSupport from './pages/AdminSupport';
-import AdminLiveChat from './pages/AdminLiveChat';
-import AdminVerifications from './pages/AdminVerifications';
-import AdminSystemMonitor from './pages/AdminSystemMonitor';
-import AdminTelegramSettings from './pages/AdminTelegramSettings';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
+import { lazy } from 'react';
 
-import FAQ from './pages/FAQ';
-import Help from './pages/Help';
+// Eager load critical pages
 import Home from './pages/Home';
-import OrderConfirmation from './pages/OrderConfirmation';
-import ProductDetail from './pages/ProductDetail';
-import Products from './pages/Products';
-import Profile from './pages/Profile';
-import ProfileSettings from './pages/ProfileSettings';
-import Requests from './pages/Requests';
-import Support from './pages/Support';
-import SupportTicketDetail from './pages/SupportTicketDetail';
-import VIP from './pages/VIP';
-import Wishlist from './pages/Wishlist';
-import Login from './pages/Login';
+import AccessGate from './pages/AccessGate';
 import __Layout from './Layout.jsx';
+
+// Lazy load secondary & admin pages
+const Admin = lazy(() => import('./pages/Admin'));
+const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics'));
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminOrders = lazy(() => import('./pages/AdminOrders'));
+const AdminBrands = lazy(() => import('./pages/AdminBrands'));
+const AdminCategories = lazy(() => import('./pages/AdminCategories'));
+const AdminNotificationTemplates = lazy(() => import('./pages/AdminNotificationTemplates'));
+const AdminProductEditor = lazy(() => import('./pages/AdminProductEditor'));
+const AdminProducts = lazy(() => import('./pages/AdminProducts'));
+const AdminRequests = lazy(() => import('./pages/AdminRequests'));
+const AdminSupport = lazy(() => import('./pages/AdminSupport'));
+const AdminLiveChat = lazy(() => import('./pages/AdminLiveChat'));
+const AdminVerifications = lazy(() => import('./pages/AdminVerifications'));
+const AdminSystemMonitor = lazy(() => import('./pages/AdminSystemMonitor'));
+const AdminTelegramSettings = lazy(() => import('./pages/AdminTelegramSettings'));
+
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const FAQ = lazy(() => import('./pages/FAQ'));
+const Help = lazy(() => import('./pages/Help'));
+const OrderConfirmation = lazy(() => import('./pages/OrderConfirmation'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Products = lazy(() => import('./pages/Products'));
+const Profile = lazy(() => import('./pages/Profile'));
+const ProfileSettings = lazy(() => import('./pages/ProfileSettings'));
+const Requests = lazy(() => import('./pages/Requests'));
+const Support = lazy(() => import('./pages/Support'));
+const SupportTicketDetail = lazy(() => import('./pages/SupportTicketDetail'));
+const VIP = lazy(() => import('./pages/VIP'));
+const Wishlist = lazy(() => import('./pages/Wishlist'));
+const Tickets = lazy(() => import('./pages/Tickets'));
+const TicketDetail = lazy(() => import('./pages/TicketDetail'));
 
 export const PAGES = {
     "Admin": Admin,
@@ -64,7 +71,10 @@ export const PAGES = {
     "SupportTicketDetail": SupportTicketDetail,
     "VIP": VIP,
     "Wishlist": Wishlist,
-    "Login": Login,
+    "DebugAuth": lazy(() => import('./pages/DebugAuth')),
+    "Tickets": Tickets,
+    "TicketDetail": TicketDetail,
+    "Login": AccessGate,
 }
 
 export const pagesConfig = {

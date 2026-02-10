@@ -84,6 +84,7 @@ export const getOrder = async (req, res, next) => {
             full_name: true,
             email: true,
             telegram_id: true,
+            username: true,
           },
         },
         request_items: {
@@ -126,61 +127,68 @@ export const createOrder = async (req, res, next) => {
   try {
     const { contact_info, note, cart_items } = req.body;
 
-    // Calculate total from cart items
-    let totalSum = 0;
-    const cartItemIds = [];
-
-    for (const item of cart_items) {
-      const cartItem = await prisma.cartItem.findUnique({
-        where: { id: item.id },
-        include: { product: true },
-      });
-
-      if (!cartItem || cartItem.user_id !== req.user.id) {
-        return res.status(400).json({
-          error: 'Bad Request',
-          message: 'Invalid cart item',
-        });
-      }
-
-      totalSum += parseFloat(cartItem.product.price) * cartItem.quantity;
-      cartItemIds.push(cartItem.id);
+    if (!cart_items || !Array.isArray(cart_items) || cart_items.length === 0) {
+      return res.status(400).json({ error: 'Bad Request', message: 'Cart is empty' });
     }
+
+    const cartItemIds = cart_items.map(item => item.id);
 
     // Create order in transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Create request
+      let totalSum = 0;
+      const requestItemsData = [];
+
+      // 1. Validate & Decrement Stock
+      for (const item of cart_items) {
+        const dbCartItem = await tx.cartItem.findUnique({
+          where: { id: item.id },
+          include: { product: true },
+        });
+
+        if (!dbCartItem || dbCartItem.user_id !== req.user.id) {
+          throw new Error(`Invalid cart item: ${item.id}`);
+        }
+
+        const product = dbCartItem.product;
+
+        // Stock Check
+        if (product.stock < dbCartItem.quantity) {
+          throw new Error(`Insufficient stock for product: ${product.name} (Available: ${product.stock}, Requested: ${dbCartItem.quantity})`);
+        }
+
+        // Decrement Stock
+        await tx.product.update({
+          where: { id: product.id },
+          data: { stock: { decrement: dbCartItem.quantity } }
+        });
+
+        totalSum += parseFloat(product.price) * dbCartItem.quantity;
+
+        requestItemsData.push({
+          product_id: product.id,
+          sku_snapshot: product.sku,
+          name_snapshot: product.name,
+          price_snapshot: product.price,
+          quantity_snapshot: dbCartItem.quantity,
+          selected_options_snapshot: dbCartItem.selected_options,
+        });
+      }
+
+      // 2. Create Request
       const request = await tx.request.create({
         data: {
           user_id: req.user.id,
           status: 'pending',
           total_sum: totalSum,
-          contact_info,
+          contact_info: typeof contact_info === 'string' ? contact_info : JSON.stringify(contact_info),
           note: note || null,
+          request_items: {
+            create: requestItemsData
+          }
         },
       });
 
-      // Create request items
-      for (const item of cart_items) {
-        const cartItem = await tx.cartItem.findUnique({
-          where: { id: item.id },
-          include: { product: true },
-        });
-
-        await tx.requestItem.create({
-          data: {
-            request_id: request.id,
-            product_id: cartItem.product_id,
-            sku_snapshot: cartItem.product.sku,
-            name_snapshot: cartItem.product.name,
-            price_snapshot: cartItem.product.price,
-            quantity_snapshot: cartItem.quantity,
-            selected_options_snapshot: cartItem.selected_options,
-          },
-        });
-      }
-
-      // Delete cart items
+      // 3. Clear Cart
       await tx.cartItem.deleteMany({
         where: {
           id: { in: cartItemIds },
@@ -203,56 +211,31 @@ export const createOrder = async (req, res, next) => {
       },
     });
 
-    // Send notifications
-    try {
-      await sendOrderConfirmation(order, req.user);
-      await sendOrderNotification(order, req.user);
-    } catch (notifError) {
-      console.error('Notification error:', notifError);
-      // Don't fail the request if notifications fail
-    }
+    // Send notifications (async, don't block response)
+    sendOrderConfirmation(order, req.user).catch(err => console.error('Email Notification Error:', err));
+    sendOrderNotification(order, req.user).catch(err => console.error('Telegram Notification Error:', err));
 
-    // 📡 Emit Realtime Event for Admins
-    // We emit to 'admin_notifications' channel or similar, but since we use rooms:
-    // We can emit to specific admin users or just broadcast if we had a global admin room.
-    // For now, let's assume admins join 'role_admin' room OR we just notify known admins loop.
-    // Better: frontend admin joins 'admin_dashboard' room.
-    // Let's modify socket.service.js to support roles or rooms better later.
-    // For now, we will assume we updated Socket Service to support broadcast or we just use a loop.
-
-    // Quick Fix: Emit to a generic 'admin_events' if possible, but let's stick to what we have.
-    // We will emit to the USER (confirmation) and potentially ALL connected sockets (admin check).
-
-    // Notify the User immediately (confetti etc)
+    // Notify User
     notifyUser(req.user.id, 'order_status_update', {
       status: 'created',
       orderId: order.id
     });
 
-    // Notify Admins (Broadcasting to all connected admins would be ideal)
-    // For MVP: We assume the Admin Dashboard listens to a global event if we implement it,
-    // OR we iterate over connected admins.
-
-    // Actually, let's just emit a global 'new_order' event via IO if we exported it, 
-    // but we only exported notifyUser.
-    // Let's use a workaround: The Admin Dashboard should join a "admin_room" on connect.
-    // We need to update socket.service.js to allow joining rooms.
-
-    // Let's update socket.service.js first to expose `io`, then we can do `io.to('admin').emit(...)`
-    // However, I can't edit socket.service.js in this step.
-    // I will add the import, use a workaround or rely on the user notification for now.
-
     // Notify Admins
     try {
       const io = getIO();
-      io.to('role_admin').emit('new_order', order);
-      console.log('📡 Emitted new_order to role_admin');
+      if (io) {
+        io.to('role_admin').emit('new_order', order);
+      }
     } catch (e) {
-      console.warn('Socket IO emit failed', e);
+      console.warn('Socket Admin Notification Error:', e);
     }
 
     res.status(201).json(order);
   } catch (error) {
+    if (error.message.includes('Insufficient stock') || error.message.includes('Invalid cart item')) {
+      return res.status(400).json({ error: 'Validation Error', message: error.message });
+    }
     next(error);
   }
 };
@@ -305,4 +288,3 @@ export const updateOrderStatus = async (req, res, next) => {
     next(error);
   }
 };
-

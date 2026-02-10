@@ -6,7 +6,7 @@ import { checkRateLimit, getRemainingCommands } from '../middleware/botRateLimit
 // Import Handlers
 import { handleStart, handleHelp } from '../bot/handlers/command.handler.js';
 import { handleShop, handleCart } from '../bot/handlers/shop.handler.js';
-import { handlePhotoMessage } from '../bot/handlers/verification.handler.js';
+import { handlePhotoMessage, handleVerify } from '../bot/handlers/verification.handler.js'; // Updated import
 import { handleCode, handleSessions } from '../bot/handlers/session.handler.js';
 
 let bot = null;
@@ -144,6 +144,7 @@ const setupBotHandlers = (botInstance) => {
   botInstance.onText(/\/cart/, (msg) => handleCart(botInstance, msg));
   botInstance.onText(/\/code/, (msg) => handleCode(botInstance, msg));
   botInstance.onText(/\/sessions/, (msg) => handleSessions(botInstance, msg));
+  botInstance.onText(/\/verify/, (msg) => handleVerify(botInstance, msg)); // NEW: Verification Command
 
   // Photos (Verification)
   botInstance.on('photo', (msg) => handlePhotoMessage(botInstance, msg));
@@ -169,4 +170,16 @@ export const setupWebhook = async (webhookUrl) => {
 export const handleWebhookUpdate = async (update) => {
   if (!bot) return;
   await bot.processUpdate(update);
+};
+
+export const shutdownBot = async () => {
+  if (bot) {
+    try {
+      await bot.stopPolling({ cancel: true });
+      botLogger.info('Bot polling stopped');
+    } catch (error) {
+      botLogger.error('Error stopping bot:', error);
+    }
+    bot = null;
+  }
 };

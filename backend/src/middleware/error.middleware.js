@@ -77,12 +77,24 @@ export const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Validation errors
+  // Validation errors (Express Validator)
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       error: 'Validation Error',
       message: err.message,
       details: err.errors,
+    });
+  }
+
+  // Zod Validation Errors
+  if (err.name === 'ZodError') {
+    return res.status(400).json({
+      error: 'Validation Error',
+      message: 'Invalid request data',
+      details: err.issues.map(issue => ({
+        path: issue.path.join('.'),
+        message: issue.message
+      }))
     });
   }
 

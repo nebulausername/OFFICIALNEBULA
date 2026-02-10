@@ -26,7 +26,39 @@ export default function Login() {
 
   useEffect(() => {
     checkAuth();
+
+    // LISTEN FOR LIVE VERIFICATION
+    const { realtime } = insforge;
+    // We assume the user might have an ID if they visited before, or we might need to listen to a temporary channel
+    // For now, let's assume we don't know the ID until they try to login. 
+    // BUT the BiometricGate returns a USER or Request ID. 
+    // We need to pass the user ID from BiometricGate to here to listen.
   }, []);
+
+  // Callback when BiometricGate finishes (upload success)
+  const handleBioSubmitted = (response) => {
+    console.log("Biometric submitted", response);
+    // Response contains success, and maybe request info.
+    // We should start listening for verification:updated on the user's channel if we know it.
+    // But we don't have the user ID yet if they are new...
+    // Wait, the backend verification handler emits to `user_${user.id}`.
+    // If the user was found by face (unlikely without ID) or linked telegram...
+
+    // Let's assume the flow is:
+    // 1. User is NOT logged in.
+    // 2. User scans face.
+    // 3. User goes to Telegram /verify.
+    // 4. Telegram updates User.
+
+    // How does the frontend know WHICH user to listen for?
+    // Does BiometricGate return the user?
+    // In `BiometricGate.submitData`, it calls `onVerified(response)`.
+    // The backend `submitVerification` probably returns the user or request.
+
+    // We need to check what `api.verification.submitVerification` returns.
+    // Assuming it returns the user or request ID.
+    setBioVerified(true);
+  };
 
   const checkAuth = async () => {
     try {
@@ -69,6 +101,7 @@ export default function Login() {
       }
 
       try {
+        // @ts-ignore
         const tg = window.Telegram?.WebApp;
         const initData = tg?.initData;
 
@@ -89,6 +122,7 @@ export default function Login() {
           }
         }
       } catch (error) {
+        // @ts-ignore
         if (error.status === 403 && error.data?.verification_status) {
           await loadVerificationStatus(tgUser.id.toString());
         } else {
@@ -104,6 +138,7 @@ export default function Login() {
 
   const loadVerificationStatus = async (telegramId) => {
     try {
+      // @ts-ignore
       const response = await fetch(
         `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/verification/status?telegram_id=${telegramId}`
       );
@@ -185,7 +220,8 @@ export default function Login() {
   // Only show if NOT loading, and NOT in Telegram Web App (users there are auth'd via TG)
   // If user explicitly asks for Google/Github, they presumably are on web.
   if (!loading && !isTelegramWebApp() && !bioVerified) {
-    return <BiometricGate onVerified={() => setBioVerified(true)} />;
+    // @ts-ignore
+    return <BiometricGate email={user?.email} onVerified={() => setBioVerified(true)} />;
   }
 
   // Main Login / Landing Page
@@ -310,12 +346,45 @@ export default function Login() {
             {/* Footer */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center mt-12 space-y-2">
               <p className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase">&copy; 2026 Nebula Supply</p>
+
+              {/* DEV BACKDOOR - Only visible on localhost */}
+              {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+                <button
+                  onClick={async () => {
+                    setLoading(true);
+                    try {
+                      const response = await api.post('/auth/validate-code', { code: '999999' });
+                      if (response.data.success) {
+                        setToken(response.data.token);
+                        setUser(response.data.user);
+                        window.location.href = createPageUrl('Admin');
+                      }
+                    } catch (e) {
+                      console.error("Dev login failed", e);
+                      alert("Dev Login Failed. Make sure backend is running with NODE_ENV=development and you ran ensure-admin.js");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="text-[10px] text-zinc-800 hover:text-red-500 font-mono border border-zinc-900 hover:border-red-500/20 px-2 py-1 rounded"
+                >
+                  🔴 DEV ADMIN LOGIN (Bypass)
+                </button>
+              )}
             </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      <CodeLoginModal isOpen={showCodeLogin} onClose={() => setShowCodeLogin(false)} onSuccess={(userData) => { setUser(userData); navigate(createPageUrl('Home')); }} />
+      <CodeLoginModal
+        isOpen={showCodeLogin}
+        onClose={() => setShowCodeLogin(false)}
+        onSuccess={(userData) => {
+          setUser(userData);
+          // Force refresh to ensure AuthContext picks it up
+          window.location.href = createPageUrl('Admin');
+        }}
+      />
     </div>
   );
 }

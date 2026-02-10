@@ -294,81 +294,54 @@ export default function Cart() {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="sticky top-28 glass-panel rounded-2xl p-8 space-y-6"
+              className="sticky top-28 glass-panel rounded-2xl p-8 space-y-6 border border-white/5 bg-black/20"
             >
               <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
                 <div className="w-10 h-10 bg-gradient-to-br from-gold to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-gold/20">
-                  <Send className="w-5 h-5 text-black" />
+                  <ShoppingBag className="w-5 h-5 text-black" />
                 </div>
-                <h2 className="text-2xl font-black text-white">Anfrage</h2>
+                <h2 className="text-2xl font-black text-white">Zusammenfassung</h2>
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-zinc-400 font-bold ml-1">Dein Name <span className="text-red-500">*</span></Label>
-                  <Input
-                    value={contactInfo.name}
-                    onChange={(e) => setContactInfo({ ...contactInfo, name: e.target.value })}
-                    className="bg-black/20 border-white/10 focus:border-gold h-12 rounded-xl text-white"
-                    placeholder="Name eingeben"
-                  />
+                <div className="flex justify-between items-center text-zinc-400">
+                  <span>Zwischensumme</span>
+                  <span>{calculateTotal().toFixed(2)}€</span>
+                </div>
+                <div className="flex justify-between items-center text-zinc-400">
+                  <span>Versand</span>
+                  <span className="text-emerald-400 text-xs uppercase font-bold bg-emerald-400/10 px-2 py-0.5 rounded">Gratis</span>
                 </div>
 
-                <div className="space-y-2">
-                  <Label className="text-zinc-400 font-bold ml-1">Telegram Username <span className="text-red-500">*</span></Label>
-                  <Input
-                    value={contactInfo.telegram}
-                    onChange={(e) => setContactInfo({ ...contactInfo, telegram: e.target.value })}
-                    className="bg-black/20 border-white/10 focus:border-gold h-12 rounded-xl text-white"
-                    placeholder="@username"
-                  />
+                <div className="pt-4 border-t border-white/5 flex justify-between items-end">
+                  <span className="text-white font-bold pb-1">Gesamtbetrag</span>
+                  <span className="text-3xl font-black text-gold">{calculateTotal().toFixed(2)}€</span>
                 </div>
 
-                {!isFromTelegram() && (
-                  <div className="space-y-2">
-                    <Label className="text-zinc-400 font-bold ml-1">Telefonnummer <span className="text-red-500">*</span></Label>
-                    <Input
-                      value={contactInfo.phone}
-                      onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
-                      className="bg-black/20 border-white/10 focus:border-gold h-12 rounded-xl text-white"
-                      placeholder="+49 170 1234567"
-                    />
+                <div className="bg-white/5 rounded-xl p-4 text-xs text-zinc-400 flex gap-3">
+                  <Package className="w-8 h-8 text-zinc-500" />
+                  <p>Inkl. MwSt. und kostenlosem Premium-Versand innerhalb Deutschlands.</p>
+                </div>
+
+                <Link to="/checkout" className="block w-full">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full h-14 bg-gold text-black font-black text-lg rounded-xl shadow-lg shadow-gold/20 flex items-center justify-center gap-2 hover:bg-[#EBDDA9] transition-colors"
+                  >
+                    <CheckCircle2 className="w-5 h-5" />
+                    Zur Kasse gehen
+                  </motion.button>
+                </Link>
+
+                <div className="flex justify-center gap-4 text-zinc-500 pt-2">
+                  {/* Payment Icons */}
+                  <div className="flex gap-2 opacity-50 grayscale hover:grayscale-0 transition-all">
+                    <div className="h-6 w-10 bg-white/10 rounded" />
+                    <div className="h-6 w-10 bg-white/10 rounded" />
+                    <div className="h-6 w-10 bg-white/10 rounded" />
                   </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label className="text-zinc-400 font-bold ml-1">Notiz</Label>
-                  <Textarea
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    className="bg-black/20 border-white/10 focus:border-gold rounded-xl text-white min-h-[80px]"
-                    placeholder="Optional..."
-                  />
                 </div>
-              </div>
-
-              <div className="pt-6 border-t border-white/5 space-y-4">
-                <div className="flex justify-between items-end">
-                  <span className="text-zinc-400 font-bold pb-1">Gesamtbetrag</span>
-                  <span className="text-3xl font-black text-white">{calculateTotal().toFixed(2)}€</span>
-                </div>
-
-                <motion.button
-                  onClick={handleSubmitRequest}
-                  disabled={submitting}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full h-14 bg-gold text-black font-black text-lg rounded-xl shadow-lg shadow-gold/20 flex items-center justify-center gap-2 hover:bg-[#EBDDA9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {submitting ? (
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-5 h-5" />
-                      Anfrage senden
-                    </>
-                  )}
-                </motion.button>
               </div>
             </motion.div>
           </div>

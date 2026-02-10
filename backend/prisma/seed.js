@@ -494,12 +494,32 @@ async function main() {
     } = p;
 
     // Build Prisma-compatible data with connect syntax for relations
+
+    // Construct Variants Create Input
+    let variantsInput = undefined;
+    if (variants && variants.length > 0) {
+      variantsInput = {
+        create: variants.map(v => ({
+          stock: v.stock,
+          price: v.price_override || baseData.price,
+          options: JSON.stringify({ Size: v.size }), // Simplified: assuming 'size' is the main variant key
+          is_default: false
+        }))
+      };
+      // Make first variant default
+      if (variantsInput.create.length > 0) {
+        variantsInput.create[0].is_default = true;
+      }
+    }
+
     const productData = {
       ...baseData,
       tags: baseData.tags ? JSON.stringify(baseData.tags) : null,
+      colors: colors ? JSON.stringify(colors) : null, // Persist legacy colors
       department: department_id ? { connect: { id: department_id } } : undefined,
       category: category_id ? { connect: { id: category_id } } : undefined,
-      brand: brand_id ? { connect: { id: brand_id } } : undefined
+      brand: brand_id ? { connect: { id: brand_id } } : undefined,
+      variants: variantsInput
     };
 
     await prisma.product.create({

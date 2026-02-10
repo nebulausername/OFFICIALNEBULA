@@ -1,7 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { api } from '@/api';
-import { setToken, getToken } from '@/api/config';
+import { setToken, getToken, authEvents } from '@/api/config';
 import { insforge, db } from '@/lib/insforge';
+import { useToast } from '@/components/ui/use-toast';
 
 const AuthContext = createContext();
 
@@ -23,6 +24,7 @@ export const AuthProvider = ({ children }) => {
   // New: Access level and Telegram detection
   const [accessLevel, setAccessLevel] = useState(ACCESS_LEVELS.GUEST);
   const [isTelegram, setIsTelegram] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Detect Telegram WebApp environment
@@ -30,6 +32,25 @@ export const AuthProvider = ({ children }) => {
     setIsTelegram(inTelegram);
 
     checkAppState();
+
+    // Listen for 401s from API
+    const handleUnauthorized = () => {
+      console.warn('🔒 Session expired (401 received). Logging out...');
+      if (getToken()) { // Only notify if we thought we were logged in
+        setToken(null);
+        setUser(null);
+        setIsAuthenticated(false);
+        setAccessLevel(ACCESS_LEVELS.GUEST);
+        toast({
+          title: "Session Expired",
+          description: "Please login again to continue.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    authEvents.on('unauthorized', handleUnauthorized);
+    return () => authEvents.off('unauthorized', handleUnauthorized);
   }, []);
 
   // Realtime Subscription

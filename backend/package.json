@@ -12,7 +12,8 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "node prisma/seed.js",
-    "db:reset": "prisma migrate reset --force && npm run db:seed"
+    "db:reset": "prisma migrate reset --force && npm run db:seed",
+    "test": "node scripts/verify_stock_logic.js && node scripts/verify_user_update.js && node scripts/verify_validation.js"
   },
   "keywords": [
     "ecommerce",
@@ -26,6 +27,7 @@
     "@prisma/client": "^5.7.1",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -40,7 +42,8 @@
     "nodemailer": "^6.9.7",
     "prisma": "^5.7.1",
     "socket.io": "^4.8.3",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

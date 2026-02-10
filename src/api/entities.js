@@ -1,166 +1,144 @@
-import { db } from '@/lib/insforge';
-// Removed api import as we are bypassing the proxy
+import { apiClient } from './config';
 
-// Map entity names to table names
-const TABLE_MAP = {
-  'product': 'products',
-  'product-image': 'product_images',
-  'category': 'categories',
-  'brand': 'brands',
-  'department': 'departments',
-  'user': 'users', // Public users table
-  'cart-item': 'cart_items',
-  'request': 'requests',
-  'request-item': 'request_items',
-  'ticket': 'tickets',
-  'ticket-message': 'ticket_messages',
-  'vip-plan': 'vip_plans',
-  'notification-template': 'notification_templates',
-  'wishlist-item': 'wishlist_items',
-  'verification-request': 'verification_requests'
+// Map entity names to API endpoints
+const ENDPOINT_MAP = {
+  'product': '/products',
+  'product-image': '/product-images', // Might need specific handling
+  'category': '/categories',
+  'brand': '/brands',
+  'department': '/departments',
+  'user': '/users',
+  'cart-item': '/cart-items',
+  'request': '/requests', // Orders
+  'request-item': '/request-items',
+  'ticket': '/tickets',
+  'ticket-message': '/ticket-messages',
+  'vip-plan': '/vip-plans',
+  'notification-template': '/notification-templates',
+  'wishlist-item': '/wishlist-items',
+  'verification-request': '/verification',
 };
 
-// Generic entity factory - optimized for InsForge
+// Generic entity factory - optimized for Express Backend
 const createEntity = (entityName, customBasePath = null) => {
-  const tableName = TABLE_MAP[entityName] || entityName + 's';
+  const basePath = customBasePath || ENDPOINT_MAP[entityName] || `/${entityName}s`;
 
   return {
-    // List all items with optional sort and limit
-    list: async (sort = null, limit = null) => {
-      let query = db.from(tableName).select('*');
-
-      // Sorting
-      if (sort) {
-        // "price_asc" -> column: price, ascending: true
-        // "created_at_desc" -> column: created_at, ascending: false
-        const parts = sort.split('_');
-        const direction = parts.pop(); // 'asc' or 'desc'
-        const column = parts.join('_');
-        query = query.order(column, { ascending: direction === 'asc' });
-      } else {
-        // Default sort
-        if (tableName === 'products' || tableName === 'requests') {
-          query = query.order('created_at', { ascending: false });
-        } else if (['categories', 'departments', 'brands'].includes(tableName)) {
-          query = query.order('sort_order', { ascending: true });
+    // List all items (Flexible params support)
+    list: async (arg1 = null, arg2 = null) => {
+      try {
+        let params = {};
+        if (arg1 && typeof arg1 === 'object') {
+          params = arg1;
+        } else {
+          if (arg1) params.sort = arg1;
+          if (arg2) params.limit = arg2;
         }
-      }
 
-      // Limit
-      if (limit) {
-        query = query.limit(Number(limit));
-      }
+        const response = await apiClient.get(basePath, { params });
+        // Backend returns { data: [], total: ... } or just [] depending on endpoint
+        // Normalizing to return array or pagination object?
+        // AdminTable needs metadata (total, pages).
+        // If response.data has 'data' prop, return full response.data (so valid pagination works)
+        // If just array, return { data: array, total: array.length }
 
-      const { data, error } = await query;
-
-      if (error) {
-        console.error(`InsForge List Error (${tableName}):`, error);
-        throw error; // Or return []
-      }
-      return data || [];
-    },
-
-    // Filter items with optional sort and limit
-    filter: async (filters = {}, sort = null, limit = null) => {
-      let query = db.from(tableName).select('*');
-
-      // Apply Filters
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          // Check for helpers like "min_price" or ranges?
-          // For now, assume direct equality or simple mapping
-          // Special handling for legacy filters might be needed
-          query = query.eq(key, value);
+        if (Array.isArray(response.data)) {
+          return { data: response.data, total: response.data.length };
         }
-      });
-
-      // Sorting (Same as list)
-      if (sort) {
-        const parts = sort.split('_');
-        const direction = parts.pop();
-        const column = parts.join('_');
-        query = query.order(column, { ascending: direction === 'asc' });
-      }
-
-      // Limit
-      if (limit) {
-        query = query.limit(Number(limit));
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error(`InsForge Filter Error (${tableName}):`, error);
+        return response.data; // Assumes { data, total, page, ... }
+      } catch (error) {
+        console.error(`API List Error (${entityName}):`, error);
         throw error;
       }
-      return data || [];
+    },
+
+    // Filter items (Backend support for filters varies, passing as query params)
+    filter: async (filters = {}, sort = null, limit = null) => {
+      try {
+        const params = { ...filters };
+        if (sort) params.sort = sort;
+        if (limit) params.limit = limit;
+
+        const response = await apiClient.get(basePath, { params });
+        return Array.isArray(response.data) ? response.data : (response.data.data || []);
+      } catch (error) {
+        console.error(`API Filter Error (${entityName}):`, error);
+        throw error;
+      }
     },
 
     // Get single item by ID
     get: async (id) => {
-      const { data, error } = await db
-        .from(tableName)
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      return data;
+      try {
+        const response = await apiClient.get(`${basePath}/${id}`);
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
     },
 
     // Create new item
     create: async (data) => {
-      const { data: created, error } = await db
-        .from(tableName)
-        .insert(data)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return created;
+      try {
+        const response = await apiClient.post(basePath, data);
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
     },
 
     // Update item
     update: async (id, data) => {
-      const { data: updated, error } = await db
-        .from(tableName)
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return updated;
+      try {
+        const response = await apiClient.patch(`${basePath}/${id}`, data);
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
     },
 
     // Delete item
     delete: async (id) => {
-      const { error } = await db
-        .from(tableName)
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      return true;
+      try {
+        await apiClient.delete(`${basePath}/${id}`);
+        return true;
+      } catch (error) {
+        throw error;
+      }
     },
   };
 };
 
-// Create entity instances for all entities used in the app
+
+const createExtendedEntity = (name, methods) => ({
+  ...createEntity(name),
+  ...methods
+});
+
 export const entities = {
-  Product: createEntity('product'),
-  ProductImage: createEntity('product-image'),
-  Category: createEntity('category', '/categories'), // Fix pluralization
+  Product: createExtendedEntity('product', {
+    getImages: async (id) => {
+      const response = await apiClient.get(`/products/${id}/images`);
+      return response.data;
+    }
+  }),
+  // ProductImage: createEntity('product-image'), // Redundant, use Product.getImages
+  Category: createEntity('category'),
   Brand: createEntity('brand'),
   Department: createEntity('department'),
   User: createEntity('user'),
   StarCartItem: createEntity('cart-item'),
-  Request: createEntity('request'),
+  Request: createEntity('request'), // Orders
   RequestItem: createEntity('request-item'),
-  Ticket: createEntity('ticket'),
-  TicketMessage: createEntity('ticket-message'),
-  VIPPlan: createEntity('vip-plan'),
-  NotificationTemplate: createEntity('notification-template'),
+  Ticket: createExtendedEntity('ticket', {
+    sendMessage: async (id, messageData) => {
+      const response = await apiClient.post(`/tickets/${id}/messages`, messageData);
+      return response.data;
+    }
+  }),
+  // TicketMessage: createEntity('ticket-message'), // Nested in Ticket
+  VIPPlan: createEntity('vip-plan'), // Check backend implementation
+  NotificationTemplate: createEntity('notification-template'), // Check backend implementation
   WishlistItem: createEntity('wishlist-item'),
   VerificationRequest: createEntity('verification-request'),
 };

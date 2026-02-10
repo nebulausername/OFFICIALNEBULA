@@ -12,6 +12,7 @@ import AdvancedFilters from '../components/shop/AdvancedFilters';
 import ProductGridSkeleton from '../components/products/ProductGridSkeleton';
 import UnifiedProductModal from '../components/products/UnifiedProductModal';
 import { useI18n } from '../components/i18n/I18nProvider';
+import { useCart } from '../contexts/CartContext';
 import { products as staticProducts } from '../data/products';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -241,40 +242,19 @@ export default function Products() {
     });
   }, [products, searchQuery, selectedCategory, selectedDepartment, advancedFilters, sortBy]);
 
-  const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
-    try {
-      const user = await api.auth.me();
-      if (!user) return; // Should likely redirect to login or show toast
+  const { addToCart } = useCart();
 
-      const existing = await api.entities.StarCartItem.filter({
-        user_id: user.id,
-        product_id: product.id
-      });
-
-      if (existing.length > 0) {
-        await api.entities.StarCartItem.update(existing[0].id, {
-          quantity: existing[0].quantity + quantity,
-          selected_options: selectedOptions
-        });
-      } else {
-        await api.entities.StarCartItem.create({
-          user_id: user.id,
-          product_id: product.id,
-          quantity: quantity,
-          selected_options: selectedOptions
-        });
-      }
-      setIsQuickViewOpen(false);
-      toast({
-        title: 'Hinzugefügt! 🛒',
-        description: `${quantity}x ${product.name} im Warenkorb.`,
-        className: "bg-gold/10 border-gold/30 text-white"
-      });
-      window.location.reload(); // Simple reload for now
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      toast({ title: 'Fehler', description: 'Produkt konnte nicht hinzugefügt werden', variant: 'destructive' });
+  const handleAddToCart = async (arg1, arg2, arg3) => {
+    // Handle overload: UnifiedProductModal passes (cartData), others might pass (product, qty, options)
+    if (arg1 && arg1.product_id) {
+      // Called from UnifiedProductModal with cartData
+      await addToCart(arg1.product_id, arg1.quantity, arg1.selected_options);
+    } else if (arg1 && arg1.id) {
+      // Standard signature (product, qty, options)
+      await addToCart(arg1.id, arg2, arg3);
     }
+
+    setIsQuickViewOpen(false);
   };
 
   return (

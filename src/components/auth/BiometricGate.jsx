@@ -1,228 +1,304 @@
+// Production Biometric Gate
 import React, { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Scan, ShieldCheck, Fingerprint, Lock, Cpu, Globe, AlertTriangle, Terminal } from 'lucide-react';
+import { Scan, ShieldCheck, Fingerprint, Lock, Cpu, Globe, AlertTriangle, Terminal, Camera, Loader2, X, RefreshCw, Smartphone, Check, PlayCircle, Mail } from 'lucide-react';
+import { api } from '@/api';
 import { useNebulaSound } from '@/contexts/SoundContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input'; // Assuming this exists, or use standard input
+import { useToast } from '@/components/ui/use-toast';
+import { insforge } from '@/lib/insforge';
 
-const BiometricGate = ({ onVerified }) => {
+const BiometricGate = ({ mode = 'verification', email: initialEmail, onVerified, onCancel }) => {
     const webcamRef = useRef(null);
-    const [scanning, setScanning] = useState(true);
-    const [progress, setProgress] = useState(0);
-    const [status, setStatus] = useState('INITIALIZING BIO-SCANNER...');
-    const [isVerified, setIsVerified] = useState(false);
+    const [status, setStatus] = useState('INITIALISIERE SENSOREN...');
+    const [email, setEmail] = useState(initialEmail || '');
+    const [showEmailInput, setShowEmailInput] = useState(false);
+    const [capturedBlob, setCapturedBlob] = useState(null);
+
+    // States
+    const [step, setStep] = useState('camera'); // camera, email, submitting, pending, success
     const [permissionGranted, setPermissionGranted] = useState(false);
-    const [noCameraMode, setNoCameraMode] = useState(false);
+    const [permissionDenied, setPermissionDenied] = useState(false);
+    const [error, setError] = useState(null);
+    const { toast } = useToast();
 
     // Sound effects
     const soundContext = useNebulaSound();
-    const playHover = soundContext?.playHover || (() => { });
     const playClick = soundContext?.playClick || (() => { });
 
-    // Simulation Sequence
     useEffect(() => {
-        let interval;
-        if (scanning && (permissionGranted || noCameraMode)) {
-            // Start scanning sound if available (mocking it with repeated clicks for now if no specific scan sound)
-
-            interval = setInterval(() => {
-                setProgress((prev) => {
-                    if (prev >= 100) {
-                        clearInterval(interval);
-                        completeScan();
-                        return 100;
-                    }
-                    // Faster progress in no-camera mode (simulation)
-                    const speed = noCameraMode ? 8 : 4;
-                    return prev + (Math.random() * speed);
-                });
-            }, 100);
-        }
-        return () => clearInterval(interval);
-    }, [scanning, permissionGranted, noCameraMode]);
-
-    // Status Text Updates based on progress
-    useEffect(() => {
-        if (progress < 20) setStatus(noCameraMode ? 'BYPASSING OPTICAL SENSORS...' : 'DETECTING FACE MESH...');
-        else if (progress < 50) setStatus(noCameraMode ? 'ESTABLISHING NEURAL LINK...' : 'ANALYZING BIOMETRIC DATA...');
-        else if (progress < 80) setStatus('VERIFYING IDENTITY AGAINST NEBULA DB...');
-        else if (progress < 100) setStatus('FINALIZING SECURE HANDSHAKE...');
-    }, [progress, noCameraMode]);
-
-    const completeScan = () => {
-        setScanning(false);
-        setStatus('IDENTITY CONFIRMED');
-        setIsVerified(true);
-        if (playClick) playClick(); // Play success sound
-
-        // Wait 1.5s to show success state then unmount
-        setTimeout(() => {
-            onVerified();
-        }, 1500);
-    };
-
-    const handleWebcamError = (e) => {
-        console.error("Webcam Error", e);
-        setNoCameraMode(true);
-        setStatus("OPTICAL SENSORS OFFLINE - SWITCHING TO NEURAL SIMULATION");
-        // Auto-start simulation after short delay
-        setTimeout(() => setScanning(true), 500);
-    };
+        // Auto-check permission status on mount
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(() => {
+                setPermissionGranted(true);
+                setPermissionDenied(false);
+                setStatus('SYSTEM BEREIT');
+            })
+            .catch(() => {
+                setPermissionDenied(true);
+                setStatus('ZUGRIFF VERWEIGERT');
+            });
+    }, []);
 
     const videoConstraints = {
-        width: 640,
-        height: 480,
+        width: 1280,
+        height: 720,
         facingMode: "user"
     };
 
+    const handleUserMedia = () => {
+        setPermissionGranted(true);
+        setPermissionDenied(false);
+        setStatus('SYSTEM BEREIT');
+    };
+
+    const handleUserMediaError = (e) => {
+        console.error("Webcam Error", e);
+        setPermissionDenied(true);
+        setStatus("ZUGRIFF VERWEIGERT");
+    };
+
+    const retryCamera = () => {
+        setPermissionDenied(false);
+        setError(null);
+        setStatus('INITIALISIERE SENSOREN...');
+        window.location.reload();
+    };
+
+    const capturePhoto = () => {
+        if (!webcamRef.current) return;
+        const imageSrc = webcamRef.current.getScreenshot();
+        if (!imageSrc) return;
+
+        // Convert to blob
+        fetch(imageSrc)
+            .then(res => res.blob())
+            .then(blob => {
+                setCapturedBlob(blob);
+                if (!email) {
+                    setStep('email');
+                    setStatus('IDENTITÄT ERFORDERLICH');
+                } else {
+                    submitData(blob, email);
+                }
+            })
+            .catch(err => {
+                console.error("Blob conversion failed", err);
+                setError("Bildverarbeitung fehlgeschlagen");
+            });
+    };
+
+    const handleEmailSubmit = (e) => {
+        e.preventDefault();
+        if (!email || !capturedBlob) return;
+        submitData(capturedBlob, email);
+    };
+
+    const submitData = async (blob, userEmail) => {
+        setStep('submitting');
+        setStatus('VERSCHLÜSSELE DATEN...');
+
+        try {
+            const formData = new FormData();
+            formData.append('photo', blob, 'verification.jpg');
+            formData.append('email', userEmail);
+            formData.append('hand_gesture', '👍'); // TODO: Implement real gesture check
+
+            // Use registerApplicant for guests (Login flow)
+            // It handles "User exists" gracefully usually, or we use browser-submit if we had auth (we don't)
+            const response = await api.verification.registerApplicant(formData);
+
+            setStatus('WARTE AUF BESTÄTIGUNG...');
+            setStep('pending');
+            playClick();
+
+            // Listen for Realtime Sync
+            if (response.user?.id) {
+                const { realtime } = insforge; // Access realtime directly if needed or via hook
+                // But we are in a component. We can use a direct socket check if available
+                // Or simulate polling if realtime isn't set up globally yet
+
+                // Using insforge.realtime:
+                // @ts-ignore
+                const channel = insforge.realtime.subscribe(`user:${response.user.id}`, (event) => {
+                    if (event.type === 'verification:updated' && event.payload.status === 'verified') {
+                        handleSuccess(response);
+                    }
+                });
+
+                // Workaround: We can't rely solely on socket in 'guest' mode sometimes if auth missing
+                // So we also poll status?
+            } else {
+                // Fallback if no user ID returned (e.g. error)
+                setError("Keine User-ID empfangen");
+            }
+
+        } catch (err) {
+            console.error("Submission failed", err);
+            setError(err.response?.data?.message || err.message || "Verifizierung fehlgeschlagen");
+            setStatus("ÜBERTRAGUNGSFEHLER");
+            toast({ title: "Fehler", description: "Verifizierung fehlgeschlagen: " + (err.response?.data?.message || err.message), variant: "destructive" });
+            setStep('camera'); // Reset
+        }
+    };
+
+    // Simulate socket event for now if backend not fully wired or for robustness
+    useEffect(() => {
+        if (step === 'pending') {
+            // Polling fallback
+            const interval = setInterval(async () => {
+                // We need user email to check status
+                try {
+                    const res = await api.verification.checkGateStatus(email);
+                    if (res.status === 'verified') {
+                        handleSuccess({ status: 'verified' });
+                    } else if (res.status === 'rejected') {
+                        setError("Verifizierung abgelehnt: " + (res.rejection_reason || 'Unbekannt'));
+                        setStep('camera');
+                    }
+                } catch (e) { console.error("Poll fail", e); }
+            }, 3000);
+            return () => clearInterval(interval);
+        }
+    }, [step, email]);
+
+    const handleSuccess = (response) => {
+        setStep('success');
+        setStatus('ZUGRIFF GENEHMIGT');
+        setTimeout(() => {
+            onVerified(response);
+        }, 1500);
+    };
+
     return (
-        <div className="fixed inset-0 z-50 bg-[#050608] flex flex-col items-center justify-center overflow-hidden font-mono">
-            {/* Background Tech Grid */}
-            <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#050608_90%)] pointer-events-none" />
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="w-full bg-[#0A0C10]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden ring-1 ring-white/5"
+        >
+            {/* Close Button */}
+            {onCancel && (
+                <button onClick={onCancel} className="absolute top-4 right-4 z-50 text-zinc-500 hover:text-white transition-colors bg-black/40 p-2 rounded-full hover:bg-white/10 border border-white/5">
+                    <X className="w-5 h-5" />
+                </button>
+            )}
 
-            <AnimatePresence>
-                {!isVerified ? (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-                        className="relative w-full max-w-lg p-6 flex flex-col items-center"
-                    >
-                        {/* Header */}
-                        <div className="mb-8 text-center space-y-2">
-                            <div className="flex justify-center mb-4">
+            <AnimatePresence mode="wait">
+                {/* 1. PERMISSION DENIED */}
+                {permissionDenied ? (
+                    <motion.div key="denied" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center text-center py-6">
+                        <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+                            <Lock className="w-10 h-10 text-red-500" />
+                        </div>
+                        <h2 className="text-xl font-black text-white mb-2 uppercase tracking-wide">Kamera erforderlich</h2>
+                        <div className="w-full space-y-3 mt-4">
+                            <Button onClick={retryCamera} className="w-full h-12 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl tracking-wide border border-white/10">
+                                <RefreshCw className="w-4 h-4 mr-2" /> Erneut versuchen
+                            </Button>
+                        </div>
+                    </motion.div>
+                ) : step === 'camera' ? (
+                    /* 2. CAMERA SCAN */
+                    <motion.div key="scan" exit={{ opacity: 0, filter: "blur(10px)" }} className="flex flex-col items-center">
+                        <div className="mb-6 text-center space-y-1">
+                            <div className="inline-flex items-center gap-2 bg-[#D6B25E]/10 px-3 py-1 rounded-full border border-[#D6B25E]/20 mb-3">
+                                <Scan className="w-3 h-3 text-[#D6B25E]" />
+                                <span className="text-[10px] font-bold text-[#D6B25E] tracking-widest uppercase">{status}</span>
+                            </div>
+                        </div>
+
+                        <div className="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden border border-white/10 shadow-2xl group mb-6 ring-1 ring-white/5">
+                            <Webcam
+                                audio={false}
+                                ref={webcamRef}
+                                screenshotFormat="image/jpeg"
+                                videoConstraints={videoConstraints}
+                                onUserMedia={handleUserMedia}
+                                onUserMediaError={handleUserMediaError}
+                                className="w-full h-full object-cover opacity-90 grayscale-[0.2] contrast-125"
+                                mirrored={true}
+                            />
+                            {/* HUD Overlays */}
+                            <div className="absolute top-4 left-4 flex gap-1"><div className="w-1 h-1 bg-red-500 rounded-full animate-pulse" /><span className="text-[8px] font-mono text-red-500 uppercase">LIVE</span></div>
+                            <div className="absolute inset-0 border-[20px] border-black/30 pointer-events-none rounded-2xl" />
+                        </div>
+
+                        {error && <div className="text-red-400 text-xs mb-4">{error}</div>}
+
+                        <Button onClick={capturePhoto} className="w-full h-12 bg-[#D6B25E] hover:bg-[#c2a155] text-black font-black tracking-widest text-xs rounded-xl shadow-[0_0_20px_rgba(214,178,94,0.3)]">
+                            <Camera className="w-4 h-4 mr-2" /> SCAN STARTEN
+                        </Button>
+                    </motion.div>
+                ) : step === 'email' ? (
+                    /* 3. EMAIL INPUT */
+                    <motion.div key="email" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col items-center py-4">
+                        <div className="w-16 h-16 bg-[#D6B25E]/10 rounded-full flex items-center justify-center mb-6 border border-[#D6B25E]/20">
+                            <Fingerprint className="w-8 h-8 text-[#D6B25E]" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-2">Identität bestätigen</h3>
+                        <p className="text-zinc-400 text-xs text-center mb-6 max-w-xs">Deine biometrischen Daten werden verschlüsselt mit deinem Account verknüpft.</p>
+
+                        <form onSubmit={handleEmailSubmit} className="w-full space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-mono text-zinc-500 uppercase ml-1">E-Mail Adresse</label>
                                 <div className="relative">
-                                    <Fingerprint className={`w-12 h-12 ${noCameraMode ? 'text-red-500' : 'text-[#D6B25E]'} animate-pulse`} />
-                                    <div className={`absolute -inset-4 ${noCameraMode ? 'bg-red-500/20' : 'bg-[#D6B25E]/20'} blur-xl rounded-full`} />
+                                    <Mail className="absolute left-3 top-3.5 w-4 h-4 text-zinc-500" />
+                                    <input
+                                        type="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-[#D6B25E]/50 focus:ring-1 focus:ring-[#D6B25E]/20 transition-all font-mono"
+                                        placeholder="user@example.com"
+                                    />
                                 </div>
                             </div>
-                            <h2 className="text-2xl font-black text-white tracking-[0.2em]">
-                                {noCameraMode ? 'MANUAL OVERRIDE' : 'SECURITY CHECK'}
-                            </h2>
-                            <p className="text-zinc-500 text-xs">NEBULA PROTOCOL V4.2</p>
-                        </div>
-
-                        {/* Scanner Frame */}
-                        <div className="relative w-full aspect-[4/3] bg-black rounded-3xl overflow-hidden border-2 border-white/10 shadow-2xl group">
-                            {/* Corner Brackets */}
-                            <div className={`absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 ${noCameraMode ? 'border-red-500' : 'border-[#D6B25E]'} z-20 transition-colors duration-500`} />
-                            <div className={`absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 ${noCameraMode ? 'border-red-500' : 'border-[#D6B25E]'} z-20 transition-colors duration-500`} />
-                            <div className={`absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 ${noCameraMode ? 'border-red-500' : 'border-[#D6B25E]'} z-20 transition-colors duration-500`} />
-                            <div className={`absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 ${noCameraMode ? 'border-red-500' : 'border-[#D6B25E]'} z-20 transition-colors duration-500`} />
-
-                            {/* Scanning Overlay Line */}
-                            {scanning && (permissionGranted || noCameraMode) && (
-                                <motion.div
-                                    animate={{ top: ["0%", "100%", "0%"] }}
-                                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                                    className={`absolute left-0 right-0 h-1 ${noCameraMode ? 'bg-red-500/50 box-shadow-[0_0_20px_#ef4444]' : 'bg-[#D6B25E]/50 box-shadow-[0_0_20px_#D6B25E]'} z-30`}
-                                />
-                            )}
-
-                            {/* Content: Websim or Glitch Effect */}
-                            {noCameraMode ? (
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/90 z-10 text-center p-6 space-y-4">
-                                    <div className="relative">
-                                        <AlertTriangle className="w-16 h-16 text-red-500 opacity-50 absolute inset-0 animate-ping" />
-                                        <Terminal className="w-16 h-16 text-red-500 relative z-10" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <p className="text-red-400 font-bold tracking-widest text-sm animate-pulse">CAMERA SIGNAL LOST</p>
-                                        <p className="text-zinc-500 text-xs">INITIATING SIMULATION SEQUENCE...</p>
-                                    </div>
-                                    <div className="w-full max-w-[200px] h-32 overflow-hidden text-[10px] text-green-500/50 text-left font-mono opacity-50">
-                                        {Array.from({ length: 10 }).map((_, i) => (
-                                            <motion.div key={i} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.1 }}>
-                                                {`> bypassing_node_${9000 + i}... OK`}
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ) : (
-                                <Webcam
-                                    audio={false}
-                                    ref={webcamRef}
-                                    screenshotFormat="image/jpeg"
-                                    videoConstraints={videoConstraints}
-                                    onUserMedia={() => setPermissionGranted(true)}
-                                    onUserMediaError={handleWebcamError}
-                                    className="w-full h-full object-cover opacity-80"
-                                />
-                            )}
-
-                            {/* Waiting State */}
-                            {!permissionGranted && !noCameraMode && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/90 z-20 text-center p-6">
-                                    <div className="animate-pulse">
-                                        <Scan className="w-12 h-12 text-zinc-500 mx-auto mb-4" />
-                                        <p className="text-zinc-400 text-sm">INITIALIZING...</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Grid Overlay */}
-                            <div className="absolute inset-0 bg-[url('/grid.png')] opacity-20 z-10 mix-blend-overlay pointer-events-none" />
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div className="w-full mt-8 space-y-2">
-                            <div className={`flex justify-between text-[10px] font-mono ${noCameraMode ? 'text-red-400' : 'text-[#D6B25E]'}`}>
-                                <span>{status}</span>
-                                <span>{Math.round(progress)}%</span>
-                            </div>
-                            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                                <motion.div
-                                    className={`h-full ${noCameraMode ? 'bg-red-500' : 'bg-[#D6B25E]'}`}
-                                    style={{ width: `${progress}%` }}
-                                />
+                            <Button type="submit" className="w-full h-12 bg-white text-black font-bold rounded-xl mt-2">
+                                Fortfahren <ArrowRight className="w-4 h-4 ml-2" />
+                            </Button>
+                            <button type="button" onClick={() => setStep('camera')} className="w-full text-center text-xs text-zinc-500 hover:text-white mt-4">Zurück zum Scan</button>
+                        </form>
+                    </motion.div>
+                ) : step === 'pending' ? (
+                    /* 4. PENDING / TELEGRAM SYNC */
+                    <motion.div key="pending" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center text-center py-6">
+                        <div className="relative w-24 h-24 mb-6">
+                            <div className="absolute inset-0 bg-[#0088cc]/20 rounded-full animate-ping opacity-75" />
+                            <div className="relative w-full h-full bg-[#0088cc]/10 rounded-full flex items-center justify-center border border-[#0088cc]/30">
+                                <Smartphone className="w-10 h-10 text-[#0088cc]" />
                             </div>
                         </div>
 
-                        {/* Decor Elements */}
-                        <div className="mt-8 grid grid-cols-3 gap-4 w-full text-center opacity-50">
-                            <div className="flex flex-col items-center gap-1 text-[10px] text-zinc-500 font-mono">
-                                <Lock className="w-4 h-4" />
-                                <span>ENCRYPTED</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1 text-[10px] text-zinc-500 font-mono">
-                                <Cpu className="w-4 h-4" />
-                                <span>AI CORE</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1 text-[10px] text-zinc-500 font-mono">
-                                <Globe className="w-4 h-4" />
-                                <span>SECURE</span>
-                            </div>
+                        <h3 className="text-xl font-bold text-white mb-2">Bestätigung erforderlich</h3>
+                        <div className="bg-[#0088cc]/5 border border-[#0088cc]/20 rounded-xl p-4 w-full mb-6">
+                            <p className="text-[#0088cc] text-xs font-bold uppercase mb-2">Telegram Sync</p>
+                            <p className="text-zinc-300 text-sm mb-3">Bitte öffne den Telegram Bot und tippe:</p>
+                            <div className="bg-black/50 rounded-lg p-3 font-mono text-white tracking-widest text-lg border border-white/10">/verify</div>
                         </div>
 
+                        <div className="flex items-center gap-2 text-zinc-500 text-xs animate-pulse">
+                            <Loader2 className="w-3 h-3 animate-spin" /> Warte auf Synchronisierung...
+                        </div>
                     </motion.div>
                 ) : (
-                    /* SUCCESS STATE */
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center text-center space-y-6"
-                    >
-                        <div className="relative">
-                            <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                                className="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center border border-green-500/50 shadow-[0_0_50px_rgba(34,197,94,0.3)]"
-                            >
-                                <ShieldCheck className="w-12 h-12 text-green-400" />
-                            </motion.div>
+                    /* 5. SUCCESS */
+                    <motion.div key="success" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center text-center py-10">
+                        <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mb-6 border border-green-500/40 shadow-[0_0_60px_rgba(34,197,94,0.2)]">
+                            <ShieldCheck className="w-12 h-12 text-green-400" />
                         </div>
-                        <div>
-                            <h2 className="text-3xl font-black text-white mb-2 tracking-tight">ACCESS GRANTED</h2>
-                            <p className="text-green-400 font-mono tracking-widest text-xs uppercase opacity-80">
-                                Welcome to Nebula Supply
-                            </p>
-                        </div>
+                        <h2 className="text-2xl font-black text-white mb-1">IDENTITÄT BESTÄTIGT</h2>
+                        <p className="text-zinc-400 text-sm">Zugriff wird gewährt...</p>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 };
+
+// Helper Icon
+const ArrowRight = ({ className }) => (<svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>);
 
 export default BiometricGate;

@@ -3,48 +3,52 @@ import { motion } from 'framer-motion';
 
 export default function InfiniteMarquee() {
     const content = [
-        "🚀 Blitzschneller Versand",
-        "✨ NEBULA 2.0 LIVE",
-        "⭐ Premium Qualität",
-        "🔒 Sicher Einkaufen",
-        "🌌 Nebula Vibe",
-        "💎 Exklusive Drops",
-        "🌍 Worldwide Shipping"
+        "🚀 BLITZSCHNELLER VERSAND",
+        "///",
+        "NEBULA 2.0 LIVE",
+        "///",
+        "⭐ PREMIUM QUALITÄT",
+        "///",
+        "🔒 SICHER EINKAUFEN",
+        "///",
+        "💎 EXKLUSIVE DROPS",
+        "///",
+        "🌍 WORLDWIDE SHIPPING",
+        "///",
+        "🔥 HYPED RELEASES",
+        "///"
     ];
 
     return (
-        <div className="relative w-full overflow-hidden bg-[#0A0C10] border-y border-white/5 py-4">
+        <div className="relative w-full overflow-hidden border-y border-white/5 bg-[#050608]/50 backdrop-blur-sm py-4 z-0">
             <div className="flex whitespace-nowrap">
                 <motion.div
-                    className="flex space-x-12 px-6"
+                    className="flex space-x-0"
                     animate={{ x: ["0%", "-50%"] }}
                     transition={{
-                        duration: 20,
+                        duration: 30,
                         ease: "linear",
                         repeat: Infinity
                     }}
                 >
-                    {/* Duplicated content for seamless loop */}
                     {[...content, ...content, ...content, ...content].map((item, i) => (
-                        <div key={i} className="flex items-center gap-12">
+                        <div key={i} className="flex items-center mx-8">
                             <span
-                                className="text-lg md:text-xl font-bold uppercase tracking-widest bg-gradient-to-r from-zinc-400 to-zinc-600 bg-clip-text text-transparent opacity-80"
+                                className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter opacity-20 select-none hover:opacity-100 transition-opacity duration-300 cursor-default"
                                 style={{
-                                    textShadow: '0 0 20px rgba(0,0,0,0.5)'
+                                    WebkitTextStroke: '1px rgba(255,255,255,0.3)',
+                                    color: 'transparent'
                                 }}
                             >
                                 {item}
                             </span>
-                            {/* Separator dot */}
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
                         </div>
                     ))}
                 </motion.div>
             </div>
 
-            {/* Fade Gradients */}
-            <div className="absolute top-0 left-0 h-full w-20 bg-gradient-to-r from-[#0A0C10] to-transparent pointer-events-none z-10" />
-            <div className="absolute top-0 right-0 h-full w-20 bg-gradient-to-l from-[#0A0C10] to-transparent pointer-events-none z-10" />
+            {/* Vignette */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#050608] via-transparent to-[#050608] pointer-events-none" />
         </div>
     );
 }

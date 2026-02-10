@@ -1,23 +1,35 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../../utils';
 import { motion } from 'framer-motion';
 import {
   Sparkles, Heart, ChevronLeft, ChevronRight,
-  ShoppingBag, ArrowRight, Package
+  ShoppingBag, ArrowRight, Package, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWishlist } from '../wishlist/WishlistContext';
 import TiltCard from '@/components/ui/TiltCard';
 
+// Helper for random viewer count generator
+const getRandomViewers = () => Math.floor(Math.random() * 15) + 4;
+
 function DropProductCard({ product, onQuickView }) {
   const { isInWishlist, toggleWishlist } = useWishlist();
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [previewImage, setPreviewImage] = useState(null);
+  const [currentViewers, setCurrentViewers] = useState(getRandomViewers());
   const inWishlist = isInWishlist(product.id);
 
-  const displayImage = previewImage || product.cover_image;
+  // Live Viewer Simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Randomly fluctuate viewers
+      setCurrentViewers(prev => {
+        const change = Math.floor(Math.random() * 5) - 2; // -2 to +2
+        return Math.max(3, prev + change);
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleWishlistClick = (e) => {
     e.preventDefault();
@@ -29,153 +41,142 @@ function DropProductCard({ product, onQuickView }) {
     <motion.div
       whileHover={{ y: -8 }}
       onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => {
-        setIsHovered(false);
-        setPreviewImage(null);
-      }}
-      className="flex-shrink-0 w-[280px] md:w-[300px] group"
+      onHoverEnd={() => setIsHovered(false)}
+      className="flex-shrink-0 w-[280px] md:w-[320px] group relative"
     >
       <Link to={createPageUrl('ProductDetail') + `?id=${product.id}`}>
         <div
-          className="glass-panel-hover rounded-[24px] overflow-hidden h-full flex flex-col bg-[#09090b] border border-zinc-800/50 hover:border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500"
+          className="relative rounded-[24px] overflow-hidden h-[450px] flex flex-col transition-all duration-500 bg-[#09090b]"
+          style={{
+            boxShadow: isHovered
+              ? '0 0 30px rgba(214, 178, 94, 0.15), 0 10px 40px rgba(0,0,0,0.5)'
+              : '0 10px 30px rgba(0,0,0,0.3)',
+            border: isHovered ? '1px solid rgba(214, 178, 94, 0.3)' : '1px solid rgba(255,255,255,0.05)'
+          }}
         >
-          {/* Image Container */}
-          <div className="relative aspect-square overflow-hidden bg-zinc-900">
-            {/* Image with Fade Transition */}
-            <div className="w-full h-full relative">
-              {product.cover_image ? (
-                <img
-                  src={product.cover_image}
-                  alt={product.name}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${!previewImage ? 'opacity-100' : 'opacity-0'}`}
-                  onLoad={() => setImageLoaded(true)}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center absolute inset-0">
-                  <Package className="w-16 h-16 text-zinc-800" />
-                </div>
-              )}
-
-              {previewImage && (
-                <img
-                  src={previewImage}
-                  alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover animate-fadeIn"
-                />
-              )}
-            </div>
-
-            {/* Gradient Overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-40 group-hover:opacity-60 transition-opacity"
-              style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%)' }}
-            />
-
-            {/* Badges & Actions Container (Clean Layout) */}
-            <div className="absolute inset-0 p-4 flex flex-col justify-between pointer-events-none">
-              {/* Top Row */}
-              <div className="flex justify-between items-start pointer-events-auto">
-                {/* Left: Badges */}
-                <div className="flex flex-col gap-2">
-                  <span
-                    className="px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-amber-400 text-black shadow-lg backdrop-blur-md"
-                  >
-                    NEU
-                  </span>
-                </div>
-
-                {/* Right: Availability */}
-                {product.in_stock ? (
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" title="Verfügbar" />
-                ) : (
-                  <span className="px-2 py-0.5 rounded bg-red-500/90 text-white text-[10px] font-bold shadow-lg">SOLD</span>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Actions (Center Hover) */}
-            <div className={`absolute inset-0 flex items-center justify-center gap-3 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-              <motion.button
-                initial={{ scale: 0.8 }}
-                animate={isHovered ? { scale: 1 } : { scale: 0.8 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onQuickView?.(product);
-                }}
-                className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-amber-400 transition-colors shadow-xl"
-              >
-                <ShoppingBag className="w-5 h-5" />
-              </motion.button>
-              <motion.button
-                initial={{ scale: 0.8 }}
-                animate={isHovered ? { scale: 1 } : { scale: 0.8 }}
-                onClick={handleWishlistClick}
-                className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors shadow-xl"
-              >
-                <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current text-red-500' : ''}`} />
-              </motion.button>
-            </div>
-          </div>
-
-          {/* Info Section */}
-          <div className="p-5 flex-1 flex flex-col gap-3 relative overflow-hidden">
-            {/* Background Glow */}
-            <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-            <div>
-              <div className="flex justify-between items-start gap-2 mb-1">
-                <h3 className="font-bold text-base text-zinc-100 leading-snug line-clamp-2 group-hover:text-amber-400 transition-colors">
-                  {product.name}
-                </h3>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-zinc-500">
-                <span className="font-mono">{product.sku}</span>
-                <span>•</span>
-                <span className="text-green-400">Sofort lieferbar</span>
-              </div>
-            </div>
-
-            {/* Color Preview Dots */}
-            {product.colors && product.colors.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 h-4">
-                {product.colors.map(color => (
-                  <button
-                    key={color.id}
-                    className="w-3 h-3 rounded-full border border-zinc-700/50 hover:scale-125 hover:border-white transition-all"
-                    style={{ backgroundColor: color.hex }}
-                    onMouseEnter={(e) => {
-                      e.preventDefault();
-                      if (color.images && color.images.length > 0) {
-                        setPreviewImage(color.images[0]);
-                      }
-                    }}
-                    onClick={(e) => e.preventDefault()}
-                  />
-                ))}
+          {/* Image Area */}
+          <div className="relative h-[65%] w-full overflow-hidden bg-[#0F1115]">
+            {product.cover_image ? (
+              <img
+                src={product.cover_image}
+                alt={product.name}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out"
+                style={{ transform: isHovered ? 'scale(1.08)' : 'scale(1)' }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <Package className="w-12 h-12 text-zinc-700" />
               </div>
             )}
 
-            <div className="mt-auto pt-4 flex items-center justify-between">
-              <span className="text-xl font-black text-white group-hover:text-amber-400 transition-colors">
-                {product.price}€
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-80" />
+
+            {/* LIVE Viewers Badge */}
+            <div className="absolute top-4 left-4 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+              <div className="relative w-2 h-2">
+                <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75" />
+                <div className="absolute inset-0 bg-red-500 rounded-full" />
+              </div>
+              <span className="text-[10px] font-bold text-white tracking-wide uppercase">
+                {currentViewers} Live
               </span>
+            </div>
+
+            {/* Quick Actions */}
+            <div className={`absolute bottom-4 right-4 flex flex-col gap-3 transition-all duration-300 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-10 opacity-0'}`}>
+              <button
+                onClick={(e) => { e.preventDefault(); onQuickView?.(product); }}
+                className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-gold transition-colors shadow-lg"
+                title="Quick View"
+              >
+                <Eye className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleWishlistClick}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-lg ${inWishlist ? 'bg-red-500 text-white' : 'bg-black/50 text-white hover:bg-red-500'}`}
+                title="Wishlist"
+              >
+                <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Info Area - Neon Style */}
+          <div className="flex-1 p-6 relative flex flex-col justify-between">
+
+            <div>
+              {/* Manufacturer / Badges */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
+                  New Season
+                </span>
+                {product.stock && product.stock < 5 && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-500 animate-pulse">
+                    Low Stock
+                  </span>
+                )}
+              </div>
+
+              <h3 className="font-bold text-xl text-white leading-tight mb-2 group-hover:text-gold transition-colors line-clamp-2">
+                {product.name}
+              </h3>
+
+              <div className="flex items-center gap-2 text-xs text-zinc-500 font-mono">
+                <span>{product.sku || 'N/A'}</span>
+                <span className="text-zinc-700">|</span>
+                <span>Authentic Supply</span>
+              </div>
+            </div>
+
+            {/* Price & Action */}
+            <div className="flex items-center justify-between mt-4 border-t border-white/5 pt-4">
+              <div className="flex flex-col">
+                <span className="text-xs text-zinc-500 uppercase">Price</span>
+                <span className="text-2xl font-black text-white">{product.price}€</span>
+              </div>
+
               <Button
                 size="sm"
-                variant="ghost"
-                className="hover:bg-amber-400 hover:text-black rounded-lg transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  // onAddToCart logic? Or link
-                }}
+                className={`bg-white/10 text-white hover:bg-gold hover:text-black border border-white/10 transition-all rounded-xl h-10 px-4 font-bold ${isHovered ? 'w-auto opacity-100' : 'w-10 px-0 opacity-50'}`}
               >
-                <ArrowRight className="w-5 h-5" />
+                {isHovered ? (
+                  <>Buy Now <ArrowRight className="w-4 h-4 ml-2" /></>
+                ) : (
+                  <ArrowRight className="w-5 h-5" />
+                )}
               </Button>
             </div>
+
+            {/* Neon Glow Line at Bottom */}
+            <div className={`absolute bottom-0 left-0 h-[2px] bg-gold transition-all duration-500 ${isHovered ? 'w-full opacity-100' : 'w-0 opacity-0'}`}
+              style={{ boxShadow: '0 0 10px #D6B25E, 0 0 20px #D6B25E' }}
+            />
           </div>
         </div>
       </Link>
     </motion.div>
   );
+}
+
+// Custom Countdown Component
+const Countdown = () => {
+  // Hardcoded next drop time for demo purposes (e.g., 2 days from now)
+  // In a real app, this would come from a config/DB
+  // For demo, we just make it look cool.
+  return (
+    <div className="flex items-center gap-4 text-center">
+      {['02', '14', '09'].map((num, i) => (
+        <div key={i} className="flex gap-1 items-baseline">
+          <div className="bg-[#0F1115] border border-white/10 px-3 py-2 rounded-lg min-w-[50px]">
+            <span className="text-2xl font-mono text-gold font-bold">{num}</span>
+          </div>
+          <span className="text-xs text-zinc-500 uppercase font-bold tracking-widest">{['d', 'h', 'm'][i]}</span>
+          {i < 2 && <span className="text-zinc-700 text-xl font-bold px-1">:</span>}
+        </div>
+      ))}
+    </div>
+  )
 }
 
 export default function FreshDropsSection({ products = [], loading = false, onQuickView }) {
@@ -193,7 +194,7 @@ export default function FreshDropsSection({ products = [], loading = false, onQu
 
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = 320;
+      const scrollAmount = 350;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -202,195 +203,82 @@ export default function FreshDropsSection({ products = [], loading = false, onQu
   };
 
   return (
-    <section className="py-16 md:py-24 relative z-10" style={{ background: '#0B0D12' }}>
-      {/* Subtle Background Glow - Behind Content Only */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] rounded-full blur-[120px] opacity-30"
-          style={{ background: 'radial-gradient(circle, rgba(214, 178, 94, 0.2), transparent 70%)' }}
-        />
+    <section className="py-24 relative overflow-hidden bg-[#050608]">
+
+      {/* Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top Glow */}
+        <div className="absolute -top-[200px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-purple-900/10 blur-[150px] rounded-full" />
+        {/* Bottom Glow */}
+        <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-gold/5 blur-[120px] rounded-full" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-8 md:mb-12"
-        >
-          {/* Badge */}
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-5 rounded-full"
-            style={{
-              background: 'rgba(214, 178, 94, 0.08)',
-              border: '1px solid rgba(214, 178, 94, 0.25)'
-            }}
-          >
-            <Sparkles className="w-4 h-4" style={{ color: '#F2D27C' }} />
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#F2D27C' }}>
-              Fresh Drops
-            </span>
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 relative z-10">
+
+        {/* Header Row */}
+        <div className="flex flex-wrap items-end justify-between gap-8 mb-12">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                Live Drop
+              </span>
+              <span className="text-zinc-500 text-sm font-medium">Next Drop in:</span>
+              <Countdown />
+            </div>
+
+            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-none">
+              FRESH <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold to-yellow-200">DROPS</span>
+            </h2>
           </div>
 
-          {/* Title - HIGH CONTRAST */}
-          <h2
-            className="text-4xl md:text-5xl lg:text-6xl font-black mb-3 tracking-tight"
-            style={{
-              color: 'rgba(255, 255, 255, 0.96)',
-              textShadow: '0 2px 30px rgba(0, 0, 0, 0.3)'
-            }}
-          >
-            Brandneu
-          </h2>
-
-          {/* Subtitle - READABLE */}
-          <p
-            className="text-base md:text-lg font-medium max-w-lg mx-auto mb-6"
-            style={{ color: 'rgba(255, 255, 255, 0.75)' }}
-          >
-            Die <span style={{ color: '#F2D27C' }}>heißesten</span> Drops – limitiert & exklusiv ✨
-          </p>
-
-          {/* Mini Chips */}
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <div
-              className="px-3 py-1.5 rounded-full text-xs font-semibold"
-              style={{
-                background: 'rgba(139, 92, 246, 0.15)',
-                border: '1px solid rgba(139, 92, 246, 0.3)',
-                color: 'rgba(196, 181, 253, 0.9)'
-              }}
-            >
-              ⚡ Neu diese Woche
-            </div>
-            <div
-              className="px-3 py-1.5 rounded-full text-xs font-semibold"
-              style={{
-                background: 'rgba(236, 72, 153, 0.15)',
-                border: '1px solid rgba(236, 72, 153, 0.3)',
-                color: 'rgba(251, 207, 232, 0.9)'
-              }}
-            >
-              🔥 Limitierte Stückzahl
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Product Slider */}
-        <div className="relative">
-          {/* Navigation Arrows - Desktop */}
-          {canScrollLeft && (
+          {/* Navigation */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => scroll('left')}
-              className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full items-center justify-center transition-all hover:scale-110"
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)'
-              }}
+              disabled={!canScrollLeft}
+              className="w-14 h-14 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
             >
-              <ChevronLeft className="w-6 h-6" style={{ color: '#FFF' }} />
+              <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform" />
             </button>
-          )}
-          {canScrollRight && (
             <button
               onClick={() => scroll('right')}
-              className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full items-center justify-center transition-all hover:scale-110"
-              style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)'
-              }}
+              disabled={!canScrollRight}
+              className="w-14 h-14 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all disabled:opacity-30 disabled:cursor-not-allowed group"
             >
-              <ChevronRight className="w-6 h-6" style={{ color: '#FFF' }} />
+              <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform" />
             </button>
-          )}
-
-          {/* Scrollable Container */}
-          <div
-            ref={scrollRef}
-            onScroll={checkScroll}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory"
-            style={{ scrollPaddingLeft: '1rem' }}
-          >
-            {loading ? (
-              // Skeleton Loading
-              Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-[280px] md:w-[300px] rounded-[20px] overflow-hidden"
-                  style={{ background: 'rgba(255, 255, 255, 0.04)' }}
-                >
-                  <div className="aspect-square animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.06)' }} />
-                  <div className="p-4 space-y-3">
-                    <div className="h-5 w-3/4 rounded animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.08)' }} />
-                    <div className="h-7 w-1/2 rounded animate-pulse" style={{ background: 'rgba(255, 255, 255, 0.08)' }} />
-                  </div>
-                </div>
-              ))
-            ) : products.length > 0 ? (
-              products.slice(0, 6).map((product, index) => (
-                <motion.div
-                  key={product.id}
-                  className="snap-start"
-                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: index * 0.1,
-                    duration: 0.5,
-                    ease: "easeOut"
-                  }}
-                >
-                  <TiltCard>
-                    <DropProductCard product={product} onQuickView={onQuickView} />
-                  </TiltCard>
-                </motion.div>
-              ))
-            ) : (
-              <div className="w-full py-12 text-center">
-                <p style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Keine Produkte verfügbar</p>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* CTA Row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8"
+        {/* Product Slider */}
+        <div
+          ref={scrollRef}
+          onScroll={checkScroll}
+          className="flex gap-6 overflow-x-auto pb-12 snap-x snap-mandatory scrollbar-none"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }} // Hide scrollbar
         >
-          <Link to={createPageUrl('Products')}>
-            <Button
-              className="h-12 px-8 rounded-xl font-bold"
-              style={{
-                background: 'linear-gradient(135deg, #D6B25E, #F2D27C)',
-                color: '#0B0D12'
-              }}
-            >
-              <ShoppingBag className="w-5 h-5 mr-2" />
-              Alle Fresh Drops
-            </Button>
-          </Link>
-          <Link to={createPageUrl('Products')}>
-            <Button
-              variant="outline"
-              className="h-12 px-6 rounded-xl font-semibold"
-              style={{
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                color: 'rgba(255, 255, 255, 0.85)'
-              }}
-            >
-              Zum Shop
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
-        </motion.div>
+          {loading ? (
+            Array(4).fill(0).map((_, i) => (
+              <div key={i} className="flex-shrink-0 w-[280px] md:w-[320px] h-[450px] bg-white/5 rounded-[24px] animate-pulse" />
+            ))
+          ) : products.length > 0 ? (
+            products.slice(0, 10).map((product, i) => (
+              <div key={product.id} className="snap-start" style={{ transitionDelay: `${i * 50}ms` }}>
+                <DropProductCard product={product} onQuickView={onQuickView} />
+              </div>
+            ))
+          ) : (
+            <div className="w-full h-64 flex flex-col items-center justify-center border border-white/10 rounded-2xl bg-white/5">
+              <p className="text-zinc-500">Currently no drops live.</p>
+              <Button variant="outline" className="mt-4 border-gold text-gold">Check Archive</Button>
+            </div>
+          )}
+        </div>
+
       </div>
     </section>
   );

@@ -11,6 +11,7 @@ import { errorHandler, notFound } from './middleware/error.middleware.js';
 import { performanceMiddleware } from './middleware/performance.middleware.js';
 import { requestLogger } from './middleware/request-logger.middleware.js';
 import { jsonSerializerMiddleware } from './middleware/json-serializer.middleware.js';
+import cookieParser from 'cookie-parser';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -81,6 +82,7 @@ app.use(cors(corsOptions));
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
 
 // Normalize Prisma types (Decimal/BigInt/Date) for JSON responses
 app.use(jsonSerializerMiddleware);

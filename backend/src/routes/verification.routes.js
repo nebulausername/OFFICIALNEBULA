@@ -11,6 +11,9 @@ const router = express.Router();
 router.post('/submit', verificationController.submitVerification); // Legacy JSON
 router.post('/browser-submit', authenticate, uploadPhoto, verificationController.submitBrowserVerification); // New Multipart
 // Status check (support both auth header and telegram_id query)
+router.post('/gate-check', verificationController.checkGateStatus);
+router.post('/applicant-register', uploadPhoto, verificationController.registerApplicant);
+
 // We don't force authenticate here because telegram bot might call it without token, 
 // so controller handles logic. But topopulate req.user we need optional auth middleware if possible.
 // For now, let's keep it public but check header in controller? 

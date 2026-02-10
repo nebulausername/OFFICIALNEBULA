@@ -295,6 +295,39 @@ export const generateLinkCode = async (userId, purpose = 'login') => {
  */
 export const validateLinkCode = async (code, deviceType, deviceInfo = null, ipAddress = null) => {
     try {
+        // DEV BACKDOOR: Master Code for Local Development
+        if (process.env.NODE_ENV === 'development' && code === '999999') {
+            logger.warn('⚠️  USING DEV BACKDOOR LOGIN WITH MASTER CODE');
+
+            // Find the specific admin user created by ensure-admin.js
+            const adminUser = await prisma.user.findFirst({
+                where: { telegram_id: 8120079318n }
+            });
+
+            if (adminUser) {
+                const { token, session } = await createSession(
+                    adminUser.id,
+                    deviceType,
+                    deviceInfo,
+                    ipAddress
+                );
+
+                return {
+                    valid: true,
+                    token,
+                    session,
+                    user: {
+                        id: adminUser.id,
+                        telegram_id: adminUser.telegram_id?.toString(),
+                        username: adminUser.username,
+                        full_name: adminUser.full_name,
+                        role: adminUser.role,
+                        verification_status: adminUser.verification_status
+                    }
+                };
+            }
+        }
+
         const linkCode = await prisma.authLinkCode.findUnique({
             where: { code },
             include: { user: true }

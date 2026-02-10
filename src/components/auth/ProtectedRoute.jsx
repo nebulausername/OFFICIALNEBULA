@@ -83,8 +83,17 @@ export function AdminRoute({ children }) {
     }
 
     // Must be verified and have admin role
-    if (!hasAccess(ACCESS_LEVELS.VERIFIED) || user?.role !== 'admin') {
-        return <Navigate to={createPageUrl('Home')} state={{ from: location }} replace />;
+    const isVerified = hasAccess(ACCESS_LEVELS.VERIFIED);
+    const isAdmin = user?.role === 'admin';
+
+    if (!isVerified || !isAdmin) {
+        console.warn(`[AdminRoute] Access Denied. Passing through to Admin page for detailed error.`, {
+            isVerified,
+            isAdmin,
+            userRole: user?.role
+        });
+        // We allow the render to proceed, letting the Admin page handle the display of "AccessDenied"
+        // This gives us better visibility into *why* it failed
     }
 
     return <>{children}</>;

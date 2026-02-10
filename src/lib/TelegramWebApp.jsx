@@ -112,7 +112,7 @@ export const getTelegramUser = () => {
  * Trigger haptic feedback on supported devices.
  * 
  * @param {'impact' | 'notification' | 'selection'} type - Type of haptic feedback
- * @param {'light' | 'medium' | 'heavy'} style - Intensity style (for impact type)
+ * @param {'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error'} style - Intensity style (for impact) or type (for notification)
  */
 export const hapticFeedback = (type = 'impact', style = 'medium') => {
   const tg = getTelegramWebApp();

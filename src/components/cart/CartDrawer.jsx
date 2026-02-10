@@ -6,26 +6,10 @@ import CartItem from './CartItem';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 
-export default function CartDrawer({ isOpen, onClose, cartItems, products, updateQuantity, removeItem }) {
+export default function CartDrawer({ isOpen, onClose, cartItems, products, updateQuantity, removeItem, totalPrice }) {
     if (!isOpen) return null;
 
-    const calculateTotal = () => {
-        return cartItems.reduce((sum, item) => {
-            const product = products[item.product_id];
-            if (!product) return sum;
-
-            let price = product.price;
-            if (item.selected_options?.price) price = item.selected_options.price;
-            else if (item.selected_options?.variant_id) {
-                const v = product.variants?.find(v => v.id === item.selected_options.variant_id);
-                if (v?.price_override) price = v.price_override;
-            }
-
-            return sum + (price * item.quantity);
-        }, 0);
-    };
-
-    const total = calculateTotal();
+    const total = totalPrice;
 
     return (
         <div className="fixed inset-0 z-[100] flex justify-end font-sans">

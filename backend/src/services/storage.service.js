@@ -19,7 +19,7 @@ export const initializeStorage = () => {
     try {
         insforge = createClient({
             baseUrl,
-            apiKey, // Use apiKey param which fits both service and anon keys in the SDK
+            apiKey: apiKey,
         });
         botLogger.info('✅ InsForge Storage Service initialized');
         return insforge;
@@ -37,36 +37,55 @@ export const initializeStorage = () => {
  * @returns {Promise<{url: string, key: string} | null>}
  */
 export const uploadVerificationPhoto = async (buffer, filename, mimeType = 'image/jpeg') => {
-    if (!insforge) initializeStorage();
-    if (!insforge) return null;
+    if (!insforge) {
+        initializeStorage();
+        if (!insforge) {
+            console.error('Storage service not initialized');
+            return null;
+        }
+    }
 
-    const bucketName = getEnv('INSFORGE_BUCKET_VERIFICATIONS', 'verifications');
+    const bucketName = getEnv('INSFORGE_BUCKET_VERIFICATIONS') || 'verifications';
 
     try {
-        // Convert buffer to Blob/File object as SDK expects
-        // Node.js doesn't have native File/Blob in older versions, but we can pass buffer if SDK supports it.
-        // The @insforge/sdk often expects a standard Request body format. 
-        // If SDK runs in Node, we might need a Blob polyfill or pass Buffer directly if supported.
-        // Based on docs: upload(path, file) where file is File | Blob.
+        // Ensure bucket exists
+        const { error: bucketError } = await insforge.storage.getBucket(bucketName);
+        if (bucketError) {
+            console.log(`Bucket ${bucketName} not found, attempting to create...`);
+            const { error: createError } = await insforge.storage.createBucket(bucketName, {
+                public: true,
+                fileSizeLimit: 5242880, // 5MB
+                allowedMimeTypes: ['image/jpeg', 'image/png']
+            });
+            if (createError) {
+                console.error('Failed to create bucket:', createError);
+                // Continue anyway, maybe getBucket failed due to permissions but upload might work if it exists
+            }
+        }
 
-        // Polyfill Blob if needed (Node 18+ has global Blob)
         const blob = new Blob([buffer], { type: mimeType });
-
         const { data, error } = await insforge.storage
             .from(bucketName)
-            .upload(filename, blob);
+            .upload(filename, blob, {
+                upsert: true
+            });
 
         if (error) {
-            botLogger.error('InsForge Upload Error:', error);
+            console.error('InsForge Upload Error detailed:', error);
             return null;
         }
 
+        // Get public URL
+        const { data: publicUrlData } = insforge.storage
+            .from(bucketName)
+            .getPublicUrl(filename);
+
         return {
-            url: data.url,
-            key: data.key
+            url: publicUrlData.publicUrl,
+            key: filename
         };
     } catch (error) {
-        botLogger.error('Storage Service Error:', error);
+        console.error('Storage Service Exception:', error);
         return null;
     }
 };

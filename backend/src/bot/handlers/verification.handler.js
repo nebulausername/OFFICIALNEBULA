@@ -130,3 +130,74 @@ export const handlePhotoMessage = async (bot, msg) => {
         );
     }
 };
+
+// NEW: Handle /verify command
+export const handleVerify = async (bot, msg) => {
+    if (!msg || !msg.from || !msg.chat) return;
+
+    const chatId = msg.chat.id;
+    const telegramId = msg.from.id.toString();
+
+    try {
+        botLogger.info(`Verification request from ${telegramId}`);
+
+        // Find user
+        const user = await prisma.user.findUnique({
+            where: { telegram_id: BigInt(telegramId) },
+        });
+
+        if (!user) {
+            await sendMessageWithRetry(bot, chatId, '❌ *Account nicht gefunden*\n\nBitte verknüpfe zuerst deinen Telegram-Account im Web-Portal.');
+            return;
+        }
+
+        // Check if already verified
+        if (user.verification_status === 'verified') {
+            await sendMessageWithRetry(bot, chatId, '✅ *Bereits verifiziert*\n\nDu hast bereits vollen Zugriff.');
+
+            // Force emit event anyway to sync sessions if stuck
+            try {
+                const { getIO } = await import('../../services/socket.service.js');
+                const io = getIO();
+                if (io) {
+                    io.to(`user_${user.id}`).emit('auth:verified', {
+                        status: 'verified',
+                        user_id: user.id
+                    });
+                }
+            } catch (e) { console.error("Socket emit fail", e); }
+            return;
+        }
+
+        // Update Status to Verified (Trusting the Telegram User)
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                verification_status: 'verified',
+                verified_at: new Date(),
+                verified_by: 'system_telegram_auto'
+            }
+        });
+
+        await sendMessageWithRetry(bot, chatId, '🚀 *Verifizierung erfolgreich!*\n\nDein Account wurde freigeschaltet. Das Web-Portal sollte sich automatisch aktualisieren.');
+
+        // Emit Realtime Event
+        try {
+            const { getIO } = await import('../../services/socket.service.js');
+            const io = getIO();
+            if (io) {
+                io.to(`user_${user.id}`).emit('auth:verified', {
+                    status: 'verified',
+                    user_id: user.id
+                });
+                botLogger.info(`Emitted auth:verified for user ${user.id}`);
+            }
+        } catch (socketError) {
+            botLogger.warn('Failed to emit socket event:', socketError);
+        }
+
+    } catch (error) {
+        botLogger.error('Error in handleVerify:', error);
+        await sendMessageWithRetry(bot, chatId, '❌ Ein Fehler ist aufgetreten.');
+    }
+};
