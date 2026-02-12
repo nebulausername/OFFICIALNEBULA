@@ -1,89 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, ArrowRight, Loader2, Key, Github, Chrome, Fingerprint } from 'lucide-react'; // Added icons
+import { Shield, ArrowRight, Loader2, Key, Fingerprint, Lock } from 'lucide-react';
 import { api } from '@/api';
 import { setToken } from '@/api/config';
-import { insforge } from '@/lib/insforge'; // Import InsForge client
-import { useTelegramWebApp, isTelegramWebApp, getTelegramUser, hapticFeedback, openTelegramLink } from '../lib/TelegramWebApp';
+import { apiClient } from '@/api/config';
+import { insforge } from '@/lib/insforge';
+import { useAuth } from '@/lib/AuthContext';
+import { useTelegramWebApp, isTelegramWebApp, getTelegramUser, hapticFeedback } from '../lib/TelegramWebApp';
 import VerificationStatus from '../components/auth/VerificationStatus';
 import CodeLoginModal from '../components/auth/CodeLoginModal';
-import BiometricGate from '../components/auth/BiometricGate'; // Import BiometricGate
+import WelcomeOverlay from '../components/onboarding/WelcomeOverlay';
+import LoginBackground from '../components/auth/LoginBackground';
+import SocialLoginButtons from '../components/auth/SocialLoginButtons';
 import { createPageUrl } from '../utils';
+import { toast } from 'sonner';
+
+import { useNebulaSound } from '@/contexts/SoundContext';
 
 export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { checkAppState } = useAuth();
+  const { playHover, playClick, playError, playSuccess } = useNebulaSound();
   const [loading, setLoading] = useState(true);
   const [verificationStatus, setVerificationStatus] = useState(null);
   const [verificationHandGesture, setVerificationHandGesture] = useState(null);
   const [rejectionReason, setRejectionReason] = useState(null);
   const [user, setUser] = useState(null);
   const [showCodeLogin, setShowCodeLogin] = useState(false);
-  const [bioVerified, setBioVerified] = useState(false); // New state
+
+  // Welcome Overlay State
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [welcomeUserName, setWelcomeUserName] = useState('');
 
   useTelegramWebApp();
 
   useEffect(() => {
     checkAuth();
-
-    // LISTEN FOR LIVE VERIFICATION
-    const { realtime } = insforge;
-    // We assume the user might have an ID if they visited before, or we might need to listen to a temporary channel
-    // For now, let's assume we don't know the ID until they try to login. 
-    // BUT the BiometricGate returns a USER or Request ID. 
-    // We need to pass the user ID from BiometricGate to here to listen.
   }, []);
-
-  // Callback when BiometricGate finishes (upload success)
-  const handleBioSubmitted = (response) => {
-    console.log("Biometric submitted", response);
-    // Response contains success, and maybe request info.
-    // We should start listening for verification:updated on the user's channel if we know it.
-    // But we don't have the user ID yet if they are new...
-    // Wait, the backend verification handler emits to `user_${user.id}`.
-    // If the user was found by face (unlikely without ID) or linked telegram...
-
-    // Let's assume the flow is:
-    // 1. User is NOT logged in.
-    // 2. User scans face.
-    // 3. User goes to Telegram /verify.
-    // 4. Telegram updates User.
-
-    // How does the frontend know WHICH user to listen for?
-    // Does BiometricGate return the user?
-    // In `BiometricGate.submitData`, it calls `onVerified(response)`.
-    // The backend `submitVerification` probably returns the user or request.
-
-    // We need to check what `api.verification.submitVerification` returns.
-    // Assuming it returns the user or request ID.
-    setBioVerified(true);
-  };
 
   const checkAuth = async () => {
     try {
       setLoading(true);
 
-      // Check if we have a token in URL (from Telegram WebApp)
-      const token = searchParams.get('token');
-      if (token) {
-        setToken(token);
+      // === 1. Check for InsForge OAuth Session (Google/GitHub/Apple callback) ===
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+
+      if (accessToken) {
+        console.log('🔑 OAuth callback detected...');
         try {
-          const userData = await api.auth.me();
-          setUser(userData);
-          navigate(createPageUrl('Home'));
-          return;
-        } catch (error) {
-          console.error('Token auth failed:', error);
+          const { data } = await insforge.auth.getCurrentSession();
+          const session = data?.session;
+
+          if (session?.user) {
+            await syncOAuthUser(session).catch(e => console.warn('Backend sync failed:', e));
+            await checkAppState();
+            window.history.replaceState(null, '', window.location.pathname);
+
+            playSuccess();
+
+            // Check if this is first login
+            const isFirstLogin = !localStorage.getItem('nebula_welcomed');
+            if (isFirstLogin) {
+              localStorage.setItem('nebula_welcomed', 'true');
+              setWelcomeUserName(session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Legend');
+              setShowWelcome(true);
+            } else {
+              toast.success('Willkommen zurück!', {
+                description: 'Du wurdest erfolgreich angemeldet.',
+                duration: 2000,
+              });
+              navigate(createPageUrl('Home'));
+            }
+            return;
+          }
+        } catch (err) {
+          console.error('OAuth sync failed:', err);
+          playError();
+          toast.error('Login fehlgeschlagen', {
+            description: 'Wir konnten deine Sitzung nicht verifizieren. Bitte versuche es erneut.'
+          });
         }
       }
 
-      // Check if running in Telegram WebApp
+      // === 2. Check for existing session ===
+      try {
+        const { data } = await insforge.auth.getCurrentSession();
+        if (data?.session?.user) {
+          navigate(createPageUrl('Home'));
+          return;
+        }
+      } catch (e) { }
+
+      // === 3. Telegram WebApp ===
       if (isTelegramWebApp()) {
         await handleTelegramAuth();
       } else {
-        // Not in Telegram - show demo/login options immediately
-        // Artificial delay for smooth transition effect
         setTimeout(() => setLoading(false), 800);
       }
     } catch (error) {
@@ -92,45 +106,50 @@ export default function Login() {
     }
   };
 
+  const syncOAuthUser = async (session) => {
+    try {
+      const igUser = session.user;
+      const payload = {
+        email: igUser.email,
+        provider: igUser.app_metadata?.provider || 'oauth',
+        provider_id: igUser.id,
+        full_name: igUser.user_metadata?.full_name || igUser.user_metadata?.name || '',
+        avatar_url: igUser.user_metadata?.avatar_url || '',
+        oauth_token: session.access_token
+      };
+
+      try {
+        return await api.auth.login(payload);
+      } catch (loginErr) {
+        return await api.auth.register(payload);
+      }
+    } catch (err) {
+      console.error('Sync error:', err);
+      return null;
+    }
+  };
+
   const handleTelegramAuth = async () => {
     try {
       const tgUser = getTelegramUser();
-      if (!tgUser) {
-        setLoading(false);
-        return;
-      }
+      if (!tgUser) { setLoading(false); return; }
 
-      try {
-        // @ts-ignore
-        const tg = window.Telegram?.WebApp;
-        const initData = tg?.initData;
-
-        if (initData) {
-          const response = await api.auth.telegramWebApp(initData);
-
-          if (response.token) {
-            setToken(response.token);
-            setUser(response.user);
-
-            if (response.user.verification_status === 'verified') {
-              hapticFeedback('notification', 'success');
-              navigate(createPageUrl('Home'));
-              return;
-            } else {
-              await loadVerificationStatus(tgUser.id.toString());
-            }
+      const tg = window.Telegram?.WebApp;
+      if (tg?.initData) {
+        const response = await api.auth.telegramWebApp(tg.initData);
+        if (response.token) {
+          setToken(response.token);
+          setUser(response.user);
+          if (response.user.verification_status === 'verified') {
+            navigate(createPageUrl('Home'));
+            return;
+          } else {
+            await loadVerificationStatus(tgUser.id.toString());
           }
-        }
-      } catch (error) {
-        // @ts-ignore
-        if (error.status === 403 && error.data?.verification_status) {
-          await loadVerificationStatus(tgUser.id.toString());
-        } else {
-          console.error('Telegram auth error:', error);
         }
       }
     } catch (error) {
-      console.error('Error in handleTelegramAuth:', error);
+      if (error.status === 403) await loadVerificationStatus(getTelegramUser()?.id.toString());
     } finally {
       setLoading(false);
     }
@@ -138,253 +157,192 @@ export default function Login() {
 
   const loadVerificationStatus = async (telegramId) => {
     try {
-      // @ts-ignore
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/verification/status?telegram_id=${telegramId}`
-      );
-
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/verification/status?telegram_id=${telegramId}`);
       if (response.ok) {
         const data = await response.json();
         setVerificationStatus(data.verification_status);
         setVerificationHandGesture(data.verification_hand_gesture);
         setRejectionReason(data.rejection_reason);
       }
-    } catch (error) {
-      console.error('Error loading verification status:', error);
-    }
-  };
-
-  const handleRetry = () => {
-    hapticFeedback('impact', 'medium');
-    if (isTelegramWebApp()) {
-      openTelegramLink('https://t.me/NebulaOrderBot');
-    } else {
-      window.open('https://t.me/NebulaOrderBot', '_blank');
-    }
+    } catch (error) { }
   };
 
   const handleSocialLogin = async (provider) => {
     try {
-      const redirectUrl = `${window.location.origin}/login`;
+      playClick();
       const { error } = await insforge.auth.signInWithOAuth({
         provider,
-        redirectTo: redirectUrl,
-        // @ts-ignore
-        options: {
-          queryParams: {
-            redirect_to: redirectUrl
-          }
-        }
+        redirectTo: `${window.location.origin}/login`,
       });
       if (error) throw error;
     } catch (error) {
       console.error('Social login error:', error);
+      playError();
+      toast.error('Verbindungsfehler', {
+        description: `Login mit ${provider} konnte nicht gestartet werden.`
+      });
     }
   };
 
-  // Loading Screen
-  if (loading && isTelegramWebApp()) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0C10] overflow-hidden relative">
-        {/* ... existing loading content ... */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-[#0A0C10] to-[#0A0C10]" />
-        <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className="relative z-10 w-20 h-20 rounded-full p-[2px] bg-gradient-to-tr from-[#D6B25E] via-purple-500 to-transparent mb-6">
-          <div className="w-full h-full bg-[#0A0C10] rounded-full flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-[#D6B25E] animate-spin" />
-          </div>
-        </motion.div>
-        <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 text-lg font-light tracking-[0.2em] text-white/50">LOADING NEBULA</motion.p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#050608] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(214,178,94,0.15),_transparent_70%)]" />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 rounded-full border-t-2 border-r-2 border-gold relative z-10"
+        />
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-6 text-gold/80 font-mono text-xs tracking-[0.3em] uppercase"
+        >
+          Authenticating
+        </motion.p>
       </div>
     );
   }
 
-  // Verification Status View
   if (isTelegramWebApp() && verificationStatus) {
     return (
-      <div className="min-h-screen bg-[#0A0C10]">
-        <div className="max-w-2xl mx-auto px-4 py-20">
-          <VerificationStatus
-            verificationStatus={verificationStatus}
-            verificationHandGesture={verificationHandGesture}
-            rejectionReason={rejectionReason}
-            verificationSubmittedAt={user?.verification_submitted_at}
-            onRetry={handleRetry}
-          />
-        </div>
-      </div>
+      <VerificationStatus
+        verificationStatus={verificationStatus}
+        verificationHandGesture={verificationHandGesture}
+        rejectionReason={rejectionReason}
+        onRetry={() => window.open('https://t.me/NebulaOrderBot', '_blank')}
+      />
     );
   }
 
-  // BIOMETRIC GATE - BLOCKS LOGIN UNTIL VERIFIED
-  // Only show if NOT loading, and NOT in Telegram Web App (users there are auth'd via TG)
-  // If user explicitly asks for Google/Github, they presumably are on web.
-  if (!loading && !isTelegramWebApp() && !bioVerified) {
-    // @ts-ignore
-    return <BiometricGate email={user?.email} onVerified={() => setBioVerified(true)} />;
-  }
-
-  // Main Login / Landing Page
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0A0C10] flex items-center justify-center font-sans selection:bg-[#D6B25E]/30">
+    <div className="min-h-[100dvh] bg-[#050608] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-gold/30">
 
-      {/* 🌌 Advanced Nebula Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(17,24,39,1),_rgba(10,12,16,1))]" />
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.03]" />
-        {/* Animated Orbs */}
-        <motion.div animate={{ x: [0, 50, 0], y: [0, -30, 0], scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] bg-purple-600/20" />
-        <motion.div animate={{ x: [0, -50, 0], y: [0, 30, 0], scale: [1.2, 1, 1.2], opacity: [0.1, 0.15, 0.1] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }} className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full blur-[130px] bg-[#D6B25E]/10" />
-      </div>
+      {/* 🌌 Background Ambience */}
+      <LoginBackground />
 
-      <div className="relative z-10 w-full max-w-md px-6">
-        <AnimatePresence>
+      <div className="w-full max-w-sm relative z-10">
+
+        {/* Logo Animation */}
+        <div className="flex flex-col items-center mb-12">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8, type: "spring" }}
+            className="relative w-24 h-24 mb-6"
           >
-            {/* Logo Section */}
-            <div className="text-center mb-12 relative">
-              {/* ... (Logo code unchanged) ... */}
-              <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2, duration: 1 }} className="relative inline-block group">
-                <div className="absolute inset-0 bg-[#D6B25E] rounded-[2rem] blur-3xl opacity-10 group-hover:opacity-20 transition-opacity duration-1000" />
-                <div className="w-32 h-32 mx-auto mb-8 rounded-[2rem] p-6 relative z-10 bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-2xl shadow-2xl ring-1 ring-white/20">
-                  <img src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/69485b06ec2f632e2b935c31/4773f2b91_file_000000002dac71f4bee1a2e6c4d7d84f.png" alt="Nebula Supply" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(214,178,94,0.5)]" />
-                </div>
-              </motion.div>
-              <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="text-5xl font-black mb-3 tracking-tighter">
-                <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50 drop-shadow-sm">NEBULA</span>
-              </motion.h1>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="flex items-center justify-center gap-3">
-                <div className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[#D6B25E]" />
-                <p className="text-[#D6B25E] font-bold tracking-[0.25em] text-xs uppercase">Premium Supply</p>
-                <div className="h-[1px] w-8 bg-gradient-to-l from-transparent to-[#D6B25E]" />
-              </motion.div>
-
-              {/* Verified Badge */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mt-4 flex items-center justify-center gap-2"
-              >
-                <Fingerprint className="w-4 h-4 text-green-500" />
-                <span className="text-green-500 text-[10px] font-mono tracking-widest uppercase">Biometric Verified</span>
-              </motion.div>
+            <div className="absolute inset-0 bg-gold/20 blur-xl rounded-full" />
+            <div className="relative w-full h-full bg-gradient-to-b from-zinc-800 to-black rounded-3xl border border-white/10 flex items-center justify-center shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-tr from-gold/10 to-transparent" />
+              <Shield className="w-10 h-10 text-gold relative z-10" />
             </div>
-
-            {/* Action Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="space-y-6"
-            >
-              {/* Social Login Buttons - Revealed after Biometric */}
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => handleSocialLogin('google')}
-                  className="flex items-center justify-center gap-3 bg-white text-black p-4 rounded-xl font-bold hover:bg-zinc-200 transition-colors"
-                >
-                  <Chrome className="w-5 h-5" />
-                  Google
-                </button>
-                <button
-                  onClick={() => handleSocialLogin('github')}
-                  className="flex items-center justify-center gap-3 bg-[#24292e] text-white p-4 rounded-xl font-bold hover:bg-[#2f363d] transition-colors border border-white/10"
-                >
-                  <Github className="w-5 h-5" />
-                  GitHub
-                </button>
-              </div>
-
-              <div className="relative flex items-center gap-4 py-2">
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-xs text-zinc-500 uppercase tracking-widest">Or Classic Login</span>
-                <div className="flex-1 h-px bg-white/10" />
-              </div>
-
-              {/* Telegram Login */}
-              <button onClick={() => { const botUsername = import.meta.env.VITE_BOT_USERNAME || 'NebulaOrderBot'; window.open(`https://t.me/${botUsername}`, '_blank'); }} className="group relative w-full overflow-hidden rounded-2xl">
-                <div className="relative bg-[#0088cc]/10 hover:bg-[#0088cc]/20 border border-[#0088cc]/30 rounded-2xl p-4 flex items-center justify-between transition-all duration-300">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-[#0088cc]/20 flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-[#0088cc]" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-white font-semibold text-base mb-0.5">Telegram Login</div>
-                      <div className="text-zinc-500 text-xs font-medium">Auto-Sync</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-[#0088cc]/50 group-hover:text-[#0088cc] transition-colors" />
-                </div>
-              </button>
-
-              {/* Code Login */}
-              <button onClick={() => setShowCodeLogin(true)} className="group relative w-full overflow-hidden rounded-2xl">
-                <div className="relative bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl p-4 flex items-center justify-between transition-all duration-300">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center">
-                      <Key className="w-5 h-5 text-zinc-400" />
-                    </div>
-                    <div className="text-left">
-                      <div className="text-white font-semibold text-base mb-0.5">Passcode Login</div>
-                      <div className="text-zinc-500 text-xs font-medium">Legacy Access</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors" />
-                </div>
-              </button>
-
-              {/* Preview Button */}
-              <button onClick={() => navigate(createPageUrl('Home'))} className="w-full text-center text-zinc-500 hover:text-white text-xs uppercase tracking-widest transition-colors pt-4">
-                Continue as Guest
-              </button>
-
-            </motion.div>
-
-            {/* Footer */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center mt-12 space-y-2">
-              <p className="text-[10px] text-zinc-600 font-medium tracking-widest uppercase">&copy; 2026 Nebula Supply</p>
-
-              {/* DEV BACKDOOR - Only visible on localhost */}
-              {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
-                <button
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      const response = await api.post('/auth/validate-code', { code: '999999' });
-                      if (response.data.success) {
-                        setToken(response.data.token);
-                        setUser(response.data.user);
-                        window.location.href = createPageUrl('Admin');
-                      }
-                    } catch (e) {
-                      console.error("Dev login failed", e);
-                      alert("Dev Login Failed. Make sure backend is running with NODE_ENV=development and you ran ensure-admin.js");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  className="text-[10px] text-zinc-800 hover:text-red-500 font-mono border border-zinc-900 hover:border-red-500/20 px-2 py-1 rounded"
-                >
-                  🔴 DEV ADMIN LOGIN (Bypass)
-                </button>
-              )}
-            </motion.div>
           </motion.div>
-        </AnimatePresence>
+
+          <motion.h1
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60"
+          >
+            NEBULA
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-xs font-bold tracking-[0.4em] text-gold mt-2 uppercase"
+          >
+            Access Control
+          </motion.p>
+        </div>
+
+        {/* Login Options */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="space-y-4"
+        >
+          <SocialLoginButtons onLogin={handleSocialLogin} />
+
+          <div className="flex items-center gap-4 py-4">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="text-zinc-600 text-xs font-mono uppercase">Alternative</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
+
+          <button
+            onClick={() => {
+              playClick();
+              setShowCodeLogin(true);
+            }}
+            onMouseEnter={playHover}
+            className="w-full h-12 rounded-xl border border-dashed border-white/10 text-zinc-500 hover:text-white hover:border-gold/30 hover:bg-gold/5 transition-all text-sm font-medium flex items-center justify-center gap-2"
+          >
+            <Key className="w-4 h-4" />
+            Enter Access Code
+          </button>
+
+        </motion.div>
+
+        {/* Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-12 text-center"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5">
+            <Lock className="w-3 h-3 text-emerald-500" />
+            <span className="text-[10px] text-zinc-400 font-medium">Secured by InsForge Authorization</span>
+          </div>
+        </motion.div>
+
+        {/* Dev Backdoor */}
+        {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+          <div className="absolute bottom-4 left-0 right-0 text-center opacity-20 hover:opacity-100 transition-opacity">
+            <button
+              onClick={async () => {
+                const res = await apiClient.post('/auth/validate-code', { code: '999999' });
+                if (res?.data?.success) {
+                  setToken(res.data.token);
+                  setUser(res.data.user);
+                  toast.success('DEV ACCESS GRANTED');
+                  window.location.href = createPageUrl('Home');
+                }
+              }}
+              className="text-[9px] text-zinc-500 uppercase tracking-widest hover:text-red-500"
+            >
+              [DEV BYPASS]
+            </button>
+          </div>
+        )}
+
       </div>
 
       <CodeLoginModal
         isOpen={showCodeLogin}
         onClose={() => setShowCodeLogin(false)}
-        onSuccess={(userData) => {
-          setUser(userData);
-          // Force refresh to ensure AuthContext picks it up
-          window.location.href = createPageUrl('Admin');
+        onSuccess={(u) => {
+          setUser(u);
+          window.location.href = createPageUrl('Home');
         }}
       />
+
+      {/* Welcome Overlay */}
+      {showWelcome && (
+        <WelcomeOverlay
+          userName={welcomeUserName}
+          onStart={() => {
+            setShowWelcome(false);
+            navigate(createPageUrl('Home'));
+          }}
+          onSkip={() => {
+            setShowWelcome(false);
+            navigate(createPageUrl('Home'));
+          }}
+        />
+      )}
     </div>
   );
 }

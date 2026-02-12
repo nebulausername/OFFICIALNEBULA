@@ -132,283 +132,282 @@ export default function Checkout() {
   const handleSubmitOrder = async () => {
     setSubmitting(true);
     try {
-      try {
-        const total = totalPrice;
+      const total = totalPrice;
 
-        const request = await api.entities.Request.create({
-          contact_info: {
-            name: formData.name,
-            phone: formData.phone,
-            telegram: formData.telegram,
-            email: formData.email,
-            address: formData.address,
-            city: formData.city,
-            zip: formData.zip,
-            country: formData.country,
-            shippingMethod: formData.shippingMethod
-          },
-          note: formData.notes,
-          cart_items: cartItems.map(item => ({ id: item.id }))
+      const request = await api.entities.Request.create({
+        contact_info: {
+          name: formData.name,
+          phone: formData.phone,
+          telegram: formData.telegram,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          zip: formData.zip,
+          country: formData.country,
+          shippingMethod: formData.shippingMethod
+        },
+        note: formData.notes,
+        cart_items: cartItems.map(item => ({ id: item.id }))
+      });
+
+      // Create a Ticket for real-time order tracking
+      await api.entities.Ticket.create({
+        user_id: user?.id,
+        type: 'order',
+        subject: `Bestellung #${request.id?.slice(0, 8) || 'NEU'}`,
+        message: `Neue Bestellung eingegangen!\n\nKunde: ${formData.name}\nE-Mail: ${formData.email}\nTelegram: ${formData.telegram || '-'}\nAdresse: ${formData.address}, ${formData.zip} ${formData.city}\n\nGesamtsumme: ${total.toFixed(2)}€\nVersand: ${formData.shippingMethod === 'express' ? 'Express' : 'Standard'}`,
+        status: 'open',
+        priority: formData.shippingMethod === 'express' ? 'high' : 'normal',
+        metadata: {
+          order_id: request.id,
+          total: total,
+          items_count: cartItems.length
+        }
+      });
+
+      playSuccess();
+      const duration = 3000;
+      const end = Date.now() + duration;
+
+      const colors = ['#D6B25E', '#F2D27C', '#FFFFFF'];
+
+      (function frame() {
+        const left = end - Date.now();
+        if (left <= 0) return;
+
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: colors,
+          zIndex: 9999
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: colors,
+          zIndex: 9999
         });
 
-        // Create a Ticket for real-time order tracking
-        await api.entities.Ticket.create({
-          user_id: user?.id,
-          type: 'order',
-          subject: `Bestellung #${request.id?.slice(0, 8) || 'NEU'}`,
-          message: `Neue Bestellung eingegangen!\n\nKunde: ${formData.name}\nE-Mail: ${formData.email}\nTelegram: ${formData.telegram || '-'}\nAdresse: ${formData.address}, ${formData.zip} ${formData.city}\n\nGesamtsumme: ${total.toFixed(2)}€\nVersand: ${formData.shippingMethod === 'express' ? 'Express' : 'Standard'}`,
-          status: 'open',
-          priority: formData.shippingMethod === 'express' ? 'high' : 'normal',
-          metadata: {
-            order_id: request.id,
-            total: total,
-            items_count: cartItems.length
-          }
-        });
+        requestAnimationFrame(frame);
+      }());
 
-        playSuccess();
-        const duration = 3000;
-        const end = Date.now() + duration;
+      setCompletedOrder(request);
 
-        const colors = ['#D6B25E', '#F2D27C', '#FFFFFF'];
+      // Clear cart context
+      await clearCart();
 
-        (function frame() {
-          const left = end - Date.now();
-          if (left <= 0) return;
+      // Redirect to the new Ticket Page after a short delay for confetti
+      setTimeout(() => {
+        navigate(`/ticket/${request.id}`);
+      }, 2000);
 
-          confetti({
-            particleCount: 3,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 },
-            colors: colors,
-            zIndex: 9999
-          });
-          confetti({
-            particleCount: 3,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 },
-            colors: colors,
-            zIndex: 9999
-          });
-
-          requestAnimationFrame(frame);
-        }());
-
-        setCompletedOrder(request);
-
-        // Clear cart context
-        await clearCart();
-
-        // Redirect to the new Ticket Page after a short delay for confetti
-        setTimeout(() => {
-          navigate(`/ticket/${request.id}`);
-        }, 2000);
-
-      } catch (error) {
-        console.error('Error submitting order:', error);
-        playError();
-      } finally {
-        setSubmitting(false);
-      }
-    };
-
-    if (loading) {
-      return (
-        <div className="min-h-screen bg-[#050608] flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
-        </div>
-      );
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      playError();
+    } finally {
+      setSubmitting(false);
     }
+  };
 
+  if (loading) {
     return (
-      <div className="min-h-screen bg-[#050608] text-white selection:bg-gold/30 font-sans pb-20">
-        {/* Navbar Minimal */}
-        <div className="glass-panel sticky top-0 z-50 border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div onClick={() => navigate(-1)} className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white transition-colors group">
-              <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              </div>
-              <span className="font-medium hidden sm:inline">Zurück</span>
+      <div className="min-h-screen bg-[#050608] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#050608] text-white selection:bg-gold/30 font-sans pb-20">
+      {/* Navbar Minimal */}
+      <div className="glass-panel sticky top-0 z-50 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div onClick={() => navigate(-1)} className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white transition-colors group">
+            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
             </div>
-            <div className="font-black text-xl tracking-tight text-white flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-gold" />
-              SECURE CHECKOUT
-            </div>
-            <div className="w-[70px]"></div>
+            <span className="font-medium hidden sm:inline">Zurück</span>
           </div>
+          <div className="font-black text-xl tracking-tight text-white flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-gold" />
+            SECURE CHECKOUT
+          </div>
+          <div className="w-[70px]"></div>
         </div>
+      </div>
 
-        {/* Gamification Bar - Dynamic 🚀 */}
-        <div className="bg-gradient-to-r from-purple-900/10 via-purple-900/20 to-purple-900/10 border-b border-purple-500/10 py-3 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-sm font-medium">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center border border-gold/30">
-                <Sparkles className="w-4 h-4 text-gold" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white font-bold text-xs uppercase tracking-wider">Dein XP Boost</span>
-                <span className="text-purple-300 text-xs">+{calculateXP(totalPrice)} Punkte bei Abschluss</span>
-              </div>
+      {/* Gamification Bar - Dynamic 🚀 */}
+      <div className="bg-gradient-to-r from-purple-900/10 via-purple-900/20 to-purple-900/10 border-b border-purple-500/10 py-3 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-sm font-medium">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center border border-gold/30">
+              <Sparkles className="w-4 h-4 text-gold" />
             </div>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <div className="flex-1 sm:w-48 h-2.5 bg-black/40 rounded-full overflow-hidden border border-white/5 relative group">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min((totalPrice / 150) * 100, 100)}%` }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] relative"
-                >
-                  <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                </motion.div>
-              </div>
-              <span className="text-zinc-400 text-xs whitespace-nowrap">
-                {totalPrice >= 150 ?
-                  <span className="text-emerald-400 font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> VIP Status</span> :
-                  <span>Noch <span className="text-white font-bold">{(150 - totalPrice).toFixed(2)}€</span> bis VIP</span>
-                }
-              </span>
+            <div className="flex flex-col">
+              <span className="text-white font-bold text-xs uppercase tracking-wider">Dein XP Boost</span>
+              <span className="text-purple-300 text-xs">+{calculateXP(totalPrice)} Punkte bei Abschluss</span>
             </div>
           </div>
+
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex-1 sm:w-48 h-2.5 bg-black/40 rounded-full overflow-hidden border border-white/5 relative group">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min((totalPrice / 150) * 100, 100)}%` }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] relative"
+              >
+                <div className="absolute inset-0 bg-white/20 animate-pulse" />
+              </motion.div>
+            </div>
+            <span className="text-zinc-400 text-xs whitespace-nowrap">
+              {totalPrice >= 150 ?
+                <span className="text-emerald-400 font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> VIP Status</span> :
+                <span>Noch <span className="text-white font-bold">{(150 - totalPrice).toFixed(2)}€</span> bis VIP</span>
+              }
+            </span>
+          </div>
         </div>
+      </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
-            {/* Left Column: Form & Steps */}
-            <div className="lg:col-span-7 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Left Column: Form & Steps */}
+          <div className="lg:col-span-7 space-y-8">
 
-              {/* Steps Indicator */}
-              <div className="flex items-center gap-4 mb-8">
-                {steps.map((step, i) => (
-                  <div key={i} className={`flex items-center gap-2 ${i <= currentStep ? 'opacity-100' : 'opacity-40'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${currentStep > i ? 'bg-gold border-gold text-black' :
-                      currentStep === i ? 'border-gold text-gold shadow-[0_0_10px_rgba(214,178,94,0.3)]' :
-                        'border-zinc-700 text-zinc-500'
-                      }`}>
-                      {currentStep > i ? <Check size={14} /> : i + 1}
-                    </div>
-                    <span className={`hidden sm:inline font-bold text-sm ${currentStep === i ? 'text-white' : 'text-zinc-500'}`}>{step.title}</span>
-                    {i < steps.length - 1 && (
-                      <div className="w-8 h-0.5 bg-zinc-800 mx-2" />
-                    )}
+            {/* Steps Indicator */}
+            <div className="flex items-center gap-4 mb-8">
+              {steps.map((step, i) => (
+                <div key={i} className={`flex items-center gap-2 ${i <= currentStep ? 'opacity-100' : 'opacity-40'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${currentStep > i ? 'bg-gold border-gold text-black' :
+                    currentStep === i ? 'border-gold text-gold shadow-[0_0_10px_rgba(214,178,94,0.3)]' :
+                      'border-zinc-700 text-zinc-500'
+                    }`}>
+                    {currentStep > i ? <Check size={14} /> : i + 1}
                   </div>
-                ))}
-              </div>
+                  <span className={`hidden sm:inline font-bold text-sm ${currentStep === i ? 'text-white' : 'text-zinc-500'}`}>{step.title}</span>
+                  {i < steps.length - 1 && (
+                    <div className="w-8 h-0.5 bg-zinc-800 mx-2" />
+                  )}
+                </div>
+              ))}
+            </div>
 
-              <AnimatePresence mode="wait" custom={currentStep}>
-                {currentStep === 0 && (
-                  <motion.div
-                    key="step0"
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    custom={1}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-6"
+            <AnimatePresence mode="wait" custom={currentStep}>
+              {currentStep === 0 && (
+                <motion.div
+                  key="step0"
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  custom={1}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <h2 className="text-3xl font-black mb-6 text-white">Versanddetails</h2>
+
+                  {/* Express Shipping Option */}
+                  <div
+                    onClick={() => setFormData({ ...formData, shippingMethod: formData.shippingMethod === 'express' ? 'standard' : 'express' })}
+                    className={`cursor-pointer group relative overflow-hidden p-6 rounded-2xl border transition-all ${formData.shippingMethod === 'express'
+                      ? 'border-gold bg-gold/5 shadow-[0_0_20px_rgba(214,178,94,0.1)]'
+                      : 'border-white/10 bg-white/5 hover:border-gold/30'
+                      }`}
                   >
-                    <h2 className="text-3xl font-black mb-6 text-white">Versanddetails</h2>
+                    <div className="flex justify-between items-start relative z-10">
+                      <div className="flex gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${formData.shippingMethod === 'express' ? 'bg-gold text-black' : 'bg-white/10 text-zinc-400'}`}>
+                          <Package size={24} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg text-white">Express Lieferung</h3>
+                          <p className="text-zinc-400 text-sm">Bevorzugte Behandlung (2-4 Tage)</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="block font-bold text-emerald-400 text-sm bg-emerald-400/10 px-2 py-1 rounded">SCHNELLER</span>
+                        {formData.shippingMethod === 'express' && <CheckCircle2 className="text-gold ml-auto mt-2" />}
+                      </div>
+                    </div>
+                  </div>
 
-                    {/* Express Shipping Option */}
-                    <div
-                      onClick={() => setFormData({ ...formData, shippingMethod: formData.shippingMethod === 'express' ? 'standard' : 'express' })}
-                      className={`cursor-pointer group relative overflow-hidden p-6 rounded-2xl border transition-all ${formData.shippingMethod === 'express'
-                        ? 'border-gold bg-gold/5 shadow-[0_0_20px_rgba(214,178,94,0.1)]'
-                        : 'border-white/10 bg-white/5 hover:border-gold/30'
-                        }`}
+                  {/* Form Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Name</label>
+                      <Input
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
+                        placeholder="Max Mustermann"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">E-Mail</label>
+                      <Input
+                        value={formData.email}
+                        onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
+                        placeholder="max@example.com"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Straße & Hausnummer</label>
+                      <Input
+                        value={formData.address}
+                        onChange={e => setFormData({ ...formData, address: e.target.value })}
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
+                        placeholder="Musterstraße 123"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1 flex items-center gap-2">PLZ <span className="text-gold text-[10px]">AUTO-FILL</span></label>
+                      <Input
+                        value={formData.zip}
+                        onChange={handleZipChange}
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
+                        placeholder="10115"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Stadt</label>
+                      <Input
+                        value={formData.city}
+                        onChange={e => setFormData({ ...formData, city: e.target.value })}
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
+                        placeholder="Berlin"
+                      />
+                    </div>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1 flex items-center gap-2"><MessageCircle className="w-3 h-3" /> Telegram</label>
+                      <Input
+                        value={formData.telegram}
+                        onChange={e => setFormData({ ...formData, telegram: e.target.value })}
+                        className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white pl-10 relative"
+                        placeholder="@username"
+                      />
+                      {/* Note: Icon positioning would be better with a wrapper in Input component or absolute div here, kept simple for now */}
+                    </div>
+                  </div>
+
+                  <div className="pt-6">
+                    <Button
+                      onClick={() => setCurrentStep(1)}
+                      disabled={!formData.name || !formData.email || !formData.address}
+                      className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                     >
-                      <div className="flex justify-between items-start relative z-10">
-                        <div className="flex gap-4">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${formData.shippingMethod === 'express' ? 'bg-gold text-black' : 'bg-white/10 text-zinc-400'}`}>
-                            <Package size={24} />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-lg text-white">Express Lieferung</h3>
-                            <p className="text-zinc-400 text-sm">Bevorzugte Behandlung (2-4 Tage)</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="block font-bold text-emerald-400 text-sm bg-emerald-400/10 px-2 py-1 rounded">SCHNELLER</span>
-                          {formData.shippingMethod === 'express' && <CheckCircle2 className="text-gold ml-auto mt-2" />}
-                        </div>
-                      </div>
-                    </div>
+                      Weiter zur Zahlung
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
 
-                    {/* Form Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Name</label>
-                        <Input
-                          value={formData.name}
-                          onChange={e => setFormData({ ...formData, name: e.target.value })}
-                          className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
-                          placeholder="Max Mustermann"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">E-Mail</label>
-                        <Input
-                          value={formData.email}
-                          onChange={e => setFormData({ ...formData, email: e.target.value })}
-                          className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
-                          placeholder="max@example.com"
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Straße & Hausnummer</label>
-                        <Input
-                          value={formData.address}
-                          onChange={e => setFormData({ ...formData, address: e.target.value })}
-                          className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
-                          placeholder="Musterstraße 123"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1 flex items-center gap-2">PLZ <span className="text-gold text-[10px]">AUTO-FILL</span></label>
-                        <Input
-                          value={formData.zip}
-                          onChange={handleZipChange}
-                          className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
-                          placeholder="10115"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Stadt</label>
-                        <Input
-                          value={formData.city}
-                          onChange={e => setFormData({ ...formData, city: e.target.value })}
-                          className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white"
-                          placeholder="Berlin"
-                        />
-                      </div>
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1 flex items-center gap-2"><MessageCircle className="w-3 h-3" /> Telegram</label>
-                        <Input
-                          value={formData.telegram}
-                          onChange={e => setFormData({ ...formData, telegram: e.target.value })}
-                          className="h-12 bg-black/20 border-white/10 focus:border-gold rounded-xl text-white pl-10 relative"
-                          placeholder="@username"
-                        />
-                        {/* Note: Icon positioning would be better with a wrapper in Input component or absolute div here, kept simple for now */}
-                      </div>
-                    </div>
-
-                    <div className="pt-6">
-                      <Button
-                        onClick={() => setCurrentStep(1)}
-                        disabled={!formData.name || !formData.email || !formData.address}
-                        className="w-full h-14 bg-white text-black hover:bg-zinc-200 font-black text-lg rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
-                      >
-                        Weiter zur Zahlung
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {currentStep === 1 && (
+              {currentStep === 1 && (
                 <motion.div
                   key="step1"
                   variants={slideVariants}
@@ -439,13 +438,15 @@ export default function Checkout() {
                     disabled={submitting}
                     className="w-full h-14 bg-gradient-to-r from-gold to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-black text-lg rounded-xl shadow-lg shadow-gold/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                   >
+                    {submitting ? (
+                      <span className="flex items-center gap-2 justify-center">
                         <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
                         Verarbeite...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2 justify-center">
                         <MessageCircle size={24} />
-                        Bestellanfrage senden & Chat starten
+                        Bestellanfrage senden &amp; Chat starten
                       </span>
                     )}
                   </Button>
@@ -480,6 +481,27 @@ export default function Checkout() {
                   products={products}
                   total={totalPrice}
                 />
+              </div>
+
+              {/* Support Section */}
+              <div className="glass-panel p-6 rounded-2xl border border-white/5 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transition-all group-hover:bg-blue-500/20" />
+
+                <h3 className="font-bold text-lg text-white mb-2 flex items-center gap-2 relative z-10">
+                  <MessageCircle className="w-5 h-5 text-blue-400" />
+                  Brauchst du Hilfe?
+                </h3>
+                <p className="text-zinc-400 text-sm mb-4 relative z-10">
+                  Hast du Fragen zur Bestellung oder zum Versand? Erstelle ein Ticket und wir helfen dir sofort.
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full border-blue-500/30 hover:bg-blue-500/10 text-blue-400 hover:text-blue-300 relative z-10 bg-black/40 backdrop-blur-md"
+                  onClick={() => navigate('/Tickets')}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Support Ticket erstellen
+                </Button>
               </div>
 
               {/* Desktop Trust badges */}

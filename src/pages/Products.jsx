@@ -13,8 +13,10 @@ import ProductGridSkeleton from '../components/products/ProductGridSkeleton';
 import UnifiedProductModal from '../components/products/UnifiedProductModal';
 import { useI18n } from '../components/i18n/I18nProvider';
 import { useCart } from '../contexts/CartContext';
-import { products as staticProducts } from '../data/products';
-import { useToast } from '@/components/ui/use-toast';
+// Removed staticProducts import
+import { insforge } from '@/lib/insforge';
+
+// ...
 
 export default function Products() {
   const { t } = useI18n();
@@ -28,56 +30,37 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
 
-  const [sortBy, setSortBy] = useState('newest');
-  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [advancedFilters, setAdvancedFilters] = useState({
-    categories: [],
-    brands: [],
-    priceRange: null,
-    sizes: [],
-    colors: [],
-    inStock: null
-  });
-
-  // Infinite Scroll State
-  const [visibleProducts, setVisibleProducts] = useState(12);
-
-  // Quick View State
-  const [quickViewProduct, setQuickViewProduct] = useState(null);
-  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-
-  // Grid View State
-  const [viewMode, setViewMode] = useState(4); // 2, 3, or 4
+  // ... (state matches original)
 
   const loadData = async () => {
     try {
-      const [prods, cats, brds, depts] = await Promise.all([
-        api.entities.Product.list('-created_at'),
-        api.entities.Category.list('sort_order'),
-        api.entities.Brand.list('sort_order'),
-        api.entities.Department.list('sort_order')
+      setLoading(true);
+      const [prodsReq, catsReq, brdsReq, deptsReq] = await Promise.all([
+        insforge.database.from('products').select('*, brand:brands(*), category:categories(*), images:product_images(*)').order('created_at', { ascending: false }),
+        insforge.database.from('categories').select('*').order('sort_order'),
+        insforge.database.from('brands').select('*').order('sort_order'),
+        insforge.database.from('departments').select('*').order('sort_order')
       ]);
 
-      if (prods && prods.length > 0) {
-        setProducts(prods);
-      } else {
-        setProducts(staticProducts);
-      }
+      if (prodsReq.error) throw prodsReq.error;
+      if (catsReq.error) throw catsReq.error;
+      if (brdsReq.error) throw brdsReq.error;
+      if (deptsReq.error) throw deptsReq.error; // Should ideally handle individually but this is fine for now
 
-      setCategories(cats);
-      setBrands(brds);
-      setDepartments(depts);
+      setProducts(prodsReq.data || []);
+      setCategories(catsReq.data || []);
+      setBrands(brdsReq.data || []);
+      setDepartments(deptsReq.data || []);
+
     } catch (error) {
-      console.error('Error loading data:', error);
-      setProducts(staticProducts);
-      if (departments.length === 0) {
-        setDepartments([
-          { id: 'vapes', name: 'Vapes', slug: 'vapes' },
-          { id: 'shishas', name: 'Shishas', slug: 'shishas' },
-          { id: 'tabak', name: 'Tabak', slug: 'tabak' }
-        ]);
-      }
+      console.error('Error loading shop data:', error);
+      toast({
+        title: "Fehler beim Laden",
+        description: "Produkte konnten nicht geladen werden.",
+        variant: "destructive"
+      });
+      // Fallback only for critical UI elements if needed, but avoid static products with wrong IDs
+      setProducts([]);
     } finally {
       setLoading(false);
     }

@@ -1,197 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '@/api';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { ShoppingBag, Send, Package, ArrowRight, CheckCircle2 } from 'lucide-react';
+import React from 'react';
+import { useCart } from '@/contexts/CartContext';
+import { ShoppingBag, Package, ArrowRight, CheckCircle2, Sparkles, ShieldCheck, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '../utils';
-import { useToast } from '@/components/ui/use-toast';
+import { Link, useNavigate } from 'react-router-dom';
 import CartItem from '@/components/cart/CartItem';
 import CartUpsell from '@/components/cart/CartUpsell';
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([]);
-  const [products, setProducts] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [contactInfo, setContactInfo] = useState({
-    name: '',
-    phone: '',
-    telegram: ''
-  });
-  const [note, setNote] = useState('');
-  const { toast } = useToast();
+  const {
+    cartItems,
+    products,
+    updateQuantity,
+    removeFromCart,
+    totalPrice,
+    totalItems,
+    isLoading
+  } = useCart();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    loadCart();
-  }, []);
-
-  const loadCart = async () => {
-    try {
-      const user = await api.auth.me();
-      const items = await api.entities.StarCartItem.filter({ user_id: user.id });
-      setCartItems(items);
-
-      // Load product details
-      const productIds = [...new Set(items.map(item => item.product_id))];
-      const productData = {};
-
-      for (const id of productIds) {
-        const prods = await api.entities.Product.filter({ id });
-        if (prods.length > 0) {
-          productData[id] = prods[0];
-        }
-      }
-
-      setProducts(productData);
-    } catch (error) {
-      console.error('Error loading cart:', error);
-      toast({
-        title: 'Fehler',
-        description: 'Warenkorb konnte nicht geladen werden',
-        variant: 'destructive'
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateQuantity = async (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
-
-    try {
-      await api.entities.StarCartItem.update(itemId, { quantity: newQuantity });
-      setCartItems(cartItems.map(item =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      ));
-
-      toast({
-        title: '✓ Aktualisiert',
-        description: 'Menge wurde geändert'
-      });
-    } catch (error) {
-      console.error('Error updating quantity:', error);
-      toast({
-        title: 'Fehler',
-        description: 'Menge konnte nicht aktualisiert werden',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const removeItem = async (itemId) => {
-    try {
-      await api.entities.StarCartItem.delete(itemId);
-      setCartItems(cartItems.filter(item => item.id !== itemId));
-      toast({
-        title: '🗑️ Entfernt',
-        description: 'Produkt wurde aus dem Warenkorb entfernt'
-      });
-    } catch (error) {
-      console.error('Error removing item:', error);
-      toast({
-        title: 'Fehler',
-        description: 'Produkt konnte nicht entfernt werden',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const getItemPrice = (item, product) => {
-    // First check for price stored in selected_options
-    if (item.selected_options?.price && item.selected_options.price > 0) {
-      return item.selected_options.price;
-    }
-    // Then check for variant price override in product variants
-    if (item.selected_options?.variant_id && product?.variants) {
-      const variant = product.variants.find(v => v.id === item.selected_options.variant_id);
-      if (variant?.price_override) {
-        return variant.price_override;
-      }
-    }
-    return product?.price || 0;
-  };
-
-  const calculateTotal = () => {
-    return cartItems.reduce((sum, item) => {
-      const product = products[item.product_id];
-      const price = getItemPrice(item, product);
-      return sum + (price * item.quantity);
-    }, 0);
-  };
-
-  const isFromTelegram = () => {
-    return window.Telegram?.WebApp?.initData || false;
-  };
-
-  const handleSubmitRequest = async () => {
-    if (cartItems.length === 0) {
-      toast({
-        title: '🛒 Warenkorb leer',
-        description: 'Füge zuerst Produkte hinzu',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    if (!contactInfo.name || !contactInfo.telegram) {
-      toast({
-        title: '⚠️ Fehlende Informationen',
-        description: 'Name und Telegram Username sind erforderlich',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Telefon ist nur Pflicht wenn nicht von Telegram
-    if (!isFromTelegram() && !contactInfo.phone) {
-      toast({
-        title: '⚠️ Telefonnummer erforderlich',
-        description: 'Bitte gib deine Telefonnummer ein',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const user = await api.auth.me();
-
-      const request = await api.entities.Request.create({
-        contact_info: contactInfo,
-        note: note,
-        cart_items: cartItems.map(item => ({ id: item.id }))
-      });
-
-      toast({
-        title: '🎉 Bestellung erfolgreich aufgegeben!',
-        description: 'Du erhältst eine Bestätigung per Email'
-      });
-
-      setTimeout(() => {
-        window.location.href = createPageUrl('Requests');
-      }, 2000);
-    } catch (error) {
-      console.error('Error submitting request:', error);
-      toast({
-        title: '❌ Fehler',
-        description: 'Anfrage konnte nicht gesendet werden',
-        variant: 'destructive'
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
+          <span className="text-zinc-500 text-sm font-medium">Warenkorb wird geladen...</span>
+        </div>
       </div>
     );
   }
+
+  const freeShippingThreshold = 100;
+  const shippingProgress = Math.min((totalPrice / freeShippingThreshold) * 100, 100);
+  const hasFreeShipping = totalPrice >= freeShippingThreshold;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
@@ -210,13 +50,13 @@ export default function Cart() {
           className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-purple-500/30 relative z-10"
         >
           <ShoppingBag className="w-10 h-10 text-white" />
-          {cartItems.length > 0 && (
+          {totalItems > 0 && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               className="absolute -top-2 -right-2 w-7 h-7 bg-gold text-black rounded-full flex items-center justify-center text-sm font-black shadow-lg"
             >
-              {cartItems.length}
+              {totalItems}
             </motion.div>
           )}
         </motion.div>
@@ -225,16 +65,54 @@ export default function Cart() {
           Warenkorb
         </h1>
         <p className="text-zinc-400 text-lg flex items-center justify-center gap-2">
-          {cartItems.length > 0 ? (
+          {totalItems > 0 ? (
             <>
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              {cartItems.length} {cartItems.length === 1 ? 'Produkt' : 'Produkte'} reserviert für dich
+              {totalItems} {totalItems === 1 ? 'Produkt' : 'Produkte'} reserviert für dich
             </>
           ) : (
             'Dein Premium-Warenkorb wartet auf dich'
           )}
         </p>
       </motion.div>
+
+      {/* Free Shipping Progress */}
+      {totalItems > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8 max-w-2xl mx-auto"
+        >
+          <div className="glass-panel rounded-2xl p-4 border border-white/5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-sm">
+                <Truck className="w-4 h-4 text-gold" />
+                <span className="text-zinc-400 font-medium">
+                  {hasFreeShipping ? (
+                    <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Gratisversand freigeschaltet!
+                    </span>
+                  ) : (
+                    <>Noch <span className="text-white font-bold">{(freeShippingThreshold - totalPrice).toFixed(2)}€</span> bis Gratisversand</>
+                  )}
+                </span>
+              </div>
+            </div>
+            <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${shippingProgress}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className={`h-full rounded-full ${hasFreeShipping
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                  : 'bg-gradient-to-r from-gold to-yellow-400 shadow-[0_0_10px_rgba(214,178,94,0.3)]'
+                  }`}
+              />
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {cartItems.length === 0 ? (
         <motion.div
@@ -256,7 +134,7 @@ export default function Cart() {
               Stöbere durch unsere exklusiven Kollektionen und finde deine neuen Favoriten.
             </p>
 
-            <Link to={createPageUrl('Products')}>
+            <Link to="/Products">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -274,18 +152,18 @@ export default function Cart() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence mode="popLayout">
-              {cartItems.map((item, index) => (
+              {cartItems.map((item) => (
                 <CartItem
                   key={item.id}
                   item={item}
                   product={products[item.product_id]}
                   updateQuantity={updateQuantity}
-                  removeItem={removeItem}
+                  removeItem={removeFromCart}
                 />
               ))}
             </AnimatePresence>
 
-            {/* Smart Upsells 🧠 */}
+            {/* Smart Upsells */}
             <CartUpsell cartItems={cartItems} />
           </div>
 
@@ -304,44 +182,78 @@ export default function Cart() {
               </div>
 
               <div className="space-y-4">
+                {/* Item summary */}
+                <div className="space-y-2 pb-4 border-b border-white/5">
+                  {cartItems.map(item => {
+                    const product = products[item.product_id];
+                    if (!product) return null;
+                    let price = product.price;
+                    if (item.selected_options?.price && item.selected_options.price > 0) price = item.selected_options.price;
+                    return (
+                      <div key={item.id} className="flex justify-between items-center text-sm">
+                        <span className="text-zinc-400 truncate max-w-[200px]">{product.name} × {item.quantity}</span>
+                        <span className="text-zinc-300 font-medium">{(price * item.quantity).toFixed(2)}€</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
                 <div className="flex justify-between items-center text-zinc-400">
                   <span>Zwischensumme</span>
-                  <span>{calculateTotal().toFixed(2)}€</span>
+                  <span>{totalPrice.toFixed(2)}€</span>
                 </div>
                 <div className="flex justify-between items-center text-zinc-400">
                   <span>Versand</span>
-                  <span className="text-emerald-400 text-xs uppercase font-bold bg-emerald-400/10 px-2 py-0.5 rounded">Gratis</span>
+                  {hasFreeShipping ? (
+                    <span className="text-emerald-400 text-xs uppercase font-bold bg-emerald-400/10 px-2 py-0.5 rounded">Gratis</span>
+                  ) : (
+                    <span className="text-zinc-300 text-sm">wird berechnet</span>
+                  )}
                 </div>
 
                 <div className="pt-4 border-t border-white/5 flex justify-between items-end">
                   <span className="text-white font-bold pb-1">Gesamtbetrag</span>
-                  <span className="text-3xl font-black text-gold">{calculateTotal().toFixed(2)}€</span>
+                  <span className="text-3xl font-black text-gold">{totalPrice.toFixed(2)}€</span>
                 </div>
 
-                <div className="bg-white/5 rounded-xl p-4 text-xs text-zinc-400 flex gap-3">
-                  <Package className="w-8 h-8 text-zinc-500" />
-                  <p>Inkl. MwSt. und kostenlosem Premium-Versand innerhalb Deutschlands.</p>
-                </div>
-
-                <Link to="/checkout" className="block w-full">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full h-14 bg-gold text-black font-black text-lg rounded-xl shadow-lg shadow-gold/20 flex items-center justify-center gap-2 hover:bg-[#EBDDA9] transition-colors"
-                  >
-                    <CheckCircle2 className="w-5 h-5" />
-                    Zur Kasse gehen
-                  </motion.button>
-                </Link>
-
-                <div className="flex justify-center gap-4 text-zinc-500 pt-2">
-                  {/* Payment Icons */}
-                  <div className="flex gap-2 opacity-50 grayscale hover:grayscale-0 transition-all">
-                    <div className="h-6 w-10 bg-white/10 rounded" />
-                    <div className="h-6 w-10 bg-white/10 rounded" />
-                    <div className="h-6 w-10 bg-white/10 rounded" />
+                {/* Trust Badges */}
+                <div className="bg-white/5 rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-3 text-xs text-zinc-400">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>Sichere Bezahlung & Käuferschutz</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-zinc-400">
+                    <Truck className="w-4 h-4 text-gold shrink-0" />
+                    <span>Premium-Versand innerhalb Deutschlands</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-zinc-400">
+                    <Sparkles className="w-4 h-4 text-purple-400 shrink-0" />
+                    <span>100% Originalware garantiert</span>
                   </div>
                 </div>
+
+                {/* XP Bonus Banner */}
+                <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-xl p-3 border border-purple-500/10 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center border border-gold/30 shrink-0">
+                    <Sparkles className="w-4 h-4 text-gold" />
+                  </div>
+                  <div>
+                    <span className="text-white text-xs font-bold uppercase tracking-wider">XP Bonus</span>
+                    <p className="text-purple-300 text-xs">+{Math.floor(totalPrice * 10)} Punkte bei Abschluss</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => navigate('/checkout')}
+                  className="w-full h-14 bg-gold text-black font-black text-lg rounded-xl shadow-lg shadow-gold/20 flex items-center justify-center gap-2 hover:bg-[#EBDDA9] transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  Zur Kasse ({totalItems})
+                </button>
+
+                <Link to="/Products" className="block text-center text-zinc-500 hover:text-white text-sm font-medium transition-colors py-2">
+                  ← Weiter einkaufen
+                </Link>
               </div>
             </motion.div>
           </div>

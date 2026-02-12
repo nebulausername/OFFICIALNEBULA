@@ -3,6 +3,7 @@ import { api } from '@/api';
 import { useAuth } from './AuthContext';
 import { insforge, realtime } from '@/lib/insforge';
 import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 
 const CartContext = createContext();
 
@@ -15,8 +16,7 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-    const { user } = useAuth();
-    const { toast } = useToast(); // Use the standard hook
+    const { user, isAuthenticated } = useAuth();
     const [cartItems, setCartItems] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -45,30 +45,34 @@ export const CartProvider = ({ children }) => {
 
     const totalPrice = calculateTotal();
 
-    // Initial Fetch
+    // Initial Fetch & Subscription
     useEffect(() => {
         if (user?.id) {
             fetchCart();
-            subscribeToCart();
+            const sub = subscribeToCart();
+            return () => {
+                if (sub) sub.unsubscribe();
+            };
         } else {
             setCartItems([]);
-        }
-        // Cleanup subscription on unmount or user change
-        return () => {
-            if (user?.id) {
-                realtime.unsubscribe(`cart:${user.id}`);
-            }
         }
     }, [user?.id]);
 
     const fetchCart = async () => {
+        if (!user?.id) return;
         try {
             setIsLoading(true);
-            const items = await api.entities.StarCartItem.filter({ user_id: user.id });
-            setCartItems(items);
+            const { data, error } = await insforge.database
+                .from('star_cart_items')
+                .select('*')
+                .eq('user_id', user.id);
+
+            if (error) throw error;
+
+            setCartItems(data || []);
 
             // Fetch missing products
-            const missingProductIds = [...new Set(items.map(i => i.product_id))].filter(id => !productsMap[id]);
+            const missingProductIds = [...new Set(data.map(i => i.product_id))].filter(id => !productsMap[id]);
             if (missingProductIds.length > 0) {
                 await fetchProducts(missingProductIds);
             }
@@ -81,43 +85,46 @@ export const CartProvider = ({ children }) => {
 
     const fetchProducts = async (ids) => {
         try {
-            // In a real optimized app, we'd use an 'in' query, but for now we loop or use existing filter logic
-            // Assuming api.entities.Product.filter accepts complex queries or we just fetch individually for now
-            // Optimization: Fetch all products needed in parallel
-            const productPromises = ids.map(id => api.entities.Product.filter({ id }));
-            const results = await Promise.all(productPromises);
+            if (ids.length === 0) return;
+            // Use InsForge DB directly for better performance if possible, or fallback to API wrapper if complex
+            // For now, sticking to API wrapper for Products as it might have complex joins, 
+            // BUT let's try direct DB for speed if simple
+            const { data, error } = await insforge.database
+                .from('products')
+                .select('*')
+                .in('id', ids);
+
+            if (error) throw error; // Fallback to old method?
 
             setProductsMap(prev => {
                 const newMap = { ...prev };
-                results.forEach(res => {
-                    if (res && res[0]) {
-                        newMap[res[0].id] = res[0];
-                    }
-                });
+                data.forEach(p => { newMap[p.id] = p; });
                 return newMap;
             });
         } catch (err) {
-            console.error("Error fetching cart products", err);
+            // Fallback to API wrapper
+            try {
+                const productPromises = ids.map(id => api.entities.Product.filter({ id }));
+                const results = await Promise.all(productPromises);
+                setProductsMap(prev => {
+                    const newMap = { ...prev };
+                    results.forEach(res => {
+                        if (res && res[0]) newMap[res[0].id] = res[0];
+                    });
+                    return newMap;
+                });
+            } catch (e) {
+                console.error("Error fetching cart products", e);
+            }
         }
     };
 
     const subscribeToCart = () => {
-        // Subscription to 'cart_update' event on a channel specific to the user
-        // Assuming backend emits 'cart_update' when StarCartItems change for this user
-        realtime.subscribe(`cart:${user.id}`, (data) => {
-            console.log("Realtime Cart Update:", data);
-            // Ideally we get the diff, but safe fallback is to refetch or merge
-            // If the event provides the new item/action:
-            if (data.action === 'refresh') {
-                fetchCart();
-            }
-        });
-
-        // Also subscribe to standard InsForge Entity changes if supported
-        // standardized channel for table 'star_cart_items'
-        realtime.subscribeTable('star_cart_items', (payload) => {
+        // Subscribe to changes in star_cart_items for this user
+        return realtime.subscribeTable('star_cart_items', (payload) => {
             if (payload.new?.user_id === user.id || payload.old?.user_id === user.id) {
-                fetchCart(); // Brute force refresh for accuracy
+                console.log('🛒 Realtime Cart Update');
+                fetchCart(); // Simplest strategy: refresh on any change
             }
         });
     };
@@ -125,11 +132,10 @@ export const CartProvider = ({ children }) => {
     // Actions
     const addToCart = async (productId, quantity = 1, options = {}) => {
         if (!user) {
-            toast({
-                title: "Anmeldung erforderlich",
-                description: "Bitte melde dich an, um den Warenkorb zu nutzen.",
-                variant: 'destructive'
+            toast.error("Anmeldung erforderlich", {
+                description: "Bitte melde dich an, um den Warenkorb zu nutzen."
             });
+            // Optionally redirect to login?
             return;
         }
 
@@ -145,40 +151,39 @@ export const CartProvider = ({ children }) => {
         };
 
         setCartItems(prev => [...prev, newItem]);
-        setIsOpen(true); // Open drawer properly
+        setIsOpen(true);
 
         try {
-            // Prepare payload, ensuring we store options as JSON if needed or structured
-            const payload = {
-                user_id: user.id,
-                product_id: productId,
-                quantity: quantity,
-                selected_options: options
-            };
+            const { data, error } = await insforge.database
+                .from('star_cart_items')
+                .insert({
+                    user_id: user.id,
+                    product_id: productId,
+                    quantity: quantity,
+                    selected_options: options // schema must support JSONB for this
+                })
+                .select()
+                .single();
 
-            const created = await api.entities.StarCartItem.create(payload);
+            if (error) throw error;
 
             // Replace temp item with real one
-            setCartItems(prev => prev.map(i => i.id === tempId ? created : i));
+            setCartItems(prev => prev.map(i => i.id === tempId ? data : i));
 
             // Ensure product data is loaded
             if (!productsMap[productId]) {
                 await fetchProducts([productId]);
             }
 
-            toast({
-                title: "Hinzugefügt! 🛒",
+            toast.success("Hinzugefügt! 🛒", {
                 description: "Artikel wurde zum Warenkorb hinzugefügt.",
-                className: "bg-gold/10 border-gold/30 text-white"
             });
 
         } catch (error) {
             console.error("Add to cart failed", error);
             setCartItems(prev => prev.filter(i => i.id !== tempId)); // Revert
-            toast({
-                title: "Fehler",
-                description: "Konnte Artikel nicht hinzufügen.",
-                variant: 'destructive'
+            toast.error("Fehler", {
+                description: "Konnte Artikel nicht hinzufügen."
             });
         }
     };
@@ -188,14 +193,17 @@ export const CartProvider = ({ children }) => {
         setCartItems(prev => prev.filter(i => i.id !== itemId));
 
         try {
-            await api.entities.StarCartItem.delete(itemId);
+            const { error } = await insforge.database
+                .from('star_cart_items')
+                .delete()
+                .eq('id', itemId);
+
+            if (error) throw error;
         } catch (error) {
             console.error("Remove from cart failed", error);
             setCartItems(originalItems); // Revert
-            toast({
-                title: "Fehler",
-                description: "Konnte Artikel nicht löschen.",
-                variant: 'destructive'
+            toast.error("Fehler", {
+                description: "Konnte Artikel nicht löschen."
             });
         }
     };
@@ -207,27 +215,32 @@ export const CartProvider = ({ children }) => {
         setCartItems(prev => prev.map(i => i.id === itemId ? { ...i, quantity: newQuantity } : i));
 
         try {
-            await api.entities.StarCartItem.update(itemId, { quantity: newQuantity });
+            const { error } = await insforge.database
+                .from('star_cart_items')
+                .update({ quantity: newQuantity })
+                .eq('id', itemId);
+
+            if (error) throw error;
         } catch (error) {
             console.error("Update quantity failed", error);
             setCartItems(originalItems);
-            toast({
-                title: "Fehler",
-                description: "Konnte Menge nicht aktualisieren.",
-                variant: 'destructive'
+            toast.error("Fehler", {
+                description: "Konnte Menge nicht aktualisieren."
             });
         }
     };
 
     const clearCart = async () => {
-        // Optimistic
         const originalItems = [...cartItems];
         setCartItems([]);
 
         try {
-            // Delete all items (might need a backend endpoint for bulk delete, or loop)
-            // For now loop (safe MVP)
-            await Promise.all(originalItems.map(item => api.entities.StarCartItem.delete(item.id)));
+            const { error } = await insforge.database
+                .from('star_cart_items')
+                .delete()
+                .eq('user_id', user.id);
+
+            if (error) throw error;
         } catch (error) {
             console.error("Clear cart failed", error);
             setCartItems(originalItems);

@@ -33,7 +33,7 @@ const translations = {
     'common.all': 'Alle',
     'common.yes': 'Ja',
     'common.no': 'Nein',
-    
+
     // Navigation
     'nav.home': 'Startseite',
     'nav.shop': 'Shop',
@@ -43,7 +43,7 @@ const translations = {
     'nav.vip': 'VIP',
     'nav.support': 'Support',
     'nav.admin': 'Admin',
-    
+
     // Shop
     'shop.title': 'Shop',
     'shop.categories': 'Kategorien',
@@ -65,7 +65,7 @@ const translations = {
     'shop.sizes': 'Größen',
     'shop.colors': 'Farben',
     'shop.inStock': 'Auf Lager',
-    
+
     // Product
     'product.details': 'Produktdetails',
     'product.description': 'Beschreibung',
@@ -77,7 +77,7 @@ const translations = {
     'product.delivery': 'Lieferung',
     'product.deliveryFrom': 'Lieferbar aus {location}',
     'product.deliveryTime': '{min}–{max} Werktage',
-    
+
     // Cart
     'cart.title': 'Warenkorb',
     'cart.empty': 'Dein Warenkorb ist leer',
@@ -85,18 +85,18 @@ const translations = {
     'cart.checkout': 'Zur Kasse',
     'cart.remove': 'Entfernen',
     'cart.continueShopping': 'Weiter einkaufen',
-    
+
     // Wishlist
     'wishlist.title': 'Merkliste',
     'wishlist.empty': 'Deine Merkliste ist leer',
     'wishlist.addedToWishlist': 'Zur Merkliste hinzugefügt',
     'wishlist.removedFromWishlist': 'Von Merkliste entfernt',
-    
+
     // Auth
     'auth.login': 'Anmelden',
     'auth.logout': 'Abmelden',
     'auth.register': 'Registrieren',
-    
+
     // Language
     'language.title': 'Sprache / Language',
     'language.select': 'Sprache wählen',
@@ -113,13 +113,13 @@ const translations = {
     'language.requestError': 'Fehler beim Senden. Bitte versuche es erneut.',
     'language.searchPlaceholder': 'Sprache suchen…',
     'language.rtl': 'RTL',
-    
+
     // VIP
     'vip.title': 'VIP Club',
     'vip.become': 'VIP werden',
     'vip.benefits': 'VIP Vorteile',
     'vip.priority': 'VIP Priorität',
-    
+
     // Support
     'support.title': 'Support',
     'support.center': 'Support Center',
@@ -145,14 +145,14 @@ const translations = {
     'support.allCategories': 'Alle Kategorien',
     'support.noTickets': 'Noch keine Tickets',
     'support.createFirst': 'Erstelle dein erstes Support-Ticket',
-    
+
     // Ticket Status
     'support.status.open': 'Offen',
     'support.status.inProgress': 'In Bearbeitung',
     'support.status.waitingForYou': 'Wartet auf dich',
     'support.status.solved': 'Gelöst',
     'support.status.closed': 'Geschlossen',
-    
+
     // Ticket Categories
     'support.category.order': 'Bestellung',
     'support.category.payment': 'Zahlung',
@@ -162,7 +162,7 @@ const translations = {
     'support.category.technical': 'Technik',
     'support.category.languageRequest': 'Sprache anfragen',
     'support.category.other': 'Sonstiges',
-    
+
     // Ticket Form
     'support.form.category': 'Kategorie',
     'support.form.subject': 'Betreff',
@@ -178,7 +178,7 @@ const translations = {
     'support.form.optional': '(optional)',
     'support.form.required': '*',
     'support.form.creating': 'Erstellen...',
-    
+
     // Ticket Chat
     'support.chat.supportTeam': 'Support Team',
     'support.chat.you': 'Du',
@@ -190,7 +190,7 @@ const translations = {
     'support.chat.ticketClosed': 'Ticket geschlossen',
     'support.chat.ticketReopened': 'Ticket wieder geöffnet',
     'support.chat.sendFailed': 'Senden fehlgeschlagen',
-    
+
     // Language Request (special ticket type)
     'support.languageRequest.title': 'Neue Sprache anfragen',
     'support.languageRequest.whichLanguage': 'Welche Sprache möchtest du?',
@@ -200,13 +200,13 @@ const translations = {
     'support.languageRequest.scopeShop': 'Nur im Shop',
     'support.languageRequest.scopeFullApp': 'Komplette App',
     'support.languageRequest.reason': 'Warum brauchst du diese Sprache?',
-    
+
     // Success State
     'support.success.ticketCreated': 'Ticket erstellt',
     'support.success.weContactYou': 'Wir melden uns in Kürze bei dir',
     'support.success.ticketId': 'Ticket-ID',
     'support.success.viewTicket': 'Ticket ansehen',
-    
+
     // FAQ Categories
     'support.faqCategory.all': 'Alle',
     'support.faqCategory.orders': 'Bestellungen',
@@ -214,7 +214,7 @@ const translations = {
     'support.faqCategory.shipping': 'Versand',
     'support.faqCategory.returns': 'Retouren',
     'support.faqCategory.account': 'Konto',
-    
+
     // Profile
     'profile.title': 'Mein Profil',
     'profile.myAccount': 'Mein Konto',
@@ -244,13 +244,13 @@ const translations = {
     'profile.administrator': 'Administrator',
     'profile.vipMember': 'VIP MITGLIED',
     'profile.vipBenefitsActive': 'Exklusive Vorteile aktiv',
-    
+
     // Footer
     'footer.copyright': '© 2026 Nebula Supply. Premium Quality.',
     'footer.imprint': 'Impressum',
     'footer.privacy': 'Datenschutz',
     'footer.terms': 'AGB',
-    
+
     // Misc
     'misc.premiumDrops': 'Premium Drops • Authentisch • Limitiert',
     'misc.discoverPremium': 'Entdecke unsere Premium-Auswahl',
@@ -261,7 +261,7 @@ const translations = {
     'misc.deliveryTime': 'Lieferzeit',
     'misc.days': 'Tage',
     'misc.businessDays': 'Werktage',
-    
+
     // Product Quick View
     'product.selectColor': 'Farbe',
     'product.selectSize': 'Größe',
@@ -279,7 +279,7 @@ const translations = {
     'product.china': 'China',
     'product.germany': 'Deutschland'
   },
-  
+
   en: {
     'common.loading': 'Loading...',
     'common.save': 'Save',
@@ -294,7 +294,7 @@ const translations = {
     'common.all': 'All',
     'common.yes': 'Yes',
     'common.no': 'No',
-    
+
     'nav.home': 'Home',
     'nav.shop': 'Shop',
     'nav.cart': 'Cart',
@@ -303,7 +303,7 @@ const translations = {
     'nav.vip': 'VIP',
     'nav.support': 'Support',
     'nav.admin': 'Admin',
-    
+
     'shop.title': 'Shop',
     'shop.categories': 'Categories',
     'shop.filters': 'Filters',
@@ -324,7 +324,7 @@ const translations = {
     'shop.sizes': 'Sizes',
     'shop.colors': 'Colors',
     'shop.inStock': 'In Stock',
-    
+
     'product.details': 'Product Details',
     'product.description': 'Description',
     'product.shipping': 'Shipping',
@@ -335,23 +335,23 @@ const translations = {
     'product.delivery': 'Delivery',
     'product.deliveryFrom': 'Ships from {location}',
     'product.deliveryTime': '{min}–{max} business days',
-    
+
     'cart.title': 'Shopping Cart',
     'cart.empty': 'Your cart is empty',
     'cart.total': 'Total',
     'cart.checkout': 'Checkout',
     'cart.remove': 'Remove',
     'cart.continueShopping': 'Continue Shopping',
-    
+
     'wishlist.title': 'Wishlist',
     'wishlist.empty': 'Your wishlist is empty',
     'wishlist.addedToWishlist': 'Added to wishlist',
     'wishlist.removedFromWishlist': 'Removed from wishlist',
-    
+
     'auth.login': 'Login',
     'auth.logout': 'Logout',
     'auth.register': 'Register',
-    
+
     'language.title': 'Language',
     'language.select': 'Select Language',
     'language.missing': 'Missing your language?',
@@ -367,12 +367,12 @@ const translations = {
     'language.requestError': 'Error sending request. Please try again.',
     'language.searchPlaceholder': 'Search language…',
     'language.rtl': 'RTL',
-    
+
     'vip.title': 'VIP Club',
     'vip.become': 'Become VIP',
     'vip.benefits': 'VIP Benefits',
     'vip.priority': 'VIP Priority',
-    
+
     'support.title': 'Support',
     'support.center': 'Support Center',
     'support.helpText': 'We\'re here to help',
@@ -452,7 +452,7 @@ const translations = {
     'support.faqCategory.shipping': 'Shipping',
     'support.faqCategory.returns': 'Returns',
     'support.faqCategory.account': 'Account',
-    
+
     'profile.title': 'My Profile',
     'profile.myAccount': 'My Account',
     'profile.accountDescription': 'Manage personal data',
@@ -481,12 +481,12 @@ const translations = {
     'profile.administrator': 'Administrator',
     'profile.vipMember': 'VIP MEMBER',
     'profile.vipBenefitsActive': 'Exclusive benefits active',
-    
+
     'footer.copyright': '© 2026 Nebula Supply. Premium Quality.',
     'footer.imprint': 'Imprint',
     'footer.privacy': 'Privacy',
     'footer.terms': 'Terms',
-    
+
     'misc.premiumDrops': 'Premium Drops • Authentic • Limited',
     'misc.discoverPremium': 'Discover our premium selection',
     'misc.newArrivals': 'New Arrivals',
@@ -496,7 +496,7 @@ const translations = {
     'misc.deliveryTime': 'Delivery time',
     'misc.days': 'days',
     'misc.businessDays': 'business days',
-    
+
     'product.selectColor': 'Color',
     'product.selectSize': 'Size',
     'product.pleaseSelect': 'Please select',
@@ -513,7 +513,7 @@ const translations = {
     'product.china': 'China',
     'product.germany': 'Germany'
   },
-  
+
   sk: {
     'common.loading': 'Načítava sa...',
     'common.save': 'Uložiť',
@@ -528,7 +528,7 @@ const translations = {
     'common.all': 'Všetko',
     'common.yes': 'Áno',
     'common.no': 'Nie',
-    
+
     'nav.home': 'Domov',
     'nav.shop': 'Obchod',
     'nav.cart': 'Košík',
@@ -537,7 +537,7 @@ const translations = {
     'nav.vip': 'VIP',
     'nav.support': 'Podpora',
     'nav.admin': 'Admin',
-    
+
     'shop.title': 'Obchod',
     'shop.categories': 'Kategórie',
     'shop.filters': 'Filtre',
@@ -558,7 +558,7 @@ const translations = {
     'shop.sizes': 'Veľkosti',
     'shop.colors': 'Farby',
     'shop.inStock': 'Na sklade',
-    
+
     'product.details': 'Detail produktu',
     'product.description': 'Popis',
     'product.shipping': 'Doručenie',
@@ -569,23 +569,23 @@ const translations = {
     'product.delivery': 'Doručenie',
     'product.deliveryFrom': 'Odosielame z {location}',
     'product.deliveryTime': '{min}–{max} pracovných dní',
-    
+
     'cart.title': 'Nákupný košík',
     'cart.empty': 'Váš košík je prázdny',
     'cart.total': 'Celkom',
     'cart.checkout': 'K pokladni',
     'cart.remove': 'Odstrániť',
     'cart.continueShopping': 'Pokračovať v nákupe',
-    
+
     'wishlist.title': 'Obľúbené',
     'wishlist.empty': 'Nemáte obľúbené položky',
     'wishlist.addedToWishlist': 'Pridané do obľúbených',
     'wishlist.removedFromWishlist': 'Odstránené z obľúbených',
-    
+
     'auth.login': 'Prihlásiť',
     'auth.logout': 'Odhlásiť',
     'auth.register': 'Registrovať',
-    
+
     'language.title': 'Jazyk',
     'language.select': 'Vybrať jazyk',
     'language.missing': 'Chýba váš jazyk?',
@@ -601,12 +601,12 @@ const translations = {
     'language.requestError': 'Chyba pri odosielaní. Skúste znova.',
     'language.searchPlaceholder': 'Hľadať jazyk…',
     'language.rtl': 'RTL',
-    
+
     'vip.title': 'VIP Klub',
     'vip.become': 'Staň sa VIP',
     'vip.benefits': 'VIP výhody',
     'vip.priority': 'VIP priorita',
-    
+
     'support.title': 'Podpora',
     'support.center': 'Centrum podpory',
     'support.helpText': 'Sme tu pre vás',
@@ -645,7 +645,7 @@ const translations = {
     'support.chat.reopenTicket': 'Znovu otvoriť',
     'support.success.ticketCreated': 'Tiket vytvorený',
     'support.success.viewTicket': 'Zobraziť tiket',
-    
+
     'profile.title': 'Môj profil',
     'profile.myAccount': 'Môj účet',
     'profile.accountDescription': 'Spravovať osobné údaje',
@@ -674,12 +674,12 @@ const translations = {
     'profile.administrator': 'Administrátor',
     'profile.vipMember': 'VIP ČLEN',
     'profile.vipBenefitsActive': 'Exkluzívne výhody aktívne',
-    
+
     'footer.copyright': '© 2026 Nebula Supply. Prémiová kvalita.',
     'footer.imprint': 'Impressum',
     'footer.privacy': 'Ochrana údajov',
     'footer.terms': 'Podmienky',
-    
+
     'misc.premiumDrops': 'Premium Drops • Autentické • Limitované',
     'misc.discoverPremium': 'Objavte našu prémiovú ponuku',
     'misc.newArrivals': 'Novinky',
@@ -689,7 +689,7 @@ const translations = {
     'misc.deliveryTime': 'Doba doručenia',
     'misc.days': 'dní',
     'misc.businessDays': 'pracovných dní',
-    
+
     'product.selectColor': 'Farba',
     'product.selectSize': 'Veľkosť',
     'product.pleaseSelect': 'Prosím vyberte',
@@ -706,7 +706,7 @@ const translations = {
     'product.china': 'Čína',
     'product.germany': 'Nemecko'
   },
-  
+
   ar: {
     'common.loading': 'جاري التحميل...',
     'common.save': 'حفظ',
@@ -721,7 +721,7 @@ const translations = {
     'common.all': 'الكل',
     'common.yes': 'نعم',
     'common.no': 'لا',
-    
+
     'nav.home': 'الرئيسية',
     'nav.shop': 'المتجر',
     'nav.cart': 'السلة',
@@ -730,7 +730,7 @@ const translations = {
     'nav.vip': 'VIP',
     'nav.support': 'الدعم',
     'nav.admin': 'الإدارة',
-    
+
     'shop.title': 'المتجر',
     'shop.categories': 'الفئات',
     'shop.filters': 'الفلاتر',
@@ -751,7 +751,7 @@ const translations = {
     'shop.sizes': 'المقاسات',
     'shop.colors': 'الألوان',
     'shop.inStock': 'متوفر',
-    
+
     'product.details': 'تفاصيل المنتج',
     'product.description': 'الوصف',
     'product.shipping': 'الشحن',
@@ -762,23 +762,23 @@ const translations = {
     'product.delivery': 'التوصيل',
     'product.deliveryFrom': 'يُشحن من {location}',
     'product.deliveryTime': '{min}–{max} أيام عمل',
-    
+
     'cart.title': 'سلة التسوق',
     'cart.empty': 'سلتك فارغة',
     'cart.total': 'المجموع',
     'cart.checkout': 'الدفع',
     'cart.remove': 'إزالة',
     'cart.continueShopping': 'متابعة التسوق',
-    
+
     'wishlist.title': 'المفضلة',
     'wishlist.empty': 'قائمة المفضلة فارغة',
     'wishlist.addedToWishlist': 'أضيف للمفضلة',
     'wishlist.removedFromWishlist': 'أزيل من المفضلة',
-    
+
     'auth.login': 'تسجيل الدخول',
     'auth.logout': 'تسجيل الخروج',
     'auth.register': 'تسجيل',
-    
+
     'language.title': 'اللغة',
     'language.select': 'اختر اللغة',
     'language.missing': 'لغتك غير متوفرة؟',
@@ -794,12 +794,12 @@ const translations = {
     'language.requestError': 'خطأ في الإرسال. حاول مرة أخرى.',
     'language.searchPlaceholder': 'ابحث عن لغة…',
     'language.rtl': 'RTL',
-    
+
     'vip.title': 'نادي VIP',
     'vip.become': 'كن VIP',
     'vip.benefits': 'مزايا VIP',
     'vip.priority': 'أولوية VIP',
-    
+
     'support.title': 'الدعم',
     'support.center': 'مركز الدعم',
     'support.helpText': 'نحن هنا لمساعدتك',
@@ -838,7 +838,7 @@ const translations = {
     'support.chat.reopenTicket': 'إعادة فتح',
     'support.success.ticketCreated': 'تم إنشاء التذكرة',
     'support.success.viewTicket': 'عرض التذكرة',
-    
+
     'profile.title': 'ملفي الشخصي',
     'profile.myAccount': 'حسابي',
     'profile.accountDescription': 'إدارة البيانات الشخصية',
@@ -867,12 +867,12 @@ const translations = {
     'profile.administrator': 'مدير',
     'profile.vipMember': 'عضو VIP',
     'profile.vipBenefitsActive': 'المزايا الحصرية مفعلة',
-    
+
     'footer.copyright': '© 2026 Nebula Supply. جودة فاخرة.',
     'footer.imprint': 'البيانات القانونية',
     'footer.privacy': 'الخصوصية',
     'footer.terms': 'الشروط',
-    
+
     'misc.premiumDrops': 'منتجات فاخرة • أصلية • محدودة',
     'misc.discoverPremium': 'اكتشف مجموعتنا الفاخرة',
     'misc.newArrivals': 'وصل حديثاً',
@@ -882,7 +882,7 @@ const translations = {
     'misc.deliveryTime': 'وقت التوصيل',
     'misc.days': 'أيام',
     'misc.businessDays': 'أيام عمل',
-    
+
     'product.selectColor': 'اللون',
     'product.selectSize': 'المقاس',
     'product.pleaseSelect': 'يرجى الاختيار',
@@ -899,7 +899,7 @@ const translations = {
     'product.china': 'الصين',
     'product.germany': 'ألمانيا'
   },
-  
+
   tr: {
     'common.loading': 'Yükleniyor...',
     'common.save': 'Kaydet',
@@ -914,7 +914,6 @@ const translations = {
     'common.all': 'Tümü',
     'common.yes': 'Evet',
     'common.no': 'Hayır',
-    
     'nav.home': 'Ana Sayfa',
     'nav.shop': 'Mağaza',
     'nav.cart': 'Sepet',
@@ -923,7 +922,6 @@ const translations = {
     'nav.vip': 'VIP',
     'nav.support': 'Destek',
     'nav.admin': 'Yönetici',
-    
     'shop.title': 'Mağaza',
     'shop.categories': 'Kategoriler',
     'shop.filters': 'Filtreler',
@@ -939,7 +937,49 @@ const translations = {
     'shop.filterApplied': 'Filtre uygulandı',
     'shop.resetFilters': 'Filtreleri sıfırla',
     'shop.productsFound': '{count} ürün bulundu',
-    
+    'shop.priceRange': 'Fiyat Aralığı',
+    'shop.brands': 'Markalar',
+    'shop.sizes': 'Bedenler',
+    'shop.colors': 'Renkler',
+    'shop.inStock': 'Stokta',
+    'product.details': 'Ürün Detayları',
+    'product.description': 'Açıklama',
+    'product.shipping': 'Kargo',
+    'product.quantity': 'Adet',
+    'product.size': 'Beden',
+    'product.color': 'Renk',
+    'product.sku': 'Ürün Kodu',
+    'product.delivery': 'Teslimat',
+    'product.deliveryFrom': '{location} adresinden gönderilir',
+    'product.deliveryTime': '{min}–{max} iş günü',
+    'product.selectColor': 'Renk',
+    'product.selectSize': 'Beden',
+    'product.pleaseSelect': 'Lütfen seçin',
+    'product.pleaseSelectSize': 'Lütfen bir beden seçin',
+    'product.deliveryTo': 'Teslimat adresi',
+    'product.freeShippingFrom': 'Ücretsiz kargo',
+    'product.added': 'Eklendi!',
+    'product.adding': 'Ekleniyor...',
+    'product.saved': 'Kaydedildi',
+    'product.save': 'Kaydet',
+    'product.viewDetails': 'Detaylar',
+    'product.buyNow': 'Şimdi Satın Al',
+    'product.deliverableFrom': 'Gönderim yeri',
+    'product.china': 'Çin',
+    'product.germany': 'Almanya',
+    'cart.title': 'Alışveriş Sepeti',
+    'cart.empty': 'Sepetiniz boş',
+    'cart.total': 'Toplam',
+    'cart.checkout': 'Ödemeye Geç',
+    'cart.remove': 'Kaldır',
+    'cart.continueShopping': 'Alışverişe Devam Et',
+    'wishlist.title': 'Favoriler',
+    'wishlist.empty': 'Favori listeniz boş',
+    'wishlist.addedToWishlist': 'Favorilere eklendi',
+    'wishlist.removedFromWishlist': 'Favorilerden çıkarıldı',
+    'auth.login': 'Giriş Yap',
+    'auth.logout': 'Çıkış Yap',
+    'auth.register': 'Kayıt Ol',
     'language.title': 'Dil',
     'language.select': 'Dil Seç',
     'language.missing': 'Diliniz eksik mi?',
@@ -947,11 +987,145 @@ const translations = {
     'language.request': 'Dil Talep Et',
     'language.requestTitle': 'Dil Talep Et',
     'language.requestLanguage': 'Hangi dil?',
+    'language.requestRegion': 'Bölge (isteğe bağlı)',
+    'language.requestComment': 'Neden ihtiyacınız var? (isteğe bağlı)',
+    'language.requestEmail': 'Geri bildirim e-postası',
     'language.requestSubmit': 'Talebi Gönder',
     'language.requestSuccess': 'Teşekkürler! Dil hazır olduğunda size bildireceğiz.',
-    'language.requestError': 'Gönderim hatası. Tekrar deneyin.'
+    'language.requestError': 'Gönderim hatası. Tekrar deneyin.',
+    'language.searchPlaceholder': 'Dil ara…',
+    'language.rtl': 'RTL',
+    'language.selectRequired': 'Lütfen bir dil seçin',
+    'language.examplePlaceholder': 'Örn. Polish, Nederlands, 中文...',
+    'language.regionPlaceholder': 'Örn. Brezilya, Avusturya, İsviçre...',
+    'language.emailPlaceholder': 'sizin@email.com',
+    'vip.title': 'VIP Kulüp',
+    'vip.become': 'VIP Ol',
+    'vip.benefits': 'VIP Avantajları',
+    'vip.priority': 'VIP Öncelik',
+    'vip.requestPrioritized': 'Talebiniz öncelikli olarak işleme alınır',
+    'support.title': 'Destek',
+    'support.center': 'Destek Merkezi',
+    'support.helpText': 'Size yardımcı olmak için buradayız',
+    'support.newTicket': 'Yeni Bilet',
+    'support.createTicket': 'Bilet Oluştur',
+    'support.myTickets': 'Biletlerim',
+    'support.new': 'Yeni',
+    'support.openTickets': 'Açık Biletler',
+    'support.vipUnlimited': 'VIP: Sınırsız',
+    'support.limitReached': 'Limite ulaşıldı',
+    'support.backToProfile': 'Profile Dön',
+    'support.faq': 'SSS',
+    'support.frequentQuestions': 'Sık Sorulan Sorular',
+    'support.quickAnswers': 'En önemli sorulara hızlı cevaplar',
+    'support.noResults': 'Sonuç bulunamadı',
+    'support.tryOtherSearch': 'Başka bir arama terimi deneyin veya bilet oluşturun',
+    'support.notFound': 'Bulunamadı mı?',
+    'support.weHelpYou': 'Bir bilet oluşturun, size yardımcı olalım',
+    'support.searchTickets': 'Biletlerde ara...',
+    'support.searchQuestions': 'Sorularda ara...',
+    'support.allStatus': 'Tüm Durumlar',
+    'support.allCategories': 'Tüm Kategoriler',
+    'support.noTickets': 'Henüz bilet yok',
+    'support.createFirst': 'İlk destek biletinizi oluşturun',
+    'support.status.open': 'Açık',
+    'support.status.inProgress': 'İşlemde',
+    'support.status.waitingForYou': 'Sizi bekliyor',
+    'support.status.solved': 'Çözüldü',
+    'support.status.closed': 'Kapatıldı',
+    'support.category.order': 'Sipariş',
+    'support.category.payment': 'Ödeme',
+    'support.category.product': 'Ürün',
+    'support.category.return': 'İade',
+    'support.category.delivery': 'Teslimat',
+    'support.category.technical': 'Teknik',
+    'support.category.languageRequest': 'Dil Talebi',
+    'support.category.other': 'Diğer',
+    'support.form.category': 'Kategori',
+    'support.form.subject': 'Konu',
+    'support.form.subjectPlaceholder': 'Ne hakkında?',
+    'support.form.message': 'Mesaj',
+    'support.form.messagePlaceholder': 'Sorununuzu açıklayın...',
+    'support.form.fillRequired': 'Lütfen tüm zorunlu alanları doldurun',
+    'support.form.orderNumber': 'Sipariş Numarası',
+    'support.form.orderPlaceholder': 'Örn. #12345',
+    'support.form.sku': 'Ürün Kodu (SKU)',
+    'support.form.attachments': 'Ekler',
+    'support.form.uploadFiles': 'Dosya yükle',
+    'support.form.optional': '(isteğe bağlı)',
+    'support.form.required': '*',
+    'support.form.creating': 'Oluşturuluyor...',
+    'support.chat.supportTeam': 'Destek Ekibi',
+    'support.chat.you': 'Sen',
+    'support.chat.writeMessage': 'Mesaj yaz...',
+    'support.chat.closeTicket': 'Bileti Kapat',
+    'support.chat.reopenTicket': 'Yeniden Aç',
+    'support.chat.problemSolved': 'Sorun Çözüldü',
+    'support.chat.needMoreInfo': 'Daha Fazla Bilgi',
+    'support.chat.ticketClosed': 'Bilet kapatıldı',
+    'support.chat.ticketReopened': 'Bilet yeniden açıldı',
+    'support.chat.sendFailed': 'Gönderim başarısız',
+    'support.languageRequest.title': 'Yeni Dil Talep Et',
+    'support.languageRequest.whichLanguage': 'Hangi dili istiyorsunuz?',
+    'support.languageRequest.selectLanguage': 'Dil seçin',
+    'support.languageRequest.otherLanguage': 'Diğer dil',
+    'support.languageRequest.scope': 'Nerede ihtiyacınız var?',
+    'support.languageRequest.scopeShop': 'Sadece mağazada',
+    'support.languageRequest.scopeFullApp': 'Tüm uygulama',
+    'support.languageRequest.reason': 'Bu dile neden ihtiyacınız var?',
+    'support.success.ticketCreated': 'Bilet oluşturuldu',
+    'support.success.weContactYou': 'Kısa süre içinde size döneceğiz',
+    'support.success.ticketId': 'Bilet ID',
+    'support.success.viewTicket': 'Bileti Görüntüle',
+    'support.faqCategory.all': 'Tümü',
+    'support.faqCategory.orders': 'Siparişler',
+    'support.faqCategory.payment': 'Ödeme',
+    'support.faqCategory.shipping': 'Kargo',
+    'support.faqCategory.returns': 'İadeler',
+    'support.faqCategory.account': 'Hesap',
+    'profile.title': 'Profilim',
+    'profile.myAccount': 'Hesabım',
+    'profile.accountDescription': 'Kişisel bilgileri yönet',
+    'profile.settings': 'Profil & Ayarlar',
+    'profile.orders': 'Siparişlerim',
+    'profile.ordersDescription': 'Siparişleri & durumu takip et',
+    'profile.supportTickets': 'Destek Biletleri',
+    'profile.supportTicketsDescription': 'Talepleriniz & sohbet',
+    'profile.wishlistDescription': 'Favorileriniz',
+    'profile.vipProgram': 'VIP Programı',
+    'profile.vipDescription': 'Özel avantajların kilidini aç',
+    'profile.faq': 'SSS',
+    'profile.faqDescription': 'Sıkça sorulan sorular',
+    'profile.helpSupport': 'Yardım & Destek',
+    'profile.helpDescription': 'Size yardımcı olmak için buradayız',
+    'profile.adminDashboard': 'Yönetici Paneli',
+    'profile.adminDescription': 'Yönetim & ayarlar',
+    'profile.quickAccess': 'Hızlı Erişim',
+    'profile.navigation': 'Gezinme',
+    'profile.more': 'Daha Fazla',
+    'profile.fastSupport': 'Hızlı Destek',
+    'profile.secure': '100% Güvenli',
+    'profile.premiumQuality': 'Premium Kalite',
+    'profile.inCart': 'Sepette',
+    'profile.open': 'açık',
+    'profile.administrator': 'Yönetici',
+    'profile.vipMember': 'VIP ÜYE',
+    'profile.vipBenefitsActive': 'Özel avantajlar aktif',
+    'footer.copyright': '© 2026 Nebula Supply. Premium Kalite.',
+    'footer.imprint': 'Yasal Bilgiler',
+    'footer.privacy': 'Gizlilik',
+    'footer.terms': 'Şartlar',
+    'misc.premiumDrops': 'Premium Drops • Orijinal • Sınırlı Sayıda',
+    'misc.discoverPremium': 'Premium koleksiyonumuzu keşfedin',
+    'misc.newArrivals': 'Yeni Gelenler',
+    'misc.bestsellers': 'Çok Satanlar',
+    'misc.vipExclusive': 'VIP\'ye Özel',
+    'misc.shippingFrom': 'Gönderim yeri',
+    'misc.deliveryTime': 'Teslimat süresi',
+    'misc.days': 'gün',
+    'misc.businessDays': 'iş günü'
   },
-  
+
   fr: {
     'common.loading': 'Chargement...',
     'common.save': 'Enregistrer',
@@ -959,60 +1133,60 @@ const translations = {
     'common.close': 'Fermer',
     'common.search': 'Rechercher',
     'common.back': 'Retour',
-    
+
     'nav.home': 'Accueil',
     'nav.shop': 'Boutique',
     'nav.cart': 'Panier',
     'nav.wishlist': 'Favoris',
-    
+
     'shop.title': 'Boutique',
     'shop.categories': 'Catégories',
     'shop.available': 'Disponible',
     'shop.soldOut': 'Épuisé',
     'shop.addToCart': 'Ajouter au panier',
-    
+
     'language.title': 'Langue',
     'language.missing': 'Votre langue manque?',
     'language.request': 'Demander une langue'
   },
-  
+
   it: {
     'common.loading': 'Caricamento...',
     'common.save': 'Salva',
     'common.cancel': 'Annulla',
     'common.close': 'Chiudi',
-    
+
     'nav.home': 'Home',
     'nav.shop': 'Negozio',
     'nav.cart': 'Carrello',
     'nav.wishlist': 'Preferiti',
-    
+
     'shop.title': 'Negozio',
     'shop.categories': 'Categorie',
     'shop.available': 'Disponibile',
     'shop.soldOut': 'Esaurito',
-    
+
     'language.title': 'Lingua',
     'language.missing': 'Manca la tua lingua?',
     'language.request': 'Richiedi lingua'
   },
-  
+
   es: {
     'common.loading': 'Cargando...',
     'common.save': 'Guardar',
     'common.cancel': 'Cancelar',
     'common.close': 'Cerrar',
-    
+
     'nav.home': 'Inicio',
     'nav.shop': 'Tienda',
     'nav.cart': 'Carrito',
     'nav.wishlist': 'Favoritos',
-    
+
     'shop.title': 'Tienda',
     'shop.categories': 'Categorías',
     'shop.available': 'Disponible',
     'shop.soldOut': 'Agotado',
-    
+
     'language.title': 'Idioma',
     'language.missing': '¿Falta tu idioma?',
     'language.request': 'Solicitar idioma'
@@ -1027,14 +1201,14 @@ const detectLocale = () => {
   // 1. Check localStorage
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored && SUPPORTED_LOCALES[stored]) return stored;
-  
+
   // 2. Check browser languages
   const browserLangs = navigator.languages || [navigator.language];
   for (const lang of browserLangs) {
     const code = lang.split('-')[0].toLowerCase();
     if (SUPPORTED_LOCALES[code]) return code;
   }
-  
+
   // 3. Fallback
   return DEFAULT_LOCALE;
 };
@@ -1060,7 +1234,7 @@ export function I18nProvider({ children }) {
     const detected = detectLocale();
     setLocaleState(detected);
     setUnsupportedCandidate(getUnsupportedCandidate());
-    
+
     // Try to get user preference
     const loadUserPreference = async () => {
       try {
@@ -1081,7 +1255,7 @@ export function I18nProvider({ children }) {
     const localeConfig = SUPPORTED_LOCALES[locale];
     const rtl = localeConfig?.dir === 'rtl';
     setIsRTL(rtl);
-    
+
     document.documentElement.setAttribute('dir', rtl ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', locale);
     localStorage.setItem(STORAGE_KEY, locale);
@@ -1090,10 +1264,10 @@ export function I18nProvider({ children }) {
   // Set locale function
   const setLocale = useCallback(async (newLocale) => {
     if (!SUPPORTED_LOCALES[newLocale]) return;
-    
+
     setLocaleState(newLocale);
     localStorage.setItem(STORAGE_KEY, newLocale);
-    
+
     // Save to user profile if logged in
     try {
       await api.auth.updateMe({ language: newLocale });
@@ -1105,12 +1279,12 @@ export function I18nProvider({ children }) {
   // Translation function
   const t = useCallback((key, params = {}) => {
     let text = translations[locale]?.[key] || translations[DEFAULT_LOCALE]?.[key] || key;
-    
+
     // Replace params
     Object.entries(params).forEach(([k, v]) => {
       text = text.replace(`{${k}}`, v);
     });
-    
+
     return text;
   }, [locale]);
 

@@ -4,7 +4,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import { useWishlist } from '../components/wishlist/WishlistContext';
-import { useI18n } from '../components/i18n/I18nProvider';
+import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/lib/AuthContext';
+import { insforge } from '@/lib/insforge';
+import { useI18n } from '@/components/i18n/I18nProvider';
 import {
   User,
   ShoppingBag,
@@ -25,12 +28,13 @@ import RankCard from './Profile/RankCard';
 export default function Profile() {
   const { t } = useI18n();
   const { count: wishlistCount } = useWishlist();
+  const { totalItems: cartCount } = useCart();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     requestCount: 0,
-    cartCount: 0,
     ticketCount: 0,
     openTicketCount: 0
   });
@@ -40,74 +44,42 @@ export default function Profile() {
     []
   );
 
-  const loadUserData = useCallback(async () => {
+  useEffect(() => {
+    if (!user) {
+      // ProtectedRoute should handle this, but double check
+      // navigate(createPageUrl('Login'));
+      return;
+    }
+    loadStats();
+  }, [user]);
+
+  const loadStats = async () => {
     try {
       setLoading(true);
-      const userData = await api.auth.me();
 
-      if (!userData) {
-        // Handle case where auth.me returns null but doesn't throw
-        throw new Error("User not authenticated");
-      }
-
-      setUser(userData);
-
-      // Load stats in parallel for better performance with individual error handling
-      const [requests, cartItems, tickets] = await Promise.all([
-        api.entities.Request.filter({ user_id: userData.id }).catch(e => {
-          console.warn('Failed to load requests:', e);
-          return [];
-        }),
-        api.entities.StarCartItem.filter({ user_id: userData.id }).catch(e => {
-          console.warn('Failed to load cart:', e);
-          return [];
-        }),
-        api.entities.Ticket.filter({ user_id: userData.id }).catch(e => {
-          console.warn('Failed to load tickets:', e);
-          return [];
-        })
+      // Parallel fetch from InsForge
+      const [requestsRes, ticketsRes, openTicketsRes] = await Promise.all([
+        insforge.database.from('requests').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        insforge.database.from('tickets').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        insforge.database.from('tickets').select('*', { count: 'exact', head: true }).eq('user_id', user.id).in('status', ['open', 'in_progress'])
       ]);
 
-      const openTickets = tickets.filter(t =>
-        t.status === 'open' || t.status === 'in_progress'
-      ).length;
-
       setStats({
-        requestCount: requests.length,
-        cartCount: cartItems.length,
-        ticketCount: tickets.length,
-        openTicketCount: openTickets
+        requestCount: requestsRes.count || 0,
+        ticketCount: ticketsRes.count || 0,
+        openTicketCount: openTicketsRes.count || 0
       });
     } catch (error) {
-      console.error('Error loading user data:', error);
-      // If auth fails, redirect to login instead of setting dummy user
-      // unless it's a network error
-      if (error.message === "User not authenticated" || error.status === 401) {
-        navigate(createPageUrl('Login'));
-        return;
-      }
-
-      if (error.networkError) {
-        // Set default user for offline mode only if strictly network error
-        setUser({
-          full_name: 'Offline Gast',
-          email: 'offline@nebula.supply',
-          role: 'user'
-        });
-      }
+      console.error('Error loading stats:', error);
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
-
-  useEffect(() => {
-    loadUserData();
-  }, [loadUserData]);
+  };
 
   const handleLogout = useCallback(() => {
-    api.auth.logout();
-    navigate(createPageUrl('Home'));
-  }, [navigate]);
+    logout();
+    // navigate(createPageUrl('Home')); // logout in AuthContext handles redirect usually, or we do it here
+  }, [logout]);
 
   // Memoize menuItems to prevent unnecessary re-renders
   const menuItems = useMemo(() => {
@@ -364,7 +336,7 @@ export default function Profile() {
               transition={{ delay: 0.7, type: 'spring' }}
               className={`text-4xl font-black mb-1 relative z-10 ${isDark ? 'bg-gradient-to-r from-blue-400 to-cyan-400' : 'bg-gradient-to-r from-blue-600 to-cyan-600'} bg-clip-text text-transparent`}
             >
-              {stats.cartCount}
+              {cartCount}
             </motion.div>
             <p className={`text-sm font-bold relative z-10 ${isDark ? 'text-zinc-300' : 'text-zinc-600'}`}>
               {t('profile.inCart') || 'Im Warenkorb'}

@@ -17,15 +17,16 @@ export default function VideoSpotlight() {
     }, []);
 
     return (
-        <section className="py-24 md:py-36 relative overflow-hidden bg-black">
-            {/* Ambient Background Glow */}
+        <section className="py-16 sm:py-24 md:py-36 relative overflow-hidden bg-black">
+            {/* Ambient Background Glow — Aurora Pulse */}
             <div className="absolute inset-0 z-0">
-                <div className="absolute top-1/2 left-1/4 w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[150px] -translate-y-1/2" />
-                <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-yellow-600/10 rounded-full blur-[120px]" />
+                <div className="absolute top-1/2 left-1/4 w-[800px] h-[800px] bg-purple-900/20 rounded-full blur-[150px] -translate-y-1/2 animate-aurora-pulse" />
+                <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-yellow-600/10 rounded-full blur-[120px] animate-aurora-pulse" style={{ animationDelay: '4s' }} />
+                <div className="absolute top-1/4 right-1/3 w-[400px] h-[400px] bg-blue-900/8 rounded-full blur-[100px] animate-aurora-pulse" style={{ animationDelay: '2s' }} />
             </div>
 
             <div className="max-w-7xl mx-auto px-4 relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
                     {/* Text Content */}
                     <motion.div
                         initial={{ opacity: 0, x: -30 }}
@@ -34,7 +35,7 @@ export default function VideoSpotlight() {
                         transition={{ duration: 0.8 }}
                     >
                         <div
-                            className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full"
+                            className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 mb-6 sm:mb-8 rounded-full"
                             style={{
                                 background: 'rgba(214, 178, 94, 0.1)',
                                 border: '1px solid rgba(214, 178, 94, 0.3)',
@@ -47,28 +48,24 @@ export default function VideoSpotlight() {
                             </span>
                         </div>
 
-                        <h2 className="text-5xl md:text-7xl font-black mb-8 leading-[1.1] text-white">
+                        <h2 className="text-3xl sm:text-5xl md:text-7xl font-black mb-6 sm:mb-8 leading-[1.1] text-white">
                             Die Nebula <br />
-                            <span className="bg-gradient-to-r from-[#E8C76A] via-[#F5D98B] to-[#E8C76A] bg-clip-text text-transparent drop-shadow-lg">
+                            <span className="bg-gradient-to-r from-[#E8C76A] via-[#F5D98B] to-[#E8C76A] bg-clip-text text-transparent drop-shadow-lg animate-text-shimmer" style={{ backgroundSize: '200% auto' }}>
                                 Welt
                             </span> erleben
                         </h2>
 
-                        <p className="text-xl text-zinc-400 mb-8 leading-relaxed max-w-lg font-medium">
+                        <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-6 sm:mb-8 leading-relaxed max-w-lg font-medium">
                             Erlebe Premium in einer neuen Dimension. Unsere exklusiven Drops und kuratierten Collections warten darauf, von dir entdeckt zu werden.
                         </p>
 
                         {/* Mini Highlight Chips */}
-                        <div className="flex flex-wrap gap-2 mb-10">
-                            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-                                <Film className="w-3 h-3 text-gold" /> Behind the Drop
-                            </span>
-                            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-                                <Eye className="w-3 h-3 text-gold" /> Material Focus
-                            </span>
-                            <span className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-300 font-medium flex items-center gap-1.5">
-                                <Clapperboard className="w-3 h-3 text-gold" /> Premium Craft
-                            </span>
+                        <div className="flex flex-wrap gap-2 mb-6 sm:mb-10">
+                            {[{ icon: Film, label: 'Behind the Drop' }, { icon: Eye, label: 'Material Focus' }, { icon: Clapperboard, label: 'Premium Craft' }].map((chip, i) => (
+                                <span key={i} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-zinc-300 font-medium flex items-center gap-1.5 hover:border-gold/30 hover:bg-gold/5 transition-all duration-300 group cursor-default animate-shimmer-sweep">
+                                    <chip.icon className="w-3 h-3 text-gold group-hover:scale-110 transition-transform" /> {chip.label}
+                                </span>
+                            ))}
                         </div>
 
                         <div className="flex flex-wrap gap-4">
@@ -76,7 +73,7 @@ export default function VideoSpotlight() {
                                 <motion.button
                                     whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(214, 178, 94, 0.4)' }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="group h-14 px-8 rounded-2xl font-bold text-lg flex items-center gap-3 transition-all"
+                                    className="group h-12 sm:h-14 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg flex items-center gap-2 sm:gap-3 transition-all active:scale-95"
                                     style={{
                                         background: 'linear-gradient(135deg, #D6B25E, #F2D27C)',
                                         color: '#000'
@@ -91,7 +88,7 @@ export default function VideoSpotlight() {
                                 whileTap={{ scale: 0.95 }}
                                 onMouseEnter={() => setIsHovering(true)}
                                 onMouseLeave={() => setIsHovering(false)}
-                                className="h-14 w-14 rounded-2xl flex items-center justify-center border border-white/20 transition-all text-white relative overflow-hidden"
+                                className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/20 transition-all text-white relative overflow-hidden active:scale-95"
                             >
                                 {/* Ring Animation on Hover */}
                                 <div className={`absolute inset-0 rounded-2xl border-2 border-gold transition-all duration-500 ${isHovering ? 'scale-100 opacity-100' : 'scale-75 opacity-0'}`} />
@@ -109,10 +106,10 @@ export default function VideoSpotlight() {
                         transition={{ duration: 0.8 }}
                         className="relative group"
                     >
-                        {/* Glow Effect */}
-                        <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/30 to-yellow-600/30 rounded-[3rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                        {/* Glow Effect — Enhanced */}
+                        <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/30 to-yellow-600/30 rounded-[3rem] blur-2xl opacity-30 group-hover:opacity-100 transition-opacity duration-700" />
 
-                        <div className="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900">
+                        <div className="relative aspect-[4/3] rounded-2xl sm:rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-zinc-900">
                             {/* Product-focused poster image */}
                             <img
                                 src="https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=1200&auto=format&fit=crop"
@@ -136,7 +133,7 @@ export default function VideoSpotlight() {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                             {/* Content Chips (Top) */}
-                            <div className="absolute top-6 left-6 right-6 flex flex-wrap gap-2">
+                            <div className="absolute top-3 sm:top-6 left-3 sm:left-6 right-3 sm:right-6 flex flex-wrap gap-1.5 sm:gap-2">
                                 <span className="px-2 py-1 rounded-lg bg-black/60 backdrop-blur-md border border-white/10 text-[10px] text-zinc-300 font-bold uppercase tracking-wider">
                                     Drop Stories
                                 </span>
@@ -149,7 +146,7 @@ export default function VideoSpotlight() {
                             </div>
 
                             {/* Content Over Video */}
-                            <div className="absolute bottom-0 left-0 p-8 w-full">
+                            <div className="absolute bottom-0 left-0 p-4 sm:p-8 w-full">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <div className="text-white font-bold text-lg">Cinematic Experience</div>
@@ -161,13 +158,16 @@ export default function VideoSpotlight() {
                                 </div>
                             </div>
 
-                            {/* Center Play Button - appears on hover */}
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            {/* Center Play Button — visible by default on mobile, hover on desktop */}
+                            <div className="absolute inset-0 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
                                 <motion.div
                                     whileHover={{ scale: 1.1 }}
-                                    className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center cursor-pointer"
+                                    className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center cursor-pointer relative active:scale-95"
                                 >
-                                    <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                                    {/* Pulse Ring */}
+                                    <div className="absolute inset-0 rounded-full border-2 border-gold/50 animate-pulse-ring" />
+                                    <div className="absolute inset-[-6px] rounded-full border border-gold/20 animate-pulse-ring" style={{ animationDelay: '0.5s' }} />
+                                    <Play className="w-6 h-6 sm:w-10 sm:h-10 text-white ml-0.5 sm:ml-1" fill="white" />
                                 </motion.div>
                             </div>
                         </div>
@@ -176,7 +176,7 @@ export default function VideoSpotlight() {
                         <motion.div
                             animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
                             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute -bottom-8 -right-8 w-28 h-28 rounded-3xl bg-gradient-to-br from-[#E8C76A] to-[#F5D98B] shadow-[0_20px_50px_rgba(232,199,106,0.5)] z-20 flex items-center justify-center p-1"
+                            className="absolute -bottom-8 -right-8 w-20 h-20 sm:w-28 sm:h-28 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#E8C76A] to-[#F5D98B] shadow-[0_20px_60px_rgba(232,199,106,0.6)] z-20 hidden sm:flex items-center justify-center p-1"
                         >
                             <div className="w-full h-full rounded-[20px] border-2 border-black/10 flex items-center justify-center bg-white/20 backdrop-blur-sm">
                                 <Sparkles className="w-12 h-12 text-zinc-900" />
@@ -187,7 +187,7 @@ export default function VideoSpotlight() {
                         <motion.div
                             animate={{ y: [0, 15, 0], x: [0, 10, 0] }}
                             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute -top-6 -left-6 z-20"
+                            className="absolute -top-6 -left-6 z-20 hidden sm:block"
                         >
                             <div className="bg-zinc-900/90 backdrop-blur-xl border border-white/10 px-5 py-3 rounded-2xl shadow-xl">
                                 <div className="flex items-center gap-3">

@@ -4,6 +4,7 @@ import { Lock, MessageCircle, Sparkles, ArrowRight, Camera } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/AuthContext';
 import FaceCaptureModal from './FaceCaptureModal';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 /**
  * TeaserOverlay - Premium glassy overlay prompting Telegram verification
@@ -14,14 +15,17 @@ export default function TeaserOverlay({
     onAction = null,
     className = ''
 }) {
-    const { navigateToLogin, isTelegram } = useAuth();
+    const { isTelegram } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
     const botUsername = import.meta.env.VITE_BOT_USERNAME || 'NebulaOrderBot';
 
     const handleUnlock = () => {
         if (onAction) {
             onAction();
         } else if (isTelegram) {
-            navigateToLogin();
+            // Use navigate with state to preserve history/redirect
+            navigate('/login', { state: { from: location } });
         } else {
             window.open(`https://t.me/${botUsername}`, '_blank');
         }
@@ -113,7 +117,9 @@ export function TeaserModal({
     message = 'Um diese Funktion zu nutzen, verifiziere dich über Telegram oder direkt hier.',
     allowCamera = true
 }) {
-    const { isTelegram, navigateToLogin } = useAuth();
+    const { isTelegram } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
     const [showCamera, setShowCamera] = React.useState(false);
     const botUsername = import.meta.env.VITE_BOT_USERNAME || 'NebulaOrderBot';
 
@@ -127,7 +133,8 @@ export function TeaserModal({
 
     const handleUnlockTelegram = () => {
         if (isTelegram) {
-            navigateToLogin();
+            // Use navigate with state to preserve history/redirect
+            navigate('/login', { state: { from: location } });
         } else {
             window.open(`https://t.me/${botUsername}`, '_blank');
         }

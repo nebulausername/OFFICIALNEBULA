@@ -1,49 +1,67 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '@/api';
+import { insforge } from '@/lib/insforge';
+import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/ui/use-toast';
 
 const WishlistContext = createContext();
 
 export function WishlistProvider({ children }) {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
 
+  // Load wishlist on user change
   useEffect(() => {
-    loadWishlist();
-  }, []);
+    if (user) {
+      loadRemoteWishlist();
+    } else {
+      loadLocalWishlist();
+    }
+  }, [user]);
 
-  const loadWishlist = async () => {
+  const loadRemoteWishlist = async () => {
     try {
-      const currentUser = await api.auth.me();
-      setUser(currentUser);
-      
-      const items = await api.entities.WishlistItem.filter({ user_id: currentUser.id });
-      setWishlistIds(new Set(items.map(item => item.product_id)));
-      
-      // Merge localStorage items if any
-      const localItems = getLocalWishlist();
-      if (localItems.length > 0) {
-        await Promise.all(
-          localItems.map(productId => 
-            api.entities.WishlistItem.create({ 
-              user_id: currentUser.id, 
-              product_id: productId 
-            }).catch(() => {})
-          )
-        );
+      setLoading(true);
+      const { data, error } = await insforge.database
+        .from('wishlist_items')
+        .select('product_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      const remoteIds = new Set(data.map(item => item.product_id));
+
+      // Merge local items if they exist
+      const local = getLocalWishlist();
+      if (local.length > 0) {
+        // Add local items to remote
+        const newItems = local.filter(id => !remoteIds.has(id)).map(id => ({
+          user_id: user.id,
+          product_id: id
+        }));
+
+        if (newItems.length > 0) {
+          await insforge.database.from('wishlist_items').insert(newItems);
+          newItems.forEach(item => remoteIds.add(item.product_id));
+        }
+
+        // Clear local storage
         localStorage.removeItem('nebula_wishlist');
-        // Reload after merge
-        const updatedItems = await api.entities.WishlistItem.filter({ user_id: currentUser.id });
-        setWishlistIds(new Set(updatedItems.map(item => item.product_id)));
       }
+
+      setWishlistIds(remoteIds);
     } catch (error) {
-      // Guest mode
-      setUser(null);
-      const localItems = getLocalWishlist();
-      setWishlistIds(new Set(localItems));
+      console.error('Failed to load wishlist:', error);
+      // Fallback to empty or local if critical failure
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadLocalWishlist = () => {
+    setWishlistIds(new Set(getLocalWishlist()));
+    setLoading(false);
   };
 
   const getLocalWishlist = () => {
@@ -63,7 +81,7 @@ export function WishlistProvider({ children }) {
     const isCurrentlySaved = wishlistIds.has(productId);
     const newIds = new Set(wishlistIds);
 
-    // Optimistic update
+    // Optimistic Update
     if (isCurrentlySaved) {
       newIds.delete(productId);
     } else {
@@ -71,33 +89,37 @@ export function WishlistProvider({ children }) {
     }
     setWishlistIds(newIds);
 
-    try {
-      if (user) {
-        // Authenticated user
+    // Persist
+    if (user) {
+      try {
         if (isCurrentlySaved) {
-          const items = await api.entities.WishlistItem.filter({ 
-            user_id: user.id, 
-            product_id: productId 
-          });
-          if (items.length > 0) {
-            await api.entities.WishlistItem.delete(items[0].id);
-          }
+          const { error } = await insforge.database
+            .from('wishlist_items')
+            .delete()
+            .match({ user_id: user.id, product_id: productId });
+          if (error) throw error;
         } else {
-          await api.entities.WishlistItem.create({ 
-            user_id: user.id, 
-            product_id: productId 
-          });
+          const { error } = await insforge.database
+            .from('wishlist_items')
+            .insert({ user_id: user.id, product_id: productId });
+          if (error) throw error;
         }
-      } else {
-        // Guest mode
-        saveLocalWishlist(newIds);
+      } catch (error) {
+        console.error('Wishlist sync error:', error);
+        // Rollback
+        setWishlistIds(wishlistIds);
+        toast({
+          title: "Fehler",
+          description: "Konnte Wishlist nicht aktualisieren.",
+          variant: "destructive"
+        });
+        return { success: false };
       }
-      return { success: true, saved: !isCurrentlySaved };
-    } catch (error) {
-      // Rollback on error
-      setWishlistIds(wishlistIds);
-      return { success: false, error: error.message };
+    } else {
+      saveLocalWishlist(newIds);
     }
+
+    return { success: true, saved: !isCurrentlySaved };
   };
 
   const isInWishlist = (productId) => {
@@ -105,10 +127,10 @@ export function WishlistProvider({ children }) {
   };
 
   return (
-    <WishlistContext.Provider value={{ 
-      wishlistIds: Array.from(wishlistIds), 
-      toggleWishlist, 
-      isInWishlist, 
+    <WishlistContext.Provider value={{
+      wishlistIds: Array.from(wishlistIds),
+      toggleWishlist,
+      isInWishlist,
       loading,
       count: wishlistIds.size
     }}>

@@ -1,10 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { api } from '@/api';
 import { setToken, getToken, authEvents } from '@/api/config';
-import { insforge, db } from '@/lib/insforge';
+import { insforge } from '@/lib/insforge';
 import { useToast } from '@/components/ui/use-toast';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 // Access levels: 'guest' (browser, no auth), 'limited' (pending verification), 'verified' (full access)
 export const ACCESS_LEVELS = {
@@ -53,45 +53,51 @@ export const AuthProvider = ({ children }) => {
     return () => authEvents.off('unauthorized', handleUnauthorized);
   }, []);
 
-  // Realtime Subscription
-  useEffect(() => {
-    let subscription;
-    if (user?.id && isAuthenticated) {
-      console.log('🔌 Subscribing to user updates:', user.id);
-      subscription = db
-        .channel(`user:${user.id}`)
-        .on('postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${user.id}` },
-          (payload) => {
-            console.log('🔄 User profile updated:', payload);
-            checkUserAuth();
-          }
-        )
-        .subscribe();
-    }
-
-    return () => {
-      if (subscription) {
-        console.log('🔌 Unsubscribing from user updates');
-        db.removeChannel(subscription);
-      }
-    };
-  }, [user?.id, isAuthenticated]);
+  // NOTE: Realtime user subscription removed — InsForge Realtime uses connect/subscribe/on pattern,
+  // not db.channel().on().subscribe(). See RealtimeService.js for correct usage.
 
   const checkAppState = async () => {
     try {
       setIsLoadingPublicSettings(false);
       setAuthError(null);
 
-      // Check if user is authenticated
+      // Check if user is authenticated via Backend JWT
       const token = getToken();
       if (token) {
         await checkUserAuth();
       } else {
-        setIsLoadingAuth(false);
-        setIsAuthenticated(false);
-        setAccessLevel(ACCESS_LEVELS.GUEST);
-        console.log('No token found, defaulting to guest mode');
+        // No backend JWT — check for InsForge OAuth session
+        console.log('No backend token, checking InsForge session...');
+        try {
+          const { data, error } = await insforge.auth.getCurrentSession();
+          if (data?.session?.user && !error) {
+            console.log('✅ InsForge session found:', data.session.user.email);
+            // Set user from InsForge session data
+            const insforgeUser = data.session.user;
+            setUser({
+              id: insforgeUser.id,
+              email: insforgeUser.email,
+              full_name: insforgeUser.profile?.name || insforgeUser.email?.split('@')[0] || 'User',
+              avatar_url: insforgeUser.profile?.avatar_url || null,
+              role: 'user',
+              verification_status: 'verified', // OAuth users are auto-verified
+              user_metadata: insforgeUser.profile || {},
+            });
+            setIsAuthenticated(true);
+            setAccessLevel(ACCESS_LEVELS.VERIFIED);
+            setIsLoadingAuth(false);
+          } else {
+            console.log('No InsForge session, defaulting to guest mode');
+            setIsLoadingAuth(false);
+            setIsAuthenticated(false);
+            setAccessLevel(ACCESS_LEVELS.GUEST);
+          }
+        } catch (insforgeError) {
+          console.warn('InsForge session check failed:', insforgeError);
+          setIsLoadingAuth(false);
+          setIsAuthenticated(false);
+          setAccessLevel(ACCESS_LEVELS.GUEST);
+        }
       }
       setIsLoadingPublicSettings(false);
     } catch (error) {
@@ -109,6 +115,11 @@ export const AuthProvider = ({ children }) => {
   const checkUserAuth = async () => {
     try {
       setIsLoadingAuth(true);
+      // Double check token exists before calling API to prevent 401s
+      if (!getToken()) {
+        throw new Error('No token found');
+      }
+
       const currentUser = await api.auth.me();
       setUser(currentUser);
       setIsAuthenticated(true);
@@ -129,9 +140,9 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
       setAccessLevel(ACCESS_LEVELS.GUEST);
 
-      // If user auth fails, it might be an expired token, but we allow guest access
+      // If user auth fails with 401/403, clear token and stay in guest mode
       if (error.status === 401 || error.status === 403) {
-        console.log('Guest mode active');
+        console.log('Token expired or invalid, clearing...');
         setToken(null);
       }
     }
@@ -153,21 +164,19 @@ export const AuthProvider = ({ children }) => {
   const logout = async (shouldRedirect = true) => {
     setUser(null);
     setIsAuthenticated(false);
+    setAccessLevel(ACCESS_LEVELS.GUEST);
+    setToken(null);
+
+    // Sign out from InsForge too
+    try { await insforge.auth.signOut(); } catch (e) { /* ignore */ }
 
     if (shouldRedirect) {
-      await api.auth.logout(window.location.href);
-    } else {
-      await api.auth.logout();
+      window.location.href = '/login';
     }
   };
 
   const navigateToLogin = () => {
-    // Check if in Telegram WebApp
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      window.location.href = '/login';
-    } else {
-      api.auth.redirectToLogin(window.location.href);
-    }
+    window.location.href = '/login';
   };
 
   return (

@@ -14,7 +14,7 @@ const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
 // Routes that require verified access
-const PROTECTED_ROUTES = ['Cart', 'Checkout', 'Profile', 'ProfileSettings', 'Wishlist', 'Requests', 'OrderConfirmation'];
+const PROTECTED_ROUTES = ['Home', 'Shop', 'Products', 'ProductDetail', 'Cart', 'Checkout', 'Profile', 'ProfileSettings', 'Wishlist', 'Requests', 'OrderConfirmation', 'VIP', 'Support', 'Tickets', 'SupportTicketDetail'];
 // Routes that require admin access
 const ADMIN_ROUTES = ['Admin', 'AdminAnalytics', 'AdminUsers', 'AdminOrders', 'AdminBrands', 'AdminCategories',
   'AdminNotificationTemplates', 'AdminProductEditor', 'AdminProducts', 'AdminRequests',
@@ -71,6 +71,15 @@ const AuthenticatedApp = () => {
       </LayoutWrapper>
     );
 
+    // Gate shop/user routes behind authentication
+    if (PROTECTED_ROUTES.includes(path)) {
+      Content = (
+        <ProtectedRoute>
+          {Content}
+        </ProtectedRoute>
+      );
+    }
+
     if (ADMIN_ROUTES.includes(path)) {
       Content = (
         <AdminRoute>
@@ -95,13 +104,7 @@ const AuthenticatedApp = () => {
             <Pages.Login />
           </MotionWrapper>
         } />
-        <Route path="/" element={
-          <MotionWrapper className="w-full h-full">
-            <LayoutWrapper currentPageName={mainPageKey}>
-              <MainPage />
-            </LayoutWrapper>
-          </MotionWrapper>
-        } />
+        <Route path="/" element={wrapWithProtection(mainPageKey, Pages[mainPageKey])} />
         {Object.entries(Pages).map(([path, Page]) => {
           // Skip Login as it's already handled above
           if (path === 'Login') return null;

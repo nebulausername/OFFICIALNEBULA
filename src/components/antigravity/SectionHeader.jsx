@@ -15,9 +15,9 @@ export default function SectionHeader({
         <div className="flex items-end justify-between mb-8 md:mb-12 px-2">
             <div className="max-w-xl">
                 {subtitle && (
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="w-8 h-[2px] bg-gold/50 shadow-[0_0_10px_#D6B25E]" />
-                        <span className="text-gold text-xs md:text-sm font-bold uppercase tracking-[0.2em]">{subtitle}</span>
+                    <div className="flex items-center gap-3 mb-3">
+                        <span className="w-10 h-[2px] bg-gradient-to-r from-gold/80 to-gold/20 shadow-[0_0_10px_#D6B25E]" />
+                        <span className="text-gold text-xs md:text-sm font-bold uppercase tracking-[0.25em]" style={{ textShadow: '0 0 15px rgba(214,178,94,0.3)' }}>{subtitle}</span>
                     </div>
                 )}
                 <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none uppercase">
@@ -28,9 +28,9 @@ export default function SectionHeader({
             <div className="flex items-center gap-4 md:gap-8">
                 {linkTo && (
                     <Link to={linkTo}>
-                        <Button variant="ghost" className="hidden md:flex items-center gap-2 text-zinc-400 hover:text-gold hover:bg-white/5 transition-all group uppercase tracking-wider font-bold">
+                        <Button variant="ghost" className="hidden md:flex items-center gap-2 text-zinc-400 hover:text-gold hover:bg-gold/5 transition-all group uppercase tracking-wider font-bold border border-transparent hover:border-gold/20 rounded-xl px-4 py-2">
                             <span>{linkText}</span>
-                            <div className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center group-hover:border-gold/50 transition-all">
+                            <div className="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center group-hover:border-gold/50 group-hover:bg-gold/10 transition-all">
                                 <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                             </div>
                         </Button>
@@ -39,10 +39,10 @@ export default function SectionHeader({
 
                 {(onPrev || onNext) && (
                     <div className="flex items-center gap-2">
-                        <button onClick={onPrev} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                        <button onClick={onPrev} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gradient-to-br hover:from-[#F2D27C] hover:to-[#D6B25E] hover:text-black hover:border-gold transition-all duration-300 hover:shadow-[0_0_15px_rgba(214,178,94,0.3)] disabled:opacity-30 disabled:cursor-not-allowed">
                             <ChevronLeft className="w-5 h-5" />
                         </button>
-                        <button onClick={onNext} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gold hover:text-black hover:border-gold transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                        <button onClick={onNext} className="w-10 h-10 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-white hover:bg-gradient-to-br hover:from-[#F2D27C] hover:to-[#D6B25E] hover:text-black hover:border-gold transition-all duration-300 hover:shadow-[0_0_15px_rgba(214,178,94,0.3)] disabled:opacity-30 disabled:cursor-not-allowed">
                             <ChevronRight className="w-5 h-5" />
                         </button>
                     </div>

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { createPageUrl } from '../utils';
 import { api } from '@/api';
-import { Crown, Sparkles, Zap, Package, LayoutGrid, Bell, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Crown, Sparkles, Zap, Package, LayoutGrid, Bell, ChevronLeft, ChevronRight, Shield, Truck, Star, Heart, Gift } from 'lucide-react';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,6 +43,7 @@ import FreshDropsSection from '../components/home/FreshDropsSection';
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { useCart } from '@/contexts/CartContext';
 
 export default function Home() {
   const [departments, setDepartments] = useState([]);
@@ -62,13 +63,15 @@ export default function Home() {
   const [onboardingStep, setOnboardingStep] = useState('none'); // 'welcome', 'intro', 'none'
 
   useEffect(() => {
+    let timer;
     if (isAuthenticated && user) {
       const hasSeenOnboarding = localStorage.getItem(`onboarding_complete_${user.id}`);
       if (!hasSeenOnboarding) {
         // Delay slightly for dramatic effect
-        setTimeout(() => setOnboardingStep('welcome'), 1000);
+        timer = setTimeout(() => setOnboardingStep('welcome'), 1000);
       }
     }
+    return () => clearTimeout(timer);
   }, [isAuthenticated, user]);
 
   const handleWelcomeStart = () => {
@@ -82,9 +85,25 @@ export default function Home() {
     setOnboardingStep('none');
   };
 
-  const handleIntroComplete = () => {
+  const handleIntroComplete = async (data) => {
     if (user) {
       localStorage.setItem(`onboarding_complete_${user.id}`, 'true');
+
+      // Persist preferences if data is provided
+      if (data) {
+        try {
+          await api.auth.updateMe({
+            user_metadata: {
+              ...user.user_metadata,
+              preferences: data,
+              onboarding_completed_at: new Date().toISOString()
+            }
+          });
+          // console.log("Preferences saved:", data);
+        } catch (e) {
+          console.warn("Failed to save preferences:", e);
+        }
+      }
     }
     setOnboardingStep('none');
   };
@@ -203,38 +222,25 @@ export default function Home() {
     }
   };
 
-  const handleAddToCart = async (product, quantity = 1, selectedOptions = {}) => {
+  // Use CartContext for proper cart management
+  const { addToCart } = useCart();
+
+  const handleAddToCart = async (cartData) => {
     try {
-      const user = await api.auth.me();
-      if (!user) {
-        // Allow mock add to cart (or redirect to login)
-        console.warn('User not logged in or using mock product');
-        return;
-      }
-
-      const existing = await api.entities.StarCartItem.filter({
-        user_id: user.id,
-        product_id: product.id
-      });
-
-      if (existing.length > 0) {
-        await api.entities.StarCartItem.update(existing[0].id, {
-          quantity: existing[0].quantity + quantity,
-          selected_options: selectedOptions
-        });
-      } else {
-        await api.entities.StarCartItem.create({
-          user_id: user.id,
-          product_id: product.id,
-          quantity: quantity,
-          selected_options: selectedOptions
-        });
+      // cartData comes from UnifiedProductModal with full options
+      if (cartData && cartData.product_id) {
+        await addToCart(cartData.product_id, cartData.quantity || 1, cartData.selected_options || {});
       }
       setIsQuickViewOpen(false);
-      window.location.reload();
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
+  };
+
+  const handleQuickAdd = async (product) => {
+    if (!product || !product.id) return;
+    // For quick add from product cards, add 1 unit with no options
+    await addToCart(product.id, 1, {});
   };
 
   // Filter Logic - using proper mock collections as fallback
@@ -265,19 +271,20 @@ export default function Home() {
       />
 
       {/* --- HERO SECTION --- */}
-      <section className="relative w-full h-screen min-h-[800px] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full min-h-[90vh] md:min-h-[800px] flex flex-col overflow-hidden pt-20 pb-8 md:pt-28 md:pb-12">
         {/* Live Cosmic Background */}
         <ErrorBoundary>
           <CosmicHeroBackground />
         </ErrorBoundary>
 
-        <div className="absolute inset-0 z-10 container mx-auto px-4 flex flex-col justify-center items-center text-center">
-          <div className="relative z-20">
+        <div className="relative z-10 container mx-auto px-4 flex flex-col flex-1">
+          <div className="relative z-20 flex flex-col flex-1">
+            {/* Top Section: Title & Typewriter */}
             <motion.div
-              style={{ y: heroTextY, scale: heroScale, opacity: heroOpacity }}
-              className="flex flex-col items-center"
+              style={{ scale: heroScale, opacity: heroOpacity }}
+              className="flex flex-col items-center text-center pt-4 md:pt-8"
             >
-              <div className="flex items-center gap-3 mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center gap-3 mb-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <span className="h-[1px] w-12 bg-gradient-to-r from-transparent to-gold" />
                 <span className="text-gold font-bold tracking-[0.3em] text-xs uppercase glow-gold">
                   {user ? `Willkommen zurück` : 'Official Supply'}
@@ -286,15 +293,15 @@ export default function Home() {
               </div>
 
               <motion.h1
-                className="text-6xl sm:text-8xl xl:text-9xl font-black leading-[0.9] tracking-tighter text-white drop-shadow-2xl relative z-10 mix-blend-overlay"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                style={{ textShadow: '0 0 80px rgba(214,178,94,0.5)' }}
+                className="text-5xl sm:text-7xl md:text-8xl xl:text-9xl font-black leading-[0.85] tracking-tighter text-white relative z-10 glow-gold-strong"
+                initial={{ opacity: 0, scale: 0.85, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                style={{ textShadow: '0 0 80px rgba(214,178,94,0.5), 0 0 160px rgba(214,178,94,0.2)' }}
               >
                 {user ? (user.user_metadata?.full_name?.split(' ')[0] || 'LEGEND') : 'NEBULA'}
               </motion.h1>
-              <div className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 tracking-[0.5em] mt-4 uppercase drop-shadow-lg">
+              <div className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 tracking-[0.2em] md:tracking-[0.4em] mt-3 uppercase drop-shadow-lg min-h-[2em]">
                 <TypewriterEffect
                   words={user ? ["READY TO COP?", "CHECK THE DROP", "STAY HYDRATED"] : ["FUTURE", "CULTURE", "SUPPLY"]}
                   className="text-white"
@@ -308,55 +315,61 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1, duration: 0.8 }}
-                  className="mt-12 p-1 rounded-2xl bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700/50 backdrop-blur-md"
+                  className="mt-6 p-1 rounded-2xl bg-gradient-to-r from-zinc-800 to-zinc-900 border border-zinc-700/50 backdrop-blur-md"
                 >
-                  <div className="bg-[#0A0C10]/80 rounded-xl p-4 flex items-center gap-4 pr-6">
+                  <Link to="/products" className="bg-[#0A0C10]/80 rounded-xl p-4 flex items-center gap-4 pr-6 hover:bg-[#0A0C10] transition-colors">
                     <div className="w-10 h-10 rounded-full bg-[#D6B25E]/20 flex items-center justify-center text-[#D6B25E]">
                       <Sparkles size={20} />
                     </div>
                     <div className="text-left">
                       <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">Next Mission</div>
-                      <div className="font-bold text-white">Dein Feed checken</div>
+                      <div className="font-bold text-white">Shop die neuesten Drops</div>
                     </div>
                     <ChevronRight className="text-zinc-600 ml-2" size={16} />
-                  </div>
+                  </Link>
                 </motion.div>
               )}
             </motion.div>
 
+            {/* Main Content Grid */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="mt-16 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center"
+              className="mt-8 sm:mt-10 lg:mt-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start flex-1"
             >
               {/* Left Column: CTA & Trust */}
-              <div className="lg:col-span-7 flex flex-col items-center lg:items-start gap-10 order-2 lg:order-1">
+              <div className="lg:col-span-7 flex flex-col items-center lg:items-start gap-8 order-2 lg:order-1">
 
                 {/* Ultra Bright "Geil" Button */}
-                <MagneticButton className="min-w-[240px] group relative" onClick={() => window.location.href = '/products'}>
-                  <div className="absolute inset-0 bg-gold blur-lg opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                  <Link to="/products" className="relative z-10 w-full h-full bg-gold hover:bg-white text-black flex items-center justify-center px-10 py-5 rounded-full transition-all duration-300 border-2 border-transparent hover:border-gold hover:scale-105">
+                <MagneticButton className="min-w-[220px] sm:min-w-[260px] group relative" onClick={() => window.location.href = '/products'}>
+                  <div className="absolute inset-0 bg-gold blur-xl opacity-50 group-hover:opacity-80 transition-opacity duration-700 animate-glow-gold-pulse" />
+                  <Link to="/products" className="relative z-10 w-full h-full bg-gradient-to-r from-[#F2D27C] to-[#D6B25E] hover:from-white hover:to-white text-black flex items-center justify-center px-12 py-5 rounded-full transition-all duration-500 border-2 border-transparent hover:border-gold hover:scale-105 shadow-[0_0_30px_rgba(214,178,94,0.4)]">
                     <span className="flex items-center gap-3 font-black text-lg tracking-widest uppercase">
                       Shop Drops <Zap className="w-5 h-5 fill-black group-hover:fill-gold transition-colors" />
                     </span>
                   </Link>
                 </MagneticButton>
 
-                {/* Trust Row - Brighter & More Visible */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-x-8 gap-y-4 text-zinc-300 text-sm font-bold uppercase tracking-widest">
-                  <span className="flex items-center gap-2 group hover:text-white transition-colors">
-                    <div className="p-1.5 rounded-full bg-white/10 group-hover:bg-gold/20"><Zap className="w-4 h-4 text-gold" /></div>
-                    Blitzversand
-                  </span>
-                  <span className="flex items-center gap-2 group hover:text-white transition-colors">
-                    <div className="p-1.5 rounded-full bg-white/10 group-hover:bg-gold/20"><Crown className="w-4 h-4 text-gold" /></div>
-                    Premium Selection
-                  </span>
-                  <span className="flex items-center gap-2 group hover:text-white transition-colors">
-                    <div className="p-1.5 rounded-full bg-white/10 group-hover:bg-gold/20"><Package className="w-4 h-4 text-gold" /></div>
-                    Discreet Pkg
-                  </span>
+                {/* Trust Row */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-x-4 sm:gap-x-8 gap-y-3 text-zinc-200 text-xs sm:text-sm font-bold uppercase tracking-wider sm:tracking-widest">
+                  {[
+                    { icon: Zap, label: 'Blitzversand' },
+                    { icon: Crown, label: 'Premium Selection' },
+                    { icon: Package, label: 'Discreet Pkg' },
+                  ].map((item, i) => (
+                    <span key={i} className="flex items-center gap-2.5 group hover:text-white transition-all duration-300">
+                      <div className="p-2 rounded-full bg-gold/15 border border-gold/30 group-hover:bg-gold/25 group-hover:border-gold/50 transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(214,178,94,0.3)]">
+                        <item.icon className="w-4 h-4 text-gold" />
+                      </div>
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Delivery Bar */}
+                <div className="w-full max-w-full lg:max-w-xl">
+                  <DeliveryBar />
                 </div>
               </div>
 
@@ -365,7 +378,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="lg:col-span-5 w-full min-h-[400px] lg:h-[500px] glass-card p-6 flex flex-col order-1 lg:order-2"
+                className="lg:col-span-5 w-full min-h-[350px] lg:h-[460px] glass-panel rounded-2xl p-5 flex flex-col order-1 lg:order-2"
               >
                 <FeaturedDropList
                   products={products}
@@ -373,19 +386,17 @@ export default function Home() {
                 />
               </motion.div>
             </motion.div>
-
-            {/* Delivery Bar Helper */}
-            <div className="mt-16 w-full max-w-3xl mx-auto lg:mx-0">
-              <DeliveryBar />
-            </div>
           </div>
         </div>
 
-        {/* Marquee Background Element */}
-        <div className="absolute bottom-10 left-0 right-0 z-0 opacity-20 pointer-events-none">
+        {/* Marquee Background Element — Higher Opacity */}
+        <div className="absolute bottom-4 left-0 right-0 z-0 opacity-40 pointer-events-none">
           <InfiniteMarquee />
         </div>
-      </section >
+      </section>
+
+      {/* Section Divider */}
+      <div className="section-divider my-4" />
 
       {/* --- SECTION: CATEGORIES --- */}
       < section className="py-20 relative z-10" >
@@ -424,6 +435,9 @@ export default function Home() {
         </div>
       </section >
 
+      {/* Section Divider */}
+      <div className="section-divider my-4" />
+
       {/* --- SECTION: FRESH DROPS (NEW) --- */}
       < FreshDropsSection
         products={products}
@@ -432,20 +446,30 @@ export default function Home() {
         }
       />
 
+      {/* Section Divider */}
+      <div className="section-divider my-4" />
+
       {/* --- VIDEO SPOTLIGHT --- */}
       <div className="py-12">
         <VideoSpotlight />
       </div>
 
+      {/* Section Divider */}
+      <div className="section-divider my-4" />
+
       {/* --- SECTION: HIGHLIGHTS (Split View) --- */}
       <section className="py-20 relative z-10">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
-          <div className="flex flex-col lg:flex-row items-end justify-between mb-12 gap-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between mb-12 gap-6 lg:gap-8">
             <div>
-              <h2 className="text-4xl md:text-5xl font-black text-white mb-2">Editor's Picks</h2>
-              <p className="text-zinc-400">Unsere persönlichen Favoriten und Bestseller der Woche.</p>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="w-10 h-[2px] bg-gradient-to-r from-gold/80 to-gold/20 shadow-[0_0_10px_#D6B25E]" />
+                <span className="text-gold text-xs font-bold uppercase tracking-[0.25em]" style={{ textShadow: '0 0 15px rgba(214,178,94,0.3)' }}>Kuratiert</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2">Editor's Picks</h2>
+              <p className="text-zinc-400 text-sm sm:text-base">Unsere persönlichen Favoriten und Bestseller der Woche.</p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide whitespace-nowrap -mx-1 px-1">
               {['bestseller', 'trending', 'under50'].map(tab => (
                 <button
                   key={tab}
@@ -461,9 +485,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {/* Product Grid (Left) */}
-            <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="col-span-2 sm:col-span-2 lg:col-span-3 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
               {loadingProducts ? Array(6).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
                 : getFilteredProducts().length > 0 ? (
                   getFilteredProducts().map(product => (
@@ -491,8 +515,8 @@ export default function Home() {
                 )}
             </div>
 
-            {/* Sticky Highlight Card (Right) */}
-            <div className="lg:col-span-1 hidden lg:block">
+            {/* Sticky Highlight Card (Right — Desktop Only) */}
+            <div className="hidden lg:block lg:col-span-1">
               <div className="sticky top-28 h-[600px] w-full rounded-3xl overflow-hidden relative group border border-white/10">
                 <div className="absolute inset-0 bg-[#0E1015]">
                   <img
@@ -526,7 +550,75 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- TRUST FOOTER (NEW) --- */}
+      {/* --- WHY NEBULA USP SECTION --- */}
+      <section className="py-16 sm:py-24 relative z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gold/[0.02] to-transparent" />
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 relative">
+          <div className="text-center mb-12 sm:mb-16">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <span className="w-10 h-[2px] bg-gradient-to-r from-transparent to-gold/60" />
+              <span className="text-gold text-xs font-bold uppercase tracking-[0.25em]" style={{ textShadow: '0 0 15px rgba(214,178,94,0.3)' }}>Warum Nebula?</span>
+              <span className="w-10 h-[2px] bg-gradient-to-l from-transparent to-gold/60" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3">Dein Premium Supply</h2>
+            <p className="text-zinc-400 text-sm sm:text-base max-w-lg mx-auto">Mehr als ein Shop — eine Community für Streetwear Kultur.</p>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {[
+              { icon: Shield, title: '100% Sicher', desc: 'Verschlüsselte Zahlung & diskreter Versand', color: 'from-emerald-500 to-green-600' },
+              { icon: Truck, title: 'Blitz-Versand', desc: 'Express Lieferung in 1-3 Werktagen', color: 'from-blue-500 to-cyan-500' },
+              { icon: Star, title: 'Premium Only', desc: 'Nur handverlesene Top-Produkte', color: 'from-gold to-yellow-400' },
+              { icon: Gift, title: 'VIP Rewards', desc: 'Punkte sammeln & exklusive Drops', color: 'from-purple-500 to-pink-500' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="group relative glass-panel rounded-2xl p-5 sm:p-6 text-center border border-white/5 hover:border-gold/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(214,178,94,0.1)]"
+              >
+                <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                </div>
+                <h3 className="text-white font-bold text-sm sm:text-base mb-1.5 group-hover:text-gold transition-colors">{item.title}</h3>
+                <p className="text-zinc-500 text-xs sm:text-sm leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Section Divider */}
+      <div className="section-divider my-4" />
+
+      {/* --- CTA Banner Section --- */}
+      <section className="py-12 sm:py-16 relative z-10">
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6">
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#0E1015] via-[#141820] to-[#0E1015] border border-gold/20 p-8 sm:p-12 lg:p-16 text-center">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(214,178,94,0.08)_0%,transparent_70%)]" />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="relative z-10"
+            >
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3">Join the <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-300 to-gold">Nebula</span></h2>
+              <p className="text-zinc-400 text-sm sm:text-base mb-8 max-w-md mx-auto">Werde Teil der Community und verpasse keine Drops, VIP-Deals & exklusive Releases.</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <Link to="/products" className="px-10 py-4 bg-gradient-to-r from-[#F2D27C] to-[#D6B25E] hover:from-white hover:to-white text-black rounded-full font-black text-base tracking-wider uppercase transition-all duration-300 shadow-[0_0_25px_rgba(214,178,94,0.3)] hover:shadow-[0_0_40px_rgba(214,178,94,0.5)]">
+                  Jetzt Shoppen
+                </Link>
+                <Link to="/VIP" className="px-10 py-4 border border-gold/30 text-gold hover:bg-gold/10 rounded-full font-bold text-sm tracking-wider uppercase transition-all duration-300">
+                  VIP Programm
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- TRUST FOOTER --- */}
       <NebulaFooter />
 
       {/* --- MODALS --- */}

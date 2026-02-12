@@ -65,8 +65,11 @@ apiClient.interceptors.response.use(
     (error) => {
         // Handle 401 (Unauthorized)
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            // Emit event so AuthContext can handle it
-            authEvents.emit('unauthorized');
+            // Only emit unauthorized if we actually had a token (i.e. we thought we were logged in)
+            // This prevents guests from triggering "Session Expired" toasts
+            if (getToken()) {
+                authEvents.emit('unauthorized');
+            }
         }
         return Promise.reject(error);
     }
