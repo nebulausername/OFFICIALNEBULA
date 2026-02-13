@@ -15,6 +15,7 @@ import { useI18n } from '../components/i18n/I18nProvider';
 import { useCart } from '../contexts/CartContext';
 // Removed staticProducts import
 import { insforge } from '@/lib/insforge';
+import { useToast } from '@/components/ui/use-toast';
 
 // ...
 
@@ -30,17 +31,50 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
 
+  // Missing State Variables
+  const [sortBy, setSortBy] = useState('newest');
+  const [viewMode, setViewMode] = useState(3);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+
+  const [advancedFilters, setAdvancedFilters] = useState({
+    categories: [],
+    brands: [],
+    priceRange: null,
+    sizes: [],
+    colors: [],
+    inStock: null
+  });
+
   // ... (state matches original)
 
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('Fetching shop data...');
+
       const [prodsReq, catsReq, brdsReq, deptsReq] = await Promise.all([
         insforge.database.from('products').select('*, brand:brands(*), category:categories(*), images:product_images(*)').order('created_at', { ascending: false }),
         insforge.database.from('categories').select('*').order('sort_order'),
         insforge.database.from('brands').select('*').order('sort_order'),
         insforge.database.from('departments').select('*').order('sort_order')
       ]);
+
+      if (prodsReq.error) {
+        console.error('Products fetch error:', prodsReq.error);
+        throw new Error(`Products: ${prodsReq.error.message} (${prodsReq.error.code})`);
+      }
+      if (catsReq.error) {
+        console.error('Categories fetch error:', catsReq.error);
+        throw new Error(`Categories: ${catsReq.error.message}`);
+      }
+
+      console.log('Data fetched:', {
+        products: prodsReq.data?.length,
+        categories: catsReq.data?.length
+      });
 
       if (prodsReq.error) throw prodsReq.error;
       if (catsReq.error) throw catsReq.error;
@@ -56,8 +90,9 @@ export default function Products() {
       console.error('Error loading shop data:', error);
       toast({
         title: "Fehler beim Laden",
-        description: "Produkte konnten nicht geladen werden.",
-        variant: "destructive"
+        description: error.message || "Produkte konnten nicht geladen werden.",
+        variant: "destructive",
+        duration: 5000
       });
       // Fallback only for critical UI elements if needed, but avoid static products with wrong IDs
       setProducts([]);
@@ -99,6 +134,9 @@ export default function Products() {
       }));
     }
   }, [products, priceRange]);
+
+  // Pagination / Load More (Simplified for now)
+  const [visibleProducts, setVisibleProducts] = useState(12);
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -373,7 +411,7 @@ export default function Products() {
                     'grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
                   }`}>
                   <AnimatePresence mode="popLayout">
-                    {filteredProducts.map((product, index) => (
+                    {filteredProducts.slice(0, visibleProducts).map((product, index) => (
                       <motion.div
                         key={product.id}
                         layout
@@ -390,14 +428,23 @@ export default function Products() {
                     ))}
                   </AnimatePresence>
 
-                  {/* Infinite Scroll Trigger */}
-                  {/* Infinite Scroll Trigger - Removed dead code referencing undefined hasMore variable */}
+                  {/* Infinite Scroll Trigger / Load More */}
+                  {visibleProducts < filteredProducts.length && (
+                    <div className="col-span-full flex justify-center mt-12">
+                      <button
+                        onClick={() => setVisibleProducts(prev => prev + 12)}
+                        className="px-8 py-3 rounded-xl font-bold bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-white"
+                      >
+                        Mehr anzeigen
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       <ShopCategoryDrawer
         isOpen={megaMenuOpen}
@@ -446,6 +493,6 @@ export default function Products() {
         onSwitchProduct={(p) => setQuickViewProduct(p)}
         mode="quick"
       />
-    </div>
+    </div >
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '@/api';
 import { useRealtime } from '@/hooks/useRealtime';
+import { useChat } from '@/contexts/ChatContext';
 import { motion } from 'framer-motion';
 import {
     ArrowLeft,
@@ -11,13 +12,20 @@ import {
     Download,
     Share2,
     Clock,
-    CheckCircle,
-    Truck
+    CheckCircle2,
+    Truck,
+    MessageCircle,
+    ShieldCheck,
+    Sparkles,
+    Copy
 } from 'lucide-react';
-import { createPageUrl } from '../utils';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function TicketDetail() {
     const { id } = useParams();
+    const { openChat } = useChat();
+    const { toast } = useToast();
     const [ticket, setTicket] = useState(null);
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -50,172 +58,245 @@ export default function TicketDetail() {
         }
     }, ['UPDATE'], `id=eq.${id}`);
 
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text);
+        toast({
+            title: "Kopiert",
+            description: "Ticket-ID in die Zwischenablage kopiert.",
+        });
+    };
+
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0A0C10]">
-                <div className="w-10 h-10 border-4 border-[#D6B25E]/20 border-t-[#D6B25E] rounded-full animate-spin" />
+            <div className="min-h-screen flex items-center justify-center bg-[#050608]">
+                <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
 
     if (!ticket) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0C10] text-white">
-                <h1 className="text-2xl font-bold mb-4">Ticket nicht gefunden</h1>
-                <Link to="/tickets" className="text-[#D6B25E] hover:underline">Zurück zur Übersicht</Link>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-[#050608] text-white">
+                <h1 className="text-3xl font-black mb-4">Ticket nicht gefunden</h1>
+                <Link to="/tickets" className="text-gold hover:underline">Zurück zur Übersicht</Link>
             </div>
         );
     }
 
-    // Progress logic
-    const steps = ['pending', 'processing', 'shipped', 'completed'];
-    const currentStepIndex = steps.indexOf(ticket.status) === -1 ? 0 : steps.indexOf(ticket.status);
-    const progress = Math.max(5, ((currentStepIndex) / (steps.length - 1)) * 100);
+    // Status Logic for "Inquiry Flow"
+    // 'pending' -> Eingang bestätigt
+    // 'processing' -> Verfügbarkeit wird geprüft
+    // 'completed' -> Angebot bereit
+    const getStatusInfo = (status) => {
+        switch (status) {
+            case 'pending':
+            case 'open':
+                return { label: 'Eingegangen', description: 'Deine Anfrage wird bearbeitet.', color: 'bg-blue-500', icon: Clock, step: 1 };
+            case 'processing':
+                return { label: 'In Prüfung', description: 'Wir prüfen die Verfügbarkeit.', color: 'bg-purple-500', icon: ShieldCheck, step: 2 };
+            case 'shipped': // Reused for "Offer Ready" in this context if adapted, or strict mapping
+                return { label: 'Versendet', description: 'Deine Bestellung ist unterwegs.', color: 'bg-emerald-500', icon: Truck, step: 3 };
+            case 'completed': // Payment Done / Finished
+                return { label: 'Abgeschlossen', description: 'Vorgang erfolgreich beendet.', color: 'bg-gold', icon: CheckCircle2, step: 4 };
+            default:
+                return { label: 'Status Unbekannt', description: 'Bitte Support kontaktieren.', color: 'bg-zinc-500', icon: Clock, step: 0 };
+        }
+    };
+
+    const statusInfo = getStatusInfo(ticket.status);
 
     return (
-        <div className="min-h-screen pt-24 pb-12 px-4 bg-[#0A0C10] text-white">
-            <div className="max-w-2xl mx-auto">
-                <div className="mb-6">
-                    <Link to="/tickets" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-4 group">
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Zurück
+        <div className="min-h-screen bg-[#050608] text-white font-sans selection:bg-gold/30 pt-24 pb-20">
+
+            {/* Background Ambience */}
+            <div className="fixed inset-0 pointer-events-none">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[100px] opacity-20" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] opacity-20" />
+            </div>
+
+            <div className="max-w-4xl mx-auto px-4 relative z-10">
+                {/* Header Navigation */}
+                <div className="flex justify-between items-center mb-8">
+                    <Link to="/shop" className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group">
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </div>
+                        <span className="font-medium">Zurück zum Shop</span>
                     </Link>
-                    <h1 className="text-3xl font-black">Ticket #{ticket.id.slice(0, 8).toUpperCase()}</h1>
+                    <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-full flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${ticket.status === 'completed' ? 'bg-emerald-500' : 'animate-pulse bg-gold'}`} />
+                        <span className="text-xs font-bold uppercase tracking-wider">{statusInfo.label}</span>
+                    </div>
                 </div>
 
-                {/* 🎫 Main Ticket Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white text-black rounded-3xl overflow-hidden relative shadow-2xl shadow-white/5"
-                >
-                    {/* Top Section (Header) */}
-                    <div className="bg-[#D6B25E] p-6 relative overflow-hidden">
-                        <div className="absolute inset-0 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
-                        <div className="flex justify-between items-start relative z-10">
-                            <div>
-                                <div className="text-xs font-bold uppercase tracking-widest text-black/60 mb-1">OFFICIAL NEBULA</div>
-                                <div className="text-2xl font-black">Digital Receipt</div>
-                            </div>
-                            <div className="bg-black/10 backdrop-blur-sm p-2 rounded-lg">
-                                <Package className="w-6 h-6 text-black" />
-                            </div>
-                        </div>
-                    </div>
+                <div className="grid lg:grid-cols-3 gap-8">
+                    {/* Main Ticket Card */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-zinc-900/50 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden relative shadow-2xl"
+                        >
+                            {/* Premium Header Strip */}
+                            <div className="h-2 bg-gradient-to-r from-gold via-[#F2D27C] to-[#D6B25E]" />
 
-                    {/* Jagged Divider */}
-                    <div className="h-4 bg-[#D6B25E] relative">
-                        <div className="absolute bottom-0 w-full h-2 bg-white" style={{ clipPath: 'polygon(0 100%, 2% 0, 4% 100%, 6% 0, 8% 100%, 10% 0, 12% 100%, 14% 0, 16% 100%, 18% 0, 20% 100%, 22% 0, 24% 100%, 26% 0, 28% 100%, 30% 0, 32% 100%, 34% 0, 36% 100%, 38% 0, 40% 100%, 42% 0, 44% 100%, 46% 0, 48% 100%, 50% 0, 52% 100%, 54% 0, 56% 100%, 58% 0, 60% 100%, 62% 0, 64% 100%, 66% 0, 68% 100%, 70% 0, 72% 100%, 74% 0, 76% 100%, 78% 0, 80% 100%, 82% 0, 84% 100%, 86% 0, 88% 100%, 90% 0, 92% 100%, 94% 0, 96% 100%, 98% 0, 100% 100%)' }}></div>
-                    </div>
-
-                    {/* Content Body */}
-                    <div className="p-8">
-                        {/* Status Bar */}
-                        <div className="mb-8">
-                            <div className="flex justify-between text-sm font-bold text-zinc-500 mb-2">
-                                <span>Status</span>
-                                <span className="text-black uppercase">{ticket.status}</span>
-                            </div>
-                            <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${progress}%` }}
-                                    transition={{ duration: 1, ease: "circOut" }}
-                                    className="h-full bg-black rounded-full"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Items List */}
-                        <div className="space-y-4 mb-8">
-                            {items.map((item, i) => (
-                                <div key={i} className="flex justify-between items-center py-2 border-b border-dashed border-zinc-200 last:border-0">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-zinc-100 rounded-md flex items-center justify-center font-bold text-xs text-zinc-500">
-                                            {item.quantity}x
+                            <div className="p-8">
+                                <div className="flex justify-between items-start mb-8">
+                                    <div>
+                                        <h1 className="text-3xl font-black text-white mb-2">Anfrage bestätigt</h1>
+                                        <div className="flex items-center gap-2 text-zinc-400 font-mono text-sm group cursor-pointer" onClick={() => copyToClipboard(ticket.id)}>
+                                            <span>#{ticket.id.slice(0, 8)}</span>
+                                            <Copy size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
-                                        <span className="font-bold text-sm">{item.product_name || 'Item'}</span>
                                     </div>
-                                    <span className="font-mono font-medium">
-                                        {parseFloat(item.price).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
-                                    </span>
+                                    <div className="w-14 h-14 bg-gradient-to-br from-gold/20 to-gold/5 rounded-2xl flex items-center justify-center text-gold border border-gold/20 shadow-[0_0_15px_rgba(214,178,94,0.1)]">
+                                        <CheckCircle2 size={28} />
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
 
-                        {/* Totals */}
-                        <div className="bg-zinc-50 p-4 rounded-xl space-y-2 mb-8">
-                            <div className="flex justify-between text-sm text-zinc-500">
-                                <span>Zwischensumme</span>
-                                <span>{(parseFloat(ticket.total_sum) * 0.81).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
-                            </div>
-                            <div className="flex justify-between text-sm text-zinc-500">
-                                <span>MwSt. (19%)</span>
-                                <span>{(parseFloat(ticket.total_sum) * 0.19).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
-                            </div>
-                            <div className="flex justify-between text-lg font-black border-t border-zinc-200 pt-2 mt-2">
-                                <span>Gesamt</span>
-                                <span>{parseFloat(ticket.total_sum).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
-                            </div>
-                        </div>
+                                {/* Status Timeline */}
+                                <div className="mb-10 relative">
+                                    <div className="absolute left-0 top-1/2 w-full h-1 bg-zinc-800 -translate-y-1/2 rounded-full" />
+                                    <div
+                                        className="absolute left-0 top-1/2 h-1 bg-gold -translate-y-1/2 rounded-full transition-all duration-1000"
+                                        style={{ width: `${Math.min(100, (statusInfo.step / 4) * 100)}%` }}
+                                    />
 
-                        {/* Footer Info */}
-                        <div className="grid grid-cols-2 gap-4 text-xs text-zinc-500">
-                            <div>
-                                <span className="block font-bold text-black mb-1">Datum</span>
-                                {new Date(ticket.created_at).toLocaleDateString('de-DE')}
-                            </div>
-                            <div>
-                                <span className="block font-bold text-black mb-1">Ticket ID</span>
-                                {ticket.id.slice(0, 12)}...
-                            </div>
-                            <div className="col-span-2">
-                                <span className="block font-bold text-black mb-1">Lieferadresse</span>
-                                {ticket.contact_info ? (
-                                    <div className="space-y-0.5">
-                                        <p>{ticket.contact_info.name}</p>
-                                        <p>{ticket.contact_info.address}</p>
-                                        <p>{ticket.contact_info.zip} {ticket.contact_info.city}</p>
-                                        <p className="text-[10px] text-zinc-400 mt-1">{ticket.contact_info.country}</p>
+                                    <div className="relative flex justify-between">
+                                        {[1, 2, 3, 4].map((step) => {
+                                            const isActive = statusInfo.step >= step;
+                                            const isCurrent = statusInfo.step === step;
+                                            return (
+                                                <div key={step} className="flex flex-col items-center gap-3">
+                                                    <div className={`w-8 h-8 rounded-full border-4 flex items-center justify-center bg-[#050608] z-10 transition-colors duration-500
+                                                        ${isActive ? 'border-gold text-gold shadow-[0_0_10px_rgba(214,178,94,0.4)]' : 'border-zinc-800 text-zinc-700'}
+                                                    `}>
+                                                        {isActive ? <div className="w-2.5 h-2.5 bg-gold rounded-full" /> : <div className="w-2.5 h-2.5 bg-zinc-800 rounded-full" />}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                ) : (
-                                    <span className="text-zinc-400">Keine Adresse angegeben</span>
+                                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-500 mt-2">
+                                        <span>Anfrage</span>
+                                        <span className={statusInfo.step >= 2 ? 'text-white' : ''}>Prüfung</span>
+                                        <span className={statusInfo.step >= 3 ? 'text-white' : ''}>Angebot</span>
+                                        <span className={statusInfo.step >= 4 ? 'text-white' : ''}>Versand</span>
+                                    </div>
+                                </div>
+
+                                {/* Action Required Box */}
+                                {ticket.status !== 'completed' && (
+                                    <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 flex items-start gap-4">
+                                        <div className="bg-blue-500/20 p-3 rounded-xl text-blue-400 shrink-0 animate-pulse">
+                                            <MessageCircle size={24} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg text-white mb-1">Nächster Schritt</h3>
+                                            <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+                                                Ein Mitarbeiter prüft deine Anfrage aktuell auf Lagerbestand und Machbarkeit.
+                                                Du erhältst in Kürze eine Benachrichtigung im Live-Chat oder per Telegram.
+                                            </p>
+                                            <Button
+                                                onClick={openChat}
+                                                className="bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl gap-2 shadow-lg shadow-blue-500/20"
+                                            >
+                                                Live-Chat öffnen <MessageCircle size={16} />
+                                            </Button>
+                                        </div>
+                                    </div>
                                 )}
+
+                                {/* Order Items */}
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-zinc-500 uppercase text-xs tracking-wider">Bestelldetails</h3>
+                                    {items.map((item, i) => (
+                                        <div key={i} className="flex items-center gap-4 bg-black/40 p-3 rounded-xl border border-white/5">
+                                            <div className="w-12 h-12 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-500">
+                                                <Package size={20} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="font-bold text-sm text-white">{item.product_name || 'Produkt'}</div>
+                                                <div className="text-xs text-zinc-500">Menge: {item.quantity}</div>
+                                            </div>
+                                            <div className="font-mono text-sm text-gold">
+                                                {parseFloat(item.price).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    <div className="flex justify-between items-center pt-4 border-t border-white/5 mt-4">
+                                        <span className="font-bold text-white">Gesamtsumme (geschätzt)</span>
+                                        <span className="font-black text-xl text-gold">
+                                            {parseFloat(ticket.total_sum).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="space-y-6">
+                        {/* Support Card */}
+                        <div className="bg-gradient-to-br from-[#6D28D9] to-[#EC4899] rounded-3xl p-6 relative overflow-hidden text-white shadow-2xl shadow-purple-900/20 group">
+                            <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-30 mix-blend-overlay" />
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transform group-hover:scale-110 transition-transform duration-700" />
+
+                            <div className="relative z-10">
+                                <Sparkles className="w-8 h-8 mb-4 text-white/90" />
+                                <h3 className="font-black text-2xl mb-2">Persönlicher Support</h3>
+                                <p className="text-white/80 text-sm mb-6 leading-relaxed">
+                                    Wir sind für dich da. Kontaktiere uns jederzeit via Live-Chat oder Telegram für Updates zu deiner Bestellung.
+                                </p>
+                                <Button
+                                    onClick={openChat}
+                                    variant="secondary"
+                                    className="w-full bg-white text-purple-900 hover:bg-white/90 font-bold rounded-xl h-12 shadow-lg"
+                                >
+                                    Support kontaktieren
+                                </Button>
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="mt-8 flex gap-3 print:hidden">
-                            <button
-                                onClick={() => window.print()}
-                                className="flex-1 bg-black text-white py-3 rounded-xl font-bold text-sm hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <Download size={16} />
-                                Speichern / Drucken
-                            </button>
-                            <Link
-                                to="/support"
-                                className="flex-1 bg-zinc-100 text-black py-3 rounded-xl font-bold text-sm hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2"
-                            >
-                                <Share2 size={16} />
-                                Support
-                            </Link>
+                        {/* Delivery Info */}
+                        <div className="bg-zinc-900/50 backdrop-blur-md border border-white/5 rounded-3xl p-6">
+                            <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+                                <MapPin size={18} className="text-zinc-400" />
+                                Lieferadresse
+                            </h3>
+                            {ticket.contact_info ? (
+                                <div className="space-y-1 text-sm text-zinc-400">
+                                    <p className="text-white font-medium">{ticket.contact_info.name}</p>
+                                    <p>{ticket.contact_info.address}</p>
+                                    <p>{ticket.contact_info.zip} {ticket.contact_info.city}</p>
+                                    <p>{ticket.contact_info.country}</p>
+                                </div>
+                            ) : (
+                                <p className="text-zinc-500 text-sm">Keine Adresse hinterlegt.</p>
+                            )}
                         </div>
-                    </div>
 
-                    {/* Bottom Code Area */}
-                    <div className="bg-black text-white p-6 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                        <div className="tracking-[0.3em] text-xs text-zinc-500 mb-2 font-mono">SCAN FOR AUTHENTICITY</div>
-                        {/* Simulated Barcode */}
-                        <div className="flex gap-1 h-8 opacity-80 mb-2">
-                            {[...Array(20)].map((_, i) => (
-                                <div key={i} className="bg-white" style={{ width: Math.random() > 0.5 ? '2px' : '4px' }}></div>
-                            ))}
+                        {/* Actions */}
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={() => window.print()}
+                                className="flex-1 border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white rounded-xl h-12"
+                            >
+                                <Download size={16} className="mr-2" />
+                                Save
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="flex-1 border-white/10 hover:bg-white/5 text-zinc-400 hover:text-white rounded-xl h-12"
+                            >
+                                <Share2 size={16} className="mr-2" />
+                                Share
+                            </Button>
                         </div>
-                        <p className="text-[10px] text-zinc-600 font-mono">{ticket.id}</p>
                     </div>
-                </motion.div>
+                </div>
             </div>
         </div>
     );

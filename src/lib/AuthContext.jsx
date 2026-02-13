@@ -72,6 +72,12 @@ export const AuthProvider = ({ children }) => {
           const { data, error } = await insforge.auth.getCurrentSession();
           if (data?.session?.user && !error) {
             console.log('✅ InsForge session found:', data.session.user.email);
+
+            // Sync token for API usage
+            if (data.session.access_token) {
+              setToken(data.session.access_token);
+            }
+
             // Set user from InsForge session data
             const insforgeUser = data.session.user;
             setUser({

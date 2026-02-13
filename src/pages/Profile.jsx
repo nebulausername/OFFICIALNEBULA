@@ -23,7 +23,7 @@ import {
   Zap,
   Heart
 } from 'lucide-react';
-import RankCard from './Profile/RankCard';
+
 
 export default function Profile() {
   const { t } = useI18n();
@@ -121,15 +121,7 @@ export default function Profile() {
         stat: wishlistCount,
         adminOnly: false
       },
-      {
-        title: t('profile.vipProgram'),
-        description: t('profile.vipDescription'),
-        icon: Crown,
-        color: 'from-yellow-400 to-amber-500',
-        link: createPageUrl('VIP'),
-        badge: 'Premium',
-        adminOnly: false
-      },
+
       {
         title: t('profile.faq'),
         description: t('profile.faqDescription'),
@@ -268,11 +260,6 @@ export default function Profile() {
             </motion.div>
           )}
         </motion.div>
-
-        {/* 🌟 Nebula Rank Progression Card */}
-        <div className="mb-12">
-          <RankCard user={user} />
-        </div>
 
         {/* Quick Stats - Enhanced */}
         <motion.div

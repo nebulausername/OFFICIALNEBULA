@@ -13,10 +13,17 @@ import useSound from 'use-sound';
  * Real-time Live Chat Widget
  * Connects to backend via Socket.io
  */
+import { useChat } from '@/contexts/ChatContext';
+
+/**
+ * Real-time Live Chat Widget
+ * Connects to backend via Socket.io
+ */
 export default function LiveChatWidget() {
     const { socket, isConnected } = useSocket();
     const { user } = useAuth();
     const { playSuccess } = useNebulaSound();
+    const { isOpen, setIsOpen, toggleChat } = useChat();
 
     // Sound Effects - using generic placeholders if files don't exist yet, 
     // but the logic is ready for them.
@@ -24,7 +31,7 @@ export default function LiveChatWidget() {
     const [playMessageSend] = useSound('/sounds/message-send.mp3', { volume: 0.3 });
     const [playPop] = useSound('/sounds/pop.mp3', { volume: 0.2 });
 
-    const [isOpen, setIsOpen] = useState(false);
+    // const [isOpen, setIsOpen] = useState(false); // REMOVED local state
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [session, setSession] = useState(null);
@@ -105,9 +112,11 @@ export default function LiveChatWidget() {
         window.location.href = '/login';
     };
 
-    const toggleChat = () => {
-        setIsOpen(!isOpen);
+    const handleToggleChat = () => {
+        toggleChat();
         if (!isOpen) {
+            // If it WAS closed (now opening), or will be open... 
+            // Logic: if !isOpen currently, we are opening.
             setUnreadCount(0);
             playPop();
         }
@@ -124,7 +133,7 @@ export default function LiveChatWidget() {
                         exit={{ scale: 0, opacity: 0 }}
                         whileHover={{ scale: 1.1, y: -5 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={toggleChat}
+                        onClick={handleToggleChat}
                         className="fixed bottom-6 right-6 w-16 h-16 rounded-full flex items-center justify-center z-[100] group shadow-2xl shadow-purple-900/40"
                     >
                         {/* Pulse effect for unread messages */}
@@ -177,7 +186,7 @@ export default function LiveChatWidget() {
                             </div>
 
                             <button
-                                onClick={toggleChat}
+                                onClick={handleToggleChat}
                                 className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors relative z-10"
                             >
                                 <Minus className="w-5 h-5 text-white" />

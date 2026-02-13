@@ -144,6 +144,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { CartProvider } from '@/contexts/CartContext';
 import GlobalCartDrawer from '@/components/cart/GlobalCartDrawer';
 
+import { ChatProvider } from '@/contexts/ChatContext';
+
 function App() {
 
   return (
@@ -153,27 +155,29 @@ function App() {
           <ProductModalProvider>
             <WishlistProvider>
               <CartProvider>
-                <I18nProvider>
-                  <HelmetProvider>
-                    <QueryClientProvider client={queryClientInstance}>
-                      <Router>
-                        <NavigationTracker />
-                        <TelegramRealtimeListener />
-                        <AdminRealtimeListener />
-                        <UserRealtimeListener />
-                        <AuthenticatedApp />
-                        <GlobalCartDrawer />
-                        <GlobalProductModal />
-                        <LiveChatWidget />
-                        <SocialProof />
-                        <ScrollToTop />
-                        <SmoothScroll />
-                      </Router>
-                      <Toaster />
-                      <CustomCursor />
-                    </QueryClientProvider>
-                  </HelmetProvider>
-                </I18nProvider>
+                <ChatProvider>
+                  <I18nProvider>
+                    <HelmetProvider>
+                      <QueryClientProvider client={queryClientInstance}>
+                        <Router>
+                          <NavigationTracker />
+                          <TelegramRealtimeListener />
+                          <AdminRealtimeListener />
+                          <UserRealtimeListener />
+                          <AuthenticatedApp />
+                          <GlobalCartDrawer />
+                          <GlobalProductModal />
+                          <LiveChatWidget />
+                          <SocialProof />
+                          <ScrollToTop />
+                          <SmoothScroll />
+                        </Router>
+                        <Toaster />
+                        <CustomCursor />
+                      </QueryClientProvider>
+                    </HelmetProvider>
+                  </I18nProvider>
+                </ChatProvider>
               </CartProvider>
             </WishlistProvider>
           </ProductModalProvider>

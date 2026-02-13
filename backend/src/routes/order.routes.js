@@ -7,11 +7,15 @@ import { createOrderSchema } from '../schemas/order.schema.js';
 
 const router = express.Router();
 
-router.use(authenticate); // All order routes require authentication
+// Open routes (optional auth for guest checkout/inquiry)
+import { optionalAuth } from '../middleware/auth.middleware.js';
+
+router.post('/', optionalAuth, validateRequest(createOrderSchema), orderController.createOrder);
+
+router.use(authenticate); // Protected routes below
 
 router.get('/', orderController.listOrders);
 router.get('/:id', orderController.getOrder);
-router.post('/', validateRequest(createOrderSchema), orderController.createOrder);
 router.patch('/:id/status', requireAdmin, orderController.updateOrderStatus);
 
 export default router;

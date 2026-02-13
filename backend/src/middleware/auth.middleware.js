@@ -2,6 +2,9 @@ import { verifyToken } from '../config/jwt.js';
 import { getInsForgeClient } from '../config/insforge.js';
 
 export const authenticate = async (req, res, next) => {
+  // DEBUG LOGGING
+  // console.log(`[AUTH] Checking request: ${req.method} ${req.path}`);
+
   try {
     let token;
 
@@ -15,11 +18,14 @@ export const authenticate = async (req, res, next) => {
     }
 
     if (!token) {
+      console.warn(`[AUTH] ⚠️ No token provided for ${req.path}`);
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'No token provided'
       });
     }
+
+    // console.log(`[AUTH] Token found (len=${token.length}), verifying...`);
 
     // 2. Verify Token (Local JWT or InsForge)
     try {
@@ -28,18 +34,25 @@ export const authenticate = async (req, res, next) => {
       return next();
     } catch (jwtError) {
       // 3. Try InsForge JWT
-      // console.log('Local JWT failed, trying InsForge...', jwtError.message);
+      console.log('Local JWT failed, trying InsForge verification...');
+      // console.log('Token snippet:', token.substring(0, 10) + '...');
 
       try {
         const insforge = getInsForgeClient();
-        if (!insforge) throw new Error('InsForge client not initialized');
+        if (!insforge) {
+          console.error('❌ InsForge client not initialized (Check INSFORGE_BASE_URL/API_KEY)');
+          throw new Error('InsForge client not initialized');
+        }
 
-        const { data: { user }, error } = await insforge.auth.getUser(token);
+        const { data, error } = await insforge.auth.getUser(token);
 
-        if (error || !user) {
-          // console.error('InsForge Auth Failed:', error?.message);
+        if (error || !data?.user) {
+          console.error('❌ InsForge Auth Failed:', error?.message || 'No user found');
           throw new Error('Invalid token');
         }
+
+        const user = data.user;
+        console.log('✅ InsForge Auth Success:', user.email);
 
         // Map InsForge user
         req.user = {
@@ -50,7 +63,7 @@ export const authenticate = async (req, res, next) => {
         };
         return next();
       } catch (insforgeError) {
-        // console.error('All auth methods failed');
+        console.error('❌ All auth methods failed for token:', insforgeError.message);
         return res.status(401).json({
           error: 'Unauthorized',
           message: 'Invalid or expired token'

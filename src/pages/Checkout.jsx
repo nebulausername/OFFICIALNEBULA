@@ -8,6 +8,7 @@ import { ArrowLeft, Check, Package, CheckCircle2, MessageCircle, ShoppingBag, Ma
 import confetti from 'canvas-confetti';
 import { useNebulaSound } from '@/contexts/SoundContext';
 import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/components/ui/use-toast';
 import CheckoutSummary from '@/components/checkout/CheckoutSummary';
 import CheckoutTrust from '@/components/checkout/CheckoutTrust';
 
@@ -35,6 +36,12 @@ export default function Checkout() {
   });
 
   const { playSuccess, playError } = useNebulaSound();
+  const { toast } = useToast();
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    console.log('Checkout Component Mounted 🚀');
+  }, []);
 
   // Mock Data for Auto-Complete
   const MOCK_ZIPS = {
@@ -61,11 +68,11 @@ export default function Checkout() {
     })
   };
 
-  const calculateXP = (total) => Math.floor(total * 10);
+
 
   const steps = [
     { title: 'Versand', icon: MapPin },
-    { title: 'Zahlung', icon: CheckCircle2 },
+    { title: 'Bestätigung', icon: CheckCircle2 },
     { title: 'Ticket', icon: MessageCircle }
   ];
 
@@ -101,13 +108,14 @@ export default function Checkout() {
         email: userData.email || ''
       }));
     } catch (error) {
-      console.error('Error loading checkout data:', error);
+      console.warn('Checkout: Failed to load user data (User might be guest or session expired)', error);
+      // Do not block checkout for 401, just don't pre-fill
     } finally {
       setLoading(false);
 
       // TELEGRAM AUTO-FILL 🚀
-      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-        const tgUser = window.Telegram.WebApp.initDataUnsafe?.user;
+      if (typeof window !== 'undefined' && window['Telegram']?.WebApp) {
+        const tgUser = window['Telegram'].WebApp.initDataUnsafe?.user;
         if (tgUser) {
           setFormData(prev => ({
             ...prev,
@@ -129,46 +137,92 @@ export default function Checkout() {
     }
   };
 
+  /* 
+     * -------------------------------------------------------------------------
+     * PREMIUM SUBMISSION FLOW
+     * -------------------------------------------------------------------------
+     */
+  const [submissionStep, setSubmissionStep] = useState('idle'); // idle, processing, verifying, encrypting, success
+
   const handleSubmitOrder = async () => {
-    setSubmitting(true);
+    if (submissionStep !== 'idle') return;
+
+    console.log('🚀 Starting Checkout Submission...');
     try {
+      // STEP 1: Processing
+      console.log('Phase 1: Processing...');
+      setSubmissionStep('processing');
+      await new Promise(r => setTimeout(r, 800));
+
+      // STEP 2: Verifying Data
+      console.log('Phase 2: Verifying...');
+      setSubmissionStep('verifying');
+      // Simulate verification delay
+      await new Promise(r => setTimeout(r, 1200));
+
+      // Check if API exists before proceeding
+      if (!api || !api.entities || !api.entities.Request) {
+        throw new Error('System error: API client not initialized. Please refresh.');
+      }
+
+      // STEP 3: Encrypting / Finalizing
+      console.log('Phase 3: Encrypting & Sending to API...');
+      setSubmissionStep('encrypting');
+
       const total = totalPrice;
 
-      const request = await api.entities.Request.create({
+      const requestData = {
         contact_info: {
           name: formData.name,
-          phone: formData.phone,
-          telegram: formData.telegram,
+          phone: formData.phone || '', // Ensure strings
+          telegram: formData.telegram || '',
           email: formData.email,
-          address: formData.address,
-          city: formData.city,
-          zip: formData.zip,
-          country: formData.country,
-          shippingMethod: formData.shippingMethod
         },
-        note: formData.notes,
+        shipping_address: {
+          street: formData.address,
+          city: formData.city,
+          postal_code: formData.zip, // Schema expects postal_code
+          country: formData.country,
+        },
+        payment_method: 'prepayment', // Required by schema
+        note: formData.notes || '',
         cart_items: cartItems.map(item => ({ id: item.id }))
-      });
+      };
 
-      // Create a Ticket for real-time order tracking
-      await api.entities.Ticket.create({
-        user_id: user?.id,
-        type: 'order',
-        subject: `Bestellung #${request.id?.slice(0, 8) || 'NEU'}`,
-        message: `Neue Bestellung eingegangen!\n\nKunde: ${formData.name}\nE-Mail: ${formData.email}\nTelegram: ${formData.telegram || '-'}\nAdresse: ${formData.address}, ${formData.zip} ${formData.city}\n\nGesamtsumme: ${total.toFixed(2)}€\nVersand: ${formData.shippingMethod === 'express' ? 'Express' : 'Standard'}`,
-        status: 'open',
-        priority: formData.shippingMethod === 'express' ? 'high' : 'normal',
-        metadata: {
-          order_id: request.id,
-          total: total,
-          items_count: cartItems.length
-        }
-      });
+      console.log('Payload:', requestData);
 
+      const request = await api.entities.Request.create(requestData);
+      console.log('Request Created:', request);
+
+      if (!request || !request.id) {
+        throw new Error('Failed to create request: No ID returned');
+      }
+
+      // Create Ticket
+      try {
+        await api.entities.Ticket.create({
+          user_id: user?.id,
+          type: 'order',
+          subject: `Bestellung #${request.id?.slice(0, 8) || 'NEU'}`,
+          message: `Neue Bestellung eingegangen!\n\nKunde: ${formData.name}\nE-Mail: ${formData.email}\nTelegram: ${formData.telegram || '-'}\nAdresse: ${formData.address}, ${formData.zip} ${formData.city}\n\nGesamtsumme: ${total.toFixed(2)}€\nVersand: ${formData.shippingMethod === 'express' ? 'Express' : 'Standard'}`,
+          status: 'open',
+          priority: formData.shippingMethod === 'express' ? 'high' : 'normal',
+          metadata: {
+            order_id: request.id,
+            total: total,
+            items_count: cartItems.length
+          }
+        });
+      } catch (ticketError) {
+        console.warn('Ticket creation failed (non-critical):', ticketError);
+      }
+
+      setSubmissionStep('success');
       playSuccess();
+
+      // Confetti Explosion
       const duration = 3000;
       const end = Date.now() + duration;
-
       const colors = ['#D6B25E', '#F2D27C', '#FFFFFF'];
 
       (function frame() {
@@ -176,7 +230,7 @@ export default function Checkout() {
         if (left <= 0) return;
 
         confetti({
-          particleCount: 3,
+          particleCount: 5,
           angle: 60,
           spread: 55,
           origin: { x: 0 },
@@ -184,32 +238,38 @@ export default function Checkout() {
           zIndex: 9999
         });
         confetti({
-          particleCount: 3,
+          particleCount: 5,
           angle: 120,
           spread: 55,
           origin: { x: 1 },
           colors: colors,
           zIndex: 9999
         });
-
         requestAnimationFrame(frame);
       }());
 
       setCompletedOrder(request);
-
-      // Clear cart context
       await clearCart();
 
-      // Redirect to the new Ticket Page after a short delay for confetti
+      // Redirect with a slight delay to show success state
       setTimeout(() => {
         navigate(`/ticket/${request.id}`);
-      }, 2000);
+      }, 1500);
 
     } catch (error) {
-      console.error('Error submitting order:', error);
+      console.error('❌ Error submitting order:', error);
       playError();
-    } finally {
-      setSubmitting(false);
+      setSubmissionStep('idle');
+
+      const message = error.message || "Ein unbekannter Fehler ist aufgetreten.";
+      setErrorMsg(message);
+
+      toast({
+        variant: "destructive",
+        title: "Fehler bei der Anfrage",
+        description: message,
+        duration: 5000,
+      });
     }
   };
 
@@ -237,40 +297,6 @@ export default function Checkout() {
             SECURE CHECKOUT
           </div>
           <div className="w-[70px]"></div>
-        </div>
-      </div>
-
-      {/* Gamification Bar - Dynamic 🚀 */}
-      <div className="bg-gradient-to-r from-purple-900/10 via-purple-900/20 to-purple-900/10 border-b border-purple-500/10 py-3 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-sm font-medium">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center border border-gold/30">
-              <Sparkles className="w-4 h-4 text-gold" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white font-bold text-xs uppercase tracking-wider">Dein XP Boost</span>
-              <span className="text-purple-300 text-xs">+{calculateXP(totalPrice)} Punkte bei Abschluss</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="flex-1 sm:w-48 h-2.5 bg-black/40 rounded-full overflow-hidden border border-white/5 relative group">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min((totalPrice / 150) * 100, 100)}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] relative"
-              >
-                <div className="absolute inset-0 bg-white/20 animate-pulse" />
-              </motion.div>
-            </div>
-            <span className="text-zinc-400 text-xs whitespace-nowrap">
-              {totalPrice >= 150 ?
-                <span className="text-emerald-400 font-bold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> VIP Status</span> :
-                <span>Noch <span className="text-white font-bold">{(150 - totalPrice).toFixed(2)}€</span> bis VIP</span>
-              }
-            </span>
-          </div>
         </div>
       </div>
 
@@ -417,46 +443,122 @@ export default function Checkout() {
                   custom={1}
                   transition={{ duration: 0.3 }}
                 >
-                  <h2 className="text-3xl font-black mb-6 text-white">Bezahlung</h2>
+                  <h2 className="text-3xl font-black mb-6 text-white">Bestätigung & Anfrage</h2>
 
-                  <div className="p-6 glass-panel rounded-2xl mb-8 border border-gold/20 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                  <div className="p-8 glass-panel rounded-2xl mb-8 border border-gold/20 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 transition-all duration-1000 group-hover:bg-gold/20" />
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
 
-                    <div className="flex items-center gap-4 mb-4 relative z-10">
-                      <div className="w-12 h-12 rounded-full bg-gold/20 text-gold flex items-center justify-center border border-gold/30">
-                        <CheckCircle2 size={24} />
+                    <div className="relative z-10 flex flex-col md:flex-row gap-6 items-center md:items-start text-center md:text-left">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gold/20 to-gold/5 text-gold flex items-center justify-center border border-gold/30 shadow-[0_0_15px_rgba(214,178,94,0.2)] shrink-0">
+                        <MessageCircle size={32} />
                       </div>
-                      <div>
-                        <h3 className="font-bold text-white text-lg">Bestellung als Anfrage senden</h3>
-                        <p className="text-zinc-400 text-sm max-w-md">Sende deine Bestellung als unverbindliche Anfrage. Ein Support-Mitarbeiter wird sich im Chat sofort um dich kümmern.</p>
+                      <div className="space-y-2">
+                        <h3 className="font-bold text-white text-xl">Bestellung als Anfrage senden</h3>
+                        <p className="text-zinc-400 text-sm leading-relaxed max-w-lg">
+                          Deine Bestellung wird als unverbindliche Anfrage an unser Team gesendet.
+                          Wir prüfen die Verfügbarkeit und melden uns <strong>sofort per Live-Chat</strong> bei dir zurück.
+                        </p>
+                        <div className="flex flex-wrap gap-2 pt-2 justify-center md:justify-start">
+                          <span className="text-xs font-bold px-2 py-1 rounded bg-white/5 border border-white/10 text-zinc-300">Keine sofortige Zahlung</span>
+                          <span className="text-xs font-bold px-2 py-1 rounded bg-white/5 border border-white/10 text-zinc-300">Persönlicher Support</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   <Button
                     onClick={handleSubmitOrder}
-                    disabled={submitting}
-                    className="w-full h-14 bg-gradient-to-r from-gold to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-black text-lg rounded-xl shadow-lg shadow-gold/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    disabled={submissionStep !== 'idle'}
+                    className={`w-full h-16 relative overflow-hidden font-black text-xl rounded-xl transition-all 
+                      ${submissionStep === 'idle'
+                        ? 'bg-gradient-to-r from-gold via-[#F2D27C] to-[#D6B25E] hover:brightness-110 text-black shadow-[0_0_20px_rgba(214,178,94,0.3)] hover:scale-[1.01] active:scale-[0.99]'
+                        : 'bg-zinc-800 text-white cursor-default'}`}
                   >
-                    {submitting ? (
-                      <span className="flex items-center gap-2 justify-center">
-                        <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                        Verarbeite...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2 justify-center">
-                        <MessageCircle size={24} />
-                        Bestellanfrage senden &amp; Chat starten
-                      </span>
+                    <AnimatePresence mode="wait">
+                      {submissionStep === 'idle' && (
+                        <motion.span
+                          key="idle"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-3 justify-center"
+                        >
+                          <span className="relative z-10">Kostenpflichtig anfragen</span>
+                          <ArrowLeft className="w-5 h-5 rotate-180 relative z-10" />
+                        </motion.span>
+                      )}
+
+                      {submissionStep === 'processing' && (
+                        <motion.span
+                          key="processing"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-3 justify-center text-zinc-400"
+                        >
+                          <span className="w-5 h-5 border-2 border-zinc-500 border-t-white rounded-full animate-spin" />
+                          <span>Verarbeite Bestellung...</span>
+                        </motion.span>
+                      )}
+
+                      {submissionStep === 'verifying' && (
+                        <motion.span
+                          key="verifying"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-3 justify-center text-blue-400"
+                        >
+                          <ShieldCheck className="w-5 h-5 animate-pulse" />
+                          <span>Prüfe Verfügbarkeit...</span>
+                        </motion.span>
+                      )}
+
+                      {submissionStep === 'encrypting' && (
+                        <motion.span
+                          key="encrypting"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-3 justify-center text-purple-400"
+                        >
+                          <Sparkles className="w-5 h-5 animate-pulse" />
+                          <span>Finalisiere Ticket...</span>
+                        </motion.span>
+                      )}
+
+                      {submissionStep === 'success' && (
+                        <motion.span
+                          key="success"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex items-center gap-3 justify-center text-emerald-400"
+                        >
+                          <CheckCircle2 className="w-6 h-6" />
+                          <span>Erfolgreich!</span>
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Progress Bar Background */}
+                    {(submissionStep !== 'idle' && submissionStep !== 'success') && (
+                      <motion.div
+                        className="absolute bottom-0 left-0 h-1 bg-white/20"
+                        initial={{ width: '0%' }}
+                        animate={{ width: submissionStep === 'processing' ? '30%' : submissionStep === 'verifying' ? '70%' : '100%' }}
+                        transition={{ duration: 1 }}
+                      />
                     )}
                   </Button>
 
                   <Button
                     variant="ghost"
                     onClick={() => setCurrentStep(0)}
-                    className="w-full mt-4 text-zinc-500 hover:text-white"
+                    disabled={submitting}
+                    className="w-full mt-4 text-zinc-500 hover:text-white hover:bg-white/5 h-12"
                   >
-                    Zurück zu Details
+                    Zurück zu den Details
                   </Button>
                 </motion.div>
               )}

@@ -78,45 +78,7 @@ export default function CartDrawer({ isOpen, onClose, cartItems, products, updat
                             <div className="text-zinc-400 text-sm">Zwischensumme</div>
                             <div className="text-2xl font-black text-white">{total.toFixed(2)}€</div>
                         </div>
-                        {/* Gamified Shipping Bar */}
-                        <div className="bg-zinc-900/50 p-3 rounded-xl border border-zinc-800">
-                            {(() => {
-                                const threshold = 100;
-                                const progress = Math.min((total / threshold) * 100, 100);
-                                const missing = (threshold - total).toFixed(2);
 
-                                return (
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-xs font-bold">
-                                            {progress < 100 ? (
-                                                <span className="text-zinc-300">Nur noch <span className="text-[#D6B25E]">{missing}€</span> bis Gratis-Versand</span>
-                                            ) : (
-                                                <span className="text-green-400 flex items-center gap-1">
-                                                    <Sparkles size={12} />
-                                                    Versandkostenfrei! 🎉
-                                                </span>
-                                            )}
-                                            <span className="text-zinc-500">{Math.round(progress)}%</span>
-                                        </div>
-                                        <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
-                                            <motion.div
-                                                className="h-full rounded-full"
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${progress}%` }}
-                                                transition={{ duration: 1, ease: "easeOut" }}
-                                                style={{
-                                                    background: progress >= 100
-                                                        ? 'linear-gradient(90deg, #22c55e, #4ade80)'
-                                                        : progress > 50
-                                                            ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
-                                                            : 'linear-gradient(90deg, #ef4444, #f87171)'
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                );
-                            })()}
-                        </div>
 
                         <Link to={createPageUrl('Checkout')} onClick={onClose} className="block w-full">
                             <Button className="w-full h-14 text-base font-black bg-white text-black hover:bg-zinc-200 rounded-xl flex items-center justify-between px-6">

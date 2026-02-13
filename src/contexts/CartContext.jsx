@@ -45,7 +45,24 @@ export const CartProvider = ({ children }) => {
 
     const totalPrice = calculateTotal();
 
-    // Initial Fetch & Subscription
+    // Load Local Cart on Mount if not logged in
+    useEffect(() => {
+        if (!user) {
+            const stored = localStorage.getItem('nebula_cart');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    setCartItems(parsed);
+                    const idsToFetch = [...new Set(parsed.map(i => i.product_id))];
+                    if (idsToFetch.length > 0) fetchProducts(idsToFetch);
+                } catch (e) {
+                    console.error("Failed to parse local cart", e);
+                }
+            }
+        }
+    }, [user]);
+
+    // Initial Fetch & Subscription (Remote)
     useEffect(() => {
         if (user?.id) {
             fetchCart();
@@ -53,8 +70,6 @@ export const CartProvider = ({ children }) => {
             return () => {
                 if (sub) sub.unsubscribe();
             };
-        } else {
-            setCartItems([]);
         }
     }, [user?.id]);
 
@@ -86,15 +101,12 @@ export const CartProvider = ({ children }) => {
     const fetchProducts = async (ids) => {
         try {
             if (ids.length === 0) return;
-            // Use InsForge DB directly for better performance if possible, or fallback to API wrapper if complex
-            // For now, sticking to API wrapper for Products as it might have complex joins, 
-            // BUT let's try direct DB for speed if simple
             const { data, error } = await insforge.database
                 .from('products')
                 .select('*')
                 .in('id', ids);
 
-            if (error) throw error; // Fallback to old method?
+            if (error) throw error;
 
             setProductsMap(prev => {
                 const newMap = { ...prev };
@@ -131,80 +143,108 @@ export const CartProvider = ({ children }) => {
 
     // Actions
     const addToCart = async (productId, quantity = 1, options = {}) => {
-        if (!user) {
-            toast.error("Anmeldung erforderlich", {
-                description: "Bitte melde dich an, um den Warenkorb zu nutzen."
-            });
-            // Optionally redirect to login?
-            return;
-        }
+        if (!productId) return;
 
-        // Optimistic Update
-        const tempId = 'temp-' + Date.now();
+        // Optimistic Update / Local State
+        const tempId = user ? 'temp-' + Date.now() : 'local-' + Date.now();
         const newItem = {
             id: tempId,
-            user_id: user.id,
+            user_id: user?.id || null,
             product_id: productId,
             quantity,
             selected_options: options,
             created_at: new Date().toISOString()
         };
 
-        setCartItems(prev => [...prev, newItem]);
-        setIsOpen(true);
+        // Check if item already exists with same options
+        setCartItems(prev => {
+            const existingIndex = prev.findIndex(item =>
+                item.product_id === productId &&
+                JSON.stringify(item.selected_options) === JSON.stringify(options)
+            );
 
-        try {
-            const { data, error } = await insforge.database
-                .from('star_cart_items')
-                .insert({
-                    user_id: user.id,
-                    product_id: productId,
-                    quantity: quantity,
-                    selected_options: options // schema must support JSONB for this
-                })
-                .select()
-                .single();
-
-            if (error) throw error;
-
-            // Replace temp item with real one
-            setCartItems(prev => prev.map(i => i.id === tempId ? data : i));
-
-            // Ensure product data is loaded
-            if (!productsMap[productId]) {
-                await fetchProducts([productId]);
+            let newItems;
+            if (existingIndex >= 0) {
+                newItems = [...prev];
+                newItems[existingIndex].quantity += quantity;
+            } else {
+                newItems = [...prev, newItem];
             }
 
-            toast.success("Hinzugefügt! 🛒", {
-                description: "Artikel wurde zum Warenkorb hinzugefügt.",
-            });
+            if (!user) {
+                localStorage.setItem('nebula_cart', JSON.stringify(newItems));
+            }
+            return newItems;
+        });
 
-        } catch (error) {
-            console.error("Add to cart failed", error);
-            setCartItems(prev => prev.filter(i => i.id !== tempId)); // Revert
-            toast.error("Fehler", {
-                description: "Konnte Artikel nicht hinzufügen."
-            });
+        setIsOpen(true);
+        if (!productsMap[productId]) await fetchProducts([productId]);
+
+        if (user) {
+            try {
+                // If item exists, update quantity
+                const existingItem = cartItems.find(item =>
+                    item.product_id === productId &&
+                    JSON.stringify(item.selected_options) === JSON.stringify(options)
+                );
+
+                if (existingItem && !existingItem.id.startsWith('temp-')) {
+                    const { error } = await insforge.database
+                        .from('star_cart_items')
+                        .update({ quantity: existingItem.quantity + quantity })
+                        .eq('id', existingItem.id);
+                    if (error) throw error;
+                } else {
+                    const { data, error } = await insforge.database
+                        .from('star_cart_items')
+                        .insert({
+                            user_id: user.id,
+                            product_id: productId,
+                            quantity: quantity,
+                            selected_options: options
+                        })
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    // Replace temp item with real one
+                    setCartItems(prev => prev.map(i => i.id === tempId ? data : i));
+                }
+            } catch (error) {
+                console.error("Add to cart failed", error);
+                // Revert or show error - for now just log
+                toast.error("Fehler beim Synchronisieren", { description: "Artikel ist nur lokal gespeichert." });
+            }
         }
+
+        toast.success("Hinzugefügt! 🛒", {
+            description: "Artikel wurde zum Warenkorb hinzugefügt.",
+        });
     };
 
     const removeFromCart = async (itemId) => {
         const originalItems = [...cartItems];
-        setCartItems(prev => prev.filter(i => i.id !== itemId));
+        setCartItems(prev => {
+            const newItems = prev.filter(i => i.id !== itemId);
+            if (!user) localStorage.setItem('nebula_cart', JSON.stringify(newItems));
+            return newItems;
+        });
 
-        try {
-            const { error } = await insforge.database
-                .from('star_cart_items')
-                .delete()
-                .eq('id', itemId);
+        if (user && !itemId.toString().startsWith('local-')) {
+            try {
+                const { error } = await insforge.database
+                    .from('star_cart_items')
+                    .delete()
+                    .eq('id', itemId);
 
-            if (error) throw error;
-        } catch (error) {
-            console.error("Remove from cart failed", error);
-            setCartItems(originalItems); // Revert
-            toast.error("Fehler", {
-                description: "Konnte Artikel nicht löschen."
-            });
+                if (error) throw error;
+            } catch (error) {
+                console.error("Remove from cart failed", error);
+                setCartItems(originalItems); // Revert
+                toast.error("Fehler", {
+                    description: "Konnte Artikel nicht löschen."
+                });
+            }
         }
     };
 
@@ -212,38 +252,47 @@ export const CartProvider = ({ children }) => {
         if (newQuantity < 1) return;
 
         const originalItems = [...cartItems];
-        setCartItems(prev => prev.map(i => i.id === itemId ? { ...i, quantity: newQuantity } : i));
+        setCartItems(prev => {
+            const newItems = prev.map(i => i.id === itemId ? { ...i, quantity: newQuantity } : i);
+            if (!user) localStorage.setItem('nebula_cart', JSON.stringify(newItems));
+            return newItems;
+        });
 
-        try {
-            const { error } = await insforge.database
-                .from('star_cart_items')
-                .update({ quantity: newQuantity })
-                .eq('id', itemId);
+        if (user && !itemId.toString().startsWith('local-')) {
+            try {
+                const { error } = await insforge.database
+                    .from('star_cart_items')
+                    .update({ quantity: newQuantity })
+                    .eq('id', itemId);
 
-            if (error) throw error;
-        } catch (error) {
-            console.error("Update quantity failed", error);
-            setCartItems(originalItems);
-            toast.error("Fehler", {
-                description: "Konnte Menge nicht aktualisieren."
-            });
+                if (error) throw error;
+            } catch (error) {
+                console.error("Update quantity failed", error);
+                setCartItems(originalItems);
+                toast.error("Fehler", {
+                    description: "Konnte Menge nicht aktualisieren."
+                });
+            }
         }
     };
 
     const clearCart = async () => {
         const originalItems = [...cartItems];
         setCartItems([]);
+        if (!user) localStorage.removeItem('nebula_cart');
 
-        try {
-            const { error } = await insforge.database
-                .from('star_cart_items')
-                .delete()
-                .eq('user_id', user.id);
+        if (user) {
+            try {
+                const { error } = await insforge.database
+                    .from('star_cart_items')
+                    .delete()
+                    .eq('user_id', user.id);
 
-            if (error) throw error;
-        } catch (error) {
-            console.error("Clear cart failed", error);
-            setCartItems(originalItems);
+                if (error) throw error;
+            } catch (error) {
+                console.error("Clear cart failed", error);
+                setCartItems(originalItems);
+            }
         }
     };
 
